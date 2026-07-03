@@ -115,3 +115,11 @@ export type VerifiedNarrative = Narrative & {
   unknownCitations: string[];
   confidence: Confidence;
 };
+
+/** The full result of one investigation — what POST /api/dig returns. */
+export type DigResult = {
+  evidence: Evidence;
+  /** null when synthesis was skipped (no API key) or failed; see `error`. */
+  narrative: VerifiedNarrative | null;
+  error?: string;
+};

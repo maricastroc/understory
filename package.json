@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "dig": "tsx scripts/dig.ts"
+    "dig": "tsx scripts/dig.ts",
+    "seed:demo": "bash scripts/seed-demo.sh"
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.3",

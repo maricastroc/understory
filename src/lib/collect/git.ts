@@ -139,3 +139,37 @@ export async function introducingCommits(
   const commits = await lineHistory(repoPath, loc);
   return commits.map((c) => commitToArtifact(c, repo));
 }
+
+/**
+ * Find files in the repo by path fragment OR by content (a symbol name).
+ * Powers the "search files or symbols" step of the investigation flow.
+ */
+export async function searchFiles(repoPath: string, query: string, limit = 25): Promise<string[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const results = new Set<string>();
+
+  // filename matches — path contains the query
+  try {
+    const files = (await git(repoPath, ["ls-files"])).split("\n").filter(Boolean);
+    const ql = q.toLowerCase();
+    for (const f of files) if (f.toLowerCase().includes(ql)) results.add(f);
+  } catch {
+    /* empty repo */
+  }
+
+  // content matches — files containing the query (fixed string, case-insensitive)
+  try {
+    const grep = await git(repoPath, ["grep", "-l", "-I", "-i", "-F", "-e", q]);
+    for (const f of grep.split("\n").filter(Boolean)) results.add(f);
+  } catch {
+    /* git grep exits non-zero when nothing matches — not an error for us */
+  }
+
+  return [...results].slice(0, limit);
+}
+
+/** Read a file's contents at HEAD — the same revision line-history investigates. */
+export async function readFileAtHead(repoPath: string, filePath: string): Promise<string> {
+  return git(repoPath, ["show", `HEAD:${filePath}`]);
+}
