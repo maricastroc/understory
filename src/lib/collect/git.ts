@@ -1,25 +1,12 @@
-/**
- * [2] Local git collection — no network, no API, no LLM.
- *
- * The core move is `git log -L<start>,<end>:<file>`, which traces a specific
- * line range through history and returns exactly the commits that changed it —
- * the *biography* of a line. That is the archaeology.
- *
- * We use execFile (never a shell) so repo paths and refs can't be injected,
- * and NUL-ish separators (0x1e record, 0x1f field) so commit bodies with
- * newlines, quotes and colons parse unambiguously.
- */
-
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { Artifact, CodeLocation, Person, RepoRef } from "../types";
 
 const exec = promisify(execFile);
 
-const RS = "\x1e"; // record separator — one per commit
-const FS = "\x1f"; // field separator — between fields of a commit
+const RS = "\x1e";
+const FS = "\x1f";
 
-/** Run a git command inside `repoPath`. Args are passed as an array (no shell). */
 async function git(repoPath: string, args: string[]): Promise<string> {
   const { stdout } = await exec("git", ["-C", repoPath, ...args], {
     maxBuffer: 64 * 1024 * 1024,
@@ -27,7 +14,6 @@ async function git(repoPath: string, args: string[]): Promise<string> {
   return stdout.toString();
 }
 
-/** True if `repoPath` is inside a git work tree. */
 export async function isGitRepo(repoPath: string): Promise<boolean> {
   try {
     return (await git(repoPath, ["rev-parse", "--is-inside-work-tree"])).trim() === "true";
@@ -36,19 +22,17 @@ export async function isGitRepo(repoPath: string): Promise<boolean> {
   }
 }
 
-/** Turn a git remote URL into a browsable web base + "owner/name" slug. */
 export function remoteToWebUrl(remote: string): { base: string; slug: string } | null {
   const strip = (s: string) => s.replace(/\.git$/, "");
-  // git@github.com:acme/payments-service.git
+
   let m = remote.match(/^[^@]+@([^:]+):(.+)$/);
   if (m) return { base: `https://${m[1]}/${strip(m[2])}`, slug: strip(m[2]) };
-  // ssh://git@github.com/acme/payments-service.git  |  https://github.com/acme/x.git
+
   m = remote.match(/^(?:ssh|https?):\/\/(?:[^@/]+@)?([^/]+)\/(.+)$/);
   if (m) return { base: `https://${m[1]}/${strip(m[2])}`, slug: strip(m[2]) };
   return null;
 }
 
-/** Best-effort metadata about the repo: branch, remote name, web base. */
 export async function resolveRepo(repoPath: string): Promise<RepoRef> {
   const ref: RepoRef = { path: repoPath };
   try {
@@ -68,12 +52,11 @@ export async function resolveRepo(repoPath: string): Promise<RepoRef> {
   return ref;
 }
 
-/** A commit as read from git, before it becomes an Artifact. */
 export type GitCommit = {
   sha: string;
   shortSha: string;
   author: Person;
-  date: string; // ISO 8601
+  date: string;
   subject: string;
   body: string;
 };
@@ -92,17 +75,12 @@ function parseRecord(record: string): GitCommit {
   };
 }
 
-/**
- * The commits that changed lines [start,end] of `file`, **oldest first** —
- * the biography of that line. `file` must be repo-relative and exist at HEAD.
- * Returns [] when nothing in history touched the range.
- */
 export async function lineHistory(repoPath: string, loc: CodeLocation): Promise<GitCommit[]> {
   const out = await git(repoPath, [
     "log",
     `-L${loc.startLine},${loc.endLine}:${loc.file}`,
-    "-s", // suppress the diff; we only want the commit headers
-    "--reverse", // chronological — the timeline reads top-to-bottom
+    "-s",
+    "--reverse",
     `--format=${COMMIT_FORMAT}`,
   ]);
   return out
@@ -112,7 +90,6 @@ export async function lineHistory(repoPath: string, loc: CodeLocation): Promise<
     .map(parseRecord);
 }
 
-/** Map a raw commit to a citable Artifact ("Exhibit"). */
 export function commitToArtifact(c: GitCommit, repo: RepoRef): Artifact {
   return {
     id: `commit:${c.shortSha}`,
@@ -127,10 +104,6 @@ export function commitToArtifact(c: GitCommit, repo: RepoRef): Artifact {
   };
 }
 
-/**
- * Plan's [2] entry point: the introducing/changing commits for a line, as
- * Artifacts, oldest first. Resolves repo metadata internally.
- */
 export async function introducingCommits(
   repoPath: string,
   loc: CodeLocation,
@@ -138,4 +111,31 @@ export async function introducingCommits(
   const repo = await resolveRepo(repoPath);
   const commits = await lineHistory(repoPath, loc);
   return commits.map((c) => commitToArtifact(c, repo));
+}
+
+export async function searchFiles(repoPath: string, query: string, limit = 25): Promise<string[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const results = new Set<string>();
+
+  try {
+    const files = (await git(repoPath, ["ls-files"])).split("\n").filter(Boolean);
+    const ql = q.toLowerCase();
+    for (const f of files) if (f.toLowerCase().includes(ql)) results.add(f);
+  } catch {
+    /* empty repo */
+  }
+
+  try {
+    const grep = await git(repoPath, ["grep", "-l", "-I", "-i", "-F", "-e", q]);
+    for (const f of grep.split("\n").filter(Boolean)) results.add(f);
+  } catch {
+    /* git grep exits non-zero when nothing matches — not an error for us */
+  }
+
+  return [...results].slice(0, limit);
+}
+
+export async function readFileAtHead(repoPath: string, filePath: string): Promise<string> {
+  return git(repoPath, ["show", `HEAD:${filePath}`]);
 }

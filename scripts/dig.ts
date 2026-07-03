@@ -1,22 +1,8 @@
-/**
- * dig — the investigation CLI.
- *
- *   npm run dig -- <repoPath> <file:line[-end]>                 collect evidence
- *   npm run dig -- <repoPath> <file:line> --why "question?"     + reconstruct the why (LLM)
- *   npm run dig -- <repoPath> <file:line> --why --dry-run       show the exact prompt (no API call)
- *   npm run dig -- <repoPath> <file:line> [--why] --json        machine-readable output
- *
- * Collection (steps 1-3) is deterministic and needs no key. The --why step
- * (step 4) calls the model via synthesize(); it reads GROQ_API_KEY from
- * .env.local.
- */
-
 import { collect, parseLocation } from "../src/lib/collect";
 import { buildSynthesisInput, synthesize } from "../src/lib/synthesize";
 import { verify } from "../src/lib/verify";
 import type { Artifact, Evidence, VerifiedNarrative } from "../src/lib/types";
 
-// Load .env.local for the LLM key (Next's convention; tsx doesn't auto-load it).
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };
 try {
   proc.loadEnvFile?.(".env.local");
@@ -24,7 +10,6 @@ try {
   /* no .env.local yet — only matters if --why is used */
 }
 
-// ---- tiny ANSI helpers (auto-off when piped or NO_COLOR) ------------------
 const color = process.stdout.isTTY && !process.env.NO_COLOR;
 const wrap = (code: string) => (s: string) => (color ? `\x1b[${code}m${s}\x1b[0m` : s);
 const bold = wrap("1");
@@ -120,7 +105,6 @@ function printReport(ev: Evidence) {
   console.log(RULE);
 }
 
-// ---- findings + verification (step 4 + step 5 output) ---------------------
 function levelColor(level: VerifiedNarrative["confidence"]["level"]) {
   return level === "high" ? green : level === "medium" ? yellow : red;
 }
@@ -141,7 +125,6 @@ function printFindings(ev: Evidence, v: VerifiedNarrative) {
   console.log(indent(v.answer, "  "));
   console.log();
 
-  // Grounding — each citation checked against collected evidence (verify.ts).
   const resolved = v.citations.filter((id) => byId.has(id));
   console.log(gray("Grounding:"));
   if (resolved.length === 0 && v.unknownCitations.length === 0) {
@@ -155,7 +138,6 @@ function printFindings(ev: Evidence, v: VerifiedNarrative) {
     console.log(`  ${red("⚠")} ${red(id)} ${red("— FABRICATED: not in collected evidence")}`);
   }
 
-  // Confidence — computed from real signals by verify.ts, not the model's say-so.
   const c = v.confidence;
   const paint = levelColor(c.level);
   console.log();
@@ -171,7 +153,6 @@ function printFindings(ev: Evidence, v: VerifiedNarrative) {
   console.log(RULE);
 }
 
-// ---- dry run (preview the prompt, no API call) ----------------------------
 function printDryRun(input: { system: string; prompt: string }) {
   console.log();
   console.log(`${bold("DRY RUN")} ${gray("· exactly what would be sent to the model — no API call")}`);
@@ -212,7 +193,6 @@ async function main() {
 
   const evidence = await collect({ repoPath, question, location });
 
-  // --why --dry-run: show the prompt, never touch the network.
   if (why && dryRun) {
     const input = buildSynthesisInput(evidence);
     if (json) {
@@ -224,7 +204,6 @@ async function main() {
     return;
   }
 
-  // --why: run the single AI call (step 4), then verify it (step 5).
   let verified: VerifiedNarrative | undefined;
   if (why) {
     if (!process.env.GROQ_API_KEY) keyMissing();
