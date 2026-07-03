@@ -31,6 +31,9 @@ export async function GET(req: Request) {
     const content = await readFileAtHead(path, filePath);
     return NextResponse.json({ path: filePath, content });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : `Could not read ${filePath}` }, { status: 404 });
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : `Could not read ${filePath}` },
+      { status: 404 },
+    );
   }
 }

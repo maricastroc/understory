@@ -28,7 +28,9 @@ async function rest<T>(path: string): Promise<T> {
 export function parseGitHubRepo(input: string): { owner: string; repo: string } | null {
   const s = input.trim();
   if (!s || s.startsWith(".") || s.startsWith("/") || s.startsWith("~")) return null;
-  let m = s.match(/^(?:https?:\/\/github\.com\/|git@github\.com:)([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/i);
+  let m = s.match(
+    /^(?:https?:\/\/github\.com\/|git@github\.com:)([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/i,
+  );
   if (m) return { owner: m[1], repo: m[2] };
   m = s.match(/^([\w.-]+)\/([\w.-]+)$/);
   if (m) return { owner: m[1], repo: m[2] };
@@ -41,9 +43,12 @@ export async function getRepoMeta(owner: string, repo: string): Promise<GitHubRe
   const key = `${owner}/${repo}`;
   const hit = metaCache.get(key);
   if (hit) return hit;
-  const d = await rest<{ full_name: string; default_branch: string; html_url: string; private: boolean }>(
-    `/repos/${owner}/${repo}`,
-  );
+  const d = await rest<{
+    full_name: string;
+    default_branch: string;
+    html_url: string;
+    private: boolean;
+  }>(`/repos/${owner}/${repo}`);
   const meta: GitHubRepoMeta = {
     name: d.full_name,
     branch: d.default_branch,
@@ -133,8 +138,19 @@ async function graphql<T>(query: string, variables: Record<string, unknown>): Pr
   return json.data;
 }
 
-export type PrReview = { author: { login: string } | null; state: string; body: string; submittedAt: string };
-export type PrIssue = { number: number; title: string; body: string; url: string; createdAt: string };
+export type PrReview = {
+  author: { login: string } | null;
+  state: string;
+  body: string;
+  submittedAt: string;
+};
+export type PrIssue = {
+  number: number;
+  title: string;
+  body: string;
+  url: string;
+  createdAt: string;
+};
 export type AssociatedPr = {
   number: number;
   title: string;

@@ -16,7 +16,7 @@ function ExhibitCard({ a, index, cited }: { a: Artifact; index: number; cited: b
         <span className="rounded-md border border-line bg-inset px-1.5 py-0.5 font-mono text-[10.5px] font-semibold text-ink-2">
           Exhibit {letter(index)}
         </span>
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-3">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-ink-3 uppercase">
           <KindIcon kind={a.kind} className="size-3.5" />
           {kindLabel[a.kind]}
         </span>
@@ -29,7 +29,7 @@ function ExhibitCard({ a, index, cited }: { a: Artifact; index: number; cited: b
         </span>
       </div>
 
-      <div className="text-[14.5px] font-semibold leading-snug text-ink">{a.title}</div>
+      <div className="text-[14.5px] leading-snug font-semibold text-ink">{a.title}</div>
 
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] text-ink-2">
         <span className="font-mono text-ink-3">{a.ref ?? a.id}</span>
@@ -44,7 +44,7 @@ function ExhibitCard({ a, index, cited }: { a: Artifact; index: number; cited: b
       </div>
 
       {body && (
-        <p className="line-clamp-5 whitespace-pre-wrap border-l-2 border-line-2 pl-3 text-[12.5px] leading-relaxed text-ink-2">
+        <p className="line-clamp-5 border-l-2 border-line-2 pl-3 text-[12.5px] leading-relaxed whitespace-pre-wrap text-ink-2">
           {body}
         </p>
       )}

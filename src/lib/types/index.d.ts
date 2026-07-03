@@ -1,0 +1,12 @@
+export type { Person } from "./person";
+export type { ArtifactKind } from "./artifact-kind";
+export type { Artifact } from "./artifact";
+export type { CodeLocation } from "./code-location";
+export type { RepoRef } from "./repo-ref";
+export type { Evidence } from "./evidence";
+export type { Narrative } from "./narrative";
+export type { Confidence } from "./confidence";
+export type { VerifiedNarrative } from "./verified-narrative";
+export type { DigResult } from "./dig-result";
+export type { InvestigateInput } from "./investigate-input";
+export type { RepoMeta } from "./repo-meta";

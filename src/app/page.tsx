@@ -63,7 +63,13 @@ const steps = [
   },
 ];
 
-const sampleConfidence = { score: 0.92, level: "high" as const, primarySources: 4, corroborating: 2, contradicting: 0 };
+const sampleConfidence = {
+  score: 0.92,
+  level: "high" as const,
+  primarySources: 4,
+  corroborating: 2,
+  contradicting: 0,
+};
 
 export default function Home() {
   return (
@@ -73,7 +79,9 @@ export default function Home() {
         <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-6">
           <Logo className="size-6 text-accent" />
           <span className="text-[14px] font-semibold tracking-tight">Git Investigator</span>
-          <span className="ml-3 hidden font-mono text-[11px] text-ink-3 sm:inline">// code archaeology</span>
+          <span className="ml-3 hidden font-mono text-[11px] text-ink-3 sm:inline">
+            {`// code archaeology`}
+          </span>
           <div className="ml-auto flex items-center gap-2">
             <Link
               href="/app"
@@ -95,11 +103,12 @@ export default function Home() {
       {/* hero */}
       <section className="mx-auto max-w-6xl px-6 pt-16 pb-20 lg:pt-20">
         <p className="font-mono text-[12.5px] text-ink-3">
-          <span className="text-accent-press">git blame</span> tells you <span className="text-ink">who</span> and{" "}
-          <span className="text-ink">when</span>. This tells you <span className="text-ink">why</span>.
+          <span className="text-accent-press">git blame</span> tells you{" "}
+          <span className="text-ink">who</span> and <span className="text-ink">when</span>. This
+          tells you <span className="text-ink">why</span>.
         </p>
 
-        <h1 className="mt-5 max-w-[18ch] font-mono text-[40px] font-semibold leading-[1.06] tracking-[-0.03em] sm:text-[56px]">
+        <h1 className="mt-5 max-w-[18ch] font-mono text-[40px] leading-[1.06] font-semibold tracking-[-0.03em] sm:text-[56px]">
           Why is this <span className="text-accent">line</span> here?
           <span
             aria-hidden
@@ -108,9 +117,9 @@ export default function Home() {
         </h1>
 
         <p className="mt-6 max-w-[58ch] font-sans text-[16px] leading-relaxed text-ink-2">
-          Git Investigator reconstructs the reasoning behind a line of code — tracing the commits, pull
-          requests, and issues that shaped it — and cites every source you can click. When the history
-          doesn&apos;t explain it, it tells you, instead of inventing a reason.
+          Git Investigator reconstructs the reasoning behind a line of code — tracing the commits,
+          pull requests, and issues that shaped it — and cites every source you can click. When the
+          history doesn&apos;t explain it, it tells you, instead of inventing a reason.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -120,7 +129,13 @@ export default function Home() {
           >
             Open a case
             <svg viewBox="0 0 16 16" fill="none" className="size-4" aria-hidden>
-              <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M6 3l5 5-5 5"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </Link>
           <a
@@ -143,13 +158,18 @@ export default function Home() {
             </div>
             <div className="overflow-x-auto py-2 font-mono text-[12.5px] leading-[1.7]">
               {codeLines.map((l) => (
-                <div key={l.n} className={`flex items-center px-1 ${l.hot ? "bg-accent-tint" : ""}`}>
-                  <span className={`w-10 shrink-0 select-none pr-3 text-right ${l.hot ? "text-accent-press" : "text-ink-3"}`}>
+                <div
+                  key={l.n}
+                  className={`flex items-center px-1 ${l.hot ? "bg-accent-tint" : ""}`}
+                >
+                  <span
+                    className={`w-10 shrink-0 pr-3 text-right select-none ${l.hot ? "text-accent-press" : "text-ink-3"}`}
+                  >
                     {l.n}
                   </span>
-                  <code className="whitespace-pre pr-4 text-ink">{l.text || " "}</code>
+                  <code className="pr-4 whitespace-pre text-ink">{l.text || " "}</code>
                   {l.hot && (
-                    <span className="ml-auto flex shrink-0 items-center gap-1 whitespace-nowrap pr-3 text-[11px] font-semibold text-accent-press">
+                    <span className="ml-auto flex shrink-0 items-center gap-1 pr-3 text-[11px] font-semibold whitespace-nowrap text-accent-press">
                       ◀ why exactly 3?
                     </span>
                   )}
@@ -172,12 +192,14 @@ export default function Home() {
             </div>
 
             <p className="mt-4 text-[13.5px] leading-relaxed text-[#2a2d36]">
-              Capped at three after an unbounded loop double-billed customers during a Stripe outage —
-              three attempts stay inside the 10-second webhook window.
+              Capped at three after an unbounded loop double-billed customers during a Stripe outage
+              — three attempts stay inside the 10-second webhook window.
             </p>
 
             <div className="mt-auto border-t border-line pt-3">
-              <div className="mb-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink-3">grounded in</div>
+              <div className="mb-2 font-mono text-[10.5px] tracking-[0.06em] text-ink-3 uppercase">
+                grounded in
+              </div>
               <div className="flex flex-wrap gap-1.5">
                 {grounded.map((g) => (
                   <span
@@ -215,7 +237,7 @@ export default function Home() {
 
       {/* how it works */}
       <section id="how" className="mx-auto max-w-6xl px-6 py-20">
-        <p className="font-mono text-[12px] text-accent-press">// the method</p>
+        <p className="font-mono text-[12px] text-accent-press">{`// the method`}</p>
         <h2 className="mt-3 max-w-[22ch] text-[27px] font-semibold tracking-[-0.015em] text-balance">
           From a line you don&apos;t understand to the decision behind it.
         </h2>
@@ -236,10 +258,16 @@ export default function Home() {
           <div>
             <div className="flex items-center gap-2 text-good">
               <Shield className="size-4" />
-              <span className="font-mono text-[11.5px] uppercase tracking-[0.06em]">open a case</span>
+              <span className="font-mono text-[11.5px] tracking-[0.06em] uppercase">
+                open a case
+              </span>
             </div>
-            <h3 className="mt-2 text-[18px] font-semibold tracking-tight">Interrogate your own code.</h3>
-            <p className="mt-1 text-[13.5px] text-ink-2">Point it at a repository and a line — see what the history really says.</p>
+            <h3 className="mt-2 text-[18px] font-semibold tracking-tight">
+              Interrogate your own code.
+            </h3>
+            <p className="mt-1 text-[13.5px] text-ink-2">
+              Point it at a repository and a line — see what the history really says.
+            </p>
           </div>
           <Link
             href="/app"
@@ -247,7 +275,13 @@ export default function Home() {
           >
             Start investigating
             <svg viewBox="0 0 16 16" fill="none" className="size-4" aria-hidden>
-              <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M6 3l5 5-5 5"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </Link>
         </div>

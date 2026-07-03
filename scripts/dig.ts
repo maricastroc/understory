@@ -31,7 +31,7 @@ function usage(): never {
       "  npm run dig -- <repoPath> <file:line[-endLine]> [--why] [--dry-run] [--json] [question...]",
       "",
       bold("Examples:"),
-      '  npm run dig -- ../payments-service src/billing/charge.ts:8',
+      "  npm run dig -- ../payments-service src/billing/charge.ts:8",
       '  npm run dig -- ../payments-service src/billing/charge.ts:8 --why "why cap retries at 3?"',
       "  npm run dig -- ../payments-service src/billing/charge.ts:8 --why --dry-run",
     ].join("\n"),
@@ -61,7 +61,9 @@ function printArtifact(a: Artifact, i: number, isLast: boolean) {
   const owner = isLast ? mag("  ← currently owns this line") : "";
 
   console.log();
-  console.log(`${bold(cyan(`Exhibit ${letter(i)}`))}  ${gray(a.id)}   ${gray(fmtDate(a.date))}${owner}`);
+  console.log(
+    `${bold(cyan(`Exhibit ${letter(i)}`))}  ${gray(a.id)}   ${gray(fmtDate(a.date))}${owner}`,
+  );
   console.log(indent(bold(a.title)));
   if (who) console.log(indent(gray(who)));
   if (a.url) console.log(indent(gray(a.url)));
@@ -143,7 +145,9 @@ function printFindings(ev: Evidence, v: VerifiedNarrative) {
   console.log();
   console.log(
     `${gray("Confidence:")} ${paint(bold(c.level.toUpperCase()))} ${paint(`${Math.round(c.score * 100)}%`)}` +
-      gray(`   ${c.primarySources} primary · ${c.corroborating} corroborating · ${c.contradicting} contradicting`),
+      gray(
+        `   ${c.primarySources} primary · ${c.corroborating} corroborating · ${c.contradicting} contradicting`,
+      ),
   );
   console.log(
     v.grounded
@@ -155,7 +159,9 @@ function printFindings(ev: Evidence, v: VerifiedNarrative) {
 
 function printDryRun(input: { system: string; prompt: string }) {
   console.log();
-  console.log(`${bold("DRY RUN")} ${gray("· exactly what would be sent to the model — no API call")}`);
+  console.log(
+    `${bold("DRY RUN")} ${gray("· exactly what would be sent to the model — no API call")}`,
+  );
   console.log(RULE);
   console.log(bold(cyan("SYSTEM ►")));
   console.log(indent(input.system, "  "));
@@ -163,7 +169,9 @@ function printDryRun(input: { system: string; prompt: string }) {
   console.log(bold(cyan("PROMPT ►")));
   console.log(indent(input.prompt, "  "));
   console.log(RULE);
-  console.log(dim("This is the entire context the model gets — no hidden knowledge, no outside data."));
+  console.log(
+    dim("This is the entire context the model gets — no hidden knowledge, no outside data."),
+  );
   console.log(RULE);
 }
 
@@ -189,7 +197,9 @@ async function main() {
   const location = parseLocation(locationArg);
   const question =
     rest.join(" ") ||
-    (why ? "Why is this line the way it is? Reconstruct why it changed." : "(collection only — no question asked)");
+    (why
+      ? "Why is this line the way it is? Reconstruct why it changed."
+      : "(collection only — no question asked)");
 
   const evidence = await collect({ repoPath, question, location });
 

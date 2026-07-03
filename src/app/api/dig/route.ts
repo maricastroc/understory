@@ -26,24 +26,33 @@ export async function POST(req: Request) {
   try {
     loc = parseLocation(location);
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 400 });
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : String(e) },
+      { status: 400 },
+    );
   }
 
   let evidence;
   try {
-    const collectPath = parseGitHubRepo(repoPath) ? repoPath : (await resolveRepoInput(repoPath)).path;
+    const collectPath = parseGitHubRepo(repoPath)
+      ? repoPath
+      : (await resolveRepoInput(repoPath)).path;
     evidence = await collect({
       repoPath: collectPath,
       question: question?.trim() || "Why is this line the way it is? Reconstruct why it changed.",
       location: loc,
     });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 400 });
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : String(e) },
+      { status: 400 },
+    );
   }
 
   const result: DigResult = { evidence, narrative: null };
   if (!process.env.GROQ_API_KEY) {
-    result.error = "GROQ_API_KEY is not set on the server (.env.local) — showing collected evidence only.";
+    result.error =
+      "GROQ_API_KEY is not set on the server (.env.local) — showing collected evidence only.";
   } else {
     try {
       result.narrative = verify(evidence, await synthesize(evidence));

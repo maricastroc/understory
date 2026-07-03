@@ -12,7 +12,15 @@ export function Logo({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden className={className}>
       <circle cx="10" cy="10" r="6.5" stroke="currentColor" strokeWidth="1.8" />
-      <line x1="15" y1="15" x2="21" y2="21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <line
+        x1="15"
+        y1="15"
+        x2="21"
+        y2="21"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
       <circle cx="10" cy="10" r="1.9" fill="currentColor" />
       <line x1="10" y1="4.5" x2="10" y2="8" stroke="currentColor" strokeWidth="1.6" />
       <line x1="10" y1="12" x2="10" y2="15.5" stroke="currentColor" strokeWidth="1.6" />
@@ -95,7 +103,10 @@ export function Plus({ className }: IconProps) {
 export function Repo({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
-      <path d="M3 2.5h8a1.5 1.5 0 0 1 1.5 1.5v9.5L11 12H4a1.5 1.5 0 0 1-1.5-1.5v-8Z" strokeWidth="1.3" />
+      <path
+        d="M3 2.5h8a1.5 1.5 0 0 1 1.5 1.5v9.5L11 12H4a1.5 1.5 0 0 1-1.5-1.5v-8Z"
+        strokeWidth="1.3"
+      />
       <path d="M5 2.5v9" strokeWidth="1.3" />
     </svg>
   );
@@ -125,7 +136,10 @@ export function Clock({ className }: IconProps) {
 export function FileIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
-      <path d="M4 2.5h5.5L13 6v7.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z" strokeWidth="1.3" />
+      <path
+        d="M4 2.5h5.5L13 6v7.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z"
+        strokeWidth="1.3"
+      />
       <path d="M9 2.5V6h4" strokeWidth="1.3" />
     </svg>
   );
@@ -134,7 +148,12 @@ export function FileIcon({ className }: IconProps) {
 export function Check({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
-      <path d="M3 8.5l3.2 3.2L13 5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M3 8.5l3.2 3.2L13 5"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -169,8 +188,17 @@ export function Lock({ className }: IconProps) {
 export function Shield({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
-      <path d="M8 1.5 13.5 4v4c0 3.4-2.3 5.6-5.5 6.5C4.8 13.6 2.5 11.4 2.5 8V4L8 1.5Z" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M5.8 8l1.6 1.6L10.5 6.3" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M8 1.5 13.5 4v4c0 3.4-2.3 5.6-5.5 6.5C4.8 13.6 2.5 11.4 2.5 8V4L8 1.5Z"
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5.8 8l1.6 1.6L10.5 6.3"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -179,7 +207,11 @@ export function Users({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
       <circle cx="6" cy="5" r="2.3" strokeWidth="1.3" />
-      <path d="M2.2 13c0-2.3 1.7-3.8 3.8-3.8S9.8 10.7 9.8 13" strokeWidth="1.3" strokeLinecap="round" />
+      <path
+        d="M2.2 13c0-2.3 1.7-3.8 3.8-3.8S9.8 10.7 9.8 13"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+      />
       <circle cx="11.4" cy="5.6" r="1.8" strokeWidth="1.2" />
       <path d="M11 9.3c1.8 0 2.9 1.3 2.9 3.2" strokeWidth="1.2" strokeLinecap="round" />
     </svg>

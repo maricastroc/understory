@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
-import type { DigResult } from "@/lib/types";
-import { Composer, type InvestigateInput } from "./Composer";
+import type { DigResult, InvestigateInput } from "@/lib/types";
+import { Composer } from "./composer/Composer";
 import { Evidence } from "./Evidence";
 import { Findings } from "./Findings";
 import { Alert, Branch, FileIcon, Logo, Plus, Search } from "./icons";
@@ -107,8 +107,12 @@ export function Investigator() {
           <Search className="size-3.5" />
           <span className="text-[13px]">Search evidence, commits, PRs…</span>
           <span className="ml-auto flex gap-1">
-            <kbd className="rounded border border-line-2 bg-surface px-1.5 font-mono text-[11px]">⌘</kbd>
-            <kbd className="rounded border border-line-2 bg-surface px-1.5 font-mono text-[11px]">K</kbd>
+            <kbd className="rounded border border-line-2 bg-surface px-1.5 font-mono text-[11px]">
+              ⌘
+            </kbd>
+            <kbd className="rounded border border-line-2 bg-surface px-1.5 font-mono text-[11px]">
+              K
+            </kbd>
           </span>
         </div>
 
@@ -151,7 +155,9 @@ export function Investigator() {
 
             {loading && <LoadingCard />}
 
-            {!loading && view === "case" && current && <CaseView entry={current} onBack={backToCode} />}
+            {!loading && view === "case" && current && (
+              <CaseView entry={current} onBack={backToCode} />
+            )}
           </div>
         </main>
 
@@ -188,7 +194,13 @@ function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }) {
         className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-2 transition-colors hover:text-accent-press"
       >
         <svg viewBox="0 0 16 16" fill="none" className="size-3.5" aria-hidden>
-          <path d="M10 3 5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M10 3 5 8l5 5"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
         Back to code
       </button>
@@ -204,7 +216,7 @@ function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }) {
           </Pill>
         </div>
 
-        <h1 className="max-w-[26ch] text-[26px] font-semibold leading-[1.24] tracking-tight text-balance">
+        <h1 className="max-w-[26ch] text-[26px] leading-[1.24] font-semibold tracking-tight text-balance">
           {form.question || "Why is this line the way it is?"}
         </h1>
 
@@ -222,8 +234,11 @@ function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }) {
           </Chip>
           {narrative && (
             <Chip>
-              confidence <b className="font-semibold text-ink">{levelLabel[narrative.confidence.level]}</b>
-              <span className="tnum text-ink-3">· {Math.round(narrative.confidence.score * 100)}%</span>
+              confidence{" "}
+              <b className="font-semibold text-ink">{levelLabel[narrative.confidence.level]}</b>
+              <span className="text-ink-3 tnum">
+                · {Math.round(narrative.confidence.score * 100)}%
+              </span>
             </Chip>
           )}
         </div>
@@ -234,7 +249,9 @@ function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }) {
       ) : (
         <div className="mt-6 flex items-start gap-2 rounded-[10px] border border-warn/30 bg-warn-tint p-4 text-[13px] text-warn">
           <Alert className="mt-0.5 size-4 shrink-0" />
-          <span>{result.error ?? "No conclusion was produced — showing collected evidence only."}</span>
+          <span>
+            {result.error ?? "No conclusion was produced — showing collected evidence only."}
+          </span>
         </div>
       )}
 
@@ -253,7 +270,12 @@ function Chip({ children }: { children: React.ReactNode }) {
 }
 
 function LoadingCard() {
-  const stages = ["Collecting from git", "Building timeline", "Reconstructing the why", "Verifying citations"];
+  const stages = [
+    "Collecting from git",
+    "Building timeline",
+    "Reconstructing the why",
+    "Verifying citations",
+  ];
   return (
     <div className="rounded-[10px] border border-line bg-surface p-6 shadow-[0_1px_2px_rgba(20,22,30,0.04)]">
       <div className="flex items-center gap-3">

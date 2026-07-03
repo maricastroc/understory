@@ -57,7 +57,14 @@ async function collectFromGitHub(
     remoteUrl: meta.htmlUrl,
     branch: meta.branch,
   };
-  const commits = await blameLines(owner, repo, meta.branch, location.file, location.startLine, location.endLine);
+  const commits = await blameLines(
+    owner,
+    repo,
+    meta.branch,
+    location.file,
+    location.startLine,
+    location.endLine,
+  );
 
   const artifacts: Artifact[] = [];
   const seen = new Set<string>();
@@ -91,7 +98,9 @@ function commitArtifact(c: BlameCommit): Artifact {
     body: c.message?.trim() || c.messageHeadline,
     url: c.url,
     date: c.committedDate,
-    author: c.author?.name ? { name: c.author.name, email: c.author.email ?? undefined } : undefined,
+    author: c.author?.name
+      ? { name: c.author.name, email: c.author.email ?? undefined }
+      : undefined,
     ref: c.abbreviatedOid,
     meta: { sha: c.oid },
   };
