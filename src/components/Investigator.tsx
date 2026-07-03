@@ -92,8 +92,7 @@ export function Investigator() {
 
   return (
     <div className="flex h-screen flex-col">
-      {/* ===== top bar ===== */}
-      <header className="flex h-[52px] shrink-0 items-center gap-4 border-b border-line bg-surface px-4">
+      <header className="flex h-13 shrink-0 items-center gap-4 border-b border-line bg-surface px-4">
         <Link href="/" className="flex items-center gap-2.5 pr-2">
           <Logo className="size-6 text-accent" />
           <span className="text-[13.5px] font-semibold tracking-tight">Git Investigator</span>
@@ -104,7 +103,7 @@ export function Investigator() {
           <span className="font-mono text-[12.5px]">{basename(repoPath)}</span>
         </div>
 
-        <div className="hidden max-w-[420px] flex-1 items-center gap-2 rounded-md border border-line bg-inset px-3 py-1.5 text-ink-3 lg:flex">
+        <div className="hidden max-w-105 flex-1 items-center gap-2 rounded-md border border-line bg-inset px-3 py-1.5 text-ink-3 lg:flex">
           <Search className="size-3.5" />
           <span className="text-[13px]">Search evidence, commits, PRs…</span>
           <span className="ml-auto flex gap-1">

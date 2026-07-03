@@ -16,7 +16,7 @@ function ExhibitCard({ a, index, cited }: { a: Artifact; index: number; cited: b
         <span className="rounded-md border border-line bg-inset px-1.5 py-0.5 font-mono text-[10.5px] font-semibold text-ink-2">
           Exhibit {letter(index)}
         </span>
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-3">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-3">
           <KindIcon kind={a.kind} className="size-3.5" />
           {kindLabel[a.kind]}
         </span>
@@ -35,11 +35,11 @@ function ExhibitCard({ a, index, cited }: { a: Artifact; index: number; cited: b
         <span className="font-mono text-ink-3">{a.ref ?? a.id}</span>
         {a.author?.name && (
           <>
-            <span className="size-[3px] rounded-full bg-line-2" />
+            <span className="size-0.75 rounded-full bg-line-2" />
             <span>{a.author.name}</span>
           </>
         )}
-        <span className="size-[3px] rounded-full bg-line-2" />
+        <span className="size-0.75 rounded-full bg-line-2" />
         <span className="tnum">{fmtDate(a.date)}</span>
       </div>
 
