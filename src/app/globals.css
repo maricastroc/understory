@@ -11,13 +11,13 @@
   --color-ink: #1a1c23;
   --color-ink-2: #565c6b;
   --color-ink-3: #888e9c;
-  --color-accent: #4b57d6;
-  --color-accent-press: #3b46bc;
-  --color-accent-tint: #ecedfb;
+  --color-accent: #b45309;
+  --color-accent-press: #8f4008;
+  --color-accent-tint: #faead0;
   --color-good: #157f52;
   --color-good-tint: #e7f3ec;
-  --color-warn: #a9700e;
-  --color-warn-tint: #f8efda;
+  --color-warn: #5a6474;
+  --color-warn-tint: #eceef2;
   --color-crit: #be3b32;
   --color-crit-tint: #fbeae8;
 }

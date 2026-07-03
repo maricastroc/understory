@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import type { DigResult } from "@/lib/types";
 import { Composer, type InvestigateInput } from "./Composer";
@@ -16,6 +17,7 @@ const DEFAULT_REPO = ".demo/payments-service";
 
 type Form = InvestigateInput;
 type Entry = { caseId: string; form: Form; result: DigResult };
+type View = "browse" | "case";
 
 export function Investigator() {
   const [repoPath, setRepoPath] = useState(DEFAULT_REPO);
@@ -23,7 +25,8 @@ export function Investigator() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<Entry[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [composing, setComposing] = useState(true);
+  const [view, setView] = useState<View>("browse");
+  const [resetKey, setResetKey] = useState(0);
   const counter = useRef(2049);
 
   const current = history.find((e) => e.caseId === activeId) ?? null;
@@ -32,7 +35,7 @@ export function Investigator() {
     if (loading) return;
     setLoading(true);
     setError(null);
-    setComposing(false);
+    setView("case");
     try {
       const res = await fetch("/api/dig", {
         method: "POST",
@@ -42,7 +45,7 @@ export function Investigator() {
       const data = (await res.json()) as DigResult & { error?: string };
       if (!res.ok || !data.evidence) {
         setError(data.error || `Request failed (${res.status})`);
-        setComposing(true);
+        setView("browse");
         return;
       }
       const caseId = `GI-${counter.current++}`;
@@ -50,24 +53,28 @@ export function Investigator() {
       setActiveId(caseId);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
-      setComposing(true);
+      setView("browse");
     } finally {
       setLoading(false);
     }
   }
 
   function selectCase(id: string) {
-    const entry = history.find((e) => e.caseId === id);
-    if (entry) {
+    if (history.some((e) => e.caseId === id)) {
       setActiveId(id);
-      setRepoPath(entry.form.repoPath);
-      setComposing(false);
+      setView("case");
       setError(null);
     }
   }
 
+  function backToCode() {
+    setView("browse");
+    setError(null);
+  }
+
   function newInvestigation() {
-    setComposing(true);
+    setResetKey((k) => k + 1); // remount Composer fresh (re-opens the repo)
+    setView("browse");
     setActiveId(null);
     setError(null);
   }
@@ -81,16 +88,16 @@ export function Investigator() {
     score: e.result.narrative?.confidence.score ?? 0,
   }));
 
-  const showComposer = composing || !current;
+  const browsing = view === "browse" && !loading;
 
   return (
     <div className="flex h-screen flex-col">
       {/* ===== top bar ===== */}
       <header className="flex h-[52px] shrink-0 items-center gap-4 border-b border-line bg-surface px-4">
-        <div className="flex items-center gap-2.5 pr-2">
+        <Link href="/" className="flex items-center gap-2.5 pr-2">
           <Logo className="size-6 text-accent" />
           <span className="text-[13.5px] font-semibold tracking-tight">Git Investigator</span>
-        </div>
+        </Link>
 
         <div className="hidden items-center gap-2 rounded-md border border-line-2 px-2.5 py-1.5 md:flex">
           <span className="size-1.5 rounded-full bg-good" />
@@ -121,29 +128,35 @@ export function Investigator() {
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <Sidebar items={items} activeId={activeId} onSelect={selectCase} />
+        <Sidebar items={items} activeId={view === "case" ? activeId : null} onSelect={selectCase} />
 
         {/* ===== workspace ===== */}
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto max-w-[1080px] px-8 py-6">
-            {error && !loading && (
+            {error && browsing && (
               <div className="mb-4 flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-4 text-[13px] text-crit">
                 <Alert className="mt-0.5 size-4 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            {loading ? (
-              <LoadingCard />
-            ) : showComposer ? (
-              <Composer repoPath={repoPath} setRepoPath={setRepoPath} onInvestigate={investigate} />
-            ) : (
-              current && <CaseView entry={current} />
-            )}
+            {/* Composer stays mounted so "back to code" preserves the open file. */}
+            <div className={browsing ? "" : "hidden"}>
+              <Composer
+                key={resetKey}
+                repoPath={repoPath}
+                setRepoPath={setRepoPath}
+                onInvestigate={investigate}
+              />
+            </div>
+
+            {loading && <LoadingCard />}
+
+            {!loading && view === "case" && current && <CaseView entry={current} onBack={backToCode} />}
           </div>
         </main>
 
-        <RightRail result={!composing ? (current?.result ?? null) : null} />
+        <RightRail result={view === "case" && !loading ? (current?.result ?? null) : null} />
       </div>
     </div>
   );
@@ -153,7 +166,7 @@ function basename(p: string) {
   return p.split("/").filter(Boolean).pop() ?? p;
 }
 
-function CaseView({ entry }: { entry: Entry }) {
+function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }) {
   const { result, caseId, form } = entry;
   const ev = result.evidence;
   const narrative = result.narrative;
@@ -171,6 +184,16 @@ function CaseView({ entry }: { entry: Entry }) {
 
   return (
     <>
+      <button
+        onClick={onBack}
+        className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-2 transition-colors hover:text-accent-press"
+      >
+        <svg viewBox="0 0 16 16" fill="none" className="size-3.5" aria-hidden>
+          <path d="M10 3 5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Back to code
+      </button>
+
       {/* case header */}
       <div className="flex flex-col gap-3.5">
         <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-ink-2">

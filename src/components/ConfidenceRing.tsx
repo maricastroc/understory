@@ -7,6 +7,7 @@ export function ConfidenceRing({ confidence, size = 132 }: { confidence: Confide
   const pct = Math.max(0, Math.min(1, confidence.score));
   const dash = pct * circumference;
   const tone = levelTone[confidence.level];
+  const showLabel = size >= 92;
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -24,12 +25,18 @@ export function ConfidenceRing({ confidence, size = 132 }: { confidence: Confide
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="tnum text-[30px] font-bold leading-none tracking-tight">
+        {/* font scales with `size` so the percentage never overflows a small ring */}
+        <span className="tnum font-bold leading-none tracking-tight" style={{ fontSize: Math.round(size * 0.26) }}>
           {Math.round(pct * 100)}%
         </span>
-        <span className={`mt-1 text-[10.5px] font-semibold uppercase tracking-wider ${tone.text}`}>
-          {levelLabel[confidence.level]}
-        </span>
+        {showLabel && (
+          <span
+            className={`mt-1 font-semibold uppercase tracking-wider ${tone.text}`}
+            style={{ fontSize: Math.round(size * 0.08) }}
+          >
+            {levelLabel[confidence.level]}
+          </span>
+        )}
       </div>
     </div>
   );
