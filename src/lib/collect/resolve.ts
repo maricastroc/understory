@@ -1,15 +1,3 @@
-/**
- * Turn whatever the user types in the "Repo" field into a local git directory.
- *
- *   https://github.com/owner/repo   ->  cloned into .cache/repos/owner/repo
- *   git@github.com:owner/repo.git   ->  cloned
- *   owner/repo                       ->  cloned from github.com
- *   ./some/local/path                ->  used as-is (must already be a clone)
- *
- * Remote repos are cloned once and reused. Concurrent requests for the same
- * repo share a single in-flight clone.
- */
-
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
@@ -53,10 +41,6 @@ export async function resolveRepoInput(input: string): Promise<ResolvedRepo> {
 
   if (!inflight.has(dir)) {
     const job = (async (): Promise<ResolvedRepo> => {
-      // Shallow, single-branch clone: enough history for `git log -L` on recent
-      // changes, but a bounded download so big repos don't hang. (A full clone
-      // is huge; a blobless one makes `git log -L` fetch every blob over the
-      // network — catastrophically slow. Depth is the sweet spot.)
       const depth = process.env.CLONE_DEPTH ?? "150";
       try {
         await exec("git", ["clone", "--depth", depth, "--single-branch", "--no-tags", remote.url, dir], {

@@ -3,7 +3,7 @@ import { levelLabel, levelTone } from "./format";
 
 export function ConfidenceRing({ confidence, size = 132 }: { confidence: Confidence; size?: number }) {
   const r = 52;
-  const circumference = 2 * Math.PI * r; // ~326.7
+  const circumference = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, confidence.score));
   const dash = pct * circumference;
   const tone = levelTone[confidence.level];

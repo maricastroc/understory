@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Check, FileIcon, Search } from "./icons";
 
 export type InvestigateInput = { repoPath: string; location: string; question: string };
-type RepoMeta = { name: string; branch: string | null; kind: "local" | "remote" };
+type RepoMeta = { name: string; branch: string | null; kind: "local" | "remote" | "github" };
 
 const field =
   "h-9 rounded-md border border-line bg-inset px-3 text-[13px] text-ink outline-none placeholder:text-ink-3 focus:border-accent focus:bg-surface";
@@ -72,7 +72,6 @@ export function Composer({
     }
   }
 
-  // Auto-open whatever repo is prefilled on first mount.
   useEffect(() => {
     void openRepo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -88,7 +87,6 @@ export function Composer({
     setSelectedLine(null);
   }
 
-  // debounced file search (only once a repo is open)
   useEffect(() => {
     const q = query.trim();
     if (!repoReady || q.length < 2 || file?.path === q) {
@@ -193,7 +191,9 @@ export function Composer({
         {repoReady && repoMeta && (
           <div className="flex items-center gap-2 border-b border-line bg-good-tint/50 px-3.5 py-2 text-[12.5px] text-ink-2">
             <Check className="size-3.5 text-good" />
-            <span className="font-medium text-ink">{repoMeta.kind === "remote" ? "Cloned" : "Local"}</span>
+            <span className="font-medium text-ink">
+              {repoMeta.kind === "github" ? "GitHub" : repoMeta.kind === "remote" ? "Cloned" : "Local"}
+            </span>
             <span className="font-mono">{repoMeta.name}</span>
             {repoMeta.branch && <span className="text-ink-3">· branch {repoMeta.branch}</span>}
           </div>

@@ -1,6 +1,8 @@
-/** GET /api/file?repo=…&path=… — read a file's contents at HEAD, for the viewer. */
+/** GET /api/file?repo=…&path=… — read a file for the viewer. GitHub via API,
+ *  local via git show. */
 import { NextResponse } from "next/server";
 import { isGitRepo, readFileAtHead } from "@/lib/collect/git";
+import { getFileContentGitHub, getRepoMeta, parseGitHubRepo } from "@/lib/collect/github";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 
 export const runtime = "nodejs";
@@ -15,6 +17,13 @@ export async function GET(req: Request) {
   }
 
   try {
+    const gh = parseGitHubRepo(repo);
+    if (gh) {
+      const meta = await getRepoMeta(gh.owner, gh.repo);
+      const content = await getFileContentGitHub(gh.owner, gh.repo, meta.branch, filePath);
+      return NextResponse.json({ path: filePath, content });
+    }
+
     const { path } = await resolveRepoInput(repo);
     if (!(await isGitRepo(path))) {
       return NextResponse.json({ error: `Not a git repository: ${repo}` }, { status: 400 });

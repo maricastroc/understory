@@ -4,7 +4,7 @@ import { ExternalLink, KindIcon, kindLabel } from "./icons";
 import { SectionLabel } from "./ui";
 
 function ExhibitCard({ a, index, cited }: { a: Artifact; index: number; cited: boolean }) {
-  const body = a.body.split("\n").slice(1).join("\n").trim(); // message minus subject
+  const body = a.body.split("\n").slice(1).join("\n").trim();
 
   return (
     <div

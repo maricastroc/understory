@@ -73,7 +73,7 @@ export function Investigator() {
   }
 
   function newInvestigation() {
-    setResetKey((k) => k + 1); // remount Composer fresh (re-opens the repo)
+    setResetKey((k) => k + 1);
     setView("browse");
     setActiveId(null);
     setError(null);

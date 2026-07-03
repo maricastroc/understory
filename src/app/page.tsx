@@ -195,14 +195,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* principles */}
       <section className="border-y border-line bg-surface-2">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <p className="font-mono text-[12px] text-accent-press">// the standard of evidence</p>
+          <p className="font-mono text-[12px] text-accent-press">{`// the standard of evidence`}</p>
           <h2 className="mt-3 max-w-[22ch] text-[27px] font-semibold tracking-[-0.015em] text-balance">
             Not a chat about your repo. A record you can audit.
           </h2>
-          <div className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-[12px] border border-line bg-line md:grid-cols-3">
+          <div className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-3">
             {principles.map((p) => (
               <div key={p.title} className="bg-surface p-6">
                 <span className="font-mono text-[11px] text-ink-3">{p.tag}</span>

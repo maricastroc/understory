@@ -1,12 +1,6 @@
-/**
- * POST /api/dig — the whole pipeline, connected. Runs server-side because it
- * shells out to git and reads GROQ_API_KEY.
- *
- *   resolve repo (clone if URL)  ->  collect (git)  ->  synthesize (LLM)  ->  verify
- */
-
 import { NextResponse } from "next/server";
 import { collect, parseLocation } from "@/lib/collect";
+import { parseGitHubRepo } from "@/lib/collect/github";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { synthesize } from "@/lib/synthesize";
 import { verify } from "@/lib/verify";
@@ -35,12 +29,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 400 });
   }
 
-  // [1] Resolve the repo (clone on demand), then [2][3] collect — deterministic.
   let evidence;
   try {
-    const { path } = await resolveRepoInput(repoPath);
+    const collectPath = parseGitHubRepo(repoPath) ? repoPath : (await resolveRepoInput(repoPath)).path;
     evidence = await collect({
-      repoPath: path,
+      repoPath: collectPath,
       question: question?.trim() || "Why is this line the way it is? Reconstruct why it changed.",
       location: loc,
     });
@@ -48,8 +41,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 400 });
   }
 
-  // [4][5] Synthesize + verify — needs the key. If absent/failing, still return
-  // the collected evidence so the UI can show the deterministic half.
   const result: DigResult = { evidence, narrative: null };
   if (!process.env.GROQ_API_KEY) {
     result.error = "GROQ_API_KEY is not set on the server (.env.local) — showing collected evidence only.";
