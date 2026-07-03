@@ -19,13 +19,21 @@ const toneDot: Record<Tone, string> = {
 export function SectionLabel({ title, meta }: { title: string; meta?: string }) {
   return (
     <div className="mb-3.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-      <h2 className="text-[13px] font-semibold uppercase tracking-[0.06em] text-ink-2">{title}</h2>
+      <h2 className="text-[13px] font-semibold tracking-[0.06em] text-ink-2 uppercase">{title}</h2>
       {meta && <span className="text-[12px] text-ink-3">{meta}</span>}
     </div>
   );
 }
 
-export function Pill({ tone, dot, children }: { tone: Tone; dot?: boolean; children: React.ReactNode }) {
+export function Pill({
+  tone,
+  dot,
+  children,
+}: {
+  tone: Tone;
+  dot?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <span
       className={`inline-flex h-[22px] items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-semibold ${toneBadge[tone]}`}

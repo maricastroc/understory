@@ -21,8 +21,10 @@ export function Sidebar({
   return (
     <aside className="hidden w-[268px] shrink-0 flex-col border-r border-line bg-surface-2 md:flex">
       <div className="flex items-center justify-between px-4 py-4">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.07em] text-ink-3">Investigations</span>
-        <span className="tnum text-[11px] font-semibold text-ink-3">{items.length}</span>
+        <span className="text-[11px] font-semibold tracking-[0.07em] text-ink-3 uppercase">
+          Investigations
+        </span>
+        <span className="text-[11px] font-semibold text-ink-3 tnum">{items.length}</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-2.5 pb-4">
@@ -43,11 +45,13 @@ export function Sidebar({
                     active ? "bg-accent-tint" : "hover:bg-inset"
                   }`}
                 >
-                  {active && <span className="absolute inset-y-2 -left-1 w-0.5 rounded bg-accent" />}
+                  {active && (
+                    <span className="absolute inset-y-2 -left-1 w-0.5 rounded bg-accent" />
+                  )}
                   <span className={`mt-[5px] size-2 shrink-0 rounded-full ${dot}`} />
                   <span className="min-w-0">
                     <span
-                      className={`line-clamp-2 text-[13px] font-medium leading-snug ${
+                      className={`line-clamp-2 text-[13px] leading-snug font-medium ${
                         active ? "text-accent-press" : "text-ink"
                       }`}
                     >
@@ -71,7 +75,7 @@ export function Sidebar({
         <span className="grid size-[26px] place-items-center rounded-full bg-accent text-[10px] font-semibold text-white">
           MC
         </span>
-        <span className="text-[12.5px] font-semibold leading-tight">
+        <span className="text-[12.5px] leading-tight font-semibold">
           Mariana Castro
           <span className="block text-[11px] font-normal text-ink-3">acme · engineering</span>
         </span>

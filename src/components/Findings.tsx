@@ -16,12 +16,23 @@ export function Findings({
 
   return (
     <section className="mt-6">
-      <SectionLabel title="Findings" meta="Reconstructed conclusion — every claim linked to a primary source" />
+      <SectionLabel
+        title="Findings"
+        meta="Reconstructed conclusion — every claim linked to a primary source"
+      />
 
       <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-[0_1px_2px_rgba(20,22,30,0.04)]">
         {/* verdict strip */}
         <div className="flex flex-wrap items-center gap-3 border-b border-line bg-surface-2 px-5 py-3">
-          {narrative.recorded ? <Pill tone="good" dot>Resolved</Pill> : <Pill tone="warn" dot>Inconclusive</Pill>}
+          {narrative.recorded ? (
+            <Pill tone="good" dot>
+              Resolved
+            </Pill>
+          ) : (
+            <Pill tone="warn" dot>
+              Inconclusive
+            </Pill>
+          )}
           <span className="text-[12.5px] font-semibold text-ink">
             {narrative.recorded ? "Rationale reconstructed" : "History is silent"}
             <span className="font-normal text-ink-2">
@@ -34,8 +45,8 @@ export function Findings({
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_244px]">
           {/* conclusion */}
-          <div className="border-b border-line p-6 md:border-b-0 md:border-r">
-            <p className="max-w-[64ch] whitespace-pre-wrap text-[15px] leading-[1.66] text-[#2a2d36]">
+          <div className="border-b border-line p-6 md:border-r md:border-b-0">
+            <p className="max-w-[64ch] text-[15px] leading-[1.66] whitespace-pre-wrap text-[#2a2d36]">
               {narrative.answer}
             </p>
 
@@ -45,15 +56,15 @@ export function Findings({
                 <span>
                   {narrative.unknownCitations.length} fabricated citation
                   {narrative.unknownCitations.length > 1 ? "s" : ""} caught by verification:{" "}
-                  <span className="font-mono">{narrative.unknownCitations.join(", ")}</span> — not in the
-                  collected evidence.
+                  <span className="font-mono">{narrative.unknownCitations.join(", ")}</span> — not
+                  in the collected evidence.
                 </span>
               </div>
             )}
 
             {resolved.length > 0 && (
               <div className="mt-5">
-                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">
+                <div className="mb-2 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
                   Grounded in
                 </div>
                 <div className="flex flex-wrap gap-2">

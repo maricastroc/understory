@@ -16,7 +16,9 @@ export async function GET(req: Request) {
     const gh = parseGitHubRepo(repo);
     if (gh) {
       const meta = await getRepoMeta(gh.owner, gh.repo);
-      return NextResponse.json({ files: await searchFilesGitHub(gh.owner, gh.repo, meta.branch, q) });
+      return NextResponse.json({
+        files: await searchFilesGitHub(gh.owner, gh.repo, meta.branch, q),
+      });
     }
 
     const { path } = await resolveRepoInput(repo);
@@ -25,6 +27,9 @@ export async function GET(req: Request) {
     }
     return NextResponse.json({ files: await searchFiles(path, q) });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 400 });
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : String(e) },
+      { status: 400 },
+    );
   }
 }

@@ -1,7 +1,13 @@
 import type { Confidence } from "@/lib/types";
 import { levelLabel, levelTone } from "./format";
 
-export function ConfidenceRing({ confidence, size = 132 }: { confidence: Confidence; size?: number }) {
+export function ConfidenceRing({
+  confidence,
+  size = 132,
+}: {
+  confidence: Confidence;
+  size?: number;
+}) {
   const r = 52;
   const circumference = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, confidence.score));
@@ -26,12 +32,15 @@ export function ConfidenceRing({ confidence, size = 132 }: { confidence: Confide
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {/* font scales with `size` so the percentage never overflows a small ring */}
-        <span className="tnum font-bold leading-none tracking-tight" style={{ fontSize: Math.round(size * 0.26) }}>
+        <span
+          className="leading-none font-bold tracking-tight tnum"
+          style={{ fontSize: Math.round(size * 0.26) }}
+        >
           {Math.round(pct * 100)}%
         </span>
         {showLabel && (
           <span
-            className={`mt-1 font-semibold uppercase tracking-wider ${tone.text}`}
+            className={`mt-1 font-semibold tracking-wider uppercase ${tone.text}`}
             style={{ fontSize: Math.round(size * 0.08) }}
           >
             {levelLabel[confidence.level]}

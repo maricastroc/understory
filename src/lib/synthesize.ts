@@ -9,7 +9,9 @@ const narrativeSchema = z.object({
     .describe("Prose explanation of WHY the code exists/changed, in the question's language."),
   citations: z
     .array(z.string())
-    .describe("Exact artifact ids the answer relies on, e.g. 'commit:c038fb3'. Only ids from the evidence."),
+    .describe(
+      "Exact artifact ids the answer relies on, e.g. 'commit:c038fb3'. Only ids from the evidence.",
+    ),
   recorded: z
     .boolean()
     .describe("true if the evidence genuinely explains the why; false = honest abstention."),

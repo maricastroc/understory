@@ -15,7 +15,7 @@ function Card({
     <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-[0_1px_2px_rgba(20,22,30,0.04)]">
       <div className="flex items-center gap-2 border-b border-line px-4 py-3 text-ink-3">
         {icon}
-        <span className="text-[11px] font-semibold uppercase tracking-[0.07em]">{title}</span>
+        <span className="text-[11px] font-semibold tracking-[0.07em] uppercase">{title}</span>
       </div>
       <div className="p-4">{children}</div>
     </div>
@@ -43,7 +43,9 @@ function Provenance({ narrative }: { narrative: VerifiedNarrative }) {
 
   return (
     <>
-      <div className={`text-[15px] font-semibold ${narrative.grounded ? "text-good" : "text-crit"}`}>
+      <div
+        className={`text-[15px] font-semibold ${narrative.grounded ? "text-good" : "text-crit"}`}
+      >
         {narrative.grounded
           ? "All citations grounded"
           : `${narrative.unknownCitations.length} fabricated citation${narrative.unknownCitations.length > 1 ? "s" : ""}`}
@@ -61,10 +63,13 @@ function Provenance({ narrative }: { narrative: VerifiedNarrative }) {
                 <span className="size-2 rounded-[2px]" style={{ background: b.color }} />
                 {b.label}
               </span>
-              <span className="tnum font-semibold">{b.n}</span>
+              <span className="font-semibold tnum">{b.n}</span>
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-inset">
-              <span className="block h-full rounded-full" style={{ width: pct(b.n), background: b.color }} />
+              <span
+                className="block h-full rounded-full"
+                style={{ width: pct(b.n), background: b.color }}
+              />
             </div>
           </div>
         ))}
@@ -110,13 +115,20 @@ function RailContent({ result }: { result: DigResult }) {
     <>
       <Card icon={<Repo className="size-[15px]" />} title="Repository">
         <div className="flex items-center gap-2 text-[14px] font-semibold tracking-tight">
-          {ev.repo.remoteUrl ? <Repo className="size-3.5 text-ink-3" /> : <Lock className="size-3.5 text-ink-3" />}
+          {ev.repo.remoteUrl ? (
+            <Repo className="size-3.5 text-ink-3" />
+          ) : (
+            <Lock className="size-3.5 text-ink-3" />
+          )}
           <span className="truncate font-mono">{repoName}</span>
         </div>
         <div className="mt-3">
           <MetaRow k="Branch" v={ev.repo.branch ?? "—"} mono />
           <MetaRow k="Location" v={loc} mono />
-          <MetaRow k="Commits on this line" v={<span className="tnum">{ev.artifacts.length}</span>} />
+          <MetaRow
+            k="Commits on this line"
+            v={<span className="tnum">{ev.artifacts.length}</span>}
+          />
           <MetaRow k="Contributors" v={<span className="tnum">{people.length}</span>} />
           {ev.repo.remoteUrl && (
             <MetaRow
@@ -149,7 +161,7 @@ function RailContent({ result }: { result: DigResult }) {
               <div key={name} className="flex items-center gap-2.5">
                 <Avatar name={name} size={28} />
                 <span className="text-[12.5px] font-semibold text-ink">{name}</span>
-                <span className="tnum ml-auto font-mono text-[11px] text-ink-3">
+                <span className="ml-auto font-mono text-[11px] text-ink-3 tnum">
                   {n} commit{n !== 1 ? "s" : ""}
                 </span>
               </div>

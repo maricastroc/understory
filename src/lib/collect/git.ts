@@ -104,10 +104,7 @@ export function commitToArtifact(c: GitCommit, repo: RepoRef): Artifact {
   };
 }
 
-export async function introducingCommits(
-  repoPath: string,
-  loc: CodeLocation,
-): Promise<Artifact[]> {
+export async function introducingCommits(repoPath: string, loc: CodeLocation): Promise<Artifact[]> {
   const repo = await resolveRepo(repoPath);
   const commits = await lineHistory(repoPath, loc);
   return commits.map((c) => commitToArtifact(c, repo));

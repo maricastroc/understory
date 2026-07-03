@@ -43,11 +43,15 @@ export async function resolveRepoInput(input: string): Promise<ResolvedRepo> {
     const job = (async (): Promise<ResolvedRepo> => {
       const depth = process.env.CLONE_DEPTH ?? "150";
       try {
-        await exec("git", ["clone", "--depth", depth, "--single-branch", "--no-tags", remote.url, dir], {
-          env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
-          timeout: 110_000,
-          maxBuffer: 64 * 1024 * 1024,
-        });
+        await exec(
+          "git",
+          ["clone", "--depth", depth, "--single-branch", "--no-tags", remote.url, dir],
+          {
+            env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+            timeout: 110_000,
+            maxBuffer: 64 * 1024 * 1024,
+          },
+        );
       } catch (e) {
         await rm(dir, { recursive: true, force: true }).catch(() => {});
         const err = e as { killed?: boolean; message?: string };
@@ -57,7 +61,8 @@ export async function resolveRepoInput(input: string): Promise<ResolvedRepo> {
             `Cloning ${remote.url} timed out (>110s). It may be a very large repo — try a smaller one, or clone it locally and pass the path.`,
           );
         }
-        const auth = /authentication|denied|not found|403|could not read|repository not found/i.test(msg);
+        const auth =
+          /authentication|denied|not found|403|could not read|repository not found/i.test(msg);
         throw new Error(
           `Could not clone ${remote.url}. ` +
             (auth
