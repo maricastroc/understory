@@ -42,6 +42,17 @@ export async function POST(req: Request) {
         });
       }
 
+      // A github.com URL that didn't parse to owner/repo (e.g. a user/org page) —
+      // clarify instead of falling through to a clone that can't work on serverless.
+      if (/^https?:\/\/github\.com\//i.test(repo)) {
+        return NextResponse.json(
+          {
+            error: `"${repo}" points to a GitHub user or org, not a repository. Use a full repo URL like https://github.com/owner/repo (or the shorthand owner/repo).`,
+          },
+          { status: 400 },
+        );
+      }
+
       const resolved = await resolveRepoInput(repo);
       if (!(await isGitRepo(resolved.path))) {
         return NextResponse.json({ error: `Not a git repository: ${repo}` }, { status: 400 });

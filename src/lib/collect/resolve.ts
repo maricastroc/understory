@@ -54,8 +54,13 @@ export async function resolveRepoInput(input: string): Promise<ResolvedRepo> {
         );
       } catch (e) {
         await rm(dir, { recursive: true, force: true }).catch(() => {});
-        const err = e as { killed?: boolean; message?: string };
+        const err = e as { killed?: boolean; code?: string; message?: string };
         const msg = err.message ?? String(e);
+        if (err.code === "ENOENT" || /\bENOENT\b/.test(msg)) {
+          throw new Error(
+            "Git isn't available in this environment, so cloning by URL isn't supported here. Enter a GitHub repo as `owner/repo` or a full `https://github.com/owner/repo` URL instead.",
+          );
+        }
         if (err.killed || /ETIMEDOUT|timed out/i.test(msg)) {
           throw new Error(
             `Cloning ${remote.url} timed out (>110s). It may be a very large repo — try a smaller one, or clone it locally and pass the path.`,
