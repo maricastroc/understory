@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { AccountMenu } from "../AccountMenu";
 import { basename } from "../format";
-import { Github, Logo, Menu, Plus, Search, User } from "../icons";
-import { Avatar } from "../ui";
-import { type AuthUser, authEnabled } from "./use-auth";
+import { Logo, Menu, Plus, Search } from "../icons";
+import { type AuthUser } from "./use-auth";
 
 export function Header({
   repoPath,
@@ -23,8 +23,6 @@ export function Header({
   user?: AuthUser | null;
 }) {
   const searchRef = useRef<HTMLInputElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -32,17 +30,9 @@ export function Header({
         e.preventDefault();
         searchRef.current?.focus();
       }
-      if (e.key === "Escape") setMenuOpen(false);
-    }
-    function onClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
     }
     window.addEventListener("keydown", onKey);
-    window.addEventListener("mousedown", onClick);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("mousedown", onClick);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   return (
@@ -100,49 +90,11 @@ export function Header({
           <span className="hidden sm:inline">New investigation</span>
         </button>
 
-        {user ? (
-          <div className="relative" ref={menuRef}>
-            <button
-              type="button"
-              aria-label="Account menu"
-              onClick={() => setMenuOpen((o) => !o)}
-              className="flex cursor-pointer items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
-            >
-              <Avatar name={user.name} src={user.avatarUrl} size={28} />
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 z-30 mt-2 w-52 overflow-hidden rounded-[10px] border border-line bg-surface shadow-panel">
-                <div className="border-b border-line px-3.5 py-3">
-                  <div className="truncate text-[13px] font-semibold text-ink">{user.name}</div>
-                  <div className="truncate font-mono text-[11.5px] text-ink-3">@{user.login}</div>
-                </div>
-                <form action="/api/auth/logout" method="post">
-                  <button
-                    type="submit"
-                    className="w-full cursor-pointer px-3.5 py-2.5 text-left text-[13px] font-medium text-ink-2 transition-colors hover:bg-inset hover:text-ink"
-                  >
-                    Sign out
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-        ) : authEnabled ? (
-          <a
-            href="/api/auth/login"
-            className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border border-line-2 bg-surface px-3 text-[13px] font-medium text-ink transition-colors hover:bg-inset"
-          >
-            <Github className="size-4" />
-            Sign in
-          </a>
-        ) : (
-          <span
-            title="Not signed in"
-            className="grid size-7 place-items-center rounded-full border border-line-2 bg-inset text-ink-3"
-          >
-            <User className="size-4" />
-          </span>
-        )}
+        <AccountMenu
+          user={user ?? null}
+          signInClassName="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border border-line-2 bg-surface px-3 text-[13px] font-medium text-ink transition-colors hover:bg-inset"
+          showPlaceholder
+        />
       </div>
     </header>
   );
