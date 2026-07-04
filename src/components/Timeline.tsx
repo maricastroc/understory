@@ -38,7 +38,7 @@ export function Timeline({
           {artifacts.map((a, i) => {
             const isLast = i === last;
             const cited = citedIds.has(a.id);
-      
+
             const belowOnChain = i >= firstCited && i < lastCited && firstCited >= 0;
             const onChainSpan = firstCited >= 0 && i >= firstCited && i <= lastCited;
 

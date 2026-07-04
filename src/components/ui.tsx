@@ -46,7 +46,19 @@ export function Pill({
 
 const AVATAR_BG = ["#8A5A44", "#4B57D6", "#3F6B58", "#6B718A", "#9A6A2E", "#5B5F97"];
 
-export function Avatar({ name, size = 28 }: { name: string; size?: number }) {
+export function Avatar({ name, src, size = 28 }: { name: string; src?: string; size?: number }) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={name}
+        width={size}
+        height={size}
+        className="shrink-0 rounded-full object-cover"
+      />
+    );
+  }
   const initials =
     name
       .split(/\s+/)

@@ -1,12 +1,3 @@
-/**
- * [2]+[3] Collection seam.
- *
- * `collect()` turns a question about a place in the code into Evidence.
- * A GitHub repo (URL / owner-repo) is read via the GitHub API — no clone;
- * a local path is read with git on disk. Both produce the same Evidence shape,
- * so synthesize/verify/UI don't care which source it came from.
- */
-
 import type { Artifact, CodeLocation, Evidence, RepoRef } from "../types";
 import { commitToArtifact, isGitRepo, lineHistory, resolveRepo } from "./git";
 import {
@@ -20,13 +11,11 @@ import {
 } from "./github";
 
 export type CollectInput = {
-  /** GitHub URL / owner-repo, or a local path to a clone. */
   repoPath: string;
   question: string;
   location: CodeLocation;
 };
 
-/** Gather all evidence for one question. */
 export async function collect(input: CollectInput): Promise<Evidence> {
   const { repoPath, question, location } = input;
 
@@ -42,8 +31,6 @@ export async function collect(input: CollectInput): Promise<Evidence> {
   return { question, repo, location, artifacts };
 }
 
-/** [2] GitHub API path: blame the line, turn its commit(s) into Artifacts.
- *  (PR/issue/review enrichment plugs in here next.) */
 async function collectFromGitHub(
   owner: string,
   repo: string,
@@ -144,7 +131,6 @@ function reviewArtifact(pr: AssociatedPr, rv: PrReview, i: number): Artifact {
   };
 }
 
-/** Parse "src/billing/charge.ts:8" or "...:8-12" into a CodeLocation. */
 export function parseLocation(raw: string): CodeLocation {
   const at = raw.lastIndexOf(":");
   if (at === -1) {

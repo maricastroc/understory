@@ -29,12 +29,16 @@ export function CodeViewer({
       <div className="flex items-center gap-2 border-b border-line bg-surface-2 px-3.5 py-2">
         <FileIcon className="size-3.5 text-ink-3" />
         <span className="font-mono text-[12.5px] text-ink">{file.path}</span>
-        <span className="ml-auto text-[11px] text-ink-3">
-          {file.lines.length} lines · click a line, shift-click for a range
+        <span className="ml-auto flex items-center gap-1.5 text-[11px] text-ink-2">
+          {file.lines.length} lines · click a line ·
+          <kbd className="rounded border border-line-2 bg-surface px-1 font-mono text-[10px] leading-[1.4] text-ink-2">
+            ⇧
+          </kbd>
+          shift-click for a range
         </span>
       </div>
 
-      <div className="max-h-[440px] overflow-auto">
+      <div className="max-h-110 overflow-auto">
         <ol className="py-1 select-none">
           {file.lines.map((ln, i) => {
             const n = i + 1;

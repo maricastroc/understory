@@ -6,6 +6,7 @@ import { RightRail } from "../RightRail";
 import { Sidebar } from "../Sidebar";
 import { Composer } from "../composer/Composer";
 import { useRepo } from "../composer/use-repo";
+import { useAuth } from "./use-auth";
 import { CaseView } from "./CaseView";
 import { Header } from "./Header";
 import { LoadingCard } from "./LoadingCard";
@@ -31,9 +32,9 @@ export function Investigator() {
   } = useInvestigation();
 
   const repo = useRepo();
+  const user = useAuth();
   const [caseFilter, setCaseFilter] = useState("");
   const [token, setToken] = useState("");
-  const user = null;
 
   useEffect(() => {
     void repo.open(repoPath);

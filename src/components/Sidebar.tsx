@@ -1,5 +1,6 @@
 import type { Confidence } from "@/lib/types";
 import { Close, User } from "./icons";
+import type { AuthUser } from "./investigator/use-auth";
 import { Avatar } from "./ui";
 
 export type CaseItem = {
@@ -24,7 +25,7 @@ export function Sidebar({
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
   filtering?: boolean;
-  user?: { name: string; role?: string } | null;
+  user?: AuthUser | null;
 }) {
   return (
     <aside className="hidden w-67 shrink-0 flex-col border-r border-line-2 bg-surface-2 md:flex">
@@ -96,12 +97,12 @@ export function Sidebar({
       <div className="flex items-center gap-2.5 border-t border-line px-4 py-3">
         {user ? (
           <>
-            <Avatar name={user.name} size={26} />
-            <span className="text-[12.5px] leading-tight font-semibold">
-              {user.name}
-              {user.role && (
-                <span className="block text-[11px] font-normal text-ink-3">{user.role}</span>
-              )}
+            <Avatar name={user.name} src={user.avatarUrl} size={26} />
+            <span className="min-w-0 text-[12.5px] leading-tight font-semibold">
+              <span className="block truncate">{user.name}</span>
+              <span className="block truncate font-mono text-[11px] font-normal text-ink-3">
+                @{user.login}
+              </span>
             </span>
           </>
         ) : (

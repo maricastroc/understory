@@ -282,7 +282,6 @@ query Blame($owner:String!, $repo:String!, $ref:String!, $path:String!) {
   }
 }`;
 
-/** Fetch PR/review/issue enrichment for a bounded set of commits, one aliased lookup each. */
 async function enrichCommits(
   owner: string,
   repo: string,

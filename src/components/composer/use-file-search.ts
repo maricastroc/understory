@@ -23,7 +23,7 @@ export function useFileSearch(
       }
       return;
     }
-    
+
     const isDefault = q.length < 2;
     const t = setTimeout(
       async () => {
