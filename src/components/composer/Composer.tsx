@@ -43,6 +43,12 @@ export function Composer({
     void viewer.open(path, token.trim() || undefined);
   }
 
+  // Clearing the Find input drops the open file with it — no orphaned code block.
+  function editFind(v: string) {
+    search.setQuery(v);
+    if (v.trim() === "" && viewer.file) viewer.reset();
+  }
+
   function run() {
     if (!viewer.file || !viewer.selectedLine) return;
     onInvestigate({
@@ -83,7 +89,7 @@ export function Composer({
         />
         <FileFinder
           query={search.query}
-          setQuery={search.setQuery}
+          setQuery={editFind}
           results={search.results}
           searching={search.searching}
           enabled={repo.ready}

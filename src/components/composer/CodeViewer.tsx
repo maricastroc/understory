@@ -1,8 +1,5 @@
-import { FileIcon } from "../icons";
+import { FileIcon, Pencil } from "../icons";
 import type { OpenFile } from "./use-file-viewer";
-
-const field =
-  "h-9 rounded-md border border-line bg-inset px-3 text-[13px] text-ink outline-none placeholder:text-ink-3 focus:border-accent focus:bg-surface";
 
 export function CodeViewer({
   file,
@@ -62,25 +59,40 @@ export function CodeViewer({
       </div>
 
       {selectedLine && (
-        <div className="flex flex-col gap-2 border-t border-line bg-surface-2 p-3 sm:flex-row sm:items-center">
-          <span className="shrink-0 font-mono text-[12px] text-ink-2">
-            {file.path}:{selectedLine}
-          </span>
-          <input
-            aria-label="Question"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && onRun()}
-            placeholder="Why is this line the way it is?"
-            className={`${field} flex-1`}
-          />
-          <button
-            type="button"
-            onClick={onRun}
-            className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-md bg-accent px-4 text-[13px] font-medium text-white transition-colors hover:bg-accent-press"
+        <div className="flex flex-col gap-2 border-t border-line bg-surface-2 p-3">
+          <label
+            htmlFor="investigate-question"
+            className="text-[11px] font-semibold tracking-[0.06em] text-ink-2 uppercase"
           >
-            Investigate this line
-          </button>
+            Question
+          </label>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Pencil className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-3" />
+              <input
+                id="investigate-question"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && onRun()}
+                placeholder="Ask about this line…"
+                className="h-11 w-full rounded-md border border-line-2 bg-surface pr-3 pl-9 text-[14px] text-ink transition-[border-color,box-shadow] outline-none placeholder:text-ink-3 focus:border-accent/50 focus:ring-2 focus:ring-accent/15"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onRun}
+              className="inline-flex h-11 shrink-0 cursor-pointer items-center justify-center rounded-md bg-accent px-5 text-[13px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
+            >
+              Investigate this line
+            </button>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[11.5px] text-ink-3">
+            <span>You can edit this question before investigating.</span>
+            <span className="inline-flex items-center gap-1.5 font-mono">
+              <FileIcon className="size-3.5" />
+              {file.path}:{selectedLine}
+            </span>
+          </div>
         </div>
       )}
     </div>
