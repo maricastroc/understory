@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run seed:demo && next build",
+    "build": "prisma generate && npm run seed:demo && next build",
     "start": "next start",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -16,9 +19,11 @@
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.3",
+    "@prisma/client": "^6.19.3",
     "ai": "^7.0.11",
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
+    "prisma": "^6.19.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "zod": "^4.4.3"

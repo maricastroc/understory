@@ -14,6 +14,7 @@ import { LoadingCard } from "./LoadingCard";
 import { useInvestigation } from "./use-investigation";
 
 export function Investigator() {
+  const user = useAuth();
   const {
     repoPath,
     setRepoPath,
@@ -30,10 +31,9 @@ export function Investigator() {
     backToCode,
     newInvestigation,
     removeCase,
-  } = useInvestigation();
+  } = useInvestigation(user);
 
   const repo = useRepo();
-  const user = useAuth();
   const [caseFilter, setCaseFilter] = useState("");
   const [token, setToken] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);

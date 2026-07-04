@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Github, Logo } from "@/components/icons";
 
+const authEnabled = !!process.env.NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_ID;
+
 export function LandingHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-bg/85 backdrop-blur-md">
@@ -15,13 +17,15 @@ export function LandingHeader() {
           {`// code archaeology`}
         </span>
         <div className="ml-auto flex items-center gap-2">
-          <Link
-            href="/app"
-            className="hidden h-9 items-center gap-2 rounded-md border border-line-2 bg-surface px-3.5 text-[13px] font-medium text-ink transition-colors hover:bg-inset sm:inline-flex"
-          >
-            <Github className="size-4" />
-            Sign in with GitHub
-          </Link>
+          {authEnabled && (
+            <a
+              href="/api/auth/login"
+              className="hidden h-9 items-center gap-2 rounded-md border border-line-2 bg-surface px-3.5 text-[13px] font-medium text-ink transition-colors hover:bg-inset sm:inline-flex"
+            >
+              <Github className="size-4" />
+              Sign in
+            </a>
+          )}
           <Link
             href="/app"
             className="inline-flex h-9 items-center rounded-md bg-accent px-3.5 text-[13px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"

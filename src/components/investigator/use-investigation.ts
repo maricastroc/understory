@@ -1,16 +1,28 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { DigResult, InvestigateInput } from "@/lib/types";
 import type { CaseItem } from "../sidebar/case-item";
+import type { AuthUser } from "./use-auth";
 
 const DEFAULT_REPO = process.env.NEXT_PUBLIC_DEFAULT_REPO || ".demo/payments-service";
+const FIRST_CASE = 2049;
 
 export type Form = InvestigateInput;
 export type Entry = { caseId: string; form: Form; result: DigResult };
 export type View = "browse" | "case";
 
-export function useInvestigation() {
+type SavedInvestigation = {
+  caseId: string;
+  question: string;
+  repoPath: string;
+  location: string;
+  result: DigResult;
+};
+
+const caseNumber = (caseId: string) => Number.parseInt(caseId.replace(/^GI-/, ""), 10) || 0;
+
+export function useInvestigation(user: AuthUser | null) {
   const [repoPath, setRepoPath] = useState(DEFAULT_REPO);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +30,32 @@ export function useInvestigation() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [view, setView] = useState<View>("browse");
   const [resetKey, setResetKey] = useState(0);
-  const counter = useRef(2049);
+  const counter = useRef(FIRST_CASE);
+
+  // Signed-in users get their saved case files back; guests get an empty list
+  // (the endpoint returns nothing without a session) and keep an in-memory session.
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/investigations")
+      .then((r) => r.json())
+      .then((d: { investigations?: SavedInvestigation[] }) => {
+        if (!alive) return;
+        const saved = d.investigations ?? [];
+        setHistory(
+          saved.map((s) => ({
+            caseId: s.caseId,
+            form: { repoPath: s.repoPath, location: s.location, question: s.question },
+            result: s.result,
+          })),
+        );
+        const maxNum = saved.reduce((m, s) => Math.max(m, caseNumber(s.caseId)), 0);
+        counter.current = Math.max(FIRST_CASE, maxNum + 1);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [user]);
 
   const current = history.find((e) => e.caseId === activeId) ?? null;
 
@@ -45,6 +82,19 @@ export function useInvestigation() {
       const caseId = `GI-${counter.current++}`;
       setHistory((h) => [{ caseId, form: input, result: data }, ...h]);
       setActiveId(caseId);
+      if (user) {
+        void fetch("/api/investigations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            caseId,
+            question: input.question,
+            repoPath: input.repoPath,
+            location: input.location,
+            result: data,
+          }),
+        }).catch(() => {});
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setView("browse");
@@ -75,6 +125,11 @@ export function useInvestigation() {
 
   function removeCase(id: string) {
     setHistory((h) => h.filter((e) => e.caseId !== id));
+    if (user) {
+      void fetch(`/api/investigations/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(
+        () => {},
+      );
+    }
     if (activeId === id) {
       setActiveId(null);
       setView("browse");

@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// One saved investigation, scoped to the GitHub login of the session that ran it.
+// `result` holds the full DigResult so a case reopens exactly as it was concluded.
+model Investigation {
+  id        String   @id @default(cuid())
+  userLogin String
+  caseId    String
+  question  String
+  repoPath  String
+  location  String
+  result    Json
+  createdAt DateTime @default(now())
+
+  @@unique([userLogin, caseId])
+  @@index([userLogin, createdAt])
+}
