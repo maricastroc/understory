@@ -22,7 +22,7 @@ const cyan = wrap("36");
 const gray = wrap("90");
 
 const RULE = gray("─".repeat(66));
-const letter = (i: number) => String.fromCharCode(65 + i); // 0 -> A
+const letter = (i: number) => String.fromCharCode(65 + i);
 
 function usage(): never {
   console.error(
@@ -55,7 +55,6 @@ function locStr(ev: Evidence): string {
   return endLine !== startLine ? `${file}:${startLine}-${endLine}` : `${file}:${startLine}`;
 }
 
-// ---- collection report ----------------------------------------------------
 function printArtifact(a: Artifact, i: number, isLast: boolean) {
   const who = a.author ? a.author.name + (a.author.email ? gray(` <${a.author.email}>`) : "") : "";
   const owner = isLast ? mag("  ← currently owns this line") : "";

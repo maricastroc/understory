@@ -32,9 +32,7 @@ export function Investigator() {
 
   const repo = useRepo();
   const [caseFilter, setCaseFilter] = useState("");
-  // A personal access token for private repos — held in memory only, never persisted.
   const [token, setToken] = useState("");
-  // No auth yet: signed-out default. When login lands, populate this from the session.
   const user = null;
 
   useEffect(() => {
@@ -42,7 +40,6 @@ export function Investigator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // A fresh start: clear the resolved repo and reset the composer to a blank form.
   function handleNewInvestigation() {
     setRepoPath("");
     setToken("");

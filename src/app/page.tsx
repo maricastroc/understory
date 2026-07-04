@@ -74,7 +74,6 @@ const sampleConfidence = {
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* nav */}
       <header className="sticky top-0 z-20 border-b border-line bg-bg/85 backdrop-blur-md">
         <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-6">
           <Logo className="size-6 text-accent" />
@@ -227,7 +226,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* how it works */}
       <section id="how" className="mx-auto max-w-6xl px-6 py-20">
         <p className="font-mono text-[12px] text-accent-press">{`// the method`}</p>
         <h2 className="mt-3 max-w-[22ch] text-[27px] font-semibold tracking-[-0.015em] text-balance">
