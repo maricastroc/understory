@@ -23,10 +23,10 @@ export function Timeline({
         meta="PR → commit → review → merge — the chain that shaped this line, oldest first"
       />
 
-      <div className="rounded-[12px] border border-line bg-surface px-5 py-5 shadow-card">
+      <div className="rounded-xl border border-line bg-surface px-5 py-5 shadow-card">
         {citedCount > 0 && (
           <div className="mb-4 flex items-center gap-2 border-b border-line pb-3 text-[12px] text-ink-2">
-            <span className="inline-block h-[3px] w-6 rounded-full bg-accent" />
+            <span className="inline-block h-0.75 w-6 rounded-full bg-accent" />
             <span>
               <b className="font-semibold text-ink">{citedCount}</b> of {artifacts.length} on the
               provenance chain
@@ -38,7 +38,7 @@ export function Timeline({
           {artifacts.map((a, i) => {
             const isLast = i === last;
             const cited = citedIds.has(a.id);
-           
+      
             const belowOnChain = i >= firstCited && i < lastCited && firstCited >= 0;
             const onChainSpan = firstCited >= 0 && i >= firstCited && i <= lastCited;
 
@@ -59,7 +59,7 @@ export function Timeline({
                 <div className="relative flex w-7 shrink-0 justify-center">
                   {!isLast && (
                     <span
-                      className={`absolute top-7 left-1/2 h-[calc(100%-1.75rem)] w-[2px] -translate-x-1/2 rounded-full ${
+                      className={`absolute top-7 left-1/2 h-[calc(100%-1.75rem)] w-0.5 -translate-x-1/2 rounded-full ${
                         belowOnChain ? "bg-accent/45" : "bg-line-2"
                       }`}
                     />
@@ -77,7 +77,7 @@ export function Timeline({
                       {kindLabel[a.kind]}
                     </span>
                     {cited && (
-                      <span className="inline-flex h-[17px] items-center rounded-full bg-accent-tint px-1.5 text-[10px] font-semibold tracking-wide text-accent-press uppercase">
+                      <span className="inline-flex h-4.25 items-center rounded-full bg-accent-tint px-1.5 text-[10px] font-semibold tracking-wide text-accent-press uppercase">
                         On chain
                       </span>
                     )}

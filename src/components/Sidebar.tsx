@@ -27,7 +27,7 @@ export function Sidebar({
   user?: { name: string; role?: string } | null;
 }) {
   return (
-    <aside className="hidden w-[268px] shrink-0 flex-col border-r border-line-2 bg-surface-2 md:flex">
+    <aside className="hidden w-67 shrink-0 flex-col border-r border-line-2 bg-surface-2 md:flex">
       <div className="flex items-center justify-between px-4 py-4">
         <span className="text-[11px] font-semibold tracking-[0.07em] text-ink-2 uppercase">
           Investigations
@@ -61,7 +61,7 @@ export function Sidebar({
                     onClick={() => onSelect(it.caseId)}
                     className="grid w-full cursor-pointer grid-cols-[auto_1fr] gap-2.5 rounded-md px-2.5 py-2 text-left"
                   >
-                    <span className={`mt-[5px] size-2 shrink-0 rounded-full ${dot}`} />
+                    <span className={`mt-1.25 size-2 shrink-0 rounded-full ${dot}`} />
                     <span className="min-w-0 pr-5">
                       <span
                         className={`line-clamp-2 text-[13px] leading-snug font-medium ${
@@ -106,7 +106,7 @@ export function Sidebar({
           </>
         ) : (
           <>
-            <span className="grid size-[26px] place-items-center rounded-full border border-line-2 bg-inset text-ink-3">
+            <span className="grid size-6.5 place-items-center rounded-full border border-line-2 bg-inset text-ink-3">
               <User className="size-3.5" />
             </span>
             <span className="text-[12.5px] leading-tight font-semibold text-ink-2">

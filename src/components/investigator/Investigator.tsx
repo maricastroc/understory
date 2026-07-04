@@ -77,7 +77,7 @@ export function Investigator() {
         />
 
         <main className="min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-[1080px] px-8 py-6">
+          <div className="mx-auto max-w-270 px-8 py-6">
             {error && browsing && (
               <div className="mb-4 flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-4 text-[13px] text-crit">
                 <Alert className="mt-0.5 size-4 shrink-0" />
@@ -85,7 +85,6 @@ export function Investigator() {
               </div>
             )}
 
-            {/* Composer stays mounted so "back to code" preserves the open file. */}
             <div className={browsing ? "" : "hidden"}>
               <Composer
                 key={resetKey}

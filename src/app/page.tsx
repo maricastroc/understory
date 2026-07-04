@@ -137,10 +137,8 @@ export default function Home() {
           </a>
         </div>
 
-        {/* the investigation — product as hero */}
         <div className="mt-14 grid grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-stretch">
-          {/* code + blame */}
-          <div className="overflow-hidden rounded-t-[12px] border border-line bg-surface shadow-[0_10px_40px_rgba(20,22,30,0.06)] lg:rounded-l-[12px] lg:rounded-tr-none lg:border-r-0">
+          <div className="overflow-hidden rounded-t-xl border border-line bg-surface shadow-[0_10px_40px_rgba(20,22,30,0.06)] lg:rounded-l-xl lg:rounded-tr-none lg:border-r-0">
             <div className="flex items-center gap-2 border-b border-line bg-surface-2 px-4 py-2.5 font-mono text-[12px] text-ink-3">
               <span className="text-ink-2">payments-service</span>
               <span>/</span>
@@ -169,10 +167,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* verdict */}
-          <div className="flex flex-col rounded-b-[12px] border border-line bg-surface p-5 shadow-[0_10px_40px_rgba(20,22,30,0.06)] lg:rounded-r-[12px] lg:rounded-bl-none">
+          <div className="flex flex-col rounded-b-xl border border-line bg-surface p-5 shadow-[0_10px_40px_rgba(20,22,30,0.06)] lg:rounded-r-xl lg:rounded-bl-none">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-[22px] items-center gap-1.5 rounded-full bg-good-tint px-2.5 text-[11.5px] font-semibold text-good">
+              <span className="inline-flex h-5.5 items-center gap-1.5 rounded-full bg-good-tint px-2.5 text-[11.5px] font-semibold text-good">
                 <span className="size-1.5 rounded-full bg-good" />
                 Solved
               </span>
@@ -269,7 +266,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* footer */}
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 font-mono text-[12px] text-ink-3 sm:flex-row">
           <div className="flex items-center gap-2">
