@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { basename } from "../format";
-import { Github, Logo, Plus, Search, User } from "../icons";
+import { Github, Logo, Menu, Plus, Search, User } from "../icons";
 import { Avatar } from "../ui";
 import { type AuthUser, authEnabled } from "./use-auth";
 
@@ -12,12 +12,14 @@ export function Header({
   filter,
   onFilterChange,
   onNewInvestigation,
+  onMenuClick,
   user,
 }: {
   repoPath: string;
   filter: string;
   onFilterChange: (v: string) => void;
   onNewInvestigation: () => void;
+  onMenuClick?: () => void;
   user?: AuthUser | null;
 }) {
   const searchRef = useRef<HTMLInputElement>(null);
@@ -44,10 +46,23 @@ export function Header({
   }, []);
 
   return (
-    <header className="flex h-13 shrink-0 items-center gap-4 border-b border-line-2 bg-surface px-4">
-      <Link href="/" className="flex items-center gap-2.5 pr-2">
-        <Logo className="size-6 text-accent" />
-        <span className="text-[13.5px] font-semibold tracking-tight">Git Investigator</span>
+    <header className="flex h-13 shrink-0 items-center gap-2 border-b border-line-2 bg-surface px-3 sm:gap-4 sm:px-4">
+      {onMenuClick && (
+        <button
+          type="button"
+          aria-label="Open investigations menu"
+          onClick={onMenuClick}
+          className="-ml-1 grid size-9 shrink-0 cursor-pointer place-items-center rounded-md text-ink-2 transition-colors hover:bg-inset hover:text-ink md:hidden"
+        >
+          <Menu className="size-5" />
+        </button>
+      )}
+
+      <Link href="/" className="flex items-center pr-1 sm:pr-2">
+        <Logo className="size-6.5 shrink-0 text-accent" />
+        <span className="text-[15px] font-semibold tracking-tight sm:text-[16px]">
+          Git <span className="text-accent">Investigator</span>
+        </span>
       </Link>
 
       <div className="hidden items-center gap-2 rounded-md border border-line-2 px-2.5 py-1.5 md:flex">
@@ -78,10 +93,11 @@ export function Header({
       <div className="ml-auto flex items-center gap-3">
         <button
           onClick={onNewInvestigation}
-          className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md bg-accent px-3 text-[13px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
+          aria-label="New investigation"
+          className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md bg-accent px-2.5 text-[13px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press sm:px-3"
         >
           <Plus className="size-3.5" />
-          New investigation
+          <span className="hidden sm:inline">New investigation</span>
         </button>
 
         {user ? (

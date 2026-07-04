@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { DigResult, InvestigateInput } from "@/lib/types";
-import type { CaseItem } from "../Sidebar";
+import type { CaseItem } from "../sidebar/case-item";
 
 const DEFAULT_REPO = process.env.NEXT_PUBLIC_DEFAULT_REPO || ".demo/payments-service";
 

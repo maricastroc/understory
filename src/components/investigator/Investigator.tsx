@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Alert } from "../icons";
-import { RightRail } from "../RightRail";
-import { Sidebar } from "../Sidebar";
+import { RightRail } from "../rail/RightRail";
+import { MobileSidebar } from "../sidebar/MobileSidebar";
+import { Sidebar } from "../sidebar/Sidebar";
 import { Composer } from "../composer/Composer";
 import { useRepo } from "../composer/use-repo";
 import { useAuth } from "./use-auth";
@@ -35,6 +36,7 @@ export function Investigator() {
   const user = useAuth();
   const [caseFilter, setCaseFilter] = useState("");
   const [token, setToken] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     void repo.open(repoPath);
@@ -64,6 +66,7 @@ export function Investigator() {
         filter={caseFilter}
         onFilterChange={setCaseFilter}
         onNewInvestigation={handleNewInvestigation}
+        onMenuClick={() => setMenuOpen(true)}
         user={user}
       />
 
@@ -77,8 +80,22 @@ export function Investigator() {
           user={user}
         />
 
+        <MobileSidebar
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          items={shownItems}
+          activeId={view === "case" ? activeId : null}
+          onSelect={(id) => {
+            selectCase(id);
+            setMenuOpen(false);
+          }}
+          onRemove={removeCase}
+          filtering={filterQuery.length > 0}
+          user={user}
+        />
+
         <main className="min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-270 px-8 py-6">
+          <div className="mx-auto max-w-270 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             {error && browsing && (
               <div className="mb-4 flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-4 text-[13px] text-crit">
                 <Alert className="mt-0.5 size-4 shrink-0" />

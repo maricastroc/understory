@@ -12,6 +12,7 @@ import {
   GitFork,
   GitPullRequest,
   Lock,
+  Menu,
   MessageSquare,
   Pencil,
   Plus,
@@ -31,20 +32,22 @@ type IconProps = { className?: string };
 /** The one hand-drawn mark: a magnifying glass over a commit node. */
 export function Logo({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={className}>
-      <circle cx="10" cy="10" r="6.5" stroke="currentColor" strokeWidth="1.8" />
-      <line
-        x1="15"
-        y1="15"
-        x2="21"
-        y2="21"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <circle cx="10" cy="10" r="1.9" fill="currentColor" />
-      <line x1="10" y1="4.5" x2="10" y2="8" stroke="currentColor" strokeWidth="1.6" />
-      <line x1="10" y1="12" x2="10" y2="15.5" stroke="currentColor" strokeWidth="1.6" />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={className}
+    >
+      <line x1="7" y1="2.5" x2="7" y2="21.5" strokeWidth="1.7" />
+      <circle cx="7" cy="5" r="1.5" strokeWidth="1.7" />
+      <circle cx="7" cy="19" r="1.5" strokeWidth="1.7" />
+      <path d="M7 12 h5.5 a3 3 0 0 1 3 3 v4" strokeWidth="1.7" />
+      <circle cx="15.5" cy="19" r="1.5" strokeWidth="1.7" />
+      <circle cx="7" cy="12" r="4" strokeWidth="1.6" opacity="0.4" />
+      <circle cx="7" cy="12" r="2" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -101,4 +104,5 @@ export {
   X as Close,
   ChevronRight,
   ChevronLeft,
+  Menu,
 };
