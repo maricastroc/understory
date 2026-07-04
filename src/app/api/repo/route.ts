@@ -65,10 +65,11 @@ export async function POST(req: Request) {
         branch: ref.branch ?? null,
       });
     } catch (e) {
-      return NextResponse.json(
-        { error: e instanceof Error ? e.message : String(e) },
-        { status: 400 },
-      );
+      const msg = e instanceof Error ? e.message : String(e);
+      const friendly = /\bENOENT\b/.test(msg)
+        ? "Git isn't available in this environment, so only GitHub repos work here. Use owner/repo or a full https://github.com/owner/repo URL."
+        : msg;
+      return NextResponse.json({ error: friendly }, { status: 400 });
     }
   });
 }

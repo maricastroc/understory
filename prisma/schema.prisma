@@ -3,8 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // Pooled connection for app queries (serverless-friendly).
+  url       = env("DATABASE_URL")
+  // Direct connection for migrations — Neon's pooler can't run them.
+  directUrl = env("DATABASE_DIRECT_URL")
 }
 
 // One saved investigation, scoped to the GitHub login of the session that ran it.
