@@ -131,11 +131,7 @@ function RepoRail({ meta }: { meta: RepoMeta }) {
     <>
       <Card icon={<Repo className="size-[15px]" />} title="Repository">
         <div className="flex items-center gap-2 text-[14px] font-semibold tracking-tight">
-          {meta.private ? (
-            <Lock className="size-3.5 text-ink-3" />
-          ) : (
-            <Repo className="size-3.5 text-ink-3" />
-          )}
+          {meta.private && <Lock className="size-3.5 shrink-0 text-ink-3" />}
           <span className="truncate font-mono">{meta.name}</span>
         </div>
         {meta.description && (
@@ -202,11 +198,7 @@ function RailContent({ result }: { result: DigResult }) {
     <>
       <Card icon={<Repo className="size-[15px]" />} title="Repository">
         <div className="flex items-center gap-2 text-[14px] font-semibold tracking-tight">
-          {ev.repo.remoteUrl ? (
-            <Repo className="size-3.5 text-ink-3" />
-          ) : (
-            <Lock className="size-3.5 text-ink-3" />
-          )}
+          {!ev.repo.remoteUrl && <Lock className="size-3.5 shrink-0 text-ink-3" />}
           <span className="truncate font-mono">{repoName}</span>
         </div>
         <div className="mt-3">

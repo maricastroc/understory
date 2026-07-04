@@ -97,7 +97,7 @@ export function RepoBar({
         <button
           type="button"
           onClick={() => setShowToken(true)}
-          className="flex w-full items-center gap-2 border-b border-line px-3.5 py-1.5 text-[11.5px] font-medium text-ink-3 transition-colors hover:bg-inset hover:text-ink-2"
+          className="flex w-full items-center gap-2 border-b border-line bg-accent-tint/30 px-3.5 py-2 text-[12px] font-semibold text-accent-press transition-colors hover:bg-accent-tint/60"
         >
           <Lock className="size-3.5" />
           Private repo? Add a token
