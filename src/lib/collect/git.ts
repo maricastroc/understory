@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { Artifact, CodeLocation, Person, RepoRef } from "../types";
+import { rankShallow } from "./rank";
 
 const exec = promisify(execFile);
 
@@ -108,6 +109,15 @@ export async function introducingCommits(repoPath: string, loc: CodeLocation): P
   const repo = await resolveRepo(repoPath);
   const commits = await lineHistory(repoPath, loc);
   return commits.map((c) => commitToArtifact(c, repo));
+}
+
+export async function defaultFiles(repoPath: string, limit = 5): Promise<string[]> {
+  try {
+    const files = (await git(repoPath, ["ls-files"])).split("\n").filter(Boolean);
+    return rankShallow(files, limit);
+  } catch {
+    return [];
+  }
 }
 
 export async function searchFiles(repoPath: string, query: string, limit = 25): Promise<string[]> {

@@ -20,7 +20,7 @@ export function CodeViewer({
   onRun: () => void;
 }) {
   return (
-    <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-[0_1px_2px_rgba(20,22,30,0.04)]">
+    <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-card">
       <div className="flex items-center gap-2 border-b border-line bg-surface-2 px-3.5 py-2">
         <FileIcon className="size-3.5 text-ink-3" />
         <span className="font-mono text-[12.5px] text-ink">{file.path}</span>
@@ -77,7 +77,7 @@ export function CodeViewer({
           <button
             type="button"
             onClick={onRun}
-            className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-accent px-4 text-[13px] font-medium text-white transition-colors hover:bg-accent-press"
+            className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-md bg-accent px-4 text-[13px] font-medium text-white transition-colors hover:bg-accent-press"
           >
             Investigate this line
           </button>

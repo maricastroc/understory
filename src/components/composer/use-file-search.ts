@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useFileSearch(repoPath: string, enabled: boolean, openedPath: string | undefined) {
+export function useFileSearch(
+  repoPath: string,
+  enabled: boolean,
+  openedPath: string | undefined,
+  token?: string,
+) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<string[]>([]);
   const [searching, setSearching] = useState(false);
@@ -9,42 +14,50 @@ export function useFileSearch(repoPath: string, enabled: boolean, openedPath: st
 
   useEffect(() => {
     const id = ++seq.current;
-    const t = setTimeout(async () => {
-      const q = query.trim();
-      if (!enabled || q.length < 2 || openedPath === q) {
-        if (id === seq.current) {
-          setResults([]);
-          setSearching(false);
-        }
-        return;
+    const q = query.trim();
+    // A file is open (query holds its path) — the finder list is hidden.
+    if (!enabled || openedPath === q) {
+      if (id === seq.current) {
+        setResults([]);
+        setSearching(false);
       }
-      setSearching(true);
-      try {
-        const res = await fetch(
-          `/api/files?repo=${encodeURIComponent(repoPath)}&q=${encodeURIComponent(q)}`,
-        );
-        const data = await res.json();
-        if (id !== seq.current) return;
-        if (!res.ok) {
-          setError(data.error || "Search failed");
-          setResults([]);
-        } else {
-          setError(null);
-          setResults(data.files ?? []);
+      return;
+    }
+    // Empty/short query fetches a default suggestion list; typed query searches.
+    const isDefault = q.length < 2;
+    const t = setTimeout(
+      async () => {
+        if (id === seq.current) setSearching(!isDefault);
+        try {
+          const res = await fetch(
+            `/api/files?repo=${encodeURIComponent(repoPath)}&q=${encodeURIComponent(q)}`,
+            token ? { headers: { "x-github-token": token } } : undefined,
+          );
+          const data = await res.json();
+          if (id !== seq.current) return;
+          if (!res.ok) {
+            setError(data.error || "Search failed");
+            setResults([]);
+          } else {
+            setError(null);
+            setResults(data.files ?? []);
+          }
+        } catch (e) {
+          if (id === seq.current) {
+            setError(e instanceof Error ? e.message : String(e));
+            setResults([]);
+          }
+        } finally {
+          if (id === seq.current) setSearching(false);
         }
-      } catch (e) {
-        if (id === seq.current) {
-          setError(e instanceof Error ? e.message : String(e));
-          setResults([]);
-        }
-      } finally {
-        if (id === seq.current) setSearching(false);
-      }
-    }, 220);
+      },
+      isDefault ? 0 : 220,
+    );
     return () => clearTimeout(t);
-  }, [query, repoPath, enabled, openedPath]);
+  }, [query, repoPath, enabled, openedPath, token]);
 
   function clear() {
+    setQuery("");
     setResults([]);
     setError(null);
   }

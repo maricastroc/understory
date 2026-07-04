@@ -1,3 +1,6 @@
+import { rankShallow } from "./rank";
+import { getRequestToken } from "./token-context";
+
 const API = "https://api.github.com";
 const metaCache = new Map<string, GitHubRepoMeta>();
 const treeCache = new Map<string, string[]>();
@@ -7,7 +10,9 @@ function headers(): Record<string, string> {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
   };
-  if (process.env.GITHUB_TOKEN) h.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  // Caller-supplied PAT (for private repos) wins; fall back to the server env token.
+  const token = getRequestToken() ?? process.env.GITHUB_TOKEN;
+  if (token) h.Authorization = `Bearer ${token}`;
   return h;
 }
 
@@ -37,7 +42,19 @@ export function parseGitHubRepo(input: string): { owner: string; repo: string } 
   return null;
 }
 
-export type GitHubRepoMeta = { name: string; branch: string; htmlUrl: string; private: boolean };
+export type GitHubRepoMeta = {
+  name: string;
+  branch: string;
+  htmlUrl: string;
+  private: boolean;
+  description: string | null;
+  language: string | null;
+  stars: number;
+  forks: number;
+  openIssues: number;
+  pushedAt: string | null;
+  topics: string[];
+};
 
 export async function getRepoMeta(owner: string, repo: string): Promise<GitHubRepoMeta> {
   const key = `${owner}/${repo}`;
@@ -48,12 +65,26 @@ export async function getRepoMeta(owner: string, repo: string): Promise<GitHubRe
     default_branch: string;
     html_url: string;
     private: boolean;
+    description: string | null;
+    language: string | null;
+    stargazers_count: number;
+    forks_count: number;
+    open_issues_count: number;
+    pushed_at: string | null;
+    topics?: string[];
   }>(`/repos/${owner}/${repo}`);
   const meta: GitHubRepoMeta = {
     name: d.full_name,
     branch: d.default_branch,
     htmlUrl: d.html_url,
     private: d.private,
+    description: d.description,
+    language: d.language,
+    stars: d.stargazers_count,
+    forks: d.forks_count,
+    openIssues: d.open_issues_count,
+    pushedAt: d.pushed_at,
+    topics: d.topics ?? [],
   };
   metaCache.set(key, meta);
   return meta;
@@ -69,6 +100,19 @@ async function getTree(owner: string, repo: string, branch: string): Promise<str
   const files = (d.tree ?? []).filter((t) => t.type === "blob").map((t) => t.path);
   treeCache.set(key, files);
   return files;
+}
+
+export async function defaultFilesGitHub(
+  owner: string,
+  repo: string,
+  branch: string,
+  limit = 5,
+): Promise<string[]> {
+  try {
+    return rankShallow(await getTree(owner, repo, branch), limit);
+  } catch {
+    return [];
+  }
 }
 
 export async function searchFilesGitHub(

@@ -8,7 +8,7 @@ export function useFileViewer(repoPath: string) {
   const [error, setError] = useState<string | null>(null);
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
 
-  async function open(path: string) {
+  async function open(path: string, token?: string) {
     setLoading(true);
     setError(null);
     setFile(null);
@@ -16,6 +16,7 @@ export function useFileViewer(repoPath: string) {
     try {
       const res = await fetch(
         `/api/file?repo=${encodeURIComponent(repoPath)}&path=${encodeURIComponent(path)}`,
+        token ? { headers: { "x-github-token": token } } : undefined,
       );
       const data = await res.json();
       if (!res.ok) {
