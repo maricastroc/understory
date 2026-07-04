@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rankShallow } from "./rank";
+import { rankByHistory, rankShallow } from "./rank";
 
 describe("rankShallow", () => {
   it("prefers real source files over docs", () => {
@@ -28,5 +28,48 @@ describe("rankShallow", () => {
     const copy = [...input];
     rankShallow(input);
     expect(input).toEqual(copy);
+  });
+});
+
+describe("rankByHistory", () => {
+  it("surfaces the most-churned source file first", () => {
+    const churn = new Map([
+      ["src/a.ts", 1],
+      ["src/b.ts", 5],
+      ["src/c.ts", 3],
+    ]);
+    expect(rankByHistory(["src/a.ts", "src/b.ts", "src/c.ts"], churn)).toEqual([
+      "src/b.ts",
+      "src/c.ts",
+      "src/a.ts",
+    ]);
+  });
+
+  it("drops files with no recent history", () => {
+    const churn = new Map([["src/hot.ts", 4]]);
+    expect(rankByHistory(["src/hot.ts", "src/cold.ts"], churn)).toEqual(["src/hot.ts"]);
+  });
+
+  it("excludes tests, noise, and non-source even when churned", () => {
+    const churn = new Map([
+      ["src/real.ts", 2],
+      ["src/real.test.ts", 9],
+      ["src/__tests__/x.ts", 9],
+      ["pnpm-lock.yaml", 9],
+      ["README.md", 9],
+    ]);
+    expect(rankByHistory(
+      ["src/real.ts", "src/real.test.ts", "src/__tests__/x.ts", "pnpm-lock.yaml", "README.md"],
+      churn,
+    )).toEqual(["src/real.ts"]);
+  });
+
+  it("caps the result at the requested limit", () => {
+    const churn = new Map([
+      ["a.ts", 3],
+      ["b.ts", 2],
+      ["c.ts", 1],
+    ]);
+    expect(rankByHistory(["a.ts", "b.ts", "c.ts"], churn, 2)).toHaveLength(2);
   });
 });

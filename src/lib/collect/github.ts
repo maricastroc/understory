@@ -1,9 +1,10 @@
-import { rankShallow } from "./rank";
+import { rankByHistory, rankShallow } from "./rank";
 import { resolveToken } from "./token-context";
 
 const API = "https://api.github.com";
 const metaCache = new Map<string, GitHubRepoMeta>();
 const treeCache = new Map<string, string[]>();
+const churnCache = new Map<string, Map<string, number>>();
 
 function headers(): Record<string, string> {
   const h: Record<string, string> = {
@@ -102,17 +103,73 @@ async function getTree(owner: string, repo: string, branch: string): Promise<str
   return files;
 }
 
+/**
+ * Tally how many of the most recent (non-merge) commits touched each file. A file with
+ * more hits has a more layered history, which is what makes it a rich investigation
+ * target. Bounded to a handful of commit-detail calls and cached per repo@branch.
+ */
+async function recentChurn(owner: string, repo: string, branch: string): Promise<Map<string, number>> {
+  const key = `${owner}/${repo}@${branch}`;
+  const hit = churnCache.get(key);
+  if (hit) return hit;
+
+  const counts = new Map<string, number>();
+  const commits = await rest<Array<{ sha: string; parents?: unknown[] }>>(
+    `/repos/${owner}/${repo}/commits?sha=${encodeURIComponent(branch)}&per_page=40`,
+  );
+  const shas = commits
+    .filter((c) => (c.parents?.length ?? 1) <= 1) // skip merges — they touch everything
+    .slice(0, 12)
+    .map((c) => c.sha);
+
+  const details = await Promise.all(
+    shas.map((sha) =>
+      rest<{ files?: Array<{ filename: string }> }>(`/repos/${owner}/${repo}/commits/${sha}`).catch(
+        () => null,
+      ),
+    ),
+  );
+  for (const d of details) {
+    for (const f of d?.files ?? []) counts.set(f.filename, (counts.get(f.filename) ?? 0) + 1);
+  }
+
+  churnCache.set(key, counts);
+  return counts;
+}
+
 export async function defaultFilesGitHub(
   owner: string,
   repo: string,
   branch: string,
   limit = 5,
 ): Promise<string[]> {
+  let tree: string[];
   try {
-    return rankShallow(await getTree(owner, repo, branch), limit);
+    tree = await getTree(owner, repo, branch);
   } catch {
     return [];
   }
+
+  try {
+    const churn = await recentChurn(owner, repo, branch);
+    const present = new Set(tree);
+    const scoped = new Map([...churn].filter(([p]) => present.has(p)));
+    const picks = rankByHistory(tree, scoped, limit);
+
+    // Top up with structural picks when few files have recent history.
+    if (picks.length < limit) {
+      const seen = new Set(picks);
+      for (const p of rankShallow(tree, limit * 3)) {
+        if (picks.length >= limit) break;
+        if (!seen.has(p)) picks.push(p);
+      }
+    }
+    if (picks.length) return picks;
+  } catch {
+    /* churn unavailable (rate limit / empty repo) — fall back to structural ranking */
+  }
+
+  return rankShallow(tree, limit);
 }
 
 export async function searchFilesGitHub(
