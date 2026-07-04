@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import type { DigResult, InvestigateInput } from "@/lib/types";
 import type { CaseItem } from "../Sidebar";
 
-const DEFAULT_REPO = ".demo/payments-service";
+const DEFAULT_REPO = process.env.NEXT_PUBLIC_DEFAULT_REPO || ".demo/payments-service";
 
 export type Form = InvestigateInput;
 export type Entry = { caseId: string; form: Form; result: DigResult };

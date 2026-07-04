@@ -36,7 +36,7 @@ export function Pill({
 }) {
   return (
     <span
-      className={`inline-flex h-[22px] items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-semibold ${toneBadge[tone]}`}
+      className={`inline-flex h-5.5 items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-semibold ${toneBadge[tone]}`}
     >
       {dot && <span className={`size-1.5 rounded-full ${toneDot[tone]}`} />}
       {children}

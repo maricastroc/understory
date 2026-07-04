@@ -50,10 +50,15 @@ export function Composer({
   }
 
   function run() {
-    if (!viewer.file || !viewer.selectedLine) return;
+    const { file, selectedStart, selectedEnd } = viewer;
+    if (!file || selectedStart === null) return;
+    const span =
+      selectedEnd !== null && selectedEnd !== selectedStart
+        ? `${selectedStart}-${selectedEnd}`
+        : `${selectedStart}`;
     onInvestigate({
       repoPath,
-      location: `${viewer.file.path}:${viewer.selectedLine}`,
+      location: `${file.path}:${span}`,
       question: question.trim(),
     });
   }
@@ -118,8 +123,9 @@ export function Composer({
       {viewer.file && (
         <CodeViewer
           file={viewer.file}
-          selectedLine={viewer.selectedLine}
-          onSelect={viewer.setSelectedLine}
+          selectedStart={viewer.selectedStart}
+          selectedEnd={viewer.selectedEnd}
+          onSelect={viewer.selectLine}
           question={question}
           setQuestion={setQuestion}
           onRun={run}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export type OpenFile = { path: string; lines: string[] };
 
@@ -6,13 +6,33 @@ export function useFileViewer(repoPath: string) {
   const [file, setFile] = useState<OpenFile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedLine, setSelectedLine] = useState<number | null>(null);
+  const [selectedStart, setSelectedStart] = useState<number | null>(null);
+  const [selectedEnd, setSelectedEnd] = useState<number | null>(null);
+  const anchor = useRef<number | null>(null);
+
+  function clearSelection() {
+    anchor.current = null;
+    setSelectedStart(null);
+    setSelectedEnd(null);
+  }
+
+  // Click sets the anchor and a single line; shift-click extends from the anchor to a range.
+  function selectLine(n: number, extend = false) {
+    if (extend && anchor.current !== null) {
+      setSelectedStart(Math.min(anchor.current, n));
+      setSelectedEnd(Math.max(anchor.current, n));
+    } else {
+      anchor.current = n;
+      setSelectedStart(n);
+      setSelectedEnd(n);
+    }
+  }
 
   async function open(path: string, token?: string) {
     setLoading(true);
     setError(null);
     setFile(null);
-    setSelectedLine(null);
+    clearSelection();
     try {
       const res = await fetch(
         `/api/file?repo=${encodeURIComponent(repoPath)}&path=${encodeURIComponent(path)}`,
@@ -34,8 +54,8 @@ export function useFileViewer(repoPath: string) {
   function reset() {
     setFile(null);
     setError(null);
-    setSelectedLine(null);
+    clearSelection();
   }
 
-  return { file, loading, error, selectedLine, setSelectedLine, open, reset };
+  return { file, loading, error, selectedStart, selectedEnd, selectLine, open, reset };
 }
