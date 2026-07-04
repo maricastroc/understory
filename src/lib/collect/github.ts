@@ -1,5 +1,5 @@
 import { rankShallow } from "./rank";
-import { getRequestToken } from "./token-context";
+import { resolveToken } from "./token-context";
 
 const API = "https://api.github.com";
 const metaCache = new Map<string, GitHubRepoMeta>();
@@ -11,7 +11,7 @@ function headers(): Record<string, string> {
     "X-GitHub-Api-Version": "2022-11-28",
   };
   // Caller-supplied PAT (for private repos) wins; fall back to the server env token.
-  const token = getRequestToken() ?? process.env.GITHUB_TOKEN;
+  const token = resolveToken();
   if (token) h.Authorization = `Bearer ${token}`;
   return h;
 }

@@ -14,3 +14,8 @@ export function runWithToken<T>(token: string | undefined, fn: () => T): T {
 export function getRequestToken(): string | undefined {
   return store.getStore();
 }
+
+/** The token to authenticate GitHub calls with: caller-supplied PAT wins, else the server env token. */
+export function resolveToken(): string | undefined {
+  return getRequestToken() ?? process.env.GITHUB_TOKEN;
+}
