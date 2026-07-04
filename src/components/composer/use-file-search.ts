@@ -15,7 +15,7 @@ export function useFileSearch(
   useEffect(() => {
     const id = ++seq.current;
     const q = query.trim();
-    // A file is open (query holds its path) — the finder list is hidden.
+
     if (!enabled || openedPath === q) {
       if (id === seq.current) {
         setResults([]);
@@ -23,7 +23,7 @@ export function useFileSearch(
       }
       return;
     }
-    // Empty/short query fetches a default suggestion list; typed query searches.
+    
     const isDefault = q.length < 2;
     const t = setTimeout(
       async () => {

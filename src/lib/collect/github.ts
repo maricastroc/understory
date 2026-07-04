@@ -10,7 +10,7 @@ function headers(): Record<string, string> {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
   };
-  // Caller-supplied PAT (for private repos) wins; fall back to the server env token.
+
   const token = resolveToken();
   if (token) h.Authorization = `Bearer ${token}`;
   return h;
@@ -165,21 +165,45 @@ export async function getFileContentGitHub(
 }
 
 async function graphql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
-  if (!process.env.GITHUB_TOKEN) {
+  if (!resolveToken()) {
     throw new Error(
-      "Line-level history needs a GitHub token — set GITHUB_TOKEN in .env.local (blame uses the GraphQL API, which requires authentication).",
+      "Line-level history needs a GitHub token — set GITHUB_TOKEN (or add a token in the UI for private repos); blame uses the GraphQL API, which requires authentication.",
     );
   }
-  const res = await fetch(`${API}/graphql`, {
-    method: "POST",
-    headers: { ...headers(), "Content-Type": "application/json" },
-    body: JSON.stringify({ query, variables }),
-  });
-  if (!res.ok) throw new Error(`GitHub GraphQL ${res.status}`);
-  const json = (await res.json()) as { data?: T; errors?: Array<{ message: string }> };
-  if (json.errors?.length) throw new Error(`GitHub GraphQL: ${json.errors[0].message}`);
-  if (!json.data) throw new Error("GitHub GraphQL: empty response");
-  return json.data;
+
+  let lastError: Error = new Error("GitHub GraphQL request failed");
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 400 * attempt));
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 22_000);
+    try {
+      const res = await fetch(`${API}/graphql`, {
+        method: "POST",
+        headers: { ...headers(), "Content-Type": "application/json" },
+        body: JSON.stringify({ query, variables }),
+        signal: ctrl.signal,
+      });
+      if (res.status >= 500) {
+        lastError = new Error(`GitHub GraphQL ${res.status}`);
+        continue;
+      }
+      if (!res.ok) throw new Error(`GitHub GraphQL ${res.status}`);
+      const json = (await res.json()) as { data?: T; errors?: Array<{ message: string }> };
+      if (json.errors?.length) throw new Error(`GitHub GraphQL: ${json.errors[0].message}`);
+      if (!json.data) throw new Error("GitHub GraphQL: empty response");
+      return json.data;
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      if (err.name === "AbortError") {
+        lastError = new Error("GitHub GraphQL timeout");
+        continue;
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw lastError;
 }
 
 export type PrReview = {
@@ -216,9 +240,24 @@ export type BlameCommit = {
   associatedPullRequests: { nodes: AssociatedPr[] };
 };
 
-type BlameRange = { startingLine: number; endingLine: number; commit: BlameCommit };
+type LeanCommit = Omit<BlameCommit, "associatedPullRequests">;
+type LeanRange = { startingLine: number; endingLine: number; commit: LeanCommit };
 
-const BLAME_QUERY = `
+const MAX_ENRICH = 10;
+
+const PR_FIELDS = `associatedPullRequests(first: 1) {
+  nodes {
+    number
+    title
+    body
+    url
+    createdAt
+    reviews(first: 5) { nodes { author { login } state body submittedAt } }
+    closingIssuesReferences(first: 5) { nodes { number title body url createdAt } }
+  }
+}`;
+
+const LEAN_BLAME_QUERY = `
 query Blame($owner:String!, $repo:String!, $ref:String!, $path:String!) {
   repository(owner:$owner, name:$repo) {
     object(expression:$ref) {
@@ -235,17 +274,6 @@ query Blame($owner:String!, $repo:String!, $ref:String!, $path:String!) {
               committedDate
               url
               author { name email }
-              associatedPullRequests(first: 1) {
-                nodes {
-                  number
-                  title
-                  body
-                  url
-                  createdAt
-                  reviews(first: 10) { nodes { author { login } state body submittedAt } }
-                  closingIssuesReferences(first: 5) { nodes { number title body url createdAt } }
-                }
-              }
             }
           }
         }
@@ -253,6 +281,37 @@ query Blame($owner:String!, $repo:String!, $ref:String!, $path:String!) {
     }
   }
 }`;
+
+/** Fetch PR/review/issue enrichment for a bounded set of commits, one aliased lookup each. */
+async function enrichCommits(
+  owner: string,
+  repo: string,
+  oids: string[],
+): Promise<Map<string, AssociatedPr[]>> {
+  const out = new Map<string, AssociatedPr[]>();
+  if (oids.length === 0) return out;
+
+  const varDecls = oids.map((_, i) => `$oid${i}:String!`).join(", ");
+  const fields = oids
+    .map((_, i) => `c${i}: object(expression:$oid${i}) { ... on Commit { ${PR_FIELDS} } }`)
+    .join("\n");
+  const query = `query Enrich($owner:String!, $repo:String!, ${varDecls}) {
+    repository(owner:$owner, name:$repo) {
+${fields}
+    }
+  }`;
+  const vars: Record<string, unknown> = { owner, repo };
+  oids.forEach((oid, i) => (vars[`oid${i}`] = oid));
+
+  const data = await graphql<{
+    repository: Record<string, { associatedPullRequests: { nodes: AssociatedPr[] } } | null> | null;
+  }>(query, vars);
+
+  oids.forEach((oid, i) => {
+    out.set(oid, data.repository?.[`c${i}`]?.associatedPullRequests?.nodes ?? []);
+  });
+  return out;
+}
 
 export async function blameLines(
   owner: string,
@@ -263,15 +322,28 @@ export async function blameLines(
   end: number,
 ): Promise<BlameCommit[]> {
   const data = await graphql<{
-    repository: { object: { blame: { ranges: BlameRange[] } } | null } | null;
-  }>(BLAME_QUERY, { owner, repo, ref: branch, path });
+    repository: { object: { blame: { ranges: LeanRange[] } } | null } | null;
+  }>(LEAN_BLAME_QUERY, { owner, repo, ref: branch, path });
 
   const ranges = data.repository?.object?.blame?.ranges ?? [];
-  const byOid = new Map<string, BlameCommit>();
+  const byOid = new Map<string, LeanCommit>();
   for (const r of ranges) {
     if (r.endingLine >= start && r.startingLine <= end && !byOid.has(r.commit.oid)) {
       byOid.set(r.commit.oid, r.commit);
     }
   }
-  return [...byOid.values()].sort((a, b) => a.committedDate.localeCompare(b.committedDate));
+  const commits = [...byOid.values()].sort((a, b) =>
+    a.committedDate.localeCompare(b.committedDate),
+  );
+
+  const enrichment = await enrichCommits(
+    owner,
+    repo,
+    commits.slice(0, MAX_ENRICH).map((c) => c.oid),
+  ).catch(() => new Map<string, AssociatedPr[]>());
+
+  return commits.map((c) => ({
+    ...c,
+    associatedPullRequests: { nodes: enrichment.get(c.oid) ?? [] },
+  }));
 }

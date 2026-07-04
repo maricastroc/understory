@@ -38,8 +38,7 @@ export function Timeline({
           {artifacts.map((a, i) => {
             const isLast = i === last;
             const cited = citedIds.has(a.id);
-            // The rail segment below node i is "on the chain" when it sits between the
-            // first and last cited artifact — literally threading the provenance path.
+           
             const belowOnChain = i >= firstCited && i < lastCited && firstCited >= 0;
             const onChainSpan = firstCited >= 0 && i >= firstCited && i <= lastCited;
 
