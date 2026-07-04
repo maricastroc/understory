@@ -18,13 +18,14 @@ Not a plausible story: every claim is checked against real evidence, and when th
 
 ## 🕵️ Features
 
-|                              |                                                                                                                                                           |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **🔗 Verifiable why**        | Every sentence in the answer is backed by a real artifact — a commit, PR, issue or review — cited by exact id and linked so you can open the source.      |
-| **🤐 Honest abstention**     | When the history genuinely doesn't explain a line, it says so (`recorded: false`) and scores low, instead of inventing a motivation. Silence is a result. |
-| **✅ Grounding check**       | A deterministic pass compares every citation against the collected evidence. Any id the model made up is flagged as a fabrication — no LLM in the loop.   |
-| **📊 Confidence, not vibes** | A 0–100 score derived only from real signals — grounding, abstention, and how many primary sources corroborate the answer — never from the model itself.  |
-| **🌐 No clone required**     | GitHub repos are read straight from the API (line-level blame + PR/issue/review enrichment in one graph query); local paths use `git` on disk.            |
+|                                |                                                                                                                                                                                              |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **🔗 Verifiable why**          | Every sentence in the answer is backed by a real artifact — a commit, PR, issue or review — cited by exact id and linked so you can open the source.                                         |
+| **🤐 Honest abstention**       | When the history genuinely doesn't explain a line, it says so (`recorded: false`) and scores low, instead of inventing a motivation. Silence is a result.                                    |
+| **✅ Grounding check**         | A deterministic pass compares every citation against the collected evidence. Any id the model made up is flagged as a fabrication — no LLM in the loop.                                      |
+| **📊 Confidence, not vibes**   | A 0–100 score derived only from real signals — grounding, abstention, and how many primary sources corroborate the answer — never from the model itself.                                     |
+| **🌐 No clone required**       | GitHub repos are read straight from the API (line-level blame + PR/issue/review enrichment in one graph query); local paths use `git` on disk.                                               |
+| **🔐 Sign in & pick up later** | Sign in with GitHub to investigate private repos with your own token and to keep a persistent case file — every investigation is saved to Postgres and restored across sessions and devices. |
 
 <br/>
 
@@ -37,20 +38,24 @@ Not a plausible story: every claim is checked against real evidence, and when th
   <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=groq&logoColor=white" alt="Groq" />
   <img src="https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white" alt="Zod" />
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/GitHub_API-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub API" />
 </p>
 
-| Category       | Technologies                                                              |
-| -------------- | ------------------------------------------------------------------------- |
-| **Framework**  | Next.js 16 (App Router), React 19                                         |
-| **Language**   | TypeScript 5                                                              |
-| **Styling**    | Tailwind CSS v4                                                           |
-| **AI**         | Vercel AI SDK (`ai`) + `@ai-sdk/groq` — `generateObject` on a Zod schema  |
-| **Model**      | Groq inference, default `openai/gpt-oss-120b` (override via `GROQ_MODEL`) |
-| **Evidence**   | GitHub GraphQL blame + REST enrichment, or local `git log -L` / blame     |
-| **Validation** | Zod 4 (structured LLM output + input parsing)                             |
-| **Runtime**    | Node.js API routes (`/api/dig`, `/api/repo`, `/api/file`, `/api/files`)   |
-| **Tooling**    | ESLint, Prettier (+ Tailwind plugin), tsx                                 |
+| Category        | Technologies                                                                                       |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| **Framework**   | Next.js 16 (App Router), React 19                                                                  |
+| **Language**    | TypeScript 5                                                                                       |
+| **Styling**     | Tailwind CSS v4                                                                                    |
+| **AI**          | Vercel AI SDK (`ai`) + `@ai-sdk/groq` — `generateObject` on a Zod schema                           |
+| **Model**       | Groq inference, default `openai/gpt-oss-120b` (override via `GROQ_MODEL`)                          |
+| **Evidence**    | GitHub GraphQL blame + REST enrichment, or local `git log -L` / blame                              |
+| **Validation**  | Zod 4 (structured LLM output + input parsing)                                                      |
+| **Auth**        | GitHub OAuth (`read:user`), HMAC-signed session cookie — no auth library                           |
+| **Persistence** | PostgreSQL via Prisma 6 — saved investigations scoped per user                                     |
+| **Runtime**     | Node.js API routes — `/api/dig`, `/api/repo`, `/api/file(s)`, `/api/auth/*`, `/api/investigations` |
+| **Tooling**     | ESLint, Prettier (+ Tailwind plugin), Vitest, tsx                                                  |
 
 <br/>
 
@@ -70,7 +75,8 @@ The result is presented as a **case file**: a verdict and prose answer, a confid
 - **Fabrication-proof citations:** The verification step ([`src/lib/verify.ts`](src/lib/verify.ts)) is pure and deterministic — it intersects the model's citations with the set of real artifact ids and surfaces any it invented. The LLM never gets to vouch for its own sources.
 - **Confidence you can audit:** The score is a function of concrete signals only — is the answer grounded, did the history actually record a reason, and how many primary sources corroborate it — mapping to `high` / `medium` / `low` with the source counts shown in the UI.
 - **Graceful without a key:** With no `GROQ_API_KEY` set, the app still collects and displays all the evidence — it just skips the synthesized answer instead of failing.
-- **Case history:** Each investigation is saved in a left rail with its question and status (Resolved / Inconclusive / Evidence only), so you can jump back to any prior case.
+- **Sign in with GitHub:** Optional OAuth (`read:user`) that unlocks private repos — the session carries your own token into the blame query — and gives each user their own persistent case file. The session is a plain HMAC-signed cookie; there's no auth framework in the stack.
+- **Case history that persists:** Each investigation is saved in a left rail with its question and status (Resolved / Inconclusive / Evidence only). Signed in with a database configured, cases are written to Postgres (via Prisma, scoped per user) and restored on any device; without either, the rail stays in memory for the session.
 - **A terminal companion:** `npm run dig` runs the same collect → synthesize → verify pipeline from the CLI, with `--why`, `--dry-run` (prints the exact prompt without calling the model) and `--json` flags.
 
 <br/>
@@ -104,9 +110,14 @@ line → blame (GitHub GraphQL / local git)
 
 <br/>
 
-## 📌 What did I learn?
+## 📌 Design notes
 
-The hard part was resisting the obvious shape of an "AI explains your code" tool — one prompt, one plausible paragraph, ship it. Plausible isn't the same as true, and for _why_ questions the failure mode is subtle: a confident, well-written answer citing a commit that doesn't exist. So the design puts the LLM in a box between two deterministic layers — collection it can't add to, and verification it can't influence — and treats "the history doesn't say" as a first-class, correct answer rather than a failure. Getting the confidence model to reflect real evidence (grounding, abstention, corroborating source count) instead of the model's own certainty is what makes the output something you can actually trust.
+The central constraint is that a _why_ answer is worthless unless it's true, and "plausible" is the failure mode language models are best at — a fluent paragraph citing a commit that was never written. The architecture is built to make that failure impossible to hide rather than merely unlikely.
+
+- **The model is boxed between two deterministic layers.** Collection produces the only evidence that exists, and the model cannot reach past it; verification checks every citation against real artifact ids, and the model cannot influence it. The LLM's entire job is to explain within a fixed evidence set — it never sources, never scores, and never vouches for itself.
+- **Abstention is a first-class result.** "The history doesn't record why" is a correct, useful answer, not an error to be papered over. The synthesis contract lets the model return `recorded: false`, and the UI treats _inconclusive_ as a real verdict — which is what keeps it from inventing motivations to fill space.
+- **Confidence is a function of evidence, not of the model's tone.** The score is computed from signals that can't be faked — is the answer grounded, did the history actually record a reason, how many primary sources corroborate it — so a well-written guess and a well-supported conclusion can't end up looking the same.
+- **The trustworthy parts are the boring parts.** Everything that determines whether output can be believed — blame, enrichment, citation grounding, scoring — is deterministic and unit-tested. The probabilistic component is deliberately the smallest, most contained piece of the pipeline.
 
 <br/>
 
@@ -125,7 +136,13 @@ npm install
 ```
 
 > Copy `.env.example` to `.env.local` and add your keys.
-> A **Groq API key** (free, no card — [console.groq.com/keys](https://console.groq.com/keys)) enables the synthesized answer; a **GitHub token** is needed for line-level blame and private repos. The app still collects and shows evidence without either.
+> A **Groq API key** (free, no card — [console.groq.com/keys](https://console.groq.com/keys)) enables the synthesized answer; a **GitHub token** is needed for line-level blame and private repos. The app still collects and shows evidence without either. **GitHub OAuth** (`NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_ID` + secret + `AUTH_SECRET`) and a **`DATABASE_URL`** are optional — they enable "Sign in with GitHub" and persistent, per-user case history.
+
+> Optional — set up the database for persistent history (needs `DATABASE_URL`):
+
+```bash
+npm run db:migrate
+```
 
 > Seed the bundled demo repo (optional — gives you something to investigate right away):
 
