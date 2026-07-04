@@ -8,7 +8,7 @@ function ExhibitCard({ a, index, cited }: { a: Artifact; index: number; cited: b
 
   return (
     <div
-      className={`flex flex-col gap-2.5 rounded-[10px] border bg-surface p-4 shadow-[0_1px_2px_rgba(20,22,30,0.04)] transition-colors ${
+      className={`flex flex-col gap-2.5 rounded-[10px] border bg-surface p-4 shadow-card transition-colors ${
         cited ? "border-accent/40 ring-1 ring-accent-tint" : "border-line"
       }`}
     >

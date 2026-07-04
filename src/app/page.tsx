@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ConfidenceRing } from "@/components/ConfidenceRing";
-import { Check, Commit, Issue, Logo, PullRequest, Shield } from "@/components/icons";
+import { Check, ChevronRight, Commit, Issue, Logo, PullRequest, Shield } from "@/components/icons";
 
 function GitHubMark({ className }: { className?: string }) {
   return (
@@ -128,15 +128,7 @@ export default function Home() {
             className="inline-flex h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
           >
             Open a case
-            <svg viewBox="0 0 16 16" fill="none" className="size-4" aria-hidden>
-              <path
-                d="M6 3l5 5-5 5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ChevronRight className="size-4" />
           </Link>
           <a
             href="#how"
@@ -274,15 +266,7 @@ export default function Home() {
             className="inline-flex h-11 shrink-0 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
           >
             Start investigating
-            <svg viewBox="0 0 16 16" fill="none" className="size-4" aria-hidden>
-              <path
-                d="M6 3l5 5-5 5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ChevronRight className="size-4" />
           </Link>
         </div>
       </section>

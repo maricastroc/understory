@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { collect, parseLocation } from "@/lib/collect";
 import { parseGitHubRepo } from "@/lib/collect/github";
 import { resolveRepoInput } from "@/lib/collect/resolve";
+import { runWithToken } from "@/lib/collect/token-context";
 import { synthesize } from "@/lib/synthesize";
 import { verify } from "@/lib/verify";
 import type { DigResult } from "@/lib/types";
@@ -22,6 +23,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "repoPath and location are required" }, { status: 400 });
   }
 
+  const token = req.headers.get("x-github-token")?.trim() || undefined;
+
   let loc;
   try {
     loc = parseLocation(location);
@@ -37,11 +40,13 @@ export async function POST(req: Request) {
     const collectPath = parseGitHubRepo(repoPath)
       ? repoPath
       : (await resolveRepoInput(repoPath)).path;
-    evidence = await collect({
-      repoPath: collectPath,
-      question: question?.trim() || "Why is this line the way it is? Reconstruct why it changed.",
-      location: loc,
-    });
+    evidence = await runWithToken(token, () =>
+      collect({
+        repoPath: collectPath,
+        question: question?.trim() || "Why is this line the way it is? Reconstruct why it changed.",
+        location: loc,
+      }),
+    );
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : String(e) },

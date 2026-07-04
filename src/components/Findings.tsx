@@ -1,6 +1,6 @@
 import type { Evidence, VerifiedNarrative } from "@/lib/types";
 import { ConfidenceRing } from "./ConfidenceRing";
-import { letter } from "./format";
+import { letter, levelLabel } from "./format";
 import { Alert, Check } from "./icons";
 import { Pill, SectionLabel } from "./ui";
 
@@ -21,32 +21,28 @@ export function Findings({
         meta="Reconstructed conclusion — every claim linked to a primary source"
       />
 
-      <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-[0_1px_2px_rgba(20,22,30,0.04)]">
-        {/* verdict strip */}
-        <div className="flex flex-wrap items-center gap-3 border-b border-line bg-surface-2 px-5 py-3">
-          {narrative.recorded ? (
-            <Pill tone="good" dot>
-              Resolved
-            </Pill>
-          ) : (
-            <Pill tone="warn" dot>
-              Inconclusive
-            </Pill>
-          )}
-          <span className="text-[12.5px] font-semibold text-ink">
-            {narrative.recorded ? "Rationale reconstructed" : "History is silent"}
-            <span className="font-normal text-ink-2">
-              {narrative.recorded
-                ? " — grounded in the record below"
-                : " — the record does not explain this"}
-            </span>
+      <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-card">
+        {/* verdict strip — reads as the conclusion header, not just another card */}
+        <div className="flex flex-wrap items-center gap-2.5 border-b border-line bg-surface-2 px-6 py-3.5">
+          <span
+            className={`grid size-6 shrink-0 place-items-center rounded-full ${
+              narrative.recorded ? "bg-good-tint text-good" : "bg-warn-tint text-warn"
+            }`}
+          >
+            {narrative.recorded ? <Check className="size-3.5" /> : <Alert className="size-3.5" />}
           </span>
+          <span className="text-[14px] font-semibold tracking-tight text-ink">
+            {narrative.recorded ? "Investigation conclusion" : "No conclusion on record"}
+          </span>
+          <Pill tone={narrative.recorded ? "good" : "warn"} dot>
+            {narrative.recorded ? "Resolved" : "Inconclusive"}
+          </Pill>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_244px]">
-          {/* conclusion */}
-          <div className="border-b border-line p-6 md:border-r md:border-b-0">
-            <p className="max-w-[64ch] text-[15px] leading-[1.66] whitespace-pre-wrap text-[#2a2d36]">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_216px]">
+          {/* conclusion — the answer is the hero: larger type, wider column, more air */}
+          <div className="border-b border-line p-7 md:border-r md:border-b-0">
+            <p className="max-w-[68ch] text-[16.5px] leading-[1.72] whitespace-pre-wrap text-[#2a2d36]">
               {narrative.answer}
             </p>
 
@@ -83,19 +79,25 @@ export function Findings({
             )}
           </div>
 
-          {/* confidence */}
-          <div className="flex flex-col items-center gap-1 p-5 text-center">
-            <ConfidenceRing confidence={narrative.confidence} />
-            <div className="mt-2 max-w-[20ch] text-[12px] leading-snug text-ink-2">
-              Confidence in reconstructed rationale
-            </div>
-            <div
-              className={`mt-1.5 inline-flex items-center gap-1.5 text-[11.5px] font-semibold ${
-                narrative.grounded ? "text-good" : "text-crit"
-              }`}
-            >
-              {narrative.grounded ? <Check className="size-3.5" /> : <Alert className="size-3.5" />}
-              {narrative.grounded ? "All citations grounded" : "Fabrication detected"}
+          {/* confidence — smaller ring, the reading gets the weight */}
+          <div className="flex flex-col items-center gap-3 p-6 text-center">
+            <ConfidenceRing confidence={narrative.confidence} size={88} />
+            <div className="flex flex-col items-center gap-1">
+              <div className="text-[15px] font-semibold tracking-tight text-ink">
+                {levelLabel[narrative.confidence.level]} confidence
+              </div>
+              <div
+                className={`inline-flex items-center gap-1.5 text-[12px] font-medium ${
+                  narrative.grounded ? "text-good" : "text-crit"
+                }`}
+              >
+                {narrative.grounded ? (
+                  <Check className="size-3.5" />
+                ) : (
+                  <Alert className="size-3.5" />
+                )}
+                {narrative.grounded ? "Every citation grounded" : "Fabrication detected"}
+              </div>
             </div>
           </div>
         </div>
