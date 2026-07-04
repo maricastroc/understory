@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { basename } from "../format";
-import { Logo, Plus, Search, User } from "../icons";
+import { Github, Logo, Plus, Search } from "../icons";
 import { Avatar } from "../ui";
 
 export function Header({
@@ -11,12 +11,14 @@ export function Header({
   filter,
   onFilterChange,
   onNewInvestigation,
+  onSignIn,
   user,
 }: {
   repoPath: string;
   filter: string;
   onFilterChange: (v: string) => void;
   onNewInvestigation: () => void;
+  onSignIn?: () => void;
   user?: { name: string } | null;
 }) {
   const searchRef = useRef<HTMLInputElement>(null);
@@ -75,12 +77,14 @@ export function Header({
         {user ? (
           <Avatar name={user.name} size={28} />
         ) : (
-          <span
-            title="Not signed in"
-            className="grid size-7 place-items-center rounded-full border border-line-2 bg-inset text-ink-3"
+          <button
+            type="button"
+            onClick={onSignIn}
+            className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border border-line-2 bg-surface px-3 text-[13px] font-medium text-ink transition-colors hover:bg-inset"
           >
-            <User className="size-4" />
-          </span>
+            <Github className="size-4" />
+            Sign in
+          </button>
         )}
       </div>
     </header>
