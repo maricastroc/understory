@@ -1,4 +1,4 @@
-import { Close, User } from "../icons";
+import { Close, Search, User } from "../icons";
 import type { AuthUser } from "../investigator/use-auth";
 import { Avatar } from "../ui";
 import { CaseRow } from "./CaseRow";
@@ -42,11 +42,19 @@ export function SidebarBody({
 
       <div className="flex-1 overflow-y-auto px-2.5 pb-4">
         {items.length === 0 ? (
-          <p className="px-2 py-6 text-[12.5px] leading-relaxed text-ink-3">
-            {filtering
-              ? "No investigations match your search."
-              : "No investigations yet. Run one to open a case file."}
-          </p>
+          <div className="mt-8 flex flex-col items-center px-4 text-center">
+            <span className="grid size-11 place-items-center rounded-full border border-line bg-surface text-ink-3 shadow-card">
+              <Search className="size-4.5" />
+            </span>
+            <p className="mt-3 text-[13px] font-semibold text-ink-2">
+              {filtering ? "No matches" : "No investigations yet"}
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed text-ink-3">
+              {filtering
+                ? "Nothing matches your search. Try a different term."
+                : "Open a repo, click a line, and run one — each case files itself here."}
+            </p>
+          </div>
         ) : (
           <div className="flex flex-col gap-0.5">
             {items.map((it) => (

@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import type { RepoMeta } from "@/lib/types";
-import { Alert, Check, Close, Lock } from "../icons";
+import { Alert, Branch, Check, Close, Lock } from "../icons";
+
+const kindLabel = { github: "GitHub", remote: "Cloned", local: "Local" } as const;
 
 export function RepoBar({
   repoPath,
@@ -97,7 +99,7 @@ export function RepoBar({
         <button
           type="button"
           onClick={() => setShowToken(true)}
-          className="flex w-full items-center gap-2 border-b border-line bg-accent-tint/30 px-3.5 py-2 text-[12px] font-semibold text-accent-press transition-colors hover:bg-accent-tint/60"
+          className="cursor-pointer flex w-full items-center gap-2 border-b border-line bg-accent-tint/30 px-3.5 py-2 text-[12px] font-semibold text-accent-press transition-colors hover:bg-accent-tint/60"
         >
           <Lock className="size-3.5" />
           Private repo? Add a token
@@ -111,13 +113,24 @@ export function RepoBar({
         </div>
       )}
       {ready && meta && (
-        <div className="flex items-center gap-2 border-b border-line bg-good-tint/50 px-3.5 py-2 text-[12.5px] text-ink-2">
-          <Check className="size-3.5 text-good" />
-          <span className="font-medium text-ink">
-            {meta.kind === "github" ? "GitHub" : meta.kind === "remote" ? "Cloned" : "Local"}
+        <div className="flex flex-wrap items-center gap-2 border-b border-line bg-good-tint/40 px-3.5 py-2.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-good-tint px-2 py-0.5 text-[11.5px] font-semibold text-good">
+            <Check className="size-3.5" />
+            Opened
           </span>
-          <span className="font-mono">{meta.name}</span>
-          {meta.branch && <span className="text-ink-3">· branch {meta.branch}</span>}
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-line-2 bg-surface px-2 py-0.5 text-[11.5px] font-medium text-ink-2">
+            <span className="size-1.5 rounded-full bg-good" />
+            {kindLabel[meta.kind]}
+          </span>
+          {meta.branch && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line-2 bg-surface px-2 py-0.5 text-[11.5px] font-medium text-ink-2">
+              <Branch className="size-3 text-ink-3" />
+              {meta.branch}
+            </span>
+          )}
+          <span className="ml-0.5 min-w-0 truncate font-mono text-[12px] text-ink">
+            {meta.name}
+          </span>
         </div>
       )}
       {error && (

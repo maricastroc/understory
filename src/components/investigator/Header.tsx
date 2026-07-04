@@ -70,8 +70,8 @@ export function Header({
         <span className="font-mono text-[12.5px]">{basename(repoPath)}</span>
       </div>
 
-      <div className="hidden max-w-105 flex-1 items-center gap-2 rounded-md border border-line-2 bg-inset px-3 py-1.5 text-ink-3 transition-[background-color,border-color,box-shadow] focus-within:border-accent/40 focus-within:bg-surface focus-within:ring-2 focus-within:ring-accent/10 hover:bg-surface lg:flex">
-        <Search className="size-3.5 shrink-0" />
+      <div className="hidden max-w-105 flex-1 items-center gap-2 rounded-md border border-line-2 bg-inset px-3 py-1.5 text-ink-2 shadow-sm transition-[background-color,border-color,box-shadow] focus-within:border-accent/40 focus-within:bg-surface focus-within:ring-2 focus-within:ring-accent/10 hover:bg-surface lg:flex">
+        <Search className="size-3.5 shrink-0 text-ink-2" />
         <input
           ref={searchRef}
           value={filter}

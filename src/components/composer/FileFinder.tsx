@@ -27,7 +27,7 @@ export function FileFinder({
         <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
           Find
         </span>
-        <Search className="size-4 shrink-0 text-ink-3" />
+        <Search className="size-4 shrink-0 text-ink-2" />
         <input
           aria-label="Search files or symbols"
           value={query}
