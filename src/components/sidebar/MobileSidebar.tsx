@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { AuthUser } from "../investigator/use-auth";
 import { SidebarBody } from "./SidebarBody";
 import type { CaseItem } from "./case-item";
@@ -24,18 +24,46 @@ export function MobileSidebar({
   filtering?: boolean;
   user?: AuthUser | null;
 }) {
+  const asideRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
+    if (!open) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const selector = 'button, a[href], input, [tabindex]:not([tabindex="-1"])';
+    const focusables = () => [...(asideRef.current?.querySelectorAll<HTMLElement>(selector) ?? [])];
+
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const f = focusables();
+      if (f.length === 0) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
-    if (open) window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+
+    window.addEventListener("keydown", onKey);
+    focusables()[0]?.focus();
+
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      previouslyFocused?.focus?.();
+    };
   }, [open, onClose]);
 
   return (
     <div
       className={`fixed inset-0 z-40 md:hidden ${open ? "" : "pointer-events-none"}`}
-      aria-hidden={!open}
+      inert={!open}
     >
       <div
         onClick={onClose}
@@ -44,6 +72,7 @@ export function MobileSidebar({
         }`}
       />
       <aside
+        ref={asideRef}
         role="dialog"
         aria-modal="true"
         aria-label="Investigations"

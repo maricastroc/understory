@@ -18,7 +18,10 @@ export function Sidebar({
   user?: AuthUser | null;
 }) {
   return (
-    <aside className="hidden w-67 shrink-0 flex-col border-r border-line-2 bg-surface-2 md:flex">
+    <aside
+      aria-label="Investigations"
+      className="hidden w-67 shrink-0 flex-col border-r border-line-2 bg-surface-2 md:flex"
+    >
       <SidebarBody
         items={items}
         activeId={activeId}

@@ -10,18 +10,33 @@ export function RightRail({
   repoMeta?: RepoMeta | null;
 }) {
   return (
-    <aside className="hidden w-[284px] shrink-0 overflow-y-auto border-l border-line-2 bg-surface-2 xl:block">
+    <aside
+      aria-label="Investigation details"
+      className="hidden w-[284px] shrink-0 overflow-y-auto border-l border-line-2 bg-surface-2 xl:block"
+    >
       <div className="flex flex-col gap-3.5 p-[18px] pb-10">
-        {result ? (
-          <CaseRail result={result} />
-        ) : repoMeta ? (
-          <RepoRail meta={repoMeta} />
+        {result || repoMeta ? (
+          <RailContent result={result} repoMeta={repoMeta} />
         ) : (
           <RailPlaceholder />
         )}
       </div>
     </aside>
   );
+}
+
+// The rail body without its chrome — reused inside the main column below `xl`,
+// where the fixed right rail is hidden and this content would otherwise vanish.
+export function RailContent({
+  result,
+  repoMeta,
+}: {
+  result: DigResult | null;
+  repoMeta?: RepoMeta | null;
+}) {
+  if (result) return <CaseRail result={result} />;
+  if (repoMeta) return <RepoRail meta={repoMeta} />;
+  return null;
 }
 
 function RailPlaceholder() {

@@ -75,7 +75,7 @@ export function Composer({
     <div className="flex flex-col gap-4">
       <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-panel">
         <div className="border-b border-line px-3.5 py-3">
-          <h2 className="text-[15px] font-semibold tracking-tight">Start an investigation</h2>
+          <h1 className="text-[15px] font-semibold tracking-tight">Start an investigation</h1>
           <p className="mt-0.5 text-[12.5px] text-ink-2">
             Paste a GitHub repo (or a local path), find a file by name or symbol, then click the
             line you&apos;re curious about.

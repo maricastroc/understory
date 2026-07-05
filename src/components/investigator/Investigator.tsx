@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Alert } from "../icons";
-import { RightRail } from "../rail/RightRail";
+import { RailContent, RightRail } from "../rail/RightRail";
 import { MobileSidebar } from "../sidebar/MobileSidebar";
 import { Sidebar } from "../sidebar/Sidebar";
 import { Composer } from "../composer/Composer";
@@ -58,6 +58,9 @@ export function Investigator() {
           it.caseId.toLowerCase().includes(filterQuery),
       )
     : items;
+
+  const railResult = view === "case" && !loading ? (current?.result ?? null) : null;
+  const railMeta = browsing && repo.ready ? repo.meta : null;
 
   return (
     <div className="flex h-screen flex-col">
@@ -120,13 +123,18 @@ export function Investigator() {
             {!loading && view === "case" && current && (
               <CaseView entry={current} onBack={backToCode} />
             )}
+
+            {/* Below xl the fixed right rail is hidden — stack its content here so
+                provenance and contributors never disappear on smaller screens. */}
+            {(railResult || railMeta) && (
+              <div className="mt-5 flex flex-col gap-3.5 xl:hidden">
+                <RailContent result={railResult} repoMeta={railMeta} />
+              </div>
+            )}
           </div>
         </main>
 
-        <RightRail
-          result={view === "case" && !loading ? (current?.result ?? null) : null}
-          repoMeta={browsing && repo.ready ? repo.meta : null}
-        />
+        <RightRail result={railResult} repoMeta={railMeta} />
       </div>
     </div>
   );

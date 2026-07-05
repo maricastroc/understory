@@ -72,32 +72,36 @@ export function CodeViewer({
             const inRange = hasSelection && n >= selectedStart && n <= selectedEnd;
             const isEnd = n === selectedEnd;
             return (
-              <li
-                key={n}
-                onClick={(e) => onSelect(n, e.shiftKey)}
-                className={`group flex cursor-pointer border-l-[3px] font-mono text-[12.5px] leading-[1.6] ${
-                  inRange ? "border-accent bg-accent-tint" : "border-transparent hover:bg-inset"
-                }`}
-              >
-                <span
-                  className={`w-12 shrink-0 border-r pr-3 text-right ${
-                    inRange
-                      ? "border-accent/40 font-semibold text-accent-press"
-                      : "border-transparent text-ink-3"
+              <li key={n}>
+                <button
+                  type="button"
+                  onClick={(e) => onSelect(n, e.shiftKey)}
+                  aria-pressed={inRange}
+                  aria-label={`Line ${n}${inRange ? ", selected" : ""}. Shift-click or shift-enter to extend the range.`}
+                  className={`group flex w-full cursor-pointer border-l-[3px] text-left font-mono text-[12.5px] leading-[1.6] focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-inset focus-visible:outline-none ${
+                    inRange ? "border-accent bg-accent-tint" : "border-transparent hover:bg-inset"
                   }`}
                 >
-                  {n}
-                </span>
-                <code className="flex-1 px-3 whitespace-pre text-ink">{ln || " "}</code>
-                {inRange && isEnd && (
-                  <span className="shrink-0 self-center pr-3 text-[10.5px] font-semibold text-accent-press">
-                    {isSymbolSelected
-                      ? symbolNoun(enclosing.kind)
-                      : rangeSize > 1
-                        ? `${rangeSize} lines`
-                        : "selected"}
+                  <span
+                    className={`w-12 shrink-0 border-r pr-3 text-right ${
+                      inRange
+                        ? "border-accent/40 font-semibold text-accent-press"
+                        : "border-transparent text-ink-3"
+                    }`}
+                  >
+                    {n}
                   </span>
-                )}
+                  <code className="flex-1 px-3 whitespace-pre text-ink">{ln || " "}</code>
+                  {inRange && isEnd && (
+                    <span className="shrink-0 self-center pr-3 text-[10.5px] font-semibold text-accent-press">
+                      {isSymbolSelected
+                        ? symbolNoun(enclosing.kind)
+                        : rangeSize > 1
+                          ? `${rangeSize} lines`
+                          : "selected"}
+                    </span>
+                  )}
+                </button>
               </li>
             );
           })}
