@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { defaultFilesGitHub, getRepoMeta, parseGitHubRepo, searchFilesGitHub } from "./github";
+import { defaultFilesGitHub, getRepoMeta, parseGitHubRepo, searchFilesGitHub } from "./index";
 
-/** Route GitHub REST calls to canned JSON by URL; `undefined` => 404. */
 function stubGitHub(handler: (url: string) => unknown) {
   vi.stubGlobal(
     "fetch",

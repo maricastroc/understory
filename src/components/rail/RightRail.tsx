@@ -25,8 +25,6 @@ export function RightRail({
   );
 }
 
-// The rail body without its chrome — reused inside the main column below `xl`,
-// where the fixed right rail is hidden and this content would otherwise vanish.
 export function RailContent({
   result,
   repoMeta,

@@ -20,12 +20,10 @@ export function verify(ev: Evidence, n: Narrative): VerifiedNarrative {
   const cited = unique(n.citations);
 
   const groundedCitations = cited.filter((id) => realIds.has(id));
-  const unknownCitations = cited.filter((id) => !realIds.has(id)); // fabrications
+  const unknownCitations = cited.filter((id) => !realIds.has(id));
 
   const grounded = unknownCitations.length === 0;
 
-  // Only contradictions that undermine a source the answer actually leans on count
-  // against it — a revert of an uncited artifact doesn't weaken the conclusion.
   const citedSet = new Set(groundedCitations);
   const contradicting = ev.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
 
@@ -73,9 +71,6 @@ function scoreConfidence(s: {
     score = 0.9;
   }
 
-  // A recorded, grounded reason that a later artifact undoes or declines is worth less
-  // than one that stands unchallenged — dock it, transparently, by how much of its
-  // support is contradicted.
   if (s.grounded && s.recorded && contradicting > 0) {
     if (contradicting >= s.primarySources) {
       level = "low";

@@ -34,7 +34,7 @@ export async function getRepoMeta(owner: string, repo: string): Promise<GitHubRe
   const hit = metaCache.get(key);
 
   if (hit) return hit;
-  
+
   const d = await rest<{
     full_name: string;
     default_branch: string;

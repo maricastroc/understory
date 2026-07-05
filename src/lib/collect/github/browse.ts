@@ -22,7 +22,11 @@ async function getTree(owner: string, repo: string, branch: string): Promise<str
   return files;
 }
 
-
+/**
+ * Tally how many of the most recent (non-merge) commits touched each file. A file with
+ * more hits has a more layered history, which is what makes it a rich investigation
+ * target. Bounded to a handful of commit-detail calls and cached per repo@branch.
+ */
 async function recentChurn(
   owner: string,
   repo: string,
@@ -74,7 +78,7 @@ export async function defaultFilesGitHub(
 
   try {
     const churn = await recentChurn(owner, repo, branch);
-    
+
     const present = new Set(tree);
 
     const scoped = new Map([...churn].filter(([p]) => present.has(p)));
@@ -144,6 +148,6 @@ export async function getFileContentGitHub(
   );
 
   if (typeof d.content !== "string") throw new Error(`No file content for ${path}`);
-  
+
   return d.encoding === "base64" ? Buffer.from(d.content, "base64").toString("utf8") : d.content;
 }

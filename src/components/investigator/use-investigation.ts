@@ -24,16 +24,21 @@ const caseNumber = (caseId: string) => Number.parseInt(caseId.replace(/^GI-/, ""
 
 export function useInvestigation(user: AuthUser | null) {
   const [repoPath, setRepoPath] = useState(DEFAULT_REPO);
+
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
+
   const [history, setHistory] = useState<Entry[]>([]);
+
   const [activeId, setActiveId] = useState<string | null>(null);
+
   const [view, setView] = useState<View>("browse");
+
   const [resetKey, setResetKey] = useState(0);
+
   const counter = useRef(FIRST_CASE);
 
-  // Signed-in users get their saved case files back; guests get an empty list
-  // (the endpoint returns nothing without a session) and keep an in-memory session.
   useEffect(() => {
     let alive = true;
     fetch("/api/investigations")
@@ -64,6 +69,7 @@ export function useInvestigation(user: AuthUser | null) {
     setLoading(true);
     setError(null);
     setView("case");
+    
     try {
       const res = await fetch("/api/dig", {
         method: "POST",
@@ -79,8 +85,11 @@ export function useInvestigation(user: AuthUser | null) {
         setView("browse");
         return;
       }
+
       const caseId = `GI-${counter.current++}`;
+
       setHistory((h) => [{ caseId, form: input, result: data }, ...h]);
+
       setActiveId(caseId);
       if (user) {
         void fetch("/api/investigations", {
@@ -139,8 +148,11 @@ export function useInvestigation(user: AuthUser | null) {
 
   const items: CaseItem[] = history.map((e) => {
     const ev = e.result.evidence;
+
     const base = (p: string) => p.split("/").filter(Boolean).pop() ?? p;
+
     const { file, startLine, endLine } = ev.location;
+
     return {
       caseId: e.caseId,
       question: e.form.question || "(no question asked)",

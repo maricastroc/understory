@@ -17,7 +17,7 @@ export function ConfidenceRing({
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      <svg viewBox="0 0 132 132" className="h-full w-full -rotate-90">
+      <svg viewBox="0 0 132 132" aria-hidden className="h-full w-full -rotate-90">
         <circle cx="66" cy="66" r={r} fill="none" stroke="var(--color-inset)" strokeWidth="10" />
         <circle
           cx="66"

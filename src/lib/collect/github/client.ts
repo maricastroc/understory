@@ -67,6 +67,6 @@ export async function graphql<T>(query: string, variables: Record<string, unknow
       clearTimeout(timer);
     }
   }
-  
+
   throw lastError;
 }

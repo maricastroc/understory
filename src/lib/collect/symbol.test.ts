@@ -72,7 +72,6 @@ function run() {
   }
 }
 `;
-    // clicking inside the if-block still resolves to the enclosing function, not "if"
     expect(at(src, 4)).toEqual({ start: 2, end: 6, name: "run", kind: "function" });
   });
 

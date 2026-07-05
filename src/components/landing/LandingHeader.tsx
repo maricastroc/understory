@@ -12,7 +12,7 @@ export function LandingHeader() {
     <header className="sticky top-0 z-20 border-b border-line bg-bg/85 backdrop-blur-md">
       <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <span className="flex min-w-0 items-center gap-1">
-          <Logo className="size-[26px] shrink-0 text-accent" />
+          <Logo className="size-6.5 shrink-0 text-accent" />
           <span className="truncate text-[15px] font-semibold tracking-tight">
             Git <span className="text-accent">Investigator</span>
           </span>

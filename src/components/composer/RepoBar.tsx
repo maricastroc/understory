@@ -47,7 +47,7 @@ export function RepoBar({
           onChange={(e) => onEdit(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onOpen()}
           placeholder="https://github.com/owner/repo  ·  owner/repo  ·  ./local/path"
-          className="min-w-0 flex-1 truncate bg-transparent font-mono text-[13px] text-ink outline-none placeholder:font-sans placeholder:text-ink-3"
+          className="min-w-0 flex-1 truncate bg-transparent font-mono text-[13px] text-ink placeholder:font-sans placeholder:text-ink-3"
         />
         {repoPath.trim() !== "" && (
           <button
@@ -82,7 +82,7 @@ export function RepoBar({
             onChange={(e) => onTokenChange(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && onOpen()}
             placeholder="ghp_… — for a private repo, kept in this tab only"
-            className="min-w-0 flex-1 bg-transparent font-mono text-[13px] text-ink outline-none placeholder:font-sans placeholder:text-ink-3"
+            className="min-w-0 flex-1 bg-transparent font-mono text-[13px] text-ink placeholder:font-sans placeholder:text-ink-3"
           />
           {token.trim() !== "" && (
             <button
@@ -99,7 +99,7 @@ export function RepoBar({
         <button
           type="button"
           onClick={() => setShowToken(true)}
-          className="cursor-pointer flex w-full items-center gap-2 border-b border-line bg-accent-tint/30 px-3.5 py-2 text-[12px] font-semibold text-accent-press transition-colors hover:bg-accent-tint/60"
+          className="flex w-full cursor-pointer items-center gap-2 border-b border-line bg-accent-tint/30 px-3.5 py-2 text-[12px] font-semibold text-accent-press transition-colors hover:bg-accent-tint/60"
         >
           <Lock className="size-3.5" />
           Private repo? Add a token

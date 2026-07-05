@@ -4,8 +4,6 @@ const REQ = new Request("http://localhost/api/dig", {
   headers: { "x-forwarded-for": "9.9.9.9" },
 });
 
-// The module reads UPSTASH_* env at import time, so each scenario resets modules and
-// (when configured) stubs the Upstash client to return a fixed limit verdict.
 async function load(opts?: { over: boolean }) {
   vi.resetModules();
   if (opts) {
