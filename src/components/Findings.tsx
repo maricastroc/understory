@@ -14,6 +14,9 @@ export function Findings({
   const idToLetter = new Map(evidence.artifacts.map((a, i) => [a.id, letter(i)]));
   const resolved = narrative.citations.filter((id) => idToLetter.has(id));
 
+  const citedSet = new Set(resolved);
+  const contradictions = evidence.contradictions.filter((c) => citedSet.has(c.artifactId));
+
   return (
     <section className="mt-6">
       <SectionLabel
@@ -55,6 +58,31 @@ export function Findings({
                   <span className="font-mono">{narrative.unknownCitations.join(", ")}</span> — not
                   in the collected evidence.
                 </span>
+              </div>
+            )}
+
+            {contradictions.length > 0 && (
+              <div className="mt-4 flex flex-col gap-2 rounded-md border border-crit/25 bg-crit-tint px-3 py-2.5 text-[12.5px] text-crit">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Alert className="size-4 shrink-0" />
+                  {contradictions.length === 1
+                    ? "A cited source is contradicted by later history"
+                    : `${contradictions.length} cited sources are contradicted by later history`}
+                </div>
+                <ul className="flex flex-col gap-1.5">
+                  {contradictions.map((c) => (
+                    <li key={`${c.artifactId}:${c.kind}`} className="flex gap-1.5">
+                      <span className="shrink-0 font-semibold">
+                        Exhibit {idToLetter.get(c.artifactId)}
+                      </span>
+                      <span className="opacity-90">{c.detail}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="text-[11.5px] opacity-80">
+                  The recorded reason was later undone or declined — confidence is lowered
+                  accordingly.
+                </div>
               </div>
             )}
 

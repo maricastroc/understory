@@ -24,6 +24,11 @@ export function verify(ev: Evidence, n: Narrative): VerifiedNarrative {
 
   const grounded = unknownCitations.length === 0;
 
+  // Only contradictions that undermine a source the answer actually leans on count
+  // against it — a revert of an uncited artifact doesn't weaken the conclusion.
+  const citedSet = new Set(groundedCitations);
+  const contradicting = ev.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
+
   return {
     ...n,
     grounded,
@@ -33,6 +38,7 @@ export function verify(ev: Evidence, n: Narrative): VerifiedNarrative {
       grounded,
       primarySources: groundedCitations.length,
       totalCollected: ev.artifacts.length,
+      contradicting,
     }),
   };
 }
@@ -42,10 +48,10 @@ function scoreConfidence(s: {
   grounded: boolean;
   primarySources: number;
   totalCollected: number;
+  contradicting: number;
 }): Confidence {
   const corroborating = Math.max(0, s.totalCollected - s.primarySources);
-
-  const contradicting = 0;
+  const { contradicting } = s;
 
   let level: Confidence["level"];
   let score: number;
@@ -65,6 +71,22 @@ function scoreConfidence(s: {
   } else {
     level = "high";
     score = 0.9;
+  }
+
+  // A recorded, grounded reason that a later artifact undoes or declines is worth less
+  // than one that stands unchallenged — dock it, transparently, by how much of its
+  // support is contradicted.
+  if (s.grounded && s.recorded && contradicting > 0) {
+    if (contradicting >= s.primarySources) {
+      level = "low";
+      score = 0.3;
+    } else if (level === "high") {
+      level = "medium";
+      score = 0.55;
+    } else {
+      level = "low";
+      score = 0.4;
+    }
   }
 
   return { score, level, primarySources: s.primarySources, corroborating, contradicting };

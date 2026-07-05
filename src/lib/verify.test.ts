@@ -1,19 +1,26 @@
 import { describe, expect, it } from "vitest";
-import type { Artifact, Evidence, Narrative } from "./types";
+import type { Artifact, Contradiction, Evidence, Narrative } from "./types";
 import { verify } from "./verify";
 
 function art(id: string): Artifact {
   return { id, kind: "commit", title: id, body: "", url: "", date: "2024-01-01T00:00:00Z" };
 }
 
-function ev(ids: string[]): Evidence {
+function ev(ids: string[], contradictions: Contradiction[] = []): Evidence {
   return {
     question: "why is this line the way it is?",
     repo: { path: "/repo" },
     location: { file: "a.ts", startLine: 1, endLine: 1 },
     artifacts: ids.map(art),
+    contradictions,
   };
 }
+
+const contra = (artifactId: string): Contradiction => ({
+  artifactId,
+  kind: "revert",
+  detail: "undone",
+});
 
 function narr(partial: Partial<Narrative>): Narrative {
   return { answer: "because reasons", citations: [], recorded: true, ...partial };
@@ -86,5 +93,36 @@ describe("verify — confidence scoring", () => {
     const v = verify(ev(["c1"]), narr({ answer: "line moved in a refactor", citations: ["c1"] }));
     expect(v.answer).toBe("line moved in a refactor");
     expect(v.recorded).toBe(true);
+  });
+});
+
+describe("verify — contradiction penalty", () => {
+  it("demotes a two-source HIGH to MEDIUM when one cited source is contradicted", () => {
+    const v = verify(
+      ev(["c1", "c2"], [contra("c1")]),
+      narr({ citations: ["c1", "c2"], recorded: true }),
+    );
+    expect(v.confidence.contradicting).toBe(1);
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.55);
+  });
+
+  it("drops to LOW when the reason is contradicted as much as it is supported", () => {
+    const v = verify(ev(["c1"], [contra("c1")]), narr({ citations: ["c1"], recorded: true }));
+    expect(v.confidence.level).toBe("low");
+    expect(v.confidence.score).toBe(0.3);
+  });
+
+  it("ignores a contradiction that hits an uncited artifact", () => {
+    const v = verify(ev(["c1", "c2"], [contra("c2")]), narr({ citations: ["c1"], recorded: true }));
+    expect(v.confidence.contradicting).toBe(0);
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.65);
+  });
+
+  it("does not penalize an honest abstention", () => {
+    const v = verify(ev(["c1"], [contra("c1")]), narr({ citations: ["c1"], recorded: false }));
+    expect(v.confidence.level).toBe("low");
+    expect(v.confidence.score).toBe(0.3);
   });
 });

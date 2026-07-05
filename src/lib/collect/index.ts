@@ -1,4 +1,5 @@
 import type { Artifact, CodeLocation, Evidence, RepoRef } from "../types";
+import { detectContradictions } from "./contradictions";
 import { commitToArtifact, isGitRepo, lineHistory, resolveRepo } from "./git";
 import {
   type AssociatedPr,
@@ -16,12 +17,24 @@ export type CollectInput = {
   location: CodeLocation;
 };
 
+type BaseEvidence = Omit<Evidence, "contradictions">;
+
 export async function collect(input: CollectInput): Promise<Evidence> {
   const { repoPath, question, location } = input;
 
   const gh = parseGitHubRepo(repoPath);
-  if (gh) return collectFromGitHub(gh.owner, gh.repo, question, location);
+  const base = gh
+    ? await collectFromGitHub(gh.owner, gh.repo, question, location)
+    : await collectLocal(repoPath, question, location);
 
+  return { ...base, contradictions: detectContradictions(base.artifacts) };
+}
+
+async function collectLocal(
+  repoPath: string,
+  question: string,
+  location: CodeLocation,
+): Promise<BaseEvidence> {
   if (!(await isGitRepo(repoPath))) {
     throw new Error(`Not a git repository: ${repoPath}`);
   }
@@ -36,7 +49,7 @@ async function collectFromGitHub(
   repo: string,
   question: string,
   location: CodeLocation,
-): Promise<Evidence> {
+): Promise<BaseEvidence> {
   const meta = await getRepoMeta(owner, repo);
   const repoRef: RepoRef = {
     path: `${owner}/${repo}`,
@@ -106,6 +119,9 @@ function prArtifact(pr: AssociatedPr): Artifact {
 }
 
 function issueArtifact(iss: PrIssue): Artifact {
+  const meta: Record<string, string> = {};
+  if (iss.state) meta.state = iss.state;
+  if (iss.stateReason) meta.stateReason = iss.stateReason;
   return {
     id: `issue:${iss.number}`,
     kind: "issue",
@@ -114,6 +130,7 @@ function issueArtifact(iss: PrIssue): Artifact {
     url: iss.url,
     date: iss.createdAt,
     ref: `#${iss.number}`,
+    ...(Object.keys(meta).length ? { meta } : {}),
   };
 }
 
