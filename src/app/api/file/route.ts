@@ -5,11 +5,15 @@ import { isGitRepo, readFileAtHead } from "@/lib/collect/git";
 import { getFileContentGitHub, getRepoMeta, parseGitHubRepo } from "@/lib/collect/github";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithToken } from "@/lib/collect/token-context";
+import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 export async function GET(req: Request) {
+  const limited = await rateLimit(req, "browse");
+  if (limited) return limited;
+
   const { searchParams } = new URL(req.url);
   const repo = searchParams.get("repo") ?? "";
   const filePath = searchParams.get("path") ?? "";

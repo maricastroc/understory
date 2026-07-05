@@ -3,11 +3,15 @@ import { isGitRepo, resolveRepo } from "@/lib/collect/git";
 import { getRepoMeta, parseGitHubRepo } from "@/lib/collect/github";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithToken } from "@/lib/collect/token-context";
+import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
+  const limited = await rateLimit(req, "browse");
+  if (limited) return limited;
+
   const token = req.headers.get("x-github-token")?.trim() || undefined;
 
   let body: { repo?: string };

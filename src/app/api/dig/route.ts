@@ -3,6 +3,7 @@ import { collect, parseLocation } from "@/lib/collect";
 import { parseGitHubRepo } from "@/lib/collect/github";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithToken } from "@/lib/collect/token-context";
+import { rateLimit } from "@/lib/ratelimit";
 import { synthesize } from "@/lib/synthesize";
 import { verify } from "@/lib/verify";
 import type { DigResult } from "@/lib/types";
@@ -11,6 +12,9 @@ export const runtime = "nodejs";
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
+  const limited = await rateLimit(req, "ai");
+  if (limited) return limited;
+
   let body: { repoPath?: string; location?: string; question?: string };
   try {
     body = await req.json();
