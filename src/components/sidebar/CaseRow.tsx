@@ -35,7 +35,10 @@ export function CaseRow({
           >
             {item.question}
           </span>
-          <span className="mt-1 block font-mono text-[11px] text-ink-3">
+          <span className="mt-1 block truncate font-mono text-[11px] text-ink-2">
+            {item.repoName} · {item.location}
+          </span>
+          <span className="mt-0.5 block font-mono text-[11px] text-ink-3">
             {item.caseId}
             {!item.hasNarrative
               ? " · evidence only"

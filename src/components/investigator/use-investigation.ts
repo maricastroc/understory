@@ -137,15 +137,22 @@ export function useInvestigation(user: AuthUser | null) {
     }
   }
 
-  const items: CaseItem[] = history.map((e) => ({
-    caseId: e.caseId,
-    question: e.form.question || "(no question asked)",
-    recorded: e.result.narrative?.recorded ?? false,
-    answerable: e.result.narrative?.answerable !== false,
-    hasNarrative: !!e.result.narrative,
-    level: e.result.narrative?.confidence.level ?? "low",
-    score: e.result.narrative?.confidence.score ?? 0,
-  }));
+  const items: CaseItem[] = history.map((e) => {
+    const ev = e.result.evidence;
+    const base = (p: string) => p.split("/").filter(Boolean).pop() ?? p;
+    const { file, startLine, endLine } = ev.location;
+    return {
+      caseId: e.caseId,
+      question: e.form.question || "(no question asked)",
+      repoName: ev.repo.name ?? base(ev.repo.path),
+      location: `${base(file)}:${startLine}${endLine !== startLine ? `-${endLine}` : ""}`,
+      recorded: e.result.narrative?.recorded ?? false,
+      answerable: e.result.narrative?.answerable !== false,
+      hasNarrative: !!e.result.narrative,
+      level: e.result.narrative?.confidence.level ?? "low",
+      score: e.result.narrative?.confidence.score ?? 0,
+    };
+  });
 
   const browsing = view === "browse" && !loading;
 
