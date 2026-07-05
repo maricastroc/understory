@@ -44,7 +44,10 @@ const SYSTEM = [
   "  'fix' with no reasoning), set recorded=false and say plainly that the history",
   "  does not explain it. Never invent a motivation to fill the gap.",
   "- Be concise and factual. No hedging, no filler, no apologies.",
-  "- Write `answer` in the same language as the question.",
+  "- LANGUAGE: write `answer` in the same language as the Question line, detected",
+  "  from the Question ALONE. The evidence may be in other languages (Japanese,",
+  "  etc.); that must NEVER change the answer's language. An English question gets",
+  "  an English answer even if every cited source is in another language.",
   "- Only cite ids that literally appear in the evidence. Never fabricate an id.",
 ].join("\n");
 
@@ -92,6 +95,7 @@ export async function synthesize(ev: Evidence): Promise<Narrative> {
     schema: narrativeSchema,
     system,
     prompt,
+    temperature: 0,
   });
   return object;
 }
