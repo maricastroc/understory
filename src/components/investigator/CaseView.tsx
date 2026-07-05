@@ -16,11 +16,14 @@ export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }
     ev.location.endLine !== ev.location.startLine ? `-${ev.location.endLine}` : ""
   }`;
 
-  const status = narrative
-    ? narrative.recorded
-      ? { tone: "good" as const, label: "Concluded" }
-      : { tone: "warn" as const, label: "Inconclusive" }
-    : { tone: "neutral" as const, label: "Evidence only" };
+  const outOfScope = narrative?.answerable === false;
+  const status = !narrative
+    ? { tone: "neutral" as const, label: "Evidence only" }
+    : outOfScope
+      ? { tone: "neutral" as const, label: "Out of scope" }
+      : narrative.recorded
+        ? { tone: "good" as const, label: "Concluded" }
+        : { tone: "warn" as const, label: "Inconclusive" };
 
   return (
     <>
@@ -59,7 +62,7 @@ export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }
           <span>
             {ev.artifacts.length} exhibit{ev.artifacts.length !== 1 ? "s" : ""}
           </span>
-          {narrative && (
+          {narrative && !outOfScope && (
             <Pill tone={status.tone} dot={status.tone !== "neutral"}>
               {levelLabel[narrative.confidence.level]} confidence ·{" "}
               <span className="tnum">{Math.round(narrative.confidence.score * 100)}%</span>

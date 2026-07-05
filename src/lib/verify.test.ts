@@ -23,7 +23,7 @@ const contra = (artifactId: string): Contradiction => ({
 });
 
 function narr(partial: Partial<Narrative>): Narrative {
-  return { answer: "because reasons", citations: [], recorded: true, ...partial };
+  return { answer: "because reasons", citations: [], recorded: true, answerable: true, ...partial };
 }
 
 describe("verify — grounding", () => {

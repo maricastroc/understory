@@ -141,6 +141,7 @@ export function useInvestigation(user: AuthUser | null) {
     caseId: e.caseId,
     question: e.form.question || "(no question asked)",
     recorded: e.result.narrative?.recorded ?? false,
+    answerable: e.result.narrative?.answerable !== false,
     hasNarrative: !!e.result.narrative,
     level: e.result.narrative?.confidence.level ?? "low",
     score: e.result.narrative?.confidence.score ?? 0,

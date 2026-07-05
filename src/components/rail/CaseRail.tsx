@@ -28,7 +28,10 @@ export function CaseRail({ result }: { result: DigResult }) {
         <div className="mt-3">
           <MetaRow k="Branch" v={ev.repo.branch ?? "—"} mono tail />
           <MetaRow k="Location" v={loc} mono tail />
-          <MetaRow k="Commits on this line" v={<span className="tnum">{ev.artifacts.length}</span>} />
+          <MetaRow
+            k="Commits on this line"
+            v={<span className="tnum">{ev.artifacts.length}</span>}
+          />
           <MetaRow k="Contributors" v={<span className="tnum">{people.length}</span>} />
           {ev.repo.remoteUrl && (
             <MetaRow
@@ -48,7 +51,7 @@ export function CaseRail({ result }: { result: DigResult }) {
         </div>
       </RailCard>
 
-      {result.narrative && (
+      {result.narrative && result.narrative.answerable !== false && (
         <RailCard icon={<Shield className="size-[15px]" />} title="Chain of provenance">
           <Provenance narrative={result.narrative} />
         </RailCard>
