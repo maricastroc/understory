@@ -12,9 +12,9 @@ export function RightRail({
   return (
     <aside
       aria-label="Investigation details"
-      className="hidden w-[284px] shrink-0 overflow-y-auto border-l border-line-2 bg-surface-2 xl:block"
+      className="hidden w-71 shrink-0 overflow-y-auto border-l border-line-2 bg-surface-2 xl:block"
     >
-      <div className="flex flex-col gap-3.5 p-[18px] pb-10">
+      <div className="flex flex-col gap-3.5 p-4.5 pb-10">
         {result || repoMeta ? (
           <RailContent result={result} repoMeta={repoMeta} />
         ) : (
