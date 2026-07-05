@@ -125,7 +125,9 @@ export function Composer({
           file={viewer.file}
           selectedStart={viewer.selectedStart}
           selectedEnd={viewer.selectedEnd}
+          enclosing={viewer.enclosing}
           onSelect={viewer.selectLine}
+          onExpand={viewer.expandToSymbol}
           question={question}
           setQuestion={setQuestion}
           onRun={run}

@@ -1,5 +1,6 @@
 import {
   BookMarked,
+  Braces,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -91,6 +92,7 @@ export {
   GitBranch as Branch,
   Clock,
   FileText as FileIcon,
+  Braces,
   Check,
   TriangleAlert as Alert,
   ExternalLink,

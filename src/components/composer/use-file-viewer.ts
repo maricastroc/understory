@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { type SymbolSpan, enclosingSymbol } from "@/lib/collect/symbol";
 
 export type OpenFile = { path: string; lines: string[] };
 
@@ -8,12 +9,14 @@ export function useFileViewer(repoPath: string) {
   const [error, setError] = useState<string | null>(null);
   const [selectedStart, setSelectedStart] = useState<number | null>(null);
   const [selectedEnd, setSelectedEnd] = useState<number | null>(null);
+  const [enclosing, setEnclosing] = useState<SymbolSpan | null>(null);
   const anchor = useRef<number | null>(null);
 
   function clearSelection() {
     anchor.current = null;
     setSelectedStart(null);
     setSelectedEnd(null);
+    setEnclosing(null);
   }
 
   // Click sets the anchor and a single line; shift-click extends from the anchor to a range.
@@ -25,7 +28,15 @@ export function useFileViewer(repoPath: string) {
       anchor.current = n;
       setSelectedStart(n);
       setSelectedEnd(n);
+      setEnclosing(file ? enclosingSymbol(file.lines, n, file.path) : null);
     }
+  }
+
+  // Grow the selection to the whole function/symbol the clicked line lives in.
+  function expandToSymbol() {
+    if (!enclosing) return;
+    setSelectedStart(enclosing.start);
+    setSelectedEnd(enclosing.end);
   }
 
   async function open(path: string, token?: string) {
@@ -57,5 +68,16 @@ export function useFileViewer(repoPath: string) {
     clearSelection();
   }
 
-  return { file, loading, error, selectedStart, selectedEnd, selectLine, open, reset };
+  return {
+    file,
+    loading,
+    error,
+    selectedStart,
+    selectedEnd,
+    enclosing,
+    selectLine,
+    expandToSymbol,
+    open,
+    reset,
+  };
 }

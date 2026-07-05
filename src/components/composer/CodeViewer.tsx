@@ -1,11 +1,21 @@
-import { FileIcon, Pencil } from "../icons";
+import type { SymbolSpan } from "@/lib/collect/symbol";
+import { Braces, FileIcon, Pencil } from "../icons";
 import type { OpenFile } from "./use-file-viewer";
+
+const NOUN: Record<string, string> = {
+  method: "function",
+  module: "module",
+  namespace: "namespace",
+};
+const symbolNoun = (kind: string): string => NOUN[kind] ?? kind;
 
 export function CodeViewer({
   file,
   selectedStart,
   selectedEnd,
+  enclosing,
   onSelect,
+  onExpand,
   question,
   setQuestion,
   onRun,
@@ -13,7 +23,9 @@ export function CodeViewer({
   file: OpenFile;
   selectedStart: number | null;
   selectedEnd: number | null;
+  enclosing: SymbolSpan | null;
   onSelect: (n: number, extend: boolean) => void;
+  onExpand: () => void;
   question: string;
   setQuestion: (v: string) => void;
   onRun: () => void;
@@ -23,6 +35,21 @@ export function CodeViewer({
   const locLabel = hasSelection
     ? `${file.path}:${selectedStart}${rangeSize > 1 ? `-${selectedEnd}` : ""}`
     : file.path;
+
+  const isSymbolSelected =
+    !!enclosing && selectedStart === enclosing.start && selectedEnd === enclosing.end;
+  const canExpand =
+    !!enclosing && (selectedStart !== enclosing.start || selectedEnd !== enclosing.end);
+
+  const subject = isSymbolSelected ? symbolNoun(enclosing.kind) : rangeSize > 1 ? "lines" : "line";
+  const runLabel =
+    isSymbolSelected && enclosing.name
+      ? `Investigate ${enclosing.name}`
+      : isSymbolSelected
+        ? `Investigate this ${subject}`
+        : rangeSize > 1
+          ? "Investigate these lines"
+          : "Investigate this line";
 
   return (
     <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-card">
@@ -49,9 +76,7 @@ export function CodeViewer({
                 key={n}
                 onClick={(e) => onSelect(n, e.shiftKey)}
                 className={`group flex cursor-pointer border-l-[3px] font-mono text-[12.5px] leading-[1.6] ${
-                  inRange
-                    ? "border-accent bg-accent-tint"
-                    : "border-transparent hover:bg-inset"
+                  inRange ? "border-accent bg-accent-tint" : "border-transparent hover:bg-inset"
                 }`}
               >
                 <span
@@ -66,7 +91,11 @@ export function CodeViewer({
                 <code className="flex-1 px-3 whitespace-pre text-ink">{ln || " "}</code>
                 {inRange && isEnd && (
                   <span className="shrink-0 self-center pr-3 text-[10.5px] font-semibold text-accent-press">
-                    {rangeSize > 1 ? `${rangeSize} lines` : "selected"}
+                    {isSymbolSelected
+                      ? symbolNoun(enclosing.kind)
+                      : rangeSize > 1
+                        ? `${rangeSize} lines`
+                        : "selected"}
                   </span>
                 )}
               </li>
@@ -77,12 +106,27 @@ export function CodeViewer({
 
       {hasSelection && (
         <div className="flex flex-col gap-3 border-t-2 border-accent/25 bg-accent-tint/25 p-4">
+          {canExpand && (
+            <button
+              type="button"
+              onClick={onExpand}
+              className="inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-md border border-accent/30 bg-surface px-2.5 py-1.5 text-[12px] text-accent-press shadow-sm transition-colors hover:bg-accent-tint"
+            >
+              <Braces className="size-3.5" />
+              Expand to the whole
+              {enclosing.name ? (
+                <code className="font-mono font-semibold">{enclosing.name}</code>
+              ) : null}
+              {symbolNoun(enclosing.kind)}
+              <span className="text-ink-3">· {enclosing.end - enclosing.start + 1} lines</span>
+            </button>
+          )}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <label
               htmlFor="investigate-question"
               className="text-[13.5px] font-semibold tracking-tight text-ink"
             >
-              What do you want to know about this line?
+              What do you want to know about this {subject}?
             </label>
             <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[11.5px] text-ink-2">
               <FileIcon className="size-3.5 text-ink-3" />
@@ -97,7 +141,7 @@ export function CodeViewer({
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && onRun()}
-                placeholder="Ask about this line…"
+                placeholder={`Ask about this ${subject}…`}
                 className="h-11 w-full rounded-md border border-line-2 bg-surface pr-3 pl-9 text-[14px] text-ink shadow-sm transition-[border-color,box-shadow] outline-none placeholder:text-ink-3 focus:border-accent/50 focus:ring-2 focus:ring-accent/15"
               />
             </div>
@@ -106,7 +150,7 @@ export function CodeViewer({
               onClick={onRun}
               className="inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-md bg-accent px-5 text-[13.5px] font-semibold text-white shadow-sm transition-colors hover:bg-accent-press"
             >
-              {rangeSize > 1 ? "Investigate these lines" : "Investigate this line"}
+              {runLabel}
             </button>
           </div>
           <p className="text-[11.5px] text-ink-2">
