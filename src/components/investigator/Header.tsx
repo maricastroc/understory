@@ -48,9 +48,9 @@ export function Header({
         </button>
       )}
 
-      <Link href="/" className="flex items-center pr-1 sm:pr-2">
+      <Link href="/" className="flex shrink-0 items-center pr-1 sm:pr-2">
         <Logo className="size-6.5 shrink-0 text-accent" />
-        <span className="text-[15px] font-semibold tracking-tight sm:text-[16px]">
+        <span className="whitespace-nowrap text-[15px] font-semibold tracking-tight sm:text-[16px]">
           Git <span className="text-accent">Investigator</span>
         </span>
       </Link>
@@ -92,7 +92,7 @@ export function Header({
 
         <AccountMenu
           user={user ?? null}
-          signInClassName="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border border-line-2 bg-surface px-3 text-[13px] font-medium text-ink transition-colors hover:bg-inset"
+          signInClassName="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-line-2 bg-surface px-3 text-[13px] font-medium text-ink whitespace-nowrap transition-colors hover:bg-inset"
           showPlaceholder
         />
       </div>

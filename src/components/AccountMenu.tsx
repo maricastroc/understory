@@ -66,8 +66,8 @@ export function AccountMenu({
   if (authEnabled) {
     return (
       <a href="/api/auth/login" className={signInClassName}>
-        <Github className="size-4" />
-        Sign in
+        <Github className="size-4 shrink-0" />
+        <span className="hidden sm:inline">Sign in</span>
       </a>
     );
   }

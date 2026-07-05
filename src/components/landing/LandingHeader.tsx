@@ -23,11 +23,11 @@ export function LandingHeader() {
         <div className="ml-auto flex items-center gap-2">
           <AccountMenu
             user={user}
-            signInClassName="hidden h-9 items-center gap-2 rounded-md border border-line-2 bg-surface px-3.5 text-[13px] font-medium text-ink transition-colors hover:bg-inset sm:inline-flex"
+            signInClassName="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-line-2 bg-surface px-2.5 text-[13px] font-medium text-ink whitespace-nowrap transition-colors hover:bg-inset sm:px-3.5"
           />
           <Link
             href="/app"
-            className="inline-flex h-9 items-center rounded-md bg-accent px-3.5 text-[13px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
+            className="inline-flex h-9 shrink-0 items-center rounded-md bg-accent px-3.5 text-[13px] font-medium whitespace-nowrap text-white shadow-sm transition-colors hover:bg-accent-press"
           >
             Open app
           </Link>
