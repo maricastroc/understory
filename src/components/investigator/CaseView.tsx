@@ -1,5 +1,5 @@
 import { Evidence } from "../Evidence";
-import { Findings } from "../Findings";
+import { Findings } from "../findings/Findings";
 import { basename, levelLabel } from "../format";
 import { Alert, Branch, ChevronLeft, FileIcon } from "../icons";
 import { Timeline } from "../Timeline";
@@ -8,15 +8,21 @@ import type { Entry } from "./use-investigation";
 
 export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }) {
   const { result, caseId, form } = entry;
+
   const ev = result.evidence;
+
   const narrative = result.narrative;
+
   const citedIds = new Set(narrative?.citations ?? []);
+
   const repoName = ev.repo.name ?? basename(ev.repo.path);
+
   const loc = `${ev.location.file}:${ev.location.startLine}${
     ev.location.endLine !== ev.location.startLine ? `-${ev.location.endLine}` : ""
   }`;
 
   const outOfScope = narrative?.answerable === false;
+
   const status = !narrative
     ? { tone: "neutral" as const, label: "Evidence only" }
     : outOfScope
@@ -49,7 +55,6 @@ export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }
           {form.question || "Why is this line the way it is?"}
         </h1>
 
-        {/* Location, branch and exhibits are plain metadata — only confidence stays a chip. */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-ink-2">
           <span className="inline-flex items-center gap-1.5">
             <FileIcon className="size-3.5 text-ink-3" />
@@ -82,8 +87,8 @@ export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }
         </div>
       )}
 
-      {ev.artifacts.length > 0 && <Timeline artifacts={ev.artifacts} citedIds={citedIds} />}
       {ev.artifacts.length > 0 && <Evidence evidence={ev} citedIds={citedIds} />}
+      {ev.artifacts.length > 0 && <Timeline artifacts={ev.artifacts} citedIds={citedIds} />}
     </>
   );
 }

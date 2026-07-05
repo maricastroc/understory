@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type { Artifact } from "@/lib/types";
 import { fmtDate } from "./format";
 import { KindIcon, kindLabel } from "./icons";
@@ -15,6 +18,13 @@ export function Timeline({
   const firstCited = citedIdxs[0] ?? -1;
   const lastCited = citedIdxs[citedIdxs.length - 1] ?? -1;
   const citedCount = citedIdxs.length;
+
+  const COLLAPSED_COUNT = 5;
+  const collapsible = artifacts.length > COLLAPSED_COUNT + 1;
+  const [expanded, setExpanded] = useState(false);
+  // Collapsed, keep the most recent entries (the current line's node lives at the end).
+  const startIdx = collapsible && !expanded ? artifacts.length - COLLAPSED_COUNT : 0;
+  const visible = artifacts.slice(startIdx);
 
   return (
     <section className="mt-8">
@@ -34,8 +44,20 @@ export function Timeline({
           </div>
         )}
 
+        {collapsible && !expanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="mb-4 inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-inset px-2.5 py-1.5 text-[12px] font-medium text-ink-2 transition-colors hover:border-accent/40 hover:text-accent-press"
+          >
+            Show all {artifacts.length} changes
+            <span className="text-ink-3">· {startIdx} earlier hidden</span>
+          </button>
+        )}
+
         <ol>
-          {artifacts.map((a, i) => {
+          {visible.map((a, k) => {
+            const i = startIdx + k;
             const isLast = i === last;
             const cited = citedIds.has(a.id);
 
@@ -54,7 +76,7 @@ export function Timeline({
               <li
                 key={a.id}
                 className="relative flex rise gap-4 pb-7 last:pb-0"
-                style={{ animationDelay: `${i * 55}ms` }}
+                style={{ animationDelay: `${k * 55}ms` }}
               >
                 <div className="relative flex w-7 shrink-0 justify-center">
                   {!isLast && (
@@ -110,6 +132,16 @@ export function Timeline({
             );
           })}
         </ol>
+
+        {collapsible && expanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded(false)}
+            className="mt-1 inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-inset px-2.5 py-1.5 text-[12px] font-medium text-ink-2 transition-colors hover:border-accent/40 hover:text-accent-press"
+          >
+            Show less
+          </button>
+        )}
       </div>
     </section>
   );

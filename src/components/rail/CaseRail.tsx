@@ -29,8 +29,12 @@ export function CaseRail({ result }: { result: DigResult }) {
           <MetaRow k="Branch" v={ev.repo.branch ?? "—"} mono tail />
           <MetaRow k="Location" v={loc} mono tail />
           <MetaRow
-            k="Commits on this line"
-            v={<span className="tnum">{ev.artifacts.length}</span>}
+            k="History"
+            v={
+              <span className="tnum">
+                {ev.artifacts.length} commit{ev.artifacts.length !== 1 ? "s" : ""}
+              </span>
+            }
           />
           <MetaRow k="Contributors" v={<span className="tnum">{people.length}</span>} />
           {ev.repo.remoteUrl && (
