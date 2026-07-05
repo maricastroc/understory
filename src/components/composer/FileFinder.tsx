@@ -39,7 +39,7 @@ export function FileFinder({
           className="min-w-0 flex-1 bg-transparent text-[13px] text-ink placeholder:text-ink-3 disabled:cursor-not-allowed"
         />
         {searching && (
-          <span className="size-4 shrink-0 animate-spin rounded-full border-2 border-line-2 border-t-accent" />
+          <span className="size-4 shrink-0 animate-spin rounded-full border border-line-2 border-t-accent" />
         )}
         {!searching && q !== "" && (
           <button

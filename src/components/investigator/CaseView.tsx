@@ -1,13 +1,24 @@
+import type { Artifact, ArtifactRef } from "@/lib/types";
 import { Evidence } from "../Evidence";
 import { Findings } from "../findings/Findings";
-import { basename, levelLabel } from "../format";
-import { Alert, Branch, ChevronLeft, FileIcon } from "../icons";
+import { basename, levelLabel, toArtifactRef } from "../format";
+import { Alert, Branch, ChevronLeft, FileIcon, KindIcon, kindLabel } from "../icons";
 import { Timeline } from "../Timeline";
 import { Pill } from "../ui";
 import type { Entry } from "./use-investigation";
 
-export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }) {
-  const { result, caseId, form } = entry;
+export function CaseView({
+  entry,
+  onBack,
+  onDrill,
+  onOpenParent,
+}: {
+  entry: Entry;
+  onBack: () => void;
+  onDrill?: (ref: ArtifactRef) => void;
+  onOpenParent?: (caseId: string) => void;
+}) {
+  const { result, caseId, form, parentCaseId, parentQuestion } = entry;
 
   const ev = result.evidence;
 
@@ -17,9 +28,16 @@ export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }
 
   const repoName = ev.repo.name ?? basename(ev.repo.path);
 
-  const loc = `${ev.location.file}:${ev.location.startLine}${
-    ev.location.endLine !== ev.location.startLine ? `-${ev.location.endLine}` : ""
-  }`;
+  const loc = ev.location
+    ? `${ev.location.file}:${ev.location.startLine}${
+        ev.location.endLine !== ev.location.startLine ? `-${ev.location.endLine}` : ""
+      }`
+    : null;
+
+  const anchor = ev.anchor;
+
+  const canDrill = (ev.repo.remoteUrl ?? "").includes("github.com");
+  const drill = onDrill && canDrill ? (a: Artifact) => onDrill(toArtifactRef(a)) : undefined;
 
   const outOfScope = narrative?.answerable === false;
 
@@ -42,6 +60,23 @@ export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }
       </button>
 
       <div className="flex flex-col gap-5">
+        {parentCaseId && onOpenParent && (
+          <button
+            type="button"
+            onClick={() => onOpenParent(parentCaseId)}
+            className="flex w-fit max-w-full cursor-pointer flex-col gap-0.5 rounded-lg border border-accent/20 bg-accent-tint px-3 py-2 text-left transition-colors hover:border-accent/45"
+          >
+            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold tracking-wide text-accent-press uppercase">
+              ↳ continues {parentCaseId}
+            </span>
+            {parentQuestion && (
+              <span className="line-clamp-1 text-[12.5px] text-ink-2 italic">
+                drilled from “{parentQuestion}”
+              </span>
+            )}
+          </button>
+        )}
+
         <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-ink-2">
           <span className="font-mono">{repoName}</span>
           <span className="text-ink-3">/</span>
@@ -56,10 +91,20 @@ export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }
         </h1>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-ink-2">
-          <span className="inline-flex items-center gap-1.5">
-            <FileIcon className="size-3.5 text-ink-3" />
-            <span className="font-mono text-ink">{loc}</span>
-          </span>
+          {loc ? (
+            <span className="inline-flex items-center gap-1.5">
+              <FileIcon className="size-3.5 text-ink-3" />
+              <span className="font-mono text-ink">{loc}</span>
+            </span>
+          ) : (
+            anchor && (
+              <span className="inline-flex items-center gap-1.5">
+                <KindIcon kind={anchor.kind} className="size-3.5 text-ink-3" />
+                <span className="text-ink-3">{kindLabel[anchor.kind]}</span>
+                <span className="font-mono text-ink">{anchor.ref ?? anchor.id}</span>
+              </span>
+            )
+          )}
           <span className="inline-flex items-center gap-1.5">
             <Branch className="size-3.5 text-ink-3" />
             branch <b className="font-medium text-ink">{ev.repo.branch ?? "—"}</b>
@@ -87,7 +132,7 @@ export function CaseView({ entry, onBack }: { entry: Entry; onBack: () => void }
         </div>
       )}
 
-      {ev.artifacts.length > 0 && <Evidence evidence={ev} citedIds={citedIds} />}
+      {ev.artifacts.length > 0 && <Evidence evidence={ev} citedIds={citedIds} onDrill={drill} />}
       {ev.artifacts.length > 0 && <Timeline artifacts={ev.artifacts} citedIds={citedIds} />}
     </>
   );

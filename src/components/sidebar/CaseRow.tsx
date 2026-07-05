@@ -36,6 +36,7 @@ export function CaseRow({
             {item.question}
           </span>
           <span className="mt-1 block truncate font-mono text-[11px] text-ink-2">
+            {item.child && <span className="text-accent-press">↳ </span>}
             {item.repoName} · {item.location}
           </span>
           <span className="mt-0.5 block font-mono text-[11px] text-ink-3">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { DigResult, InvestigateInput } from "@/lib/types";
+import type { ArtifactRef, DigResult, InvestigateInput } from "@/lib/types";
 import type { CaseItem } from "../sidebar/case-item";
 import type { AuthUser } from "./use-auth";
 
@@ -9,7 +9,13 @@ const DEFAULT_REPO = process.env.NEXT_PUBLIC_DEFAULT_REPO || ".demo/payments-ser
 const FIRST_CASE = 2049;
 
 export type Form = InvestigateInput;
-export type Entry = { caseId: string; form: Form; result: DigResult };
+export type Entry = {
+  caseId: string;
+  form: Form;
+  result: DigResult;
+  parentCaseId?: string;
+  parentQuestion?: string;
+};
 export type View = "browse" | "case";
 
 type SavedInvestigation = {
@@ -64,12 +70,17 @@ export function useInvestigation(user: AuthUser | null) {
 
   const current = history.find((e) => e.caseId === activeId) ?? null;
 
-  async function investigate(input: Form, token?: string) {
+  async function submit(
+    reqBody: object,
+    buildEntry: (caseId: string, data: DigResult) => Entry,
+    buildSave: (caseId: string, data: DigResult) => SavedInvestigation,
+    token?: string,
+  ) {
     if (loading) return;
     setLoading(true);
     setError(null);
     setView("case");
-    
+
     try {
       const res = await fetch("/api/dig", {
         method: "POST",
@@ -77,7 +88,7 @@ export function useInvestigation(user: AuthUser | null) {
           "Content-Type": "application/json",
           ...(token ? { "x-github-token": token } : {}),
         },
-        body: JSON.stringify(input),
+        body: JSON.stringify(reqBody),
       });
       const data = (await res.json()) as DigResult & { error?: string };
       if (!res.ok || !data.evidence) {
@@ -88,20 +99,14 @@ export function useInvestigation(user: AuthUser | null) {
 
       const caseId = `GI-${counter.current++}`;
 
-      setHistory((h) => [{ caseId, form: input, result: data }, ...h]);
+      setHistory((h) => [buildEntry(caseId, data), ...h]);
 
       setActiveId(caseId);
       if (user) {
         void fetch("/api/investigations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            caseId,
-            question: input.question,
-            repoPath: input.repoPath,
-            location: input.location,
-            result: data,
-          }),
+          body: JSON.stringify(buildSave(caseId, data)),
         }).catch(() => {});
       }
     } catch (err) {
@@ -110,6 +115,49 @@ export function useInvestigation(user: AuthUser | null) {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function investigate(input: Form, token?: string) {
+    await submit(
+      input,
+      (caseId, data) => ({ caseId, form: input, result: data }),
+      (caseId, data) => ({
+        caseId,
+        question: input.question,
+        repoPath: input.repoPath,
+        location: input.location,
+        result: data,
+      }),
+      token,
+    );
+  }
+
+  async function drillInto(
+    parentCaseId: string,
+    parentQuestion: string,
+    anchor: ArtifactRef,
+    repoPath: string,
+    token?: string,
+  ) {
+    const label = anchor.ref ?? anchor.id;
+    await submit(
+      { repoPath, target: anchor },
+      (caseId, data) => ({
+        caseId,
+        form: { repoPath, location: label, question: data.evidence.question },
+        result: data,
+        parentCaseId,
+        parentQuestion,
+      }),
+      (caseId, data) => ({
+        caseId,
+        question: data.evidence.question,
+        repoPath,
+        location: label,
+        result: data,
+      }),
+      token,
+    );
   }
 
   function selectCase(id: string) {
@@ -151,18 +199,23 @@ export function useInvestigation(user: AuthUser | null) {
 
     const base = (p: string) => p.split("/").filter(Boolean).pop() ?? p;
 
-    const { file, startLine, endLine } = ev.location;
+    const location = ev.location
+      ? `${base(ev.location.file)}:${ev.location.startLine}${
+          ev.location.endLine !== ev.location.startLine ? `-${ev.location.endLine}` : ""
+        }`
+      : (ev.anchor?.ref ?? ev.anchor?.id ?? "—");
 
     return {
       caseId: e.caseId,
       question: e.form.question || "(no question asked)",
       repoName: ev.repo.name ?? base(ev.repo.path),
-      location: `${base(file)}:${startLine}${endLine !== startLine ? `-${endLine}` : ""}`,
+      location,
       recorded: e.result.narrative?.recorded ?? false,
       answerable: e.result.narrative?.answerable !== false,
       hasNarrative: !!e.result.narrative,
       level: e.result.narrative?.confidence.level ?? "low",
       score: e.result.narrative?.confidence.score ?? 0,
+      child: !!e.parentCaseId,
     };
   });
 
@@ -180,6 +233,7 @@ export function useInvestigation(user: AuthUser | null) {
     current,
     browsing,
     investigate,
+    drillInto,
     selectCase,
     backToCode,
     newInvestigation,

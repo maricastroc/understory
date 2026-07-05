@@ -43,7 +43,6 @@ export function Composer({
     void viewer.open(path, token.trim() || undefined);
   }
 
-  // Clearing the Find input drops the open file with it — no orphaned code block.
   function editFind(v: string) {
     search.setQuery(v);
     if (v.trim() === "" && viewer.file) viewer.reset();

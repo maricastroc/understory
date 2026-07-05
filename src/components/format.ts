@@ -1,7 +1,21 @@
-import type { Confidence } from "@/lib/types";
+import type { Artifact, ArtifactRef, Confidence } from "@/lib/types";
 
 /** 0 -> "A", 1 -> "B" … for exhibit labels. */
 export const letter = (i: number) => String.fromCharCode(65 + i);
+
+/** A collected artifact, reduced to the reference needed to anchor a drill-down on it. */
+export function toArtifactRef(a: Artifact): ArtifactRef {
+  const n = a.ref?.startsWith("#") ? Number(a.ref.slice(1)) : NaN;
+  const sha = typeof a.meta?.sha === "string" ? a.meta.sha : undefined;
+  return {
+    kind: a.kind,
+    id: a.id,
+    ref: a.ref,
+    title: a.title,
+    number: Number.isFinite(n) ? n : undefined,
+    oid: sha ?? (a.kind === "commit" ? a.ref : undefined),
+  };
+}
 
 /** "a/b/payments-service" -> "payments-service". */
 export function basename(p: string): string {

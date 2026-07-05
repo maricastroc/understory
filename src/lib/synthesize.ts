@@ -58,15 +58,26 @@ function renderEvidence(ev: Evidence): string {
     .join("\n\n---\n\n");
 }
 
-function formatLocation(ev: Evidence): string {
-  const { file, startLine, endLine } = ev.location;
-  return endLine !== startLine ? `${file}:${startLine}-${endLine}` : `${file}:${startLine}`;
+function formatTarget(ev: Evidence): string {
+  if (ev.location) {
+    const { file, startLine, endLine } = ev.location;
+    return endLine !== startLine ? `${file}:${startLine}-${endLine}` : `${file}:${startLine}`;
+  }
+  if (ev.anchor) {
+    const a = ev.anchor;
+    const kind = a.kind.replace("_", " ");
+    return `${kind} ${a.ref ?? a.id}${a.title ? ` — ${a.title}` : ""}`;
+  }
+  return "(unspecified)";
 }
 
 export function buildSynthesisInput(ev: Evidence): { system: string; prompt: string } {
+  const targetLine = ev.location
+    ? `Code location: ${formatTarget(ev)}`
+    : `Anchored on: ${formatTarget(ev)}`;
   const prompt = [
     `Question: ${ev.question}`,
-    `Code location: ${formatLocation(ev)}`,
+    targetLine,
     "",
     "Evidence:",
     ev.artifacts.length ? renderEvidence(ev) : "(no evidence was collected)",

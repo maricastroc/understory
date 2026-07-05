@@ -1,4 +1,5 @@
 import type { Artifact } from "./artifact";
+import type { ArtifactRef } from "./artifact-ref";
 import type { CodeLocation } from "./code-location";
 import type { Contradiction } from "./contradiction";
 import type { RepoRef } from "./repo-ref";
@@ -6,7 +7,8 @@ import type { RepoRef } from "./repo-ref";
 export type Evidence = {
   question: string;
   repo: RepoRef;
-  location: CodeLocation;
+  location?: CodeLocation;
+  anchor?: ArtifactRef;
   artifacts: Artifact[];
   contradictions: Contradiction[];
 };

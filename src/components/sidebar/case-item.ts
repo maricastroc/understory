@@ -10,4 +10,5 @@ export type CaseItem = {
   hasNarrative: boolean;
   level: Confidence["level"];
   score: number;
+  child: boolean;
 };

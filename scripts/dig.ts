@@ -51,6 +51,10 @@ function indent(text: string, pad = "     "): string {
 }
 
 function locStr(ev: Evidence): string {
+  if (!ev.location) {
+    const a = ev.anchor;
+    return a ? `${a.kind} ${a.ref ?? a.id}` : "(unknown target)";
+  }
   const { file, startLine, endLine } = ev.location;
   return endLine !== startLine ? `${file}:${startLine}-${endLine}` : `${file}:${startLine}`;
 }
@@ -67,7 +71,7 @@ function printArtifact(a: Artifact, i: number, isLast: boolean) {
   if (who) console.log(indent(gray(who)));
   if (a.url) console.log(indent(gray(a.url)));
 
-  const body = a.body.split("\n").slice(1).join("\n").trim(); // drop subject line
+  const body = a.body.split("\n").slice(1).join("\n").trim();
   if (body) {
     console.log();
     console.log(indent(dim(body)));

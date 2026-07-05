@@ -1,31 +1,43 @@
-import type { Artifact, CodeLocation, Evidence, RepoRef } from "../types";
+import type { Artifact, ArtifactRef, CodeLocation, Evidence, RepoRef } from "../types";
 import { detectContradictions } from "./contradictions";
 import { commitToArtifact, isGitRepo, lineHistory, resolveRepo } from "./git";
 import {
-  type AssociatedPr,
-  type BlameCommit,
-  type PrIssue,
-  type PrReview,
   blameLines,
+  commitArtifact,
+  commitContextArtifacts,
   getRepoMeta,
+  issueArtifact,
+  issueContextArtifacts,
   parseGitHubRepo,
+  prArtifact,
+  prContextArtifacts,
+  reviewArtifact,
 } from "./github";
 
 export type CollectInput = {
   repoPath: string;
   question: string;
-  location: CodeLocation;
+  location?: CodeLocation;
+  anchor?: ArtifactRef;
 };
 
 type BaseEvidence = Omit<Evidence, "contradictions">;
 
 export async function collect(input: CollectInput): Promise<Evidence> {
-  const { repoPath, question, location } = input;
-
+  const { repoPath, question, location, anchor } = input;
   const gh = parseGitHubRepo(repoPath);
-  const base = gh
-    ? await collectFromGitHub(gh.owner, gh.repo, question, location)
-    : await collectLocal(repoPath, question, location);
+
+  let base: BaseEvidence;
+  if (anchor) {
+    if (!gh) throw new Error("Drill-down is only available for GitHub repositories.");
+    base = await collectAroundArtifact(gh.owner, gh.repo, question, anchor);
+  } else if (location) {
+    base = gh
+      ? await collectFromGitHub(gh.owner, gh.repo, question, location)
+      : await collectLocal(repoPath, question, location);
+  } else {
+    throw new Error("collect requires a code location or an artifact to anchor on.");
+  }
 
   return { ...base, contradictions: detectContradictions(base.artifacts) };
 }
@@ -81,7 +93,7 @@ async function collectFromGitHub(
       add(prArtifact(pr));
       for (const iss of pr.closingIssuesReferences.nodes) add(issueArtifact(iss));
       pr.reviews.nodes.forEach((rv, i) => {
-        if (rv.body.trim()) add(reviewArtifact(pr, rv, i));
+        if (rv.body.trim()) add(reviewArtifact(pr.number, pr.url, rv, i));
       });
     }
   }
@@ -90,62 +102,52 @@ async function collectFromGitHub(
   return { question, repo: repoRef, location, artifacts };
 }
 
-function commitArtifact(c: BlameCommit): Artifact {
-  return {
-    id: `commit:${c.abbreviatedOid}`,
-    kind: "commit",
-    title: c.messageHeadline,
-    body: c.message?.trim() || c.messageHeadline,
-    url: c.url,
-    date: c.committedDate,
-    author: c.author?.name
-      ? { name: c.author.name, email: c.author.email ?? undefined }
-      : undefined,
-    ref: c.abbreviatedOid,
-    meta: { sha: c.oid },
+async function collectAroundArtifact(
+  owner: string,
+  repo: string,
+  question: string,
+  anchor: ArtifactRef,
+): Promise<BaseEvidence> {
+  const meta = await getRepoMeta(owner, repo);
+  const repoRef: RepoRef = {
+    path: `${owner}/${repo}`,
+    name: meta.name,
+    remoteUrl: meta.htmlUrl,
+    branch: meta.branch,
   };
+
+  const raw = await artifactsForAnchor(owner, repo, anchor);
+
+  const seen = new Set<string>();
+  const artifacts = raw.filter((a) => {
+    if (seen.has(a.id)) return false;
+    seen.add(a.id);
+    return true;
+  });
+  artifacts.sort((a, b) => a.date.localeCompare(b.date));
+
+  return { question, repo: repoRef, anchor, artifacts };
 }
 
-function prArtifact(pr: AssociatedPr): Artifact {
-  return {
-    id: `pr:${pr.number}`,
-    kind: "pull_request",
-    title: pr.title,
-    body: pr.body?.trim() ? `${pr.title}\n\n${pr.body.trim()}` : pr.title,
-    url: pr.url,
-    date: pr.createdAt,
-    ref: `#${pr.number}`,
-  };
-}
-
-function issueArtifact(iss: PrIssue): Artifact {
-  const meta: Record<string, string> = {};
-  if (iss.state) meta.state = iss.state;
-  if (iss.stateReason) meta.stateReason = iss.stateReason;
-  return {
-    id: `issue:${iss.number}`,
-    kind: "issue",
-    title: iss.title,
-    body: iss.body?.trim() ? `${iss.title}\n\n${iss.body.trim()}` : iss.title,
-    url: iss.url,
-    date: iss.createdAt,
-    ref: `#${iss.number}`,
-    ...(Object.keys(meta).length ? { meta } : {}),
-  };
-}
-
-function reviewArtifact(pr: AssociatedPr, rv: PrReview, i: number): Artifact {
-  const who = rv.author?.login ?? "reviewer";
-  return {
-    id: `review:${pr.number}-${i}`,
-    kind: "review",
-    title: `Review by ${who} on #${pr.number}`,
-    body: rv.body.trim(),
-    url: pr.url,
-    date: rv.submittedAt,
-    author: { name: who },
-    ref: `#${pr.number}`,
-  };
+function artifactsForAnchor(
+  owner: string,
+  repo: string,
+  anchor: ArtifactRef,
+): Promise<Artifact[]> {
+  switch (anchor.kind) {
+    case "pull_request":
+    case "review":
+      if (anchor.number == null) throw new Error("Missing pull request number for drill-down.");
+      return prContextArtifacts(owner, repo, anchor.number);
+    case "issue":
+      if (anchor.number == null) throw new Error("Missing issue number for drill-down.");
+      return issueContextArtifacts(owner, repo, anchor.number);
+    case "commit": {
+      const oid = anchor.oid ?? anchor.ref;
+      if (!oid) throw new Error("Missing commit sha for drill-down.");
+      return commitContextArtifacts(owner, repo, oid);
+    }
+  }
 }
 
 export function parseLocation(raw: string): CodeLocation {

@@ -1,6 +1,7 @@
 export type { Person } from "./person";
 export type { ArtifactKind } from "./artifact-kind";
 export type { Artifact } from "./artifact";
+export type { ArtifactRef } from "./artifact-ref";
 export type { CodeLocation } from "./code-location";
 export type { Contradiction } from "./contradiction";
 export type { RepoRef } from "./repo-ref";

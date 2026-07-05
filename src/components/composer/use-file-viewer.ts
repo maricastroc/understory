@@ -19,7 +19,6 @@ export function useFileViewer(repoPath: string) {
     setEnclosing(null);
   }
 
-  // Click sets the anchor and a single line; shift-click extends from the anchor to a range.
   function selectLine(n: number, extend = false) {
     if (extend && anchor.current !== null) {
       setSelectedStart(Math.min(anchor.current, n));
@@ -32,7 +31,6 @@ export function useFileViewer(repoPath: string) {
     }
   }
 
-  // Grow the selection to the whole function/symbol the clicked line lives in.
   function expandToSymbol() {
     if (!enclosing) return;
     setSelectedStart(enclosing.start);

@@ -27,6 +27,7 @@ export function Investigator() {
     current,
     browsing,
     investigate,
+    drillInto,
     selectCase,
     backToCode,
     newInvestigation,
@@ -121,7 +122,20 @@ export function Investigator() {
             {loading && <LoadingCard />}
 
             {!loading && view === "case" && current && (
-              <CaseView entry={current} onBack={backToCode} />
+              <CaseView
+                entry={current}
+                onBack={backToCode}
+                onDrill={(anchor) =>
+                  drillInto(
+                    current.caseId,
+                    current.form.question || "Why is this line the way it is?",
+                    anchor,
+                    current.form.repoPath,
+                    token.trim() || undefined,
+                  )
+                }
+                onOpenParent={selectCase}
+              />
             )}
 
             {/* Below xl the fixed right rail is hidden — stack its content here so

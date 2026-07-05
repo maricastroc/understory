@@ -14,16 +14,23 @@ export function Timeline({
   citedIds: Set<string>;
 }) {
   const last = artifacts.length - 1;
+
   const citedIdxs = artifacts.map((a, i) => (citedIds.has(a.id) ? i : -1)).filter((i) => i >= 0);
+
   const firstCited = citedIdxs[0] ?? -1;
+
   const lastCited = citedIdxs[citedIdxs.length - 1] ?? -1;
+
   const citedCount = citedIdxs.length;
 
   const COLLAPSED_COUNT = 5;
+
   const collapsible = artifacts.length > COLLAPSED_COUNT + 1;
+
   const [expanded, setExpanded] = useState(false);
-  // Collapsed, keep the most recent entries (the current line's node lives at the end).
+
   const startIdx = collapsible && !expanded ? artifacts.length - COLLAPSED_COUNT : 0;
+  
   const visible = artifacts.slice(startIdx);
 
   return (
