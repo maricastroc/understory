@@ -1,5 +1,5 @@
 import { rankByHistory, rankShallow } from "../rank";
-import { rest } from "./client";
+import { rest, restRaw } from "./client";
 
 const treeCache = new Map<string, string[]>();
 const churnCache = new Map<string, Map<string, number>>();
@@ -143,11 +143,5 @@ export async function getFileContentGitHub(
 ): Promise<string> {
   const encoded = path.split("/").map(encodeURIComponent).join("/");
 
-  const d = await rest<{ content?: string; encoding?: string }>(
-    `/repos/${owner}/${repo}/contents/${encoded}?ref=${encodeURIComponent(branch)}`,
-  );
-
-  if (typeof d.content !== "string") throw new Error(`No file content for ${path}`);
-
-  return d.encoding === "base64" ? Buffer.from(d.content, "base64").toString("utf8") : d.content;
+  return restRaw(`/repos/${owner}/${repo}/contents/${encoded}?ref=${encodeURIComponent(branch)}`);
 }

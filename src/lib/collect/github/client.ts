@@ -13,18 +13,31 @@ function headers(): Record<string, string> {
   return h;
 }
 
+function hint(status: number): string {
+  if (status === 403 || status === 429)
+    return " — rate limited; set GITHUB_TOKEN in .env.local for higher limits";
+  if (status === 404)
+    return " — not found; is the repo public, or is GITHUB_TOKEN set for private access?";
+  return "";
+}
+
 export async function rest<T>(path: string): Promise<T> {
   const res = await fetch(`${API}${path}`, { headers: headers() });
-  if (!res.ok) {
-    const hint =
-      res.status === 403 || res.status === 429
-        ? " — rate limited; set GITHUB_TOKEN in .env.local for higher limits"
-        : res.status === 404
-          ? " — not found; is the repo public, or is GITHUB_TOKEN set for private access?"
-          : "";
-    throw new Error(`GitHub API ${res.status}${hint}`);
-  }
+  if (!res.ok) throw new Error(`GitHub API ${res.status}${hint(res.status)}`);
   return (await res.json()) as T;
+}
+
+/**
+ * The Contents API's default JSON form silently returns an empty string for blobs over
+ * 1 MB; the raw media type streams the whole file (up to 100 MB) and still honors the
+ * auth token for private repos.
+ */
+export async function restRaw(path: string): Promise<string> {
+  const res = await fetch(`${API}${path}`, {
+    headers: { ...headers(), Accept: "application/vnd.github.raw" },
+  });
+  if (!res.ok) throw new Error(`GitHub API ${res.status}${hint(res.status)}`);
+  return res.text();
 }
 
 export async function graphql<T>(query: string, variables: Record<string, unknown>): Promise<T> {

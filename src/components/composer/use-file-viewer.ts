@@ -52,7 +52,10 @@ export function useFileViewer(repoPath: string) {
         setError(data.error || "Could not open file");
         return;
       }
-      setFile({ path, lines: (data.content as string).replace(/\n$/, "").split("\n") });
+      setFile({
+        path,
+        lines: (data.content as string).replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n"),
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {

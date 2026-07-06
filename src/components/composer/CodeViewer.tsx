@@ -1,6 +1,8 @@
 import type { SymbolSpan } from "@/lib/collect/symbol";
 import { Braces, FileIcon, Pencil } from "../icons";
+import { GoToLine } from "./GoToLine";
 import type { OpenFile } from "./use-file-viewer";
+import { useVirtualRows } from "./use-virtual-rows";
 
 const NOUN: Record<string, string> = {
   method: "function",
@@ -8,6 +10,8 @@ const NOUN: Record<string, string> = {
   namespace: "namespace",
 };
 const symbolNoun = (kind: string): string => NOUN[kind] ?? kind;
+
+const ROW_H = 20;
 
 export function CodeViewer({
   file,
@@ -34,6 +38,15 @@ export function CodeViewer({
   setNoCapture: (v: boolean) => void;
   onRun: () => void;
 }) {
+  const { scrollRef, startIndex, endIndex, totalHeight, onScroll, scrollToIndex } = useVirtualRows(
+    file.lines.length,
+    ROW_H,
+  );
+  const goToLine = (n: number) => {
+    onSelect(n, false);
+    scrollToIndex(n - 1);
+  };
+
   const hasSelection = selectedStart !== null && selectedEnd !== null;
   const rangeSize = hasSelection ? selectedEnd - selectedStart + 1 : 0;
   const locLabel = hasSelection
@@ -67,27 +80,37 @@ export function CodeViewer({
           </kbd>
           shift-click for a range
         </span>
+        <GoToLine max={file.lines.length} onGo={goToLine} />
       </div>
 
-      <div className="max-h-110 overflow-auto">
-        <ol className="py-1 select-none">
-          {file.lines.map((ln, i) => {
-            const n = i + 1;
+      <div ref={scrollRef} onScroll={onScroll} className="max-h-110 overflow-auto">
+        <ol className="relative select-none" style={{ height: totalHeight }}>
+          {file.lines.slice(startIndex, endIndex).map((ln, k) => {
+            const n = startIndex + k + 1;
             const inRange = hasSelection && n >= selectedStart && n <= selectedEnd;
             const isEnd = n === selectedEnd;
             return (
-              <li key={n}>
+              <li
+                key={n}
+                className="absolute left-0"
+                style={{
+                  top: (n - 1) * ROW_H,
+                  height: ROW_H,
+                  minWidth: "100%",
+                  width: "max-content",
+                }}
+              >
                 <button
                   type="button"
                   onClick={(e) => onSelect(n, e.shiftKey)}
                   aria-pressed={inRange}
                   aria-label={`Line ${n}${inRange ? ", selected" : ""}. Shift-click or shift-enter to extend the range.`}
-                  className={`group flex w-full cursor-pointer border-l-[3px] text-left font-mono text-[12.5px] leading-[1.6] focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-inset focus-visible:outline-none ${
+                  className={`group flex h-full w-full cursor-pointer items-center border-l-[3px] text-left font-mono text-[12.5px] leading-[1.6] focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-inset focus-visible:outline-none ${
                     inRange ? "border-accent bg-accent-tint" : "border-transparent hover:bg-inset"
                   }`}
                 >
                   <span
-                    className={`w-12 shrink-0 border-r pr-3 text-right ${
+                    className={`w-14 shrink-0 border-r pr-3 text-right ${
                       inRange
                         ? "border-accent/40 font-semibold text-accent-press"
                         : "border-transparent text-ink-3"
