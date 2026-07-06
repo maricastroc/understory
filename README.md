@@ -123,6 +123,17 @@ The central constraint is that a _why_ answer is worthless unless it's true, and
 
 <br/>
 
+## 🔒 Data & privacy
+
+A tool that stakes its value on honesty has to hold itself to the same standard on the data it collects. When a database is configured, Git Investigator keeps an **anonymous** log of the questions asked — used only to understand what people actually want to know and make the investigations better.
+
+- **Recorded:** the question, the repository, and the file location.
+- **Never recorded:** your identity, your GitHub token, or the investigation's result — the log is not linked to any user.
+- **Opt out per question:** a _"Don't log this question"_ checkbox sits beside the composer; your choice is remembered in your browser.
+- **Turn it off entirely:** set `CAPTURE_QUESTIONS=0` and nothing is ever written.
+
+<br/>
+
 ## ℹ️ How to run the application?
 
 > Clone the repository:
