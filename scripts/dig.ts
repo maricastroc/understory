@@ -59,9 +59,9 @@ function locStr(ev: Evidence): string {
   return endLine !== startLine ? `${file}:${startLine}-${endLine}` : `${file}:${startLine}`;
 }
 
-function printArtifact(a: Artifact, i: number, isLast: boolean) {
+function printArtifact(a: Artifact, i: number, owns: boolean) {
   const who = a.author ? a.author.name + (a.author.email ? gray(` <${a.author.email}>`) : "") : "";
-  const owner = isLast ? mag("  ← currently owns this line") : "";
+  const owner = owns ? mag("  ← currently owns this line") : "";
 
   console.log();
   console.log(
@@ -82,6 +82,9 @@ function printReport(ev: Evidence) {
   const repoName = ev.repo.name ?? ev.repo.path;
   const branch = ev.repo.branch ? gray(` · ${ev.repo.branch}`) : "";
   const n = ev.artifacts.length;
+  const commits = ev.artifacts.filter((a) => a.kind === "commit").length;
+  const extra = n - commits;
+  const lastCommit = ev.artifacts.reduce((idx, a, i) => (a.kind === "commit" ? i : idx), -1);
 
   console.log();
   console.log(RULE);
@@ -102,9 +105,11 @@ function printReport(ev: Evidence) {
   }
 
   console.log(
-    `${gray("Evidence:")} ${green(String(n))} commit${n === 1 ? "" : "s"} shaped this line ${gray("(oldest first)")}`,
+    `${gray("Evidence:")} ${green(String(commits))} commit${commits === 1 ? "" : "s"} shaped this line` +
+      (extra > 0 ? gray(` · ${extra} PR/issue/review exhibit${extra === 1 ? "" : "s"}`) : "") +
+      ` ${gray("(oldest first)")}`,
   );
-  ev.artifacts.forEach((a, i) => printArtifact(a, i, i === n - 1));
+  ev.artifacts.forEach((a, i) => printArtifact(a, i, i === lastCommit));
 
   console.log();
   console.log(RULE);
