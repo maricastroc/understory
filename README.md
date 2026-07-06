@@ -151,7 +151,7 @@ A tool that stakes its value on honesty has to hold itself to the same standard 
 > Clone the repository:
 
 ```bash
-git clone https://github.com/maricastroc/git-archeologist
+git clone https://github.com/maricastroc/git-investigator
 ```
 
 > Install the dependencies:
