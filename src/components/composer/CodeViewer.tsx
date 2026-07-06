@@ -18,6 +18,8 @@ export function CodeViewer({
   onExpand,
   question,
   setQuestion,
+  noCapture,
+  setNoCapture,
   onRun,
 }: {
   file: OpenFile;
@@ -28,6 +30,8 @@ export function CodeViewer({
   onExpand: () => void;
   question: string;
   setQuestion: (v: string) => void;
+  noCapture: boolean;
+  setNoCapture: (v: boolean) => void;
   onRun: () => void;
 }) {
   const hasSelection = selectedStart !== null && selectedEnd !== null;
@@ -160,10 +164,21 @@ export function CodeViewer({
           <p className="text-[11.5px] text-ink-2">
             Edit the question before investigating — it steers how the history is reconstructed.
           </p>
-          <p className="text-[11px] text-ink-3">
-            Questions are logged anonymously (the repo and file location, never your identity) to
-            improve investigations.
-          </p>
+          <div className="flex flex-col gap-1.5">
+            <p className="text-[11px] text-ink-3">
+              Questions are logged anonymously (the repo and file location, never your identity) to
+              improve investigations.
+            </p>
+            <label className="flex w-fit cursor-pointer items-center gap-1.5 text-[11px] text-ink-3">
+              <input
+                type="checkbox"
+                checked={noCapture}
+                onChange={(e) => setNoCapture(e.target.checked)}
+                className="size-3.5 cursor-pointer accent-accent"
+              />
+              Don&apos;t log this question
+            </label>
+          </div>
         </div>
       )}
     </div>

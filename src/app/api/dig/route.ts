@@ -24,6 +24,7 @@ export async function POST(req: Request) {
     location?: string;
     question?: string;
     target?: ArtifactRef;
+    noCapture?: boolean;
   };
   try {
     body = await req.json();
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { repoPath, location, question, target } = body;
+  const { repoPath, location, question, target, noCapture } = body;
   if (!repoPath || (!location && !target)) {
     return NextResponse.json(
       { error: "repoPath and either a location or a target are required" },
@@ -59,12 +60,14 @@ export async function POST(req: Request) {
     );
   }
 
-  captureQuestion({
-    question: collectArgs.question,
-    repoPath,
-    location: collectArgs.location ? location : undefined,
-    anchorKind: target?.kind,
-  });
+  if (!noCapture) {
+    captureQuestion({
+      question: collectArgs.question,
+      repoPath,
+      location: collectArgs.location ? location : undefined,
+      anchorKind: target?.kind,
+    });
+  }
 
   let evidence;
   try {

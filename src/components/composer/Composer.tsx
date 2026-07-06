@@ -29,6 +29,13 @@ export function Composer({
   const viewer = useFileViewer(repoPath);
   const search = useFileSearch(repoPath, repo.ready, viewer.file?.path, token.trim() || undefined);
   const [question, setQuestion] = useState("Why is this line the way it is?");
+  const [noCapture, setNoCapture] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem("gi:no-capture") === "1",
+  );
+  function updateNoCapture(v: boolean) {
+    setNoCapture(v);
+    localStorage.setItem("gi:no-capture", v ? "1" : "0");
+  }
 
   function editRepo(v: string) {
     setRepoPath(v);
@@ -59,6 +66,7 @@ export function Composer({
       repoPath,
       location: `${file.path}:${span}`,
       question: question.trim(),
+      noCapture,
     });
   }
 
@@ -129,6 +137,8 @@ export function Composer({
           onExpand={viewer.expandToSymbol}
           question={question}
           setQuestion={setQuestion}
+          noCapture={noCapture}
+          setNoCapture={updateNoCapture}
           onRun={run}
         />
       )}

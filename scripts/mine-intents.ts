@@ -139,12 +139,10 @@ async function main() {
     // db.ts reads DATABASE_URL at module init, so import it only after loadEnvFile ran.
     const { prisma, dbEnabled } = await import("../src/lib/db");
     if (!dbEnabled || !prisma) {
-      console.error(
-        red("\n✗ DATABASE_URL is not set — nothing to mine (no saved investigations)."),
-      );
+      console.error(red("\n✗ DATABASE_URL is not set — nothing to mine (no captured questions)."));
       process.exit(1);
     }
-    const rows = await prisma.investigation.findMany({ select: { question: true } });
+    const rows = await prisma.questionLog.findMany({ select: { question: true } });
     rawQuestions = rows.map((r) => r.question);
     totalRows = rows.length;
     disconnect = () => prisma.$disconnect();
