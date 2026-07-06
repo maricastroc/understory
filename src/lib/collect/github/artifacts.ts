@@ -51,7 +51,7 @@ export function commitArtifact(c: CommitNode): Artifact {
   };
 }
 
-export function prArtifact(pr: PrNode): Artifact {
+export function prArtifact(pr: PrNode, parentId?: string): Artifact {
   return {
     id: `pr:${pr.number}`,
     kind: "pull_request",
@@ -60,10 +60,11 @@ export function prArtifact(pr: PrNode): Artifact {
     url: pr.url,
     date: pr.createdAt,
     ref: `#${pr.number}`,
+    parentId,
   };
 }
 
-export function issueArtifact(iss: IssueNode): Artifact {
+export function issueArtifact(iss: IssueNode, parentId?: string): Artifact {
   const meta: Record<string, string> = {};
   if (iss.state) meta.state = iss.state;
   if (iss.stateReason) meta.stateReason = iss.stateReason;
@@ -75,6 +76,7 @@ export function issueArtifact(iss: IssueNode): Artifact {
     url: iss.url,
     date: iss.createdAt,
     ref: `#${iss.number}`,
+    parentId,
     ...(Object.keys(meta).length ? { meta } : {}),
   };
 }
@@ -84,6 +86,7 @@ export function reviewArtifact(
   prUrl: string,
   rv: ReviewNode,
   i: number,
+  parentId?: string,
 ): Artifact {
   const who = rv.author?.login ?? "reviewer";
   return {
@@ -95,5 +98,6 @@ export function reviewArtifact(
     date: rv.submittedAt,
     author: { name: who },
     ref: `#${prNumber}`,
+    parentId,
   };
 }

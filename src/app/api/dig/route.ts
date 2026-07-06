@@ -15,6 +15,16 @@ export const maxDuration = 120;
 
 const DEFAULT_LINE_QUESTION = "Why is this line the way it is? Reconstruct why it changed.";
 
+// Provider errors can carry org ids and billing URLs — keep those out of the UI and give
+// a message that points at the evidence and provenance chain, which are already complete.
+function synthesisError(e: unknown): string {
+  const raw = e instanceof Error ? e.message : String(e);
+  if (/rate.?limit|too large|tokens per minute|\bTPM\b|quota|\b429\b/i.test(raw)) {
+    return "The write-up model is rate-limited for the moment — the evidence and provenance chain below are complete. Try the summary again in a minute.";
+  }
+  return "Could not generate the written summary — the collected evidence and provenance chain below still stand.";
+}
+
 export async function POST(req: Request) {
   const limited = await rateLimit(req, "ai");
   if (limited) return limited;
@@ -90,7 +100,7 @@ export async function POST(req: Request) {
     try {
       result.narrative = verify(evidence, await synthesize(evidence));
     } catch (e) {
-      result.error = `Synthesis failed: ${e instanceof Error ? e.message : String(e)}`;
+      result.error = synthesisError(e);
     }
   }
 

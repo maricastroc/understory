@@ -11,4 +11,6 @@ export type Artifact = {
   author?: Person;
   ref?: string;
   meta?: Record<string, string | number>;
+  /** The artifact this one hangs off in the causal chain: a PR's commit, an issue or review's PR. */
+  parentId?: string;
 };

@@ -51,12 +51,30 @@ const SYSTEM = [
   "- Only cite ids that literally appear in the evidence. Never fabricate an id.",
 ].join("\n");
 
+// The synthesis model is rate-limited by tokens-per-minute, so the prompt has a size
+// budget. Every artifact's id header is always kept (citations depend on it); only the
+// bodies are trimmed, shared across however many exhibits were collected. Small
+// investigations stay untouched — this only bites the large ones that would otherwise
+// blow the limit and fail outright.
+const EVIDENCE_CHAR_BUDGET = 13_000;
+const MAX_BODY = 3_000;
+const MIN_BODY = 280;
+
+function clampBody(body: string, cap: number): string {
+  if (body.length <= cap) return body;
+  return `${body.slice(0, cap).trimEnd()}… [truncated]`;
+}
+
 function renderEvidence(ev: Evidence): string {
+  const perItem = Math.min(
+    MAX_BODY,
+    Math.max(MIN_BODY, Math.floor(EVIDENCE_CHAR_BUDGET / Math.max(1, ev.artifacts.length))),
+  );
   return ev.artifacts
     .map((a) => {
       const when = a.date.slice(0, 10);
       const who = a.author?.name ? ` · ${a.author.name}` : "";
-      return `[${a.id}] ${a.kind} · ${when}${who}\n${a.body}`;
+      return `[${a.id}] ${a.kind} · ${when}${who}\n${clampBody(a.body, perItem)}`;
     })
     .join("\n\n---\n\n");
 }

@@ -1,4 +1,5 @@
 import type { Artifact, ArtifactRef } from "@/lib/types";
+import { CausalChain } from "../chain/CausalChain";
 import { Evidence } from "../Evidence";
 import { Findings } from "../findings/Findings";
 import { basename, levelLabel, toArtifactRef } from "../format";
@@ -139,6 +140,7 @@ export function CaseView({
         </div>
       )}
 
+      {ev.artifacts.length > 0 && <CausalChain artifacts={ev.artifacts} citedIds={citedIds} />}
       {ev.artifacts.length > 0 && <Evidence evidence={ev} citedIds={citedIds} onDrill={drill} />}
       {ev.artifacts.length > 0 && <Timeline artifacts={ev.artifacts} citedIds={citedIds} />}
     </>

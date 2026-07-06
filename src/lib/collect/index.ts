@@ -112,12 +112,14 @@ async function collectFromGitHub(
   };
 
   for (const c of commits) {
-    add(commitArtifact(c));
+    const commit = commitArtifact(c);
+    add(commit);
     for (const pr of c.associatedPullRequests.nodes) {
-      add(prArtifact(pr));
-      for (const iss of pr.closingIssuesReferences.nodes) add(issueArtifact(iss));
+      const prCard = prArtifact(pr, commit.id);
+      add(prCard);
+      for (const iss of pr.closingIssuesReferences.nodes) add(issueArtifact(iss, prCard.id));
       pr.reviews.nodes.forEach((rv, i) => {
-        if (rv.body.trim()) add(reviewArtifact(pr.number, pr.url, rv, i));
+        if (rv.body.trim()) add(reviewArtifact(pr.number, pr.url, rv, i, prCard.id));
       });
     }
   }
