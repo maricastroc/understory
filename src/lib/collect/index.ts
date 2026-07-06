@@ -78,8 +78,6 @@ async function collectFromGitHub(
   let commits: BlameCommit[];
   let note: string | undefined;
 
-  // GraphQL blame has no line-range option and 502s on very large files, so route those
-  // straight to file-level history instead of hanging on a retry that can't succeed.
   const size = await getFileSizeGitHub(owner, repo, meta.branch, location.file).catch(() => 0);
   if (size > LARGE_FILE_BYTES) {
     commits = await fileHistoryGitHub(owner, repo, meta.branch, location.file);

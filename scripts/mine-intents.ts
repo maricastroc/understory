@@ -7,7 +7,7 @@ const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void
 try {
   proc.loadEnvFile?.(".env.local");
 } catch {
-  /* env may be provided some other way */
+  //
 }
 
 const color = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -20,12 +20,6 @@ const cyan = wrap("36");
 const gray = wrap("90");
 const RULE = gray("─".repeat(66));
 
-/**
- * Hypothesis to validate — NOT the final taxonomy. It stays in this throwaway
- * script on purpose: nothing graduates to the type system until the data earns
- * it. `other` + a free-form label exist so a question that fits none of these
- * is surfaced, never force-fit.
- */
 const BUCKETS = [
   [
     "provenance",
@@ -136,7 +130,6 @@ async function main() {
     rawQuestions = readQuestionsFromFile(from);
     totalRows = rawQuestions.length;
   } else {
-    // db.ts reads DATABASE_URL at module init, so import it only after loadEnvFile ran.
     const { prisma, dbEnabled } = await import("../src/lib/db");
     if (!dbEnabled || !prisma) {
       console.error(red("\n✗ DATABASE_URL is not set — nothing to mine (no captured questions)."));
@@ -175,18 +168,20 @@ async function main() {
     process.exit(0);
   }
 
-  // llm.ts resolves GROQ_MODEL at import init too, so load it after loadEnvFile.
   const { model } = await import("../src/lib/llm");
+
   const classified: Classified[] = [];
   for (let i = 0; i < unique.length; i++) {
     if (!json) process.stdout.write(gray(`\r  classifying ${i + 1}/${unique.length}…`));
     const c = await classify(unique[i].question, model);
     classified.push({ ...unique[i], ...c });
   }
+
   if (!json) process.stdout.write("\r".padEnd(40) + "\r");
 
   const weight = (pred: (c: Classified) => boolean) =>
     classified.filter(pred).reduce((n, c) => n + c.count, 0);
+
   const total = classified.reduce((n, c) => n + c.count, 0);
 
   if (json) {
@@ -195,6 +190,7 @@ async function main() {
   }
 
   const order: Intent[] = [...BUCKETS.map(([n]) => n as Intent), "other"];
+
   const dist = order
     .map((intent) => ({ intent, n: weight((c) => c.intent === intent) }))
     .filter((d) => d.n > 0)
@@ -205,14 +201,17 @@ async function main() {
   console.log(
     `${bold("INTENT MINING")} ${gray("· Phase 0 — validate the taxonomy from real questions")}`,
   );
+
   console.log(RULE);
   console.log(
     `${gray("Sample:")} ${bold(String(total))} free-text question${total === 1 ? "" : "s"}` +
       gray(` (${unique.length} unique · ${excludedCanonical} canonical drill-downs excluded)`),
   );
+
   if (from) {
     console.log(gray(`Source: ${from} — mechanism check, not a usage signal.`));
   }
+
   if (unique.length < 20) {
     console.log(
       yellow("⚠ Small sample — treat everything below as a preliminary signal, not a verdict."),
@@ -220,6 +219,7 @@ async function main() {
   }
 
   console.log();
+
   console.log(bold("Distribution"));
   for (const { intent, n } of dist) {
     const pct = (n / total) * 100;
@@ -230,6 +230,7 @@ async function main() {
   }
 
   const conf = (level: string) => Math.round((weight((c) => c.confidence === level) / total) * 100);
+
   console.log();
   console.log(bold("Classification confidence") + gray("  — the menu-vs-inference signal"));
   console.log(
@@ -237,6 +238,7 @@ async function main() {
   );
 
   const otherPile = classified.filter((c) => c.intent === "other");
+
   if (otherPile.length) {
     const labels = new Map<string, number>();
     for (const c of otherPile) labels.set(c.label, (labels.get(c.label) ?? 0) + c.count);

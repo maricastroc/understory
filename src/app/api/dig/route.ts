@@ -15,8 +15,6 @@ export const maxDuration = 120;
 
 const DEFAULT_LINE_QUESTION = "Why is this line the way it is? Reconstruct why it changed.";
 
-// Provider errors can carry org ids and billing URLs — keep those out of the UI and give
-// a message that points at the evidence and provenance chain, which are already complete.
 function synthesisError(e: unknown): string {
   const raw = e instanceof Error ? e.message : String(e);
   if (/rate.?limit|too large|tokens per minute|\bTPM\b|quota|\b429\b/i.test(raw)) {

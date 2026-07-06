@@ -4,7 +4,6 @@ import { appOrigin } from "@/lib/auth/origin";
 
 export const runtime = "nodejs";
 
-// The client id is public; the secret is only used server-side in the callback.
 const CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_ID;
 
 export function GET(req: NextRequest) {

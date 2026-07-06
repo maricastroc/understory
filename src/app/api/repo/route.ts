@@ -46,8 +46,6 @@ export async function POST(req: Request) {
         });
       }
 
-      // A github.com URL that didn't parse to owner/repo (e.g. a user/org page) —
-      // clarify instead of falling through to a clone that can't work on serverless.
       if (/^https?:\/\/github\.com\//i.test(repo)) {
         return NextResponse.json(
           {

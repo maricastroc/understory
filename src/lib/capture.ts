@@ -9,6 +9,6 @@ export function captureQuestion(entry: {
   anchorKind?: string;
 }): void {
   if (!enabled || !prisma) return;
-  // Fire-and-forget: capture must never delay or fail an investigation.
+
   void prisma.questionLog.create({ data: entry }).catch(() => {});
 }

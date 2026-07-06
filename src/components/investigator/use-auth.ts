@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 export type AuthUser = { login: string; name: string; avatarUrl: string };
 
-// GitHub OAuth is available only when the (public) client id is configured.
 export const authEnabled = !!process.env.NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_ID;
 
 export function useAuth() {

@@ -66,7 +66,7 @@ describe("buildCausalChain", () => {
       mk("commit", "commit:b", "2023-02-01"),
     ]);
     if (chain.mode !== "lanes") throw new Error("mode");
-    // commit:b has no PR -> 1 gap; commit:a's PR has no issue and no review -> 2 gaps
+
     expect(chain.gaps).toBe(3);
     const direct = chain.lanes.find((l) => l.commit.id === "commit:b");
     expect(direct?.pr.artifact).toBeNull();

@@ -28,7 +28,6 @@ describe("buildSynthesisInput", () => {
       expect(prompt).toContain(`[commit:${i}]`);
     }
     expect(prompt).toContain("[truncated]");
-    // ~13k body budget + headers + scaffolding — comfortably under the model's token limit.
     expect(prompt.length).toBeLessThan(18_000);
   });
 

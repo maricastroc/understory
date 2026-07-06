@@ -8,7 +8,7 @@ export function GET(req: NextRequest) {
   try {
     user = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
   } catch {
-    // AUTH_SECRET missing / bad cookie — treat as signed out.
+    //
   }
   return NextResponse.json({ user });
 }
