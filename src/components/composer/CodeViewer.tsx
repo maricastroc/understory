@@ -160,6 +160,10 @@ export function CodeViewer({
           <p className="text-[11.5px] text-ink-2">
             Edit the question before investigating — it steers how the history is reconstructed.
           </p>
+          <p className="text-[11px] text-ink-3">
+            Questions are logged anonymously (the repo and file location, never your identity) to
+            improve investigations.
+          </p>
         </div>
       )}
     </div>

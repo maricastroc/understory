@@ -21,3 +21,17 @@ model Investigation {
   @@unique([userLogin, caseId])
   @@index([userLogin, createdAt])
 }
+
+// Anonymous sample of the questions asked, to validate the intent taxonomy
+// (Phase 0). No user identity, token, or result — just the ask and its target.
+// Disabled with CAPTURE_QUESTIONS=0.
+model QuestionLog {
+  id         String   @id @default(cuid())
+  question   String
+  repoPath   String
+  location   String?
+  anchorKind String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}

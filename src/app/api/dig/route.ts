@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { anchorQuestion } from "@/lib/anchor-question";
+import { captureQuestion } from "@/lib/capture";
 import { type CollectInput, collect, parseLocation } from "@/lib/collect";
 import { parseGitHubRepo } from "@/lib/collect/github";
 import { resolveRepoInput } from "@/lib/collect/resolve";
@@ -58,14 +59,19 @@ export async function POST(req: Request) {
     );
   }
 
+  captureQuestion({
+    question: collectArgs.question,
+    repoPath,
+    location: collectArgs.location ? location : undefined,
+    anchorKind: target?.kind,
+  });
+
   let evidence;
   try {
     const collectPath = parseGitHubRepo(repoPath)
       ? repoPath
       : (await resolveRepoInput(repoPath)).path;
-    evidence = await runWithToken(token, () =>
-      collect({ repoPath: collectPath, ...collectArgs }),
-    );
+    evidence = await runWithToken(token, () => collect({ repoPath: collectPath, ...collectArgs }));
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : String(e) },
