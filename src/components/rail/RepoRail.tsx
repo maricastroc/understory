@@ -8,7 +8,7 @@ const kindLabel = { github: "GitHub", remote: "Cloned", local: "Local" } as cons
 export function RepoRail({ meta }: { meta: RepoMeta }) {
   return (
     <>
-      <RailCard icon={<Repo className="size-[15px]" />} title="Repository">
+      <RailCard icon={<Repo className="size-3.75" />} title="Repository">
         <div className="flex items-center gap-2 text-[14px] font-semibold tracking-tight">
           {meta.kind === "github" ? (
             <Github className="size-4 shrink-0 text-ink-2" />
@@ -57,7 +57,7 @@ export function RepoRail({ meta }: { meta: RepoMeta }) {
       </RailCard>
 
       <div className="rounded-[10px] border border-dashed border-line-2 bg-surface px-4 py-3 text-[12px] leading-relaxed text-ink-3">
-        Pick a file and click a line — the chain of provenance and the people behind it appear here.
+        Pick a file and click a line — the provenance chain and the people behind it appear here.
       </div>
     </>
   );

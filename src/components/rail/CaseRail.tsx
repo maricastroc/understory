@@ -22,7 +22,7 @@ export function CaseRail({ result }: { result: DigResult }) {
 
   return (
     <>
-      <RailCard icon={<Repo className="size-[15px]" />} title="Repository">
+      <RailCard icon={<Repo className="size-3.75" />} title="Repository">
         <div className="flex items-center gap-2 text-[14px] font-semibold tracking-tight">
           {!ev.repo.remoteUrl && <Lock className="size-3.5 shrink-0 text-ink-3" />}
           <span className="truncate font-mono">{repoName}</span>
@@ -58,13 +58,13 @@ export function CaseRail({ result }: { result: DigResult }) {
       </RailCard>
 
       {result.narrative && result.narrative.answerable !== false && (
-        <RailCard icon={<Shield className="size-[15px]" />} title="Chain of provenance">
+        <RailCard icon={<Shield className="size-3.75" />} title="Provenance chain">
           <Provenance narrative={result.narrative} />
         </RailCard>
       )}
 
       {people.length > 0 && (
-        <RailCard icon={<Users className="size-[15px]" />} title="Who's involved">
+        <RailCard icon={<Users className="size-3.75" />} title="Who's involved">
           <div className="flex flex-col gap-3">
             {people.map(([name, n]) => (
               <div key={name} className="flex items-center gap-2.5">

@@ -18,15 +18,16 @@ Not a plausible story: every claim is checked against real evidence, and when th
 
 ## 🕵️ Features
 
-|                                |                                                                                                                                                                                              |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **🔗 Verifiable why**          | Every sentence in the answer is backed by a real artifact — a commit, PR, issue or review — cited by exact id and linked so you can open the source.                                         |
-| **🤐 Honest abstention**       | When the history genuinely doesn't explain a line, it says so (`recorded: false`) and scores low, instead of inventing a motivation. Silence is a result.                                    |
-| **✅ Grounding check**         | A deterministic pass compares every citation against the collected evidence. Any id the model made up is flagged as a fabrication — no LLM in the loop.                                      |
-| **📊 Confidence, not vibes**   | A 0–100 score derived only from real signals — grounding, abstention, and how many primary sources corroborate the answer — never from the model itself.                                     |
-| **🔎 Drill into any exhibit**  | Every cited commit, PR, issue or review is a doorway: click **Investigate** to open a fresh, equally-grounded case anchored on that artifact — pulling in the discussion (review threads, issue comments, linked PRs) the line trail never surfaced. The child case links back to its parent and shows the origin question it was drilled from. |
-| **🌐 No clone required**       | GitHub repos are read straight from the API (line-level blame + PR/issue/review enrichment in one graph query); local paths use `git` on disk.                                               |
-| **🔐 Sign in & pick up later** | Sign in with GitHub to investigate private repos with your own token and to keep a persistent case file — every investigation is saved to Postgres and restored across sessions and devices. |
+|                                       |                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **🔗 Verifiable why**                 | Every sentence in the answer is backed by a real artifact — a commit, PR, issue or review — cited by exact id and linked so you can open the source.                                                                                                                                                                                            |
+| **⛓️ Provenance chain, gaps and all** | The causal path from motivation to change — issue → PR → review → commit — laid out per commit, with the missing links (no PR, no review, a direct commit) drawn explicitly. The gaps _are_ the signal: they mark exactly where the recorded reason runs out.                                                                                   |
+| **🤐 Honest abstention**              | When the history genuinely doesn't explain a line, it says so (`recorded: false`) and scores low, instead of inventing a motivation. Silence is a result.                                                                                                                                                                                       |
+| **✅ Grounding check**                | A deterministic pass compares every citation against the collected evidence. Any id the model made up is flagged as a fabrication — no LLM in the loop.                                                                                                                                                                                         |
+| **📊 Confidence, not vibes**          | A 0–100 score derived only from real signals — grounding, abstention, and how many primary sources corroborate the answer — never from the model itself.                                                                                                                                                                                        |
+| **🔎 Drill into any exhibit**         | Every cited commit, PR, issue or review is a doorway: click **Investigate** to open a fresh, equally-grounded case anchored on that artifact — pulling in the discussion (review threads, issue comments, linked PRs) the line trail never surfaced. The child case links back to its parent and shows the origin question it was drilled from. |
+| **🌐 No clone required**              | GitHub repos are read straight from the API (line-level blame + PR/issue/review enrichment in one graph query); local paths use `git` on disk.                                                                                                                                                                                                  |
+| **🔐 Sign in & pick up later**        | Sign in with GitHub to investigate private repos with your own token and to keep a persistent case file — every investigation is saved to Postgres and restored across sessions and devices.                                                                                                                                                    |
 
 <br/>
 
@@ -68,7 +69,7 @@ You paste a GitHub repo (or a local path), find a file, and click the line you'r
 
 It then asks a language model to reconstruct the reasoning **using only that evidence**, and — crucially — it doesn't take the model's word for it. Every citation is checked against the real artifacts before anything is shown. If the model cites something that doesn't exist, it's caught. If the evidence simply doesn't explain the line, the answer is marked _inconclusive_ rather than dressed up as fact.
 
-The result is presented as a **case file**: a verdict and prose answer, a confidence score, a timeline of the artifacts oldest-to-newest, evidence cards labelled as _cited_ or _supporting_, and a chain-of-provenance sidebar showing exactly what backs the conclusion.
+The result is presented as a **case file**: a verdict and prose answer, a confidence score, a **provenance chain** tracing the causal path — issue → PR → review → commit — and marking where it breaks, a timeline of the artifacts oldest-to-newest, evidence cards labelled as _cited_ or _supporting_, and a grounding sidebar showing exactly what backs the conclusion.
 
 **Additional features:**
 
@@ -93,7 +94,7 @@ line → blame (GitHub GraphQL / local git)
      → synthesize the "why" from evidence only     [LLM · generateObject]
      → verify every citation against real ids       [deterministic]
      → score confidence from real signals only      [deterministic]
-     → case file (verdict · timeline · evidence · provenance)
+     → case file (verdict · provenance chain · evidence · timeline)
 ```
 
 **Collect ([`src/lib/collect`](src/lib/collect)).** A location is blamed to the commits that shaped it. On GitHub, a single GraphQL blame query returns the commit ranges, and each commit is enriched with its associated PR, that PR's reviews, and the issues it closed. Every commit, PR, issue and review becomes an `Artifact` with a stable id (`commit:sha`, `pr:812`, `issue:1187`, …), deduplicated and sorted oldest-first. The same stage can also be **anchored on an artifact instead of a line** (the drill-down): given a PR, issue or commit, [`collect/github/context.ts`](src/lib/collect/github/context.ts) gathers that artifact's body plus its immediate discussion — review-comment threads, issue comments, a PR's commits, cross-referenced PRs — folded into the same `Artifact` list, so synthesis and verification treat it identically.
@@ -120,6 +121,17 @@ The central constraint is that a _why_ answer is worthless unless it's true, and
 - **Abstention is a first-class result.** "The history doesn't record why" is a correct, useful answer, not an error to be papered over. The synthesis contract lets the model return `recorded: false`, and the UI treats _inconclusive_ as a real verdict — which is what keeps it from inventing motivations to fill space.
 - **Confidence is a function of evidence, not of the model's tone.** The score is computed from signals that can't be faked — is the answer grounded, did the history actually record a reason, how many primary sources corroborate it — so a well-written guess and a well-supported conclusion can't end up looking the same.
 - **The trustworthy parts are the boring parts.** Everything that determines whether output can be believed — blame, enrichment, citation grounding, scoring — is deterministic and unit-tested. The probabilistic component is deliberately the smallest, most contained piece of the pipeline.
+
+<br/>
+
+## ⚠️ Limitations
+
+A tool that stakes its value on honesty should be just as honest about its own edges:
+
+- **GitHub blame is last-writer, not full history.** The GraphQL path attributes each selected line to the single commit that _last_ touched it, so a line rewritten several times surfaces only its most recent author — not every commit that shaped it. A local checkout uses `git log -L`, which follows the full evolution of those lines; the no-clone GitHub reading is intentionally shallower in exchange.
+- **Large files fall back to file-level history.** When a file is too big for GitHub's blame API (or blame fails), collection switches to the commits that touched the _file_ rather than the specific lines — coarser, and surfaced in the UI with a note so it's never silently passed off as line-level.
+- **Grounding checks existence, not entailment.** Verification proves every cited artifact is real and was collected — it catches fabricated references. It does _not_ yet check that the artifact's content actually supports the claim it's cited for, so a real source attributed to the wrong reason would still pass. Semantic entailment is the natural next layer.
+- **Big investigations trim the prompt.** The synthesis model is rate-limited by tokens per minute, so on large cases the evidence _bodies_ sent to the model are budget-trimmed — every artifact id is always kept, so citations and grounding stay intact, and the full bodies remain visible in the evidence cards.
 
 <br/>
 

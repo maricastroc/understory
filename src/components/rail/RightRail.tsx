@@ -40,7 +40,7 @@ export function RailContent({
 function RailPlaceholder() {
   return (
     <div className="rounded-[10px] border border-dashed border-line-2 bg-surface p-5 text-[12.5px] leading-relaxed text-ink-3">
-      Repository metadata, chain of provenance, and the people behind the change appear here once an
+      Repository metadata, provenance chain, and the people behind the change appear here once an
       investigation runs.
     </div>
   );
