@@ -11,4 +11,5 @@ export type Evidence = {
   anchor?: ArtifactRef;
   artifacts: Artifact[];
   contradictions: Contradiction[];
+  note?: string;
 };

@@ -145,3 +145,16 @@ export async function getFileContentGitHub(
 
   return restRaw(`/repos/${owner}/${repo}/contents/${encoded}?ref=${encodeURIComponent(branch)}`);
 }
+
+export async function getFileSizeGitHub(
+  owner: string,
+  repo: string,
+  branch: string,
+  path: string,
+): Promise<number> {
+  const encoded = path.split("/").map(encodeURIComponent).join("/");
+  const d = await rest<{ size?: number }>(
+    `/repos/${owner}/${repo}/contents/${encoded}?ref=${encodeURIComponent(branch)}`,
+  );
+  return d.size ?? 0;
+}

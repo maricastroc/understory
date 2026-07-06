@@ -1,10 +1,13 @@
 import type { Artifact, ArtifactRef, CodeLocation, Evidence, RepoRef } from "../types";
+import type { BlameCommit } from "./github";
 import { detectContradictions } from "./contradictions";
 import { commitToArtifact, isGitRepo, lineHistory, resolveRepo } from "./git";
 import {
   blameLines,
   commitArtifact,
   commitContextArtifacts,
+  fileHistoryGitHub,
+  getFileSizeGitHub,
   getRepoMeta,
   issueArtifact,
   issueContextArtifacts,
@@ -56,6 +59,8 @@ async function collectLocal(
   return { question, repo, location, artifacts };
 }
 
+const LARGE_FILE_BYTES = 1_000_000;
+
 async function collectFromGitHub(
   owner: string,
   repo: string,
@@ -69,14 +74,33 @@ async function collectFromGitHub(
     remoteUrl: meta.htmlUrl,
     branch: meta.branch,
   };
-  const commits = await blameLines(
-    owner,
-    repo,
-    meta.branch,
-    location.file,
-    location.startLine,
-    location.endLine,
-  );
+
+  let commits: BlameCommit[];
+  let note: string | undefined;
+
+  // GraphQL blame has no line-range option and 502s on very large files, so route those
+  // straight to file-level history instead of hanging on a retry that can't succeed.
+  const size = await getFileSizeGitHub(owner, repo, meta.branch, location.file).catch(() => 0);
+  if (size > LARGE_FILE_BYTES) {
+    commits = await fileHistoryGitHub(owner, repo, meta.branch, location.file);
+    note =
+      "This file is too large for GitHub's blame API, so line-level history isn't available here — showing recent commits that touched the file instead. A local checkout gives full line-level history.";
+  } else {
+    try {
+      commits = await blameLines(
+        owner,
+        repo,
+        meta.branch,
+        location.file,
+        location.startLine,
+        location.endLine,
+      );
+    } catch {
+      commits = await fileHistoryGitHub(owner, repo, meta.branch, location.file);
+      note =
+        "GitHub's blame API couldn't resolve line-level history for this file — showing recent commits that touched it instead.";
+    }
+  }
 
   const artifacts: Artifact[] = [];
   const seen = new Set<string>();
@@ -99,7 +123,7 @@ async function collectFromGitHub(
   }
 
   artifacts.sort((a, b) => a.date.localeCompare(b.date));
-  return { question, repo: repoRef, location, artifacts };
+  return { question, repo: repoRef, location, artifacts, note };
 }
 
 async function collectAroundArtifact(
@@ -129,11 +153,7 @@ async function collectAroundArtifact(
   return { question, repo: repoRef, anchor, artifacts };
 }
 
-function artifactsForAnchor(
-  owner: string,
-  repo: string,
-  anchor: ArtifactRef,
-): Promise<Artifact[]> {
+function artifactsForAnchor(owner: string, repo: string, anchor: ArtifactRef): Promise<Artifact[]> {
   switch (anchor.kind) {
     case "pull_request":
     case "review":

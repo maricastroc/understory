@@ -1,4 +1,4 @@
-import { graphql } from "./client";
+import { graphql, rest } from "./client";
 
 export type PrReview = {
   author: { login: string } | null;
@@ -135,6 +135,51 @@ export async function blameLines(
     owner,
     repo,
     commits.slice(0, MAX_ENRICH).map((c) => c.oid),
+  ).catch(() => new Map<string, AssociatedPr[]>());
+
+  return commits.map((c) => ({
+    ...c,
+    associatedPullRequests: { nodes: enrichment.get(c.oid) ?? [] },
+  }));
+}
+
+type RestCommit = {
+  sha: string;
+  html_url: string;
+  commit: { message: string; author: { name?: string; email?: string; date?: string } | null };
+};
+
+/**
+ * File-level history via REST — the fallback when whole-file GraphQL blame is unavailable
+ * (GitHub 502s on very large files). Coarser than blame: these are commits that touched the
+ * file, not the specific lines, but still enriched with their PRs/issues/reviews.
+ */
+export async function fileHistoryGitHub(
+  owner: string,
+  repo: string,
+  branch: string,
+  path: string,
+  limit = 20,
+): Promise<BlameCommit[]> {
+  const encoded = path.split("/").map(encodeURIComponent).join("/");
+  const rows = await rest<RestCommit[]>(
+    `/repos/${owner}/${repo}/commits?path=${encoded}&sha=${encodeURIComponent(branch)}&per_page=${limit}`,
+  );
+  const commits: LeanCommit[] = rows.map((c) => ({
+    oid: c.sha,
+    abbreviatedOid: c.sha.slice(0, 7),
+    messageHeadline: c.commit.message.split("\n", 1)[0],
+    message: c.commit.message,
+    committedDate: c.commit.author?.date ?? "",
+    url: c.html_url,
+    author: { name: c.commit.author?.name ?? null, email: c.commit.author?.email ?? null },
+  }));
+  commits.sort((a, b) => a.committedDate.localeCompare(b.committedDate));
+
+  const enrichment = await enrichCommits(
+    owner,
+    repo,
+    commits.slice(-MAX_ENRICH).map((c) => c.oid),
   ).catch(() => new Map<string, AssociatedPr[]>());
 
   return commits.map((c) => ({

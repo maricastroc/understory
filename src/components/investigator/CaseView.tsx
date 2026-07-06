@@ -121,6 +121,13 @@ export function CaseView({
         </div>
       </div>
 
+      {ev.note && (
+        <div className="mt-5 flex items-start gap-2 rounded-[10px] border border-line bg-surface-2 p-3.5 text-[12.5px] text-ink-2">
+          <Alert className="mt-0.5 size-4 shrink-0 text-ink-3" />
+          <span>{ev.note}</span>
+        </div>
+      )}
+
       {narrative ? (
         <Findings evidence={ev} narrative={narrative} />
       ) : (
