@@ -6,7 +6,6 @@ const configured = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_
 
 const redis = configured ? Redis.fromEnv() : null;
 
-==
 const limiters = redis
   ? {
       ai: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60 s"), prefix: "gi:ai" }),

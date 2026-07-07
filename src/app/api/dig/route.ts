@@ -3,8 +3,10 @@ import { anchorQuestion } from "@/lib/anchor-question";
 import { captureQuestion } from "@/lib/capture";
 import { type CollectInput, collect, parseLocation } from "@/lib/collect";
 import { parseGitHubRepo } from "@/lib/collect/github";
+import { parseGitLabRepo } from "@/lib/collect/gitlab";
+import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
-import { runWithToken } from "@/lib/collect/token-context";
+import { runWithTokens } from "@/lib/collect/token-context";
 import { rateLimit } from "@/lib/ratelimit";
 import { synthesize } from "@/lib/synthesize";
 import { verify } from "@/lib/verify";
@@ -24,6 +26,9 @@ function synthesisError(e: unknown): string {
 }
 
 export async function POST(req: Request) {
+  const authError = collectorAuthError(req);
+  if (authError) return authError;
+
   const limited = await rateLimit(req, "ai");
   if (limited) return limited;
 
@@ -48,7 +53,11 @@ export async function POST(req: Request) {
     );
   }
 
+  const delegated = await maybeDelegate(req, repoPath, body);
+  if (delegated) return delegated;
+
   const token = req.headers.get("x-github-token")?.trim() || undefined;
+  const gitlabToken = req.headers.get("x-gitlab-token")?.trim() || undefined;
 
   let collectArgs: Pick<CollectInput, "location" | "anchor" | "question">;
   try {
@@ -79,10 +88,13 @@ export async function POST(req: Request) {
 
   let evidence;
   try {
-    const collectPath = parseGitHubRepo(repoPath)
-      ? repoPath
-      : (await resolveRepoInput(repoPath)).path;
-    evidence = await runWithToken(token, () => collect({ repoPath: collectPath, ...collectArgs }));
+    const collectPath =
+      parseGitHubRepo(repoPath) || parseGitLabRepo(repoPath)
+        ? repoPath
+        : (await resolveRepoInput(repoPath)).path;
+    evidence = await runWithTokens({ github: token, gitlab: gitlabToken }, () =>
+      collect({ repoPath: collectPath, ...collectArgs }),
+    );
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : String(e) },

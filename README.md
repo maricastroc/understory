@@ -191,6 +191,39 @@ npm run dig -- .demo/payments-service src/billing/charge.ts:8 --why "why cap ret
 
 <br/>
 
+## 🏢 Private GitLab (self-hosted)
+
+Git Investigator also reads **GitLab** — including private, self-hosted instances. The only real constraint is physical: a GitLab behind a corporate firewall isn't reachable from a public host like Vercel, so the app has to run **inside the network** where it can open a connection to your GitLab. It ships as a single container that talks to the GitLab REST API in-process — no separate collector, no tunnel, no extra moving parts. The access token never leaves that network.
+
+The GitHub path is untouched; GitLab support is purely additive. Provider is detected from the repo URL's host (`GITLAB_HOSTS`), and every artifact is normalized to the same evidence shape, so blame, enrichment, grounding and scoring all behave identically.
+
+> Configure it — copy `.env.on-prem.example` to `.env.on-prem` and set at least a GitLab **access token** (`read_api` + `read_repository`) and your **host**:
+
+```bash
+cp .env.on-prem.example .env.on-prem
+# GITLAB_TOKEN=glpat-...
+# GITLAB_HOSTS=gitlab.company.com
+```
+
+> Build and start the container (must run where it can reach your GitLab host):
+
+```bash
+docker compose --env-file .env.on-prem up -d --build
+```
+
+> Optional — persist investigation history in the bundled Postgres:
+
+```bash
+docker compose --env-file .env.on-prem --profile db up -d --build
+docker compose --env-file .env.on-prem run --rm app npx prisma migrate deploy
+```
+
+> ⏩ Access [http://localhost:3000](http://localhost:3000) (or the host you deploy to).
+
+A **Groq key** is still optional — without it you get the evidence and provenance chain, just not the synthesized answer. Note that `NEXT_PUBLIC_DEFAULT_REPO` (the project the app opens on) is baked in at **build** time, so changing it means rebuilding the image, not just restarting.
+
+<br/>
+
 ## 📄 License
 
 Released under the MIT License. You're free to use, study, fork and build on this code — **as long as the original copyright and license notice are kept**. Reuse it and learn from it; don't strip the attribution and present it as your own.

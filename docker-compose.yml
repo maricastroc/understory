@@ -1,0 +1,51 @@
+# On-prem deploy ("Formato A"). Fill in .env.on-prem (see .env.on-prem.example),
+# then:  docker compose --env-file .env.on-prem up -d --build
+#
+# Optional Postgres for persistent investigation history:
+#   docker compose --env-file .env.on-prem --profile db up -d --build
+#   docker compose --env-file .env.on-prem run --rm app npx prisma migrate deploy
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Baked in at build time (NEXT_PUBLIC_* is inlined). Point at your project.
+        NEXT_PUBLIC_DEFAULT_REPO: "${NEXT_PUBLIC_DEFAULT_REPO:-}"
+    image: git-investigator:onprem
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # --- required for private GitLab ---
+      GITLAB_TOKEN: "${GITLAB_TOKEN:?set GITLAB_TOKEN in .env.on-prem}"
+      GITLAB_HOSTS: "${GITLAB_HOSTS:?set GITLAB_HOSTS, e.g. gitlab.company.com}"
+      # --- optional: LLM narrative. Without it you still get evidence + provenance ---
+      GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      # --- optional: also investigate GitHub Enterprise / github.com repos ---
+      GITHUB_TOKEN: "${GITHUB_TOKEN:-}"
+      # --- optional: persist history. In-memory (per session) when unset ---
+      DATABASE_URL: "${DATABASE_URL:-}"
+      DATABASE_DIRECT_URL: "${DATABASE_DIRECT_URL:-}"
+      # NOTE: deliberately NO COLLECTOR_* here — that is what makes this instance
+      # collect in-process instead of trying to delegate to a remote collector.
+    # This container must be able to open a connection to your GitLab host. If
+    # GitLab is only reachable from the Docker host itself (not the bridge
+    # network), uncomment the next line (Linux only):
+    # network_mode: host
+
+  # Optional local Postgres. Enabled only with `--profile db`.
+  db:
+    profiles: ["db"]
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gi
+      POSTGRES_PASSWORD: gi
+      POSTGRES_DB: git_investigator
+    volumes:
+      - gi-pgdata:/var/lib/postgresql/data
+
+volumes:
+  gi-pgdata:

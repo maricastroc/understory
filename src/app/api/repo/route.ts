@@ -1,18 +1,24 @@
 import { NextResponse } from "next/server";
 import { isGitRepo, resolveRepo } from "@/lib/collect/git";
 import { getRepoMeta, parseGitHubRepo } from "@/lib/collect/github";
+import { getProjectMeta, parseGitLabRepo } from "@/lib/collect/gitlab";
+import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
-import { runWithToken } from "@/lib/collect/token-context";
+import { runWithTokens } from "@/lib/collect/token-context";
 import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
+  const authError = collectorAuthError(req);
+  if (authError) return authError;
+
   const limited = await rateLimit(req, "browse");
   if (limited) return limited;
 
   const token = req.headers.get("x-github-token")?.trim() || undefined;
+  const gitlabToken = req.headers.get("x-gitlab-token")?.trim() || undefined;
 
   let body: { repo?: string };
   try {
@@ -24,7 +30,10 @@ export async function POST(req: Request) {
   const repo = (body.repo ?? "").trim();
   if (!repo) return NextResponse.json({ error: "repo is required" }, { status: 400 });
 
-  return runWithToken(token, async () => {
+  const delegated = await maybeDelegate(req, repo, body);
+  if (delegated) return delegated;
+
+  return runWithTokens({ github: token, gitlab: gitlabToken }, async () => {
     try {
       const gh = parseGitHubRepo(repo);
       if (gh) {
@@ -32,6 +41,26 @@ export async function POST(req: Request) {
         return NextResponse.json({
           ready: true,
           kind: "github",
+          name: meta.name,
+          branch: meta.branch,
+          htmlUrl: meta.htmlUrl,
+          private: meta.private,
+          description: meta.description,
+          language: meta.language,
+          stars: meta.stars,
+          forks: meta.forks,
+          openIssues: meta.openIssues,
+          pushedAt: meta.pushedAt,
+          topics: meta.topics,
+        });
+      }
+
+      const gl = parseGitLabRepo(repo);
+      if (gl) {
+        const meta = await getProjectMeta(gl.host, gl.project);
+        return NextResponse.json({
+          ready: true,
+          kind: "gitlab",
           name: meta.name,
           branch: meta.branch,
           htmlUrl: meta.htmlUrl,

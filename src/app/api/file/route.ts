@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
 import { isGitRepo, readFileAtHead } from "@/lib/collect/git";
 import { getFileContentGitHub, getRepoMeta, parseGitHubRepo } from "@/lib/collect/github";
+import { getFileContentGitLab, getProjectMeta, parseGitLabRepo } from "@/lib/collect/gitlab";
+import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
-import { runWithToken } from "@/lib/collect/token-context";
+import { runWithTokens } from "@/lib/collect/token-context";
 import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 export async function GET(req: Request) {
+  const authError = collectorAuthError(req);
+  if (authError) return authError;
+
   const limited = await rateLimit(req, "browse");
   if (limited) return limited;
 
@@ -19,14 +24,25 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "repo and path are required" }, { status: 400 });
   }
 
-  const token = req.headers.get("x-github-token")?.trim() || undefined;
+  const delegated = await maybeDelegate(req, repo);
+  if (delegated) return delegated;
 
-  return runWithToken(token, async () => {
+  const token = req.headers.get("x-github-token")?.trim() || undefined;
+  const gitlabToken = req.headers.get("x-gitlab-token")?.trim() || undefined;
+
+  return runWithTokens({ github: token, gitlab: gitlabToken }, async () => {
     try {
       const gh = parseGitHubRepo(repo);
       if (gh) {
         const meta = await getRepoMeta(gh.owner, gh.repo);
         const content = await getFileContentGitHub(gh.owner, gh.repo, meta.branch, filePath);
+        return NextResponse.json({ path: filePath, content });
+      }
+
+      const gl = parseGitLabRepo(repo);
+      if (gl) {
+        const meta = await getProjectMeta(gl.host, gl.project);
+        const content = await getFileContentGitLab(gl.host, gl.project, meta.branch, filePath);
         return NextResponse.json({ path: filePath, content });
       }
 
