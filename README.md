@@ -197,7 +197,9 @@ Git Investigator also reads **GitLab** — including private, self-hosted instan
 
 The GitHub path is untouched; GitLab support is purely additive. Provider is detected from the repo URL's host (`GITLAB_HOSTS`), and every artifact is normalized to the same evidence shape, so blame, enrichment, grounding and scoring all behave identically.
 
-> Configure it — copy `.env.on-prem.example` to `.env.on-prem` and set at least a GitLab **access token** (`read_api` + `read_repository`) and your **host**:
+> **Prerequisite:** Docker (Desktop or Engine) on a machine that can reach your GitLab host — i.e. on the corporate network / VPN.
+
+> Configure it — copy `.env.on-prem.example` to `.env.on-prem` and set at least a GitLab **access token** and your **host**:
 
 ```bash
 cp .env.on-prem.example .env.on-prem
@@ -205,10 +207,26 @@ cp .env.on-prem.example .env.on-prem
 # GITLAB_HOSTS=gitlab.company.com
 ```
 
+> The token must have the **`read_api`** and **`read_repository`** scopes, and be created **on that same GitLab instance** — a `gitlab.com` token will not work against a self-hosted host. To sanity-check it before wiring it in:
+
+```bash
+curl -s -H "PRIVATE-TOKEN: <token>" \
+  "https://gitlab.company.com/api/v4/projects/<group>%2F<project>" | head -c 200
+# a JSON object (…"id":…) means the token is good; "401 Unauthorized" means scope/instance is wrong
+```
+
 > Build and start the container (must run where it can reach your GitLab host):
 
 ```bash
 docker compose --env-file .env.on-prem up -d --build
+```
+
+> Check it's up, follow logs, or stop it:
+
+```bash
+docker compose ps
+docker compose logs -f app
+docker compose --env-file .env.on-prem down
 ```
 
 > Optional — persist investigation history in the bundled Postgres:
