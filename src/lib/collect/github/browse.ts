@@ -22,11 +22,6 @@ async function getTree(owner: string, repo: string, branch: string): Promise<str
   return files;
 }
 
-/**
- * Tally how many of the most recent (non-merge) commits touched each file. A file with
- * more hits has a more layered history, which is what makes it a rich investigation
- * target. Bounded to a handful of commit-detail calls and cached per repo@branch.
- */
 async function recentChurn(
   owner: string,
   repo: string,
@@ -94,7 +89,7 @@ export async function defaultFilesGitHub(
     }
     if (picks.length) return picks;
   } catch {
-    /* churn unavailable (rate limit / empty repo) — fall back to structural ranking */
+    //
   }
 
   return rankShallow(tree, limit);
@@ -118,7 +113,7 @@ export async function searchFilesGitHub(
       if (results.size >= limit) break;
     }
   } catch {
-    /* tree too large / not found */
+    //
   }
 
   if (results.size < limit) {
@@ -128,7 +123,7 @@ export async function searchFilesGitHub(
       );
       for (const it of found.items ?? []) results.add(it.path);
     } catch {
-      /* code search requires auth / is rate-limited — filename matches still work */
+      //
     }
   }
 

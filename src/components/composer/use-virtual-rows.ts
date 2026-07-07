@@ -2,10 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const INITIAL_ROWS = 60;
 
-/**
- * Windowed rendering for fixed-height rows: only the visible slice (plus overscan) is
- * ever in the DOM, so a 50k-line file stays responsive. Owns the scroll container ref.
- */
 export function useVirtualRows(count: number, rowHeight: number, overscan = 12) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [range, setRange] = useState(() => ({ start: 0, end: Math.min(count, INITIAL_ROWS) }));

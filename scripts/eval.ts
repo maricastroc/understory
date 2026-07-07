@@ -8,7 +8,7 @@ const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void
 try {
   proc.loadEnvFile?.(".env.local");
 } catch {
-  /* no .env.local — GROQ_API_KEY must be set some other way */
+  //
 }
 
 const color = process.stdout.isTTY && !process.env.NO_COLOR;

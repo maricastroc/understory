@@ -14,7 +14,6 @@ function secret(): string {
 const sign = (body: string) =>
   crypto.createHmac("sha256", secret()).update(body).digest("base64url");
 
-/** A tamper-proof, self-contained session token: base64url(payload).hmac. */
 export function signSession(user: SessionUser, ttlMs = 7 * 24 * 60 * 60 * 1000): string {
   const payload: Payload = { ...user, exp: Date.now() + ttlMs };
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");

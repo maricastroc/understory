@@ -25,11 +25,6 @@ const slot = (items: Artifact[]): ChainSlot => ({
   extra: Math.max(0, items.length - 1),
 });
 
-/**
- * A commit merged with no PR has no place for an issue or review to hang, so that
- * counts as one gap, not three. A PR present but missing its issue or review counts
- * each real break. The gaps are the honesty — we surface where the trail stops.
- */
 function laneGaps(lane: ChainLane): number {
   if (!lane.pr.artifact) return 1;
   return (lane.issue.artifact ? 0 : 1) + (lane.review.artifact ? 0 : 1);

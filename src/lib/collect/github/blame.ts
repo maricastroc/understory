@@ -149,11 +149,6 @@ type RestCommit = {
   commit: { message: string; author: { name?: string; email?: string; date?: string } | null };
 };
 
-/**
- * File-level history via REST — the fallback when whole-file GraphQL blame is unavailable
- * (GitHub 502s on very large files). Coarser than blame: these are commits that touched the
- * file, not the specific lines, but still enriched with their PRs/issues/reviews.
- */
 export async function fileHistoryGitHub(
   owner: string,
   repo: string,

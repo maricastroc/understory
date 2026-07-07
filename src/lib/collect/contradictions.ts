@@ -9,12 +9,6 @@ function on(iso: string): string {
 
 const str = (v: unknown): string | undefined => (typeof v === "string" ? v : undefined);
 
-/**
- * Deterministic, zero-AI: find evidence that undermines a collected artifact's stated
- * reason — a commit later reverted, an issue reopened after the fix, a motivation
- * closed as not planned. These are facts about the history, not judgments about it, so
- * they can lower the confidence score without ever asking the model.
- */
 export function detectContradictions(artifacts: Artifact[]): Contradiction[] {
   const commits = artifacts.filter((a) => a.kind === "commit");
 

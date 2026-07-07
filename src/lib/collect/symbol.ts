@@ -24,12 +24,6 @@ const RESERVED = new Set([
   "of",
 ]);
 
-/**
- * Best-effort: given the clicked line, find the span of the enclosing
- * function/class/symbol so an investigation can target a whole unit instead of a
- * single line. A heuristic (brace matching or indentation), not a parser — it
- * degrades to null when it can't be sure, and the caller keeps the raw line.
- */
 export function enclosingSymbol(lines: string[], line: number, file?: string): SymbolSpan | null {
   const ext = file ? (file.split(".").pop() ?? "").toLowerCase() : "";
   if (INDENT_EXT.has(ext)) return indentSymbol(lines, line);

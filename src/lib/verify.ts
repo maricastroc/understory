@@ -1,16 +1,3 @@
-/**
- * [5] Verification — deterministic, zero AI. The model can say anything; here
- * we CHECK it. This is what separates a toy that hallucinates from a tool you
- * can trust.
- *
- * Two jobs:
- *   1. Grounding — does every citation resolve to an artifact we actually
- *      collected? A cited id we never gathered is a fabrication.
- *   2. Confidence — a transparent, reproducible score derived from real signals
- *      (did the model abstain? did it fabricate? how many real sources back it?)
- *      — never a number the LLM made up.
- */
-
 import type { Confidence, Evidence, Narrative, VerifiedNarrative } from "./types";
 
 const unique = (xs: string[]): string[] => Array.from(new Set(xs));

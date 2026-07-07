@@ -6,12 +6,7 @@ const configured = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_
 
 const redis = configured ? Redis.fromEnv() : null;
 
-/**
- * Per-IP limits keyed by how expensive the route is: `ai` guards the one route that
- * spends LLM tokens; `browse` guards the routes that clone or read a repo. When Upstash
- * isn't configured (local dev, no env vars) every check passes — fail open, so nothing
- * breaks without a Redis.
- */
+==
 const limiters = redis
   ? {
       ai: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60 s"), prefix: "gi:ai" }),
@@ -30,7 +25,6 @@ function clientIp(req: Request): string {
   return fwd?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
 }
 
-/** A 429 response when the caller is over the limit, or null to let the request through. */
 export async function rateLimit(req: Request, tier: RateTier): Promise<NextResponse | null> {
   if (!limiters) return null;
 

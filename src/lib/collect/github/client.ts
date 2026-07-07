@@ -27,11 +27,6 @@ export async function rest<T>(path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
-/**
- * The Contents API's default JSON form silently returns an empty string for blobs over
- * 1 MB; the raw media type streams the whole file (up to 100 MB) and still honors the
- * auth token for private repos.
- */
 export async function restRaw(path: string): Promise<string> {
   const res = await fetch(`${API}${path}`, {
     headers: { ...headers(), Accept: "application/vnd.github.raw" },

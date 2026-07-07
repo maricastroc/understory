@@ -30,7 +30,6 @@ import type { ArtifactKind } from "@/lib/types";
 
 type IconProps = { className?: string };
 
-/** The one hand-drawn mark: a magnifying glass over a commit node. */
 export function Logo({ className }: IconProps) {
   return (
     <svg
@@ -53,7 +52,6 @@ export function Logo({ className }: IconProps) {
   );
 }
 
-/** GitHub mark — lucide dropped brand icons, so it's drawn here. */
 export function Github({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>

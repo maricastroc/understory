@@ -7,7 +7,7 @@ const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void
 try {
   proc.loadEnvFile?.(".env.local");
 } catch {
-  /* no .env.local yet — only matters if --why is used */
+  //
 }
 
 const color = process.stdout.isTTY && !process.env.NO_COLOR;

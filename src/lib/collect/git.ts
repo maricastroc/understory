@@ -39,7 +39,7 @@ export async function resolveRepo(repoPath: string): Promise<RepoRef> {
   try {
     ref.branch = (await git(repoPath, ["rev-parse", "--abbrev-ref", "HEAD"])).trim();
   } catch {
-    /* detached / empty repo — leave branch undefined */
+    //
   }
   try {
     const web = remoteToWebUrl((await git(repoPath, ["remote", "get-url", "origin"])).trim());
@@ -48,7 +48,7 @@ export async function resolveRepo(repoPath: string): Promise<RepoRef> {
       ref.name = web.slug;
     }
   } catch {
-    /* no remote — local-only investigation */
+    //
   }
   return ref;
 }
@@ -130,14 +130,14 @@ export async function searchFiles(repoPath: string, query: string, limit = 25): 
     const ql = q.toLowerCase();
     for (const f of files) if (f.toLowerCase().includes(ql)) results.add(f);
   } catch {
-    /* empty repo */
+    //
   }
 
   try {
     const grep = await git(repoPath, ["grep", "-l", "-I", "-i", "-F", "-e", q]);
     for (const f of grep.split("\n").filter(Boolean)) results.add(f);
   } catch {
-    /* git grep exits non-zero when nothing matches — not an error for us */
+    //
   }
 
   return [...results].slice(0, limit);

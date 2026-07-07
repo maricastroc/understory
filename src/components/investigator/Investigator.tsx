@@ -138,8 +138,6 @@ export function Investigator() {
               />
             )}
 
-            {/* Below xl the fixed right rail is hidden — stack its content here so
-                provenance and contributors never disappear on smaller screens. */}
             {(railResult || railMeta) && (
               <div className="mt-5 flex flex-col gap-3.5 xl:hidden">
                 <RailContent result={railResult} repoMeta={railMeta} />

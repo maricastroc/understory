@@ -31,7 +31,6 @@ export function ConfidenceRing({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        {/* font scales with `size` so the percentage never overflows a small ring */}
         <span
           className="leading-none font-bold tracking-tight tnum"
           style={{ fontSize: Math.round(size * 0.26) }}

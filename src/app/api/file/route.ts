@@ -1,5 +1,3 @@
-/** GET /api/file?repo=…&path=… — read a file for the viewer. GitHub via API,
- *  local via git show. */
 import { NextResponse } from "next/server";
 import { isGitRepo, readFileAtHead } from "@/lib/collect/git";
 import { getFileContentGitHub, getRepoMeta, parseGitHubRepo } from "@/lib/collect/github";
