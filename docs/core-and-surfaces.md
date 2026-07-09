@@ -92,6 +92,9 @@ Extrair para `packages/core` só o **puro**; deixar a casca-web no app.
 - **Validado:** typecheck limpo, 101 testes passando, lint limpo, `/api/dig` HIGH 0.9 ao vivo,
   páginas `/` e `/app` em 200, CLI `npm run dig --why` — tudo pelo core extraído.
 - Fix tangencial: `**/out/**` no eslint ignore (a build compilada da extensão estava sendo lintada).
+- **Fix pós-deploy:** a Vercel falhou no type-check porque o tsconfig da web (`include: **/*.ts`)
+  varria `apps/extension/src` (que importa `vscode`, tipos ausentes na Vercel). Corrigido com
+  `exclude: [..., "apps/**"]`. Provado escondendo o node_modules da extensão e rodando `next build`.
 
 ### Fase C — Extensão em modo local (embedded)
 - Extensão importa `@gi/core` e chama `investigate()` **in-process** com o path do workspace
