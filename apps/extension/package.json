@@ -1,0 +1,58 @@
+{
+  "name": "git-investigator-vscode",
+  "displayName": "Git Investigator",
+  "description": "Investigate why a line of code is the way it is, from your editor.",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "publisher": "git-investigator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maricastroc/git-investigator.git",
+    "directory": "apps/extension"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gitInvestigator.digCurrentLine",
+        "title": "Git Investigator: Why is this line?"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "gitInvestigator.digCurrentLine",
+          "when": "editorTextFocus",
+          "group": "z_gitInvestigator@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Git Investigator",
+      "properties": {
+        "gitInvestigator.backendUrl": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "markdownDescription": "Base URL of the Git Investigator backend. The extension calls `{backendUrl}/api/dig`."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile",
+    "package": "vsce package --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3",
+    "typescript": "^5"
+  }
+}

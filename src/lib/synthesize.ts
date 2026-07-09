@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import { model } from "./llm";
+import type { Model } from "./llm";
 import type { Evidence, Narrative } from "./types";
 
 const narrativeSchema = z.object({
@@ -101,7 +101,7 @@ export function buildSynthesisInput(ev: Evidence): { system: string; prompt: str
   return { system: SYSTEM, prompt };
 }
 
-export async function synthesize(ev: Evidence): Promise<Narrative> {
+export async function synthesize(ev: Evidence, model: Model): Promise<Narrative> {
   const { system, prompt } = buildSynthesisInput(ev);
   const { object } = await generateObject({
     model,

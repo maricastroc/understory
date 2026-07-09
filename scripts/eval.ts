@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { collect, parseLocation } from "../src/lib/collect";
+import { getModel } from "../src/lib/llm";
 import { synthesize } from "../src/lib/synthesize";
 import type { Evidence, VerifiedNarrative } from "../src/lib/types";
 import { verify } from "../src/lib/verify";
@@ -60,7 +61,9 @@ async function runOnce(repo: string, c: Case): Promise<Run> {
       question: c.question,
       location: parseLocation(c.location),
     });
-    const n = verify(ev, await synthesize(ev));
+    const model = getModel();
+    if (!model) throw new Error("GROQ_API_KEY is not set.");
+    const n = verify(ev, await synthesize(ev, model));
     return { fails: checkExpect(c.expect, n, ev), answerable: n.answerable, answer: n.answer };
   } catch (err) {
     return {

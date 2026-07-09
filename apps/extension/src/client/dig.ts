@@ -1,0 +1,37 @@
+import { DigError } from "./errors";
+import type { DigRequest, DigResult } from "./types";
+
+export async function runDig(
+  backendUrl: string,
+  request: DigRequest,
+  signal: AbortSignal,
+): Promise<DigResult> {
+  const url = `${backendUrl}/api/dig`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(request),
+      signal,
+    });
+  } catch (e) {
+    if (signal.aborted) throw new DigError("cancelled", "Investigation cancelled.");
+    const detail = e instanceof Error ? e.message : String(e);
+    throw new DigError("offline", `Could not reach the backend at ${url}. (${detail})`);
+  }
+
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const data = (await res.json()) as { error?: string };
+      if (data?.error) detail = ` — ${data.error}`;
+    } catch {
+      // response had no JSON body
+    }
+    throw new DigError("http", `Backend returned ${res.status}${detail}`);
+  }
+
+  return (await res.json()) as DigResult;
+}

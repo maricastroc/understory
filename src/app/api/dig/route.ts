@@ -1,29 +1,20 @@
 import { NextResponse } from "next/server";
 import { anchorQuestion } from "@/lib/anchor-question";
 import { captureQuestion } from "@/lib/capture";
-import { type CollectInput, collect, parseLocation } from "@/lib/collect";
+import { type CollectInput, parseLocation } from "@/lib/collect";
 import { parseGitHubRepo } from "@/lib/collect/github";
 import { parseGitLabRepo } from "@/lib/collect/gitlab";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithTokens } from "@/lib/collect/token-context";
+import { investigate } from "@/lib/investigate";
 import { rateLimit } from "@/lib/ratelimit";
-import { synthesize } from "@/lib/synthesize";
-import { verify } from "@/lib/verify";
 import type { ArtifactRef, DigResult } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 const DEFAULT_LINE_QUESTION = "Why is this line the way it is? Reconstruct why it changed.";
-
-function synthesisError(e: unknown): string {
-  const raw = e instanceof Error ? e.message : String(e);
-  if (/rate.?limit|too large|tokens per minute|\bTPM\b|quota|\b429\b/i.test(raw)) {
-    return "The write-up model is rate-limited for the moment — the evidence and provenance chain below are complete. Try the summary again in a minute.";
-  }
-  return "Could not generate the written summary — the collected evidence and provenance chain below still stand.";
-}
 
 export async function POST(req: Request) {
   const authError = collectorAuthError(req);
@@ -86,32 +77,20 @@ export async function POST(req: Request) {
     });
   }
 
-  let evidence;
+  let result: DigResult;
   try {
     const collectPath =
       parseGitHubRepo(repoPath) || parseGitLabRepo(repoPath)
         ? repoPath
         : (await resolveRepoInput(repoPath)).path;
-    evidence = await runWithTokens({ github: token, gitlab: gitlabToken }, () =>
-      collect({ repoPath: collectPath, ...collectArgs }),
+    result = await runWithTokens({ github: token, gitlab: gitlabToken }, () =>
+      investigate({ repoPath: collectPath, ...collectArgs }),
     );
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : String(e) },
       { status: 400 },
     );
-  }
-
-  const result: DigResult = { evidence, narrative: null };
-  if (!process.env.GROQ_API_KEY) {
-    result.error =
-      "GROQ_API_KEY is not set on the server (.env.local) — showing collected evidence only.";
-  } else {
-    try {
-      result.narrative = verify(evidence, await synthesize(evidence));
-    } catch (e) {
-      result.error = synthesisError(e);
-    }
   }
 
   return NextResponse.json(result);

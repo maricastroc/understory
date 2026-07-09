@@ -26,7 +26,8 @@ Not a plausible story: every claim is checked against real evidence, and when th
 | **✅ Grounding check**                | A deterministic pass compares every citation against the collected evidence. Any id the model made up is flagged as a fabrication — no LLM in the loop.                                                                                                                                                                                         |
 | **📊 Confidence, not vibes**          | A 0–100 score derived only from real signals — grounding, abstention, and how many primary sources corroborate the answer — never from the model itself.                                                                                                                                                                                        |
 | **🔎 Drill into any exhibit**         | Every cited commit, PR, issue or review is a doorway: click **Investigate** to open a fresh, equally-grounded case anchored on that artifact — pulling in the discussion (review threads, issue comments, linked PRs) the line trail never surfaced. The child case links back to its parent and shows the origin question it was drilled from. |
-| **🌐 No clone required**              | GitHub repos are read straight from the API (line-level blame + PR/issue/review enrichment in one graph query); local paths use `git` on disk.                                                                                                                                                                                                  |
+| **🌐 No clone required**              | GitHub **and GitLab** repos are read straight from the API — line-level blame plus PR/MR, issue and review enrichment — so nothing is cloned; local paths use `git` on disk.                                                                                                                                                                                                  |
+| **🏢 Self-hosted GitLab**             | Point it at a private, firewalled GitLab and it collects through the GitLab REST API in-process — a single container inside your network, no separate collector or tunnel. See [Private GitLab](#-private-gitlab-self-hosted).                                                                                                                    |
 | **🔐 Sign in & pick up later**        | Sign in with GitHub to investigate private repos with your own token and to keep a persistent case file — every investigation is saved to Postgres and restored across sessions and devices.                                                                                                                                                    |
 
 <br/>
@@ -43,6 +44,8 @@ Not a plausible story: every claim is checked against real evidence, and when th
   <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
   <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/GitHub_API-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub API" />
+  <img src="https://img.shields.io/badge/GitLab_API-FC6D26?style=for-the-badge&logo=gitlab&logoColor=white" alt="GitLab API" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
 </p>
 
 | Category        | Technologies                                                                                       |
@@ -52,11 +55,12 @@ Not a plausible story: every claim is checked against real evidence, and when th
 | **Styling**     | Tailwind CSS v4                                                                                    |
 | **AI**          | Vercel AI SDK (`ai`) + `@ai-sdk/groq` — `generateObject` on a Zod schema                           |
 | **Model**       | Groq inference, default `openai/gpt-oss-120b` (override via `GROQ_MODEL`)                          |
-| **Evidence**    | GitHub GraphQL blame + REST enrichment, or local `git log -L` / blame                              |
+| **Evidence**    | GitHub GraphQL blame + REST enrichment, GitLab REST v4 (blame + MR / issue enrichment), or local `git log -L` / blame |
 | **Validation**  | Zod 4 (structured LLM output + input parsing)                                                      |
 | **Auth**        | GitHub OAuth (`read:user`), HMAC-signed session cookie — no auth library                           |
 | **Persistence** | PostgreSQL via Prisma 6 — saved investigations scoped per user                                     |
 | **Runtime**     | Node.js API routes — `/api/dig`, `/api/repo`, `/api/file(s)`, `/api/auth/*`, `/api/investigations` |
+| **Deploy**      | Vercel (public UI), or a single Docker container on-prem for private GitLab                        |
 | **Tooling**     | ESLint, Prettier (+ Tailwind plugin), Vitest, tsx                                                  |
 
 <br/>

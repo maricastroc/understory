@@ -1,3 +1,15 @@
-import { groq } from "@ai-sdk/groq";
+import { createGroq } from "@ai-sdk/groq";
 
-export const model = groq(process.env.GROQ_MODEL ?? "openai/gpt-oss-120b");
+export type LlmConfig = {
+  apiKey?: string;
+  model?: string;
+};
+
+export function getModel(config: LlmConfig = {}) {
+  const apiKey = config.apiKey ?? process.env.GROQ_API_KEY;
+  if (!apiKey) return null;
+  const provider = createGroq({ apiKey });
+  return provider(config.model ?? process.env.GROQ_MODEL ?? "openai/gpt-oss-120b");
+}
+
+export type Model = NonNullable<ReturnType<typeof getModel>>;

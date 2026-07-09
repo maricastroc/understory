@@ -1,4 +1,5 @@
 import { collect, parseLocation } from "../src/lib/collect";
+import { getModel } from "../src/lib/llm";
 import { buildSynthesisInput, synthesize } from "../src/lib/synthesize";
 import { verify } from "../src/lib/verify";
 import type { Artifact, Evidence, VerifiedNarrative } from "../src/lib/types";
@@ -224,8 +225,9 @@ async function main() {
 
   let verified: VerifiedNarrative | undefined;
   if (why) {
-    if (!process.env.GROQ_API_KEY) keyMissing();
-    const narrative = await synthesize(evidence);
+    const model = getModel();
+    if (!model) keyMissing();
+    const narrative = await synthesize(evidence, model);
     verified = verify(evidence, narrative);
   }
 
