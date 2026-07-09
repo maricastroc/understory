@@ -1,4 +1,4 @@
-import type { Contradiction } from "@/lib/types";
+import type { Contradiction } from "@git-investigator/core/types";
 import { Alert } from "../icons";
 
 export function ContradictionAlert({

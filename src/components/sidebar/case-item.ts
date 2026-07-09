@@ -1,4 +1,4 @@
-import type { Confidence } from "@/lib/types";
+import type { Confidence } from "@git-investigator/core/types";
 
 export type CaseItem = {
   caseId: string;

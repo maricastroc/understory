@@ -1,5 +1,5 @@
-import { anchorQuestion } from "@/lib/anchor-question";
-import type { Artifact, Evidence as EvidenceT } from "@/lib/types";
+import { anchorQuestion } from "@git-investigator/core/anchor-question";
+import type { Artifact, Evidence as EvidenceT } from "@git-investigator/core/types";
 import { fmtDate, letter } from "./format";
 import { ExternalLink, KindIcon, Search, kindLabel } from "./icons";
 import { SectionLabel } from "./ui";

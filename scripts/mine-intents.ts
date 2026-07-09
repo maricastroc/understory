@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { generateObject } from "ai";
 import { z } from "zod";
-import { anchorQuestion } from "../src/lib/anchor-question";
+import { anchorQuestion } from "@git-investigator/core/anchor-question";
 
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };
 try {
@@ -168,7 +168,7 @@ async function main() {
     process.exit(0);
   }
 
-  const { getModel } = await import("../src/lib/llm");
+  const { getModel } = await import("@git-investigator/core/llm");
   const model = getModel();
   if (!model) {
     console.error(yellow("\nGROQ_API_KEY is not set — the miner needs the model to classify."));

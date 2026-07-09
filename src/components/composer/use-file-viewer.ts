@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { type SymbolSpan, enclosingSymbol } from "@/lib/collect/symbol";
+import { type SymbolSpan, enclosingSymbol } from "@git-investigator/core/collect/symbol";
 
 export type OpenFile = { path: string; lines: string[] };
 

@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
-import { defaultFiles, isGitRepo, searchFiles } from "@/lib/collect/git";
+import { defaultFiles, isGitRepo, searchFiles } from "@git-investigator/core/collect/git";
 import {
   defaultFilesGitHub,
   getRepoMeta,
   parseGitHubRepo,
   searchFilesGitHub,
-} from "@/lib/collect/github";
+} from "@git-investigator/core/collect/github";
 import {
   defaultFilesGitLab,
   getProjectMeta,
   parseGitLabRepo,
   searchFilesGitLab,
-} from "@/lib/collect/gitlab";
+} from "@git-investigator/core/collect/gitlab";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
-import { runWithTokens } from "@/lib/collect/token-context";
+import { runWithTokens } from "@git-investigator/core/collect/token-context";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;

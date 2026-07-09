@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Artifact } from "@/lib/types";
+import type { Artifact } from "@git-investigator/core/types";
 import { fmtDate } from "./format";
 import { KindIcon, kindLabel } from "./icons";
 import { Avatar, SectionLabel } from "./ui";

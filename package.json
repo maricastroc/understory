@@ -2,6 +2,7 @@
   "name": "git-archeologist",
   "version": "0.1.0",
   "private": true,
+  "workspaces": ["packages/*"],
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && npm run seed:demo && next build",
@@ -21,6 +22,7 @@
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.3",
+    "@git-investigator/core": "*",
     "@prisma/client": "^6.19.3",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",

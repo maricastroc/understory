@@ -1,9 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
-import { collect, parseLocation } from "../src/lib/collect";
-import { getModel } from "../src/lib/llm";
-import { synthesize } from "../src/lib/synthesize";
-import type { Evidence, VerifiedNarrative } from "../src/lib/types";
-import { verify } from "../src/lib/verify";
+import { collect, parseLocation } from "@git-investigator/core/collect";
+import { getModel } from "@git-investigator/core/llm";
+import { synthesize } from "@git-investigator/core/synthesize";
+import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
+import { verify } from "@git-investigator/core/verify";
 
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };
 try {

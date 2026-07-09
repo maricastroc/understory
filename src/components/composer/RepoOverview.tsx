@@ -1,4 +1,4 @@
-import type { RepoMeta } from "@/lib/types";
+import type { RepoMeta } from "@git-investigator/core/types";
 import { fmtCount, fmtDate } from "../format";
 import { Branch, Clock, ExternalLink, Fork, Issue, Lock, Repo, Search, Star } from "../icons";
 

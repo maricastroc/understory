@@ -1,4 +1,4 @@
-import type { DigResult, RepoMeta } from "@/lib/types";
+import type { DigResult, RepoMeta } from "@git-investigator/core/types";
 import { CaseRail } from "./CaseRail";
 import { RepoRail } from "./RepoRail";
 

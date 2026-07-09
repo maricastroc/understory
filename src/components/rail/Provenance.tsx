@@ -1,4 +1,4 @@
-import type { VerifiedNarrative } from "@/lib/types";
+import type { VerifiedNarrative } from "@git-investigator/core/types";
 
 export function Provenance({ narrative }: { narrative: VerifiedNarrative }) {
   const c = narrative.confidence;

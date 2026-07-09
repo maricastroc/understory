@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { Artifact, ArtifactKind } from "@/lib/types";
+import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
 
 export type ChainSlot = { artifact: Artifact | null; extra: number };
 

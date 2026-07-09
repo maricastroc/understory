@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { anchorQuestion } from "@/lib/anchor-question";
+import { anchorQuestion } from "@git-investigator/core/anchor-question";
 import { captureQuestion } from "@/lib/capture";
-import { type CollectInput, parseLocation } from "@/lib/collect";
-import { parseGitHubRepo } from "@/lib/collect/github";
-import { parseGitLabRepo } from "@/lib/collect/gitlab";
+import { type CollectInput, parseLocation } from "@git-investigator/core/collect";
+import { parseGitHubRepo } from "@git-investigator/core/collect/github";
+import { parseGitLabRepo } from "@git-investigator/core/collect/gitlab";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
-import { runWithTokens } from "@/lib/collect/token-context";
-import { investigate } from "@/lib/investigate";
+import { runWithTokens } from "@git-investigator/core/collect/token-context";
+import { investigate } from "@git-investigator/core/investigate";
 import { rateLimit } from "@/lib/ratelimit";
-import type { ArtifactRef, DigResult } from "@/lib/types";
+import type { ArtifactRef, DigResult } from "@git-investigator/core/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;

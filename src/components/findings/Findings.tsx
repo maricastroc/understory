@@ -1,4 +1,4 @@
-import type { Evidence, VerifiedNarrative } from "@/lib/types";
+import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
 import { letter } from "../format";
 import { SectionLabel } from "../ui";
 import { ConfidencePanel } from "./ConfidencePanel";

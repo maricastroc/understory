@@ -1,4 +1,4 @@
-import type { SymbolSpan } from "@/lib/collect/symbol";
+import type { SymbolSpan } from "@git-investigator/core/collect/symbol";
 import { Braces, FileIcon, Pencil } from "../icons";
 import { GoToLine } from "./GoToLine";
 import type { OpenFile } from "./use-file-viewer";

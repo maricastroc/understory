@@ -26,7 +26,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import type { ArtifactKind } from "@/lib/types";
+import type { ArtifactKind } from "@git-investigator/core/types";
 
 type IconProps = { className?: string };
 

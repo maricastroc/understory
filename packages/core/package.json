@@ -1,0 +1,12 @@
+{
+  "name": "@git-investigator/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@ai-sdk/groq": "^4.0.3",
+    "ai": "^7.0.11",
+    "zod": "^4.4.3"
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { InvestigateInput } from "@/lib/types";
+import type { InvestigateInput } from "@git-investigator/core/types";
 import { Alert } from "../icons";
 import { CodeViewer } from "./CodeViewer";
 import { FileFinder } from "./FileFinder";

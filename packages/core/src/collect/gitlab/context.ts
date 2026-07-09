@@ -1,4 +1,4 @@
-import type { Artifact } from "@/lib/types";
+import type { Artifact } from "../../types";
 import {
   type GlCommit,
   type GlIssue,

@@ -1,4 +1,4 @@
-import type { Confidence } from "@/lib/types";
+import type { Confidence } from "@git-investigator/core/types";
 
 export const codeLines = [
   { n: 6, text: 'import { sleep } from "../lib/sleep";' },

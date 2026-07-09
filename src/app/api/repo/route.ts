@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { isGitRepo, resolveRepo } from "@/lib/collect/git";
-import { getRepoMeta, parseGitHubRepo } from "@/lib/collect/github";
-import { getProjectMeta, parseGitLabRepo } from "@/lib/collect/gitlab";
+import { isGitRepo, resolveRepo } from "@git-investigator/core/collect/git";
+import { getRepoMeta, parseGitHubRepo } from "@git-investigator/core/collect/github";
+import { getProjectMeta, parseGitLabRepo } from "@git-investigator/core/collect/gitlab";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
-import { runWithTokens } from "@/lib/collect/token-context";
+import { runWithTokens } from "@git-investigator/core/collect/token-context";
 import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";

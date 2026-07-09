@@ -1,4 +1,4 @@
-import type { Confidence } from "@/lib/types";
+import type { Confidence } from "@git-investigator/core/types";
 import { ConfidenceRing } from "../ConfidenceRing";
 import { levelLabel } from "../format";
 import { Alert, Check } from "../icons";

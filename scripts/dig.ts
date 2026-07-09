@@ -1,8 +1,8 @@
-import { collect, parseLocation } from "../src/lib/collect";
-import { getModel } from "../src/lib/llm";
-import { buildSynthesisInput, synthesize } from "../src/lib/synthesize";
-import { verify } from "../src/lib/verify";
-import type { Artifact, Evidence, VerifiedNarrative } from "../src/lib/types";
+import { collect, parseLocation } from "@git-investigator/core/collect";
+import { getModel } from "@git-investigator/core/llm";
+import { buildSynthesisInput, synthesize } from "@git-investigator/core/synthesize";
+import { verify } from "@git-investigator/core/verify";
+import type { Artifact, Evidence, VerifiedNarrative } from "@git-investigator/core/types";
 
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };
 try {

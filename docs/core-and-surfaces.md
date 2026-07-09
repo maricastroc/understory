@@ -77,12 +77,21 @@ Extrair para `packages/core` só o **puro**; deixar a casca-web no app.
 - Única mudança de wording: a mensagem de "sem GROQ key" ficou neutra (não cita "server/.env.local"),
   pois o core é surface-agnostic. Só aparece quando a chave não está setada.
 
-### Fase B — Workspaces + `packages/core`
-- Raiz vira workspace (`packages/*`, `apps/*`); o app Next vira `apps/web`.
-- Mover os arquivos **puros** para `packages/core`; casca-web fica em `apps/web`.
-- Reescrever imports (`@/lib/*` → `@gi/core` só nos que moveram).
-- **Entrega:** web builda e roda idêntica; core importável por qualquer casca. (Churn mecânica —
-  fase isolada.)
+### Fase B — Workspaces + `packages/core` ✅ FEITA
+- Workspace `["packages/*"]` na raiz (o app Next **fica na raiz**, não virou `apps/web` — decisão de
+  reduzir churn). `apps/extension` **não** entrou nos workspaces (fica standalone até a Fase C).
+- Puros movidos (`git mv`) para `packages/@git-investigator/core/src`: `investigate/synthesize/
+  verify/llm/anchor-question`, `types/`, e `collect/` inteiro **exceto** `remote.ts`/`resolve.ts`.
+  Casca-web ficou em `src/lib`: `ratelimit`, `db`, `capture`, `auth/`, `collect/remote`,
+  `collect/resolve`.
+- Resolução por **alias** (igual ao `@/`): tsconfig `paths` + vitest `resolve.alias`
+  (`@git-investigator/core` → `packages/core/src`). Sem `exports` map, sem `transpilePackages` —
+  o core fica sob a raiz do projeto, então Next/tsx/vitest compilam o TS direto. 33 arquivos da web+
+  scripts reescritos (`@/lib/<movido>` → `@git-investigator/core/<movido>`); os 4 arquivos do core
+  que usavam `@/lib/types` viraram `../../types`.
+- **Validado:** typecheck limpo, 101 testes passando, lint limpo, `/api/dig` HIGH 0.9 ao vivo,
+  páginas `/` e `/app` em 200, CLI `npm run dig --why` — tudo pelo core extraído.
+- Fix tangencial: `**/out/**` no eslint ignore (a build compilada da extensão estava sendo lintada).
 
 ### Fase C — Extensão em modo local (embedded)
 - Extensão importa `@gi/core` e chama `investigate()` **in-process** com o path do workspace

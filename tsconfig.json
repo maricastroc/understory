@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@git-investigator/core": ["./packages/core/src/index.ts"],
+      "@git-investigator/core/*": ["./packages/core/src/*"]
     }
   },
   "include": [

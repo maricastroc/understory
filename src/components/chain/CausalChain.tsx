@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Artifact, ArtifactKind } from "@/lib/types";
+import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
 import { Alert, Check, ChevronRight, KindIcon, kindLabel } from "../icons";
 import { SectionLabel } from "../ui";
 import { type ChainLane, type ChainSlot, useCausalChain } from "./use-causal-chain";

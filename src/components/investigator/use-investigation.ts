@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { ArtifactRef, DigResult, InvestigateInput } from "@/lib/types";
+import type { ArtifactRef, DigResult, InvestigateInput } from "@git-investigator/core/types";
 import type { CaseItem } from "../sidebar/case-item";
 import type { AuthUser } from "./use-auth";
 

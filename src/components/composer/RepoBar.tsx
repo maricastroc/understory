@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { RepoMeta } from "@/lib/types";
+import type { RepoMeta } from "@git-investigator/core/types";
 import { Alert, Branch, Check, Close, Lock } from "../icons";
 
 const kindLabel = { github: "GitHub", remote: "Cloned", local: "Local" } as const;
