@@ -1,10 +1,21 @@
+import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
-import { SESSION_COOKIE, type SessionUser, verifySession } from "./session";
+import { SESSION_COOKIE, type SessionUser, sessionGithubToken, verifySession } from "./session";
 
 export function currentUser(req: NextRequest): SessionUser | null {
   try {
     return verifySession(req.cookies.get(SESSION_COOKIE)?.value);
   } catch {
     return null;
+  }
+}
+
+// The signed-in user's GitHub token (from the OAuth session cookie), if any.
+export async function sessionToken(): Promise<string | undefined> {
+  try {
+    const cookie = (await cookies()).get(SESSION_COOKIE)?.value;
+    return sessionGithubToken(cookie) ?? undefined;
+  } catch {
+    return undefined;
   }
 }

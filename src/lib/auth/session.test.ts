@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { signSession, verifySession } from "./session";
+import { sessionGithubToken, signSession, verifySession } from "./session";
 
 describe("session sign/verify", () => {
   const prev = process.env.AUTH_SECRET;
@@ -26,7 +26,21 @@ describe("session sign/verify", () => {
   });
 
   it("rejects an expired session", () => {
-    expect(verifySession(signSession(user, -1000))).toBeNull();
+    expect(verifySession(signSession(user, undefined, -1000))).toBeNull();
+  });
+
+  it("encrypts and round-trips the github token, and keeps it out of the public user", () => {
+    const token = signSession(user, "gho_secret_token");
+    expect(sessionGithubToken(token)).toBe("gho_secret_token");
+    expect(verifySession(token)).toEqual(user);
+    // the raw token must not appear in the (signed-but-readable) cookie body
+    expect(Buffer.from(token.split(".")[0], "base64url").toString()).not.toContain(
+      "gho_secret_token",
+    );
+  });
+
+  it("returns null token when the session carries none", () => {
+    expect(sessionGithubToken(signSession(user))).toBeNull();
   });
 
   it("rejects a session signed with a different secret", () => {

@@ -55,7 +55,10 @@ export async function GET(req: NextRequest) {
   const res = NextResponse.redirect(`${origin}/app`);
   res.cookies.set(
     SESSION_COOKIE,
-    signSession({ login: gh.login, name: gh.name ?? gh.login, avatarUrl: gh.avatar_url }),
+    signSession(
+      { login: gh.login, name: gh.name ?? gh.login, avatarUrl: gh.avatar_url },
+      accessToken,
+    ),
     {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

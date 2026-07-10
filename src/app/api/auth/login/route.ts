@@ -18,7 +18,7 @@ export function GET(req: NextRequest) {
   const authorize = new URL("https://github.com/login/oauth/authorize");
   authorize.searchParams.set("client_id", CLIENT_ID);
   authorize.searchParams.set("redirect_uri", `${origin}/api/auth/callback`);
-  authorize.searchParams.set("scope", "read:user");
+  authorize.searchParams.set("scope", "read:user repo");
   authorize.searchParams.set("state", state);
 
   const res = NextResponse.redirect(authorize.toString());
