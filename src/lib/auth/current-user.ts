@@ -10,7 +10,6 @@ export function currentUser(req: NextRequest): SessionUser | null {
   }
 }
 
-// The signed-in user's GitHub token (from the OAuth session cookie), if any.
 export async function sessionToken(): Promise<string | undefined> {
   try {
     const cookie = (await cookies()).get(SESSION_COOKIE)?.value;

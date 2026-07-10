@@ -74,8 +74,6 @@ export async function installationTokenForRepo(
   return data.token;
 }
 
-// Prefer a user-supplied token; otherwise fall back to a GitHub App installation
-// token for the repo. Returns undefined if neither is available.
 export async function githubTokenForRepo(
   userToken: string | undefined,
   repoSpec: string,
