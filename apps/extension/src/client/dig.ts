@@ -1,5 +1,6 @@
+import type { DigResult } from "@git-investigator/core";
 import { DigError } from "./errors";
-import type { DigRequest, DigResult } from "./types";
+import type { DigRequest } from "./types";
 
 export async function runDig(
   backendUrl: string,

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { DigResult } from "../client/types";
+import type { DigResult } from "@git-investigator/core";
 import { type ErrorView, renderError, renderLoading, renderResult } from "./render";
 
 export type WebviewMessage = { type: "retry" };

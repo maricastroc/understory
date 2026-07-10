@@ -15,12 +15,20 @@
     "vscode": "^1.85.0"
   },
   "categories": ["Other"],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "gitInvestigator.digCurrentLine",
         "title": "Git Investigator: Why is this line?"
+      },
+      {
+        "command": "gitInvestigator.openOnWeb",
+        "title": "Git Investigator: Open Full Investigation on the Web"
+      },
+      {
+        "command": "gitInvestigator.setGroqKey",
+        "title": "Git Investigator: Set Groq API Key"
       }
     ],
     "menus": {
@@ -29,30 +37,52 @@
           "command": "gitInvestigator.digCurrentLine",
           "when": "editorTextFocus",
           "group": "z_gitInvestigator@1"
+        },
+        {
+          "command": "gitInvestigator.openOnWeb",
+          "when": "editorTextFocus",
+          "group": "z_gitInvestigator@2"
         }
       ]
     },
     "configuration": {
       "title": "Git Investigator",
       "properties": {
+        "gitInvestigator.mode": {
+          "type": "string",
+          "enum": ["local", "backend"],
+          "enumDescriptions": [
+            "Run the investigation in-process against the local git repo — no server needed.",
+            "Send the request to a running backend at backendUrl (for remote GitHub/GitLab repos)."
+          ],
+          "default": "local",
+          "markdownDescription": "How investigations run. `local` collects and synthesizes in-process (needs a Groq API key set via the *Set Groq API Key* command). `backend` calls `{backendUrl}/api/dig`."
+        },
         "gitInvestigator.backendUrl": {
           "type": "string",
           "default": "http://localhost:3000",
-          "markdownDescription": "Base URL of the Git Investigator backend. The extension calls `{backendUrl}/api/dig`."
+          "markdownDescription": "Base URL of the Git Investigator backend, used when `gitInvestigator.mode` is `backend`. The extension calls `{backendUrl}/api/dig`."
+        },
+        "gitInvestigator.webUrl": {
+          "type": "string",
+          "default": "https://git-investigator.marianacastro.dev",
+          "markdownDescription": "Base URL of the hosted Git Investigator web app, opened by *Open Full Investigation on the Web*. Point this at the deployment where you are signed in, so private-repo investigations use your session. The extension opens `{webUrl}/app?repo=…&file=…&line=…`, where the full GitHub/GitLab provenance (PRs, reviews, issues) is collected."
         }
       }
     }
   },
   "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "vscode:prepublish": "npm run compile",
-    "package": "vsce package --allow-missing-repository"
+    "compile": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit -p ./",
+    "vscode:prepublish": "npm run typecheck && npm run compile",
+    "package": "vsce package --no-dependencies --allow-missing-repository"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3",
+    "esbuild": "^0.24",
     "typescript": "^5"
   }
 }

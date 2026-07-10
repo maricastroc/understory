@@ -1,4 +1,4 @@
-export * from "./types";
+export type * from "./types";
 export { investigate, synthesisError } from "./investigate";
 export { getModel, type LlmConfig, type Model } from "./llm";
 export { buildSynthesisInput, synthesize } from "./synthesize";

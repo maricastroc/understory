@@ -1,4 +1,4 @@
-import type { Artifact, DigResult, Narrative } from "../client/types";
+import type { Artifact, DigResult, VerifiedNarrative } from "@git-investigator/core";
 
 export type ErrorView = {
   tone: "error" | "muted";
@@ -86,7 +86,7 @@ export function renderResult(nonce: string, result: DigResult, location: string)
   return page(nonce, location, parts.join("\n"), retryFooter("Re-investigate"));
 }
 
-function renderNarrative(narrative: Narrative | null): string {
+function renderNarrative(narrative: VerifiedNarrative | null): string {
   if (!narrative) {
     return `<section class="note">No written summary — the collected evidence below still stands.</section>`;
   }

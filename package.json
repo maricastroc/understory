@@ -2,7 +2,7 @@
   "name": "git-archeologist",
   "version": "0.1.0",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && npm run seed:demo && next build",

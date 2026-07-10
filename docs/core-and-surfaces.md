@@ -96,12 +96,23 @@ Extrair para `packages/core` só o **puro**; deixar a casca-web no app.
   varria `apps/extension/src` (que importa `vscode`, tipos ausentes na Vercel). Corrigido com
   `exclude: [..., "apps/**"]`. Provado escondendo o node_modules da extensão e rodando `next build`.
 
-### Fase C — Extensão em modo local (embedded)
-- Extensão importa `@gi/core` e chama `investigate()` **in-process** com o path do workspace
-  (adapter localGit). Chave do Groq via **SecretStorage**.
-- Setting `gitInvestigator.mode`: `local` (in-process) | `backend` (HTTP, o que já existe).
-  Mantém o cliente HTTP para apontar na **web hospedada** quando o alvo for repo remoto.
-- **Entrega:** instalar o `.vsix` e usar em projeto local **sem manter nada rodando**.
+### Fase C — Extensão consome o core + "abrir na web" ✅ FEITA
+- **Embedded local (feito):** extensão vira workspace member; build migrou de `tsc` → **esbuild**
+  (bundla o core no `dist/extension.js`, ~1MB). `investigate()` roda **in-process** com git local;
+  chave do Groq via **SecretStorage**; setting `gitInvestigator.mode: local|backend`. vsce empacota
+  com `--no-dependencies` (senão sobe pra raiz do repo e vaza `.env.local`). Resolução do core no
+  esbuild/tsc via `tsconfig paths` (sem declarar o core como dep → sem symlink pro vsce seguir).
+- **Decisão de produto (usuário, 2026-07-09):** git LOCAL só tem **commits** — PR/review/issue vivem
+  na API. Pra "acesso a tudo", escolhido **abrir na web**: a extensão detecta o remote e abre o app
+  hospedado com `repo+file+line`, onde a coleta por API dá a provenance completa.
+- **Open-on-web (feito):** comando `gitInvestigator.openOnWeb` + `web-link.ts` (detecta `origin`,
+  normaliza pra `https://host/owner/repo`) + setting `gitInvestigator.webUrl` →
+  `vscode.env.openExternal({webUrl}/app?repo&file&line)`. Lado web: `/app` lê os query params
+  (Suspense + `useSearchParams`) e auto-investiga.
+- **Validado:** extensão typecheck+bundle+vsix (184KB) ok; `next build` ok (Suspense correto);
+  deep-link serve 200; `/api/dig` via URL github pública retorna **commit+PR+5 reviews** (provenance
+  completa). Repo privado dá 404 sem auth — restrição esperada (login na web resolve).
+- Local (commits) e open-on-web (provenance completa) coexistem: dois gestos no menu de contexto.
 
 ### Fase D — Web como surface dedicada (depois)
 - `apps/web` continua servindo repos remotos; tokens/OAuth já existem lá. Opcional: publicar.

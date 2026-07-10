@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Alert } from "../icons";
 import { RailContent, RightRail } from "../rail/RightRail";
@@ -35,12 +36,26 @@ export function Investigator() {
   } = useInvestigation(user);
 
   const repo = useRepo();
+  const params = useSearchParams();
   const [caseFilter, setCaseFilter] = useState("");
   const [token, setToken] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    void repo.open(repoPath);
+    const deepRepo = params.get("repo");
+    const deepFile = params.get("file");
+    const deepLine = params.get("line");
+    if (deepRepo && deepFile && deepLine) {
+      setRepoPath(deepRepo);
+      void repo.open(deepRepo);
+      void investigate({
+        repoPath: deepRepo,
+        location: `${deepFile}:${deepLine}`,
+        question: "Why is this line the way it is? Reconstruct why it changed.",
+      });
+    } else {
+      void repo.open(repoPath);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
