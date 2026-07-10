@@ -2,34 +2,69 @@ import * as vscode from "vscode";
 import { runDig } from "./client/dig";
 import { DigError } from "./client/errors";
 import { runLocalDig } from "./client/local";
-import { type Mode, getBackendUrl, getMode } from "./config";
-import { getGroqKey } from "./secrets";
+import { type Mode, getBackendUrl, getMode, getWebUrl } from "./config";
+import { getGithubToken, getGroqKey } from "./secrets";
 import type { InvestigationTarget } from "./target";
 import * as panel from "./webview/panel";
 import type { ErrorView } from "./webview/render";
+import { detectRemoteUrl } from "./web-link";
 
-let current: InvestigationTarget | undefined;
+let lastRun: (() => Promise<void>) | undefined;
 
+function withProgress(
+  title: string,
+  run: (token: vscode.CancellationToken) => Promise<void>,
+): Thenable<void> {
+  return vscode.window.withProgress(
+    { location: vscode.ProgressLocation.Notification, title, cancellable: true },
+    (_progress, token) => run(token),
+  );
+}
+
+// "Why is this line?" — local (in-process) by default, or the configured backend.
 export async function investigate(target: InvestigationTarget): Promise<void> {
-  current = target;
+  lastRun = () => investigate(target);
   const mode = getMode();
   panel.showLoading(target.location);
 
-  await vscode.window.withProgress(
-    {
-      location: vscode.ProgressLocation.Notification,
-      title: `Git Investigator — investigating ${target.location}…`,
-      cancellable: true,
-    },
-    async (_progress, token) => {
+  await withProgress(`Git Investigator — investigating ${target.location}…`, async (token) => {
+    try {
+      if (mode === "local") await runLocal(target, token);
+      else await runBackend(target, target.workspacePath, getBackendUrl(), token);
+    } catch (e) {
+      panel.showError(errorView(e, mode), target.location);
+    }
+  });
+}
+
+// Full provenance (commits + PRs + reviews + issues) rendered in the editor panel.
+// Collected from the repo's GitHub/GitLab remote via the backend API.
+export async function investigateRemote(target: InvestigationTarget): Promise<void> {
+  lastRun = () => investigateRemote(target);
+  panel.showLoading(target.location);
+
+  const remote = await detectRemoteUrl(target.workspacePath);
+  if (!remote) {
+    panel.showError(
+      {
+        tone: "error",
+        title: "No remote repository",
+        message: "This workspace has no GitHub/GitLab remote.",
+        hint: "Full provenance (PRs, reviews, issues) is collected from the remote's API — this repo needs a remote. Use “Why is this line?” for local commit history.",
+      },
+      target.location,
+    );
+    return;
+  }
+
+  await withProgress(
+    `Git Investigator — full investigation of ${target.location}…`,
+    async (token) => {
       try {
-        if (mode === "local") {
-          await runLocal(target, token);
-        } else {
-          await runBackend(target, token);
-        }
+        // Full provenance is collected the same way the web does — via the hosted app's API.
+        await runBackend(target, remote, getWebUrl(), token);
       } catch (e) {
-        panel.showError(errorView(e, mode), target.location);
+        panel.showError(errorView(e, "backend"), target.location);
       }
     },
   );
@@ -55,21 +90,24 @@ async function runLocal(target: InvestigationTarget, token: vscode.CancellationT
 
 async function runBackend(
   target: InvestigationTarget,
+  repoPath: string,
+  baseUrl: string,
   token: vscode.CancellationToken,
 ): Promise<void> {
-  const backendUrl = getBackendUrl();
   const controller = new AbortController();
   token.onCancellationRequested(() => controller.abort());
+  const githubToken = await getGithubToken();
   const result = await runDig(
-    backendUrl,
-    { repoPath: target.workspacePath, location: target.location },
+    baseUrl,
+    { repoPath, location: target.location },
     controller.signal,
+    githubToken,
   );
   panel.showResult(result, target.location);
 }
 
 export function retry(): void {
-  if (current) void investigate(current);
+  void lastRun?.();
 }
 
 function errorView(e: unknown, mode: Mode): ErrorView {
@@ -78,7 +116,7 @@ function errorView(e: unknown, mode: Mode): ErrorView {
       tone: "error",
       title: "Backend unreachable",
       message: e.message,
-      hint: `Start it with \`npm run dev\`, point \`gitInvestigator.backendUrl\` at a running backend, or switch \`gitInvestigator.mode\` to \`local\`.`,
+      hint: `Start it with \`npm run dev\`, or point \`gitInvestigator.backendUrl\` at a running backend.`,
     };
   }
   if (e instanceof DigError && e.kind === "cancelled") {
@@ -92,6 +130,14 @@ function errorView(e: unknown, mode: Mode): ErrorView {
       title: "Can't read git history",
       message,
       hint: "Open a folder that is a git repository with local commit history.",
+    };
+  }
+  if (/\b404\b|not found|private|GITHUB_TOKEN/i.test(message)) {
+    return {
+      tone: "error",
+      title: "Repository not accessible",
+      message,
+      hint: "If this is a private repo, run “Git Investigator: Set GitHub Token” (a classic PAT with the `repo` scope), then try again.",
     };
   }
   return { tone: "error", title: "Investigation failed", message };

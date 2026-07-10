@@ -6,6 +6,7 @@ export async function runDig(
   backendUrl: string,
   request: DigRequest,
   signal: AbortSignal,
+  githubToken?: string,
 ): Promise<DigResult> {
   const url = `${backendUrl}/api/dig`;
 
@@ -13,7 +14,10 @@ export async function runDig(
   try {
     res = await fetch(url, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        ...(githubToken ? { "x-github-token": githubToken } : {}),
+      },
       body: JSON.stringify(request),
       signal,
     });

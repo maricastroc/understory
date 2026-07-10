@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { getWebUrl } from "./config";
-import { investigate, retry } from "./investigate";
-import { initSecrets, setGroqKeyInteractive } from "./secrets";
+import { investigate, investigateRemote, retry } from "./investigate";
+import { initSecrets, setGithubTokenInteractive, setGroqKeyInteractive } from "./secrets";
 import { getCurrentTarget } from "./target";
 import * as panel from "./webview/panel";
 import { buildWebUrl, detectRemoteUrl } from "./web-link";
@@ -21,8 +21,18 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showWarningMessage(e instanceof Error ? e.message : String(e));
       }
     }),
+    vscode.commands.registerCommand("gitInvestigator.digCurrentLineFull", () => {
+      try {
+        void investigateRemote(getCurrentTarget());
+      } catch (e) {
+        vscode.window.showWarningMessage(e instanceof Error ? e.message : String(e));
+      }
+    }),
     vscode.commands.registerCommand("gitInvestigator.openOnWeb", () => openOnWeb()),
     vscode.commands.registerCommand("gitInvestigator.setGroqKey", () => setGroqKeyInteractive()),
+    vscode.commands.registerCommand("gitInvestigator.setGithubToken", () =>
+      setGithubTokenInteractive(),
+    ),
   );
 }
 

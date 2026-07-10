@@ -23,12 +23,20 @@
         "title": "Git Investigator: Why is this line?"
       },
       {
+        "command": "gitInvestigator.digCurrentLineFull",
+        "title": "Git Investigator: Full Investigation (in editor)"
+      },
+      {
         "command": "gitInvestigator.openOnWeb",
         "title": "Git Investigator: Open Full Investigation on the Web"
       },
       {
         "command": "gitInvestigator.setGroqKey",
         "title": "Git Investigator: Set Groq API Key"
+      },
+      {
+        "command": "gitInvestigator.setGithubToken",
+        "title": "Git Investigator: Set GitHub Token"
       }
     ],
     "menus": {
@@ -39,9 +47,14 @@
           "group": "z_gitInvestigator@1"
         },
         {
-          "command": "gitInvestigator.openOnWeb",
+          "command": "gitInvestigator.digCurrentLineFull",
           "when": "editorTextFocus",
           "group": "z_gitInvestigator@2"
+        },
+        {
+          "command": "gitInvestigator.openOnWeb",
+          "when": "editorTextFocus",
+          "group": "z_gitInvestigator@3"
         }
       ]
     },
