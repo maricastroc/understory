@@ -3,26 +3,27 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { AccountMenu } from "../AccountMenu";
+import { LangToggle } from "../LangToggle";
 import { basename } from "../format";
-import { Logo, Menu, Plus, Search } from "../icons";
+import { Logo, Menu, PullRequest, Search } from "../icons";
+import { useLanguage } from "../use-language";
 import { type AuthUser } from "./use-auth";
 
 export function Header({
   repoPath,
   filter,
   onFilterChange,
-  onNewInvestigation,
   onMenuClick,
   user,
 }: {
   repoPath: string;
   filter: string;
   onFilterChange: (v: string) => void;
-  onNewInvestigation: () => void;
   onMenuClick?: () => void;
   user?: AuthUser | null;
 }) {
   const searchRef = useRef<HTMLInputElement>(null);
+  const { language, setLanguage } = useLanguage();
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -50,7 +51,7 @@ export function Header({
 
       <Link href="/" className="flex shrink-0 items-center pr-1 sm:pr-2">
         <Logo className="size-6.5 shrink-0 text-accent" />
-        <span className="whitespace-nowrap text-[15px] font-semibold tracking-tight sm:text-[16px]">
+        <span className="text-[15px] font-semibold tracking-tight whitespace-nowrap sm:text-[16px]">
           Git <span className="text-accent">Investigator</span>
         </span>
       </Link>
@@ -81,14 +82,14 @@ export function Header({
       </div>
 
       <div className="ml-auto flex items-center gap-3">
-        <button
-          onClick={onNewInvestigation}
-          aria-label="New investigation"
-          className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md bg-accent px-2.5 text-[13px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press sm:px-3"
+        <LangToggle language={language} onChange={setLanguage} className="h-8" />
+        <Link
+          href="/pr"
+          className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-line-2 bg-surface px-3 text-[13px] font-medium whitespace-nowrap text-ink transition-colors hover:bg-inset"
         >
-          <Plus className="size-3.5" />
-          <span className="hidden sm:inline">New investigation</span>
-        </button>
+          <PullRequest className="size-3.5 text-ink-3" />
+          <span className="hidden sm:inline">Explain a PR</span>
+        </Link>
 
         <AccountMenu
           user={user ?? null}

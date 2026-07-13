@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import type { Model } from "./llm";
+import type { Language, Model } from "./llm";
 import type { Evidence, Narrative } from "./types";
 
 const narrativeSchema = z.object({
@@ -44,12 +44,21 @@ const SYSTEM = [
   "  'fix' with no reasoning), set recorded=false and say plainly that the history",
   "  does not explain it. Never invent a motivation to fill the gap.",
   "- Be concise and factual. No hedging, no filler, no apologies.",
-  "- LANGUAGE: write `answer` in the same language as the Question line, detected",
-  "  from the Question ALONE. The evidence may be in other languages (Japanese,",
-  "  etc.); that must NEVER change the answer's language. An English question gets",
-  "  an English answer even if every cited source is in another language.",
   "- Only cite ids that literally appear in the evidence. Never fabricate an id.",
 ].join("\n");
+
+function languageRule(language: Language): string {
+  if (language === "pt")
+    return "- LANGUAGE: write `answer` in Brazilian Portuguese (pt-BR), no matter what language the question or the evidence is in.";
+  if (language === "en")
+    return "- LANGUAGE: write `answer` in English, no matter what language the question or the evidence is in.";
+  return [
+    "- LANGUAGE: write `answer` in the same language as the Question line, detected",
+    "  from the Question ALONE. The evidence may be in other languages (Japanese,",
+    "  etc.); that must NEVER change the answer's language. An English question gets",
+    "  an English answer even if every cited source is in another language.",
+  ].join("\n");
+}
 
 const EVIDENCE_CHAR_BUDGET = 13_000;
 const MAX_BODY = 3_000;
@@ -87,7 +96,10 @@ function formatTarget(ev: Evidence): string {
   return "(unspecified)";
 }
 
-export function buildSynthesisInput(ev: Evidence): { system: string; prompt: string } {
+export function buildSynthesisInput(
+  ev: Evidence,
+  language: Language = "auto",
+): { system: string; prompt: string } {
   const targetLine = ev.location
     ? `Code location: ${formatTarget(ev)}`
     : `Anchored on: ${formatTarget(ev)}`;
@@ -98,11 +110,15 @@ export function buildSynthesisInput(ev: Evidence): { system: string; prompt: str
     "Evidence:",
     ev.artifacts.length ? renderEvidence(ev) : "(no evidence was collected)",
   ].join("\n");
-  return { system: SYSTEM, prompt };
+  return { system: `${SYSTEM}\n${languageRule(language)}`, prompt };
 }
 
-export async function synthesize(ev: Evidence, model: Model): Promise<Narrative> {
-  const { system, prompt } = buildSynthesisInput(ev);
+export async function synthesize(
+  ev: Evidence,
+  model: Model,
+  language: Language = "auto",
+): Promise<Narrative> {
+  const { system, prompt } = buildSynthesisInput(ev, language);
   const { object } = await generateObject({
     model,
     schema: narrativeSchema,

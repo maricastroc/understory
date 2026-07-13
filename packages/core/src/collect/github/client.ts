@@ -35,6 +35,14 @@ export async function restRaw(path: string): Promise<string> {
   return res.text();
 }
 
+export async function restDiff(path: string): Promise<string> {
+  const res = await fetch(`${API}${path}`, {
+    headers: { ...headers(), Accept: "application/vnd.github.diff" },
+  });
+  if (!res.ok) throw new Error(`GitHub API ${res.status}${hint(res.status)}`);
+  return res.text();
+}
+
 export async function graphql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
   if (!resolveToken()) {
     throw new Error(

@@ -1,4 +1,4 @@
-import { Close, Search, User } from "../icons";
+import { Close, Plus, Search, User } from "../icons";
 import type { AuthUser } from "../investigator/use-auth";
 import { Avatar } from "../ui";
 import { CaseRow } from "./CaseRow";
@@ -9,6 +9,7 @@ export function SidebarBody({
   activeId,
   onSelect,
   onRemove,
+  onNew,
   filtering = false,
   user,
   onClose,
@@ -17,6 +18,7 @@ export function SidebarBody({
   activeId: string | null;
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
+  onNew?: () => void;
   filtering?: boolean;
   user?: AuthUser | null;
   onClose?: () => void;
@@ -28,6 +30,17 @@ export function SidebarBody({
           Investigations
         </span>
         <span className="ml-auto text-[11px] font-semibold text-ink-3 tnum">{items.length}</span>
+        {onNew && (
+          <button
+            type="button"
+            aria-label="New investigation"
+            title="New investigation"
+            onClick={onNew}
+            className="grid size-7 cursor-pointer place-items-center rounded-md border border-line-2 bg-surface text-ink-2 transition-colors hover:bg-inset hover:text-ink"
+          >
+            <Plus className="size-4" />
+          </button>
+        )}
         {onClose && (
           <button
             type="button"

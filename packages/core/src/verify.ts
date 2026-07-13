@@ -41,7 +41,7 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
   };
 }
 
-function scoreConfidence(s: {
+export function scoreConfidence(s: {
   recorded: boolean;
   grounded: boolean;
   primarySources: number;

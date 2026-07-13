@@ -54,3 +54,21 @@ export const sampleConfidence: Confidence = {
   corroborating: 2,
   contradicting: 0,
 };
+
+export const reviewCopilot = {
+  tag: "// review copilot",
+  title: "Reviewing a pull request? See the why behind every change.",
+  body: "Paste a GitHub PR and read the grounded reasoning behind the code it touches — riskiest changes first, each claim linked to the commits, pull requests, and reviews that justify it. The context a diff never shows you.",
+  cta: "Explain a PR",
+  example: "chalk/chalk#664",
+  finding: {
+    risk: "High risk",
+    target: "src/index.js:42",
+    why: "This retry cap was set to 3 after issue #1187 — an unbounded loop double-charged customers during an outage. Loosening it here reopens that incident.",
+    grounded: [
+      { kind: "pr", id: "pr:812" },
+      { kind: "issue", id: "issue:1187" },
+      { kind: "review", id: "review:approved" },
+    ],
+  },
+} as const;

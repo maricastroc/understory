@@ -12,6 +12,7 @@ export function MobileSidebar({
   activeId,
   onSelect,
   onRemove,
+  onNewInvestigation,
   filtering = false,
   user,
 }: {
@@ -21,6 +22,7 @@ export function MobileSidebar({
   activeId: string | null;
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
+  onNewInvestigation?: () => void;
   filtering?: boolean;
   user?: AuthUser | null;
 }) {
@@ -85,6 +87,14 @@ export function MobileSidebar({
           activeId={activeId}
           onSelect={onSelect}
           onRemove={onRemove}
+          onNew={
+            onNewInvestigation
+              ? () => {
+                  onNewInvestigation();
+                  onClose();
+                }
+              : undefined
+          }
           filtering={filtering}
           user={user}
           onClose={onClose}

@@ -10,3 +10,5 @@ export { blameLines, fileHistoryGitHub } from "./blame";
 export type { PrReview, PrIssue, AssociatedPr, BlameCommit } from "./blame";
 export { commitArtifact, prArtifact, issueArtifact, reviewArtifact } from "./artifacts";
 export { prContextArtifacts, issueContextArtifacts, commitContextArtifacts } from "./context";
+export { getPullRequest, getPullRequestDiff } from "./pulls";
+export type { PullMeta } from "./pulls";

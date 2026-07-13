@@ -8,6 +8,7 @@ import { MobileSidebar } from "../sidebar/MobileSidebar";
 import { Sidebar } from "../sidebar/Sidebar";
 import { Composer } from "../composer/Composer";
 import { useRepo } from "../composer/use-repo";
+import { useLanguage } from "../use-language";
 import { useAuth } from "./use-auth";
 import { CaseView } from "./CaseView";
 import { Header } from "./Header";
@@ -37,6 +38,7 @@ export function Investigator() {
 
   const repo = useRepo();
   const params = useSearchParams();
+  const { language } = useLanguage();
   const [caseFilter, setCaseFilter] = useState("");
   const [token, setToken] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -48,11 +50,15 @@ export function Investigator() {
     if (deepRepo && deepFile && deepLine) {
       setRepoPath(deepRepo);
       void repo.open(deepRepo);
-      void investigate({
-        repoPath: deepRepo,
-        location: `${deepFile}:${deepLine}`,
-        question: "Why is this line the way it is? Reconstruct why it changed.",
-      });
+      void investigate(
+        {
+          repoPath: deepRepo,
+          location: `${deepFile}:${deepLine}`,
+          question: "Why is this line the way it is? Reconstruct why it changed.",
+        },
+        undefined,
+        language,
+      );
     } else {
       void repo.open(repoPath);
     }
@@ -84,7 +90,6 @@ export function Investigator() {
         repoPath={repoPath}
         filter={caseFilter}
         onFilterChange={setCaseFilter}
-        onNewInvestigation={handleNewInvestigation}
         onMenuClick={() => setMenuOpen(true)}
         user={user}
       />
@@ -95,6 +100,7 @@ export function Investigator() {
           activeId={view === "case" ? activeId : null}
           onSelect={selectCase}
           onRemove={removeCase}
+          onNewInvestigation={handleNewInvestigation}
           filtering={filterQuery.length > 0}
           user={user}
         />
@@ -109,6 +115,7 @@ export function Investigator() {
             setMenuOpen(false);
           }}
           onRemove={removeCase}
+          onNewInvestigation={handleNewInvestigation}
           filtering={filterQuery.length > 0}
           user={user}
         />
@@ -130,7 +137,7 @@ export function Investigator() {
                 setRepoPath={setRepoPath}
                 token={token}
                 setToken={setToken}
-                onInvestigate={(input) => investigate(input, token.trim() || undefined)}
+                onInvestigate={(input) => investigate(input, token.trim() || undefined, language)}
               />
             </div>
 
@@ -147,6 +154,7 @@ export function Investigator() {
                     anchor,
                     current.form.repoPath,
                     token.trim() || undefined,
+                    language,
                   )
                 }
                 onOpenParent={selectCase}

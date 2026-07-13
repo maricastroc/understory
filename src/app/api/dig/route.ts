@@ -31,6 +31,7 @@ export async function POST(req: Request) {
     question?: string;
     target?: ArtifactRef;
     noCapture?: boolean;
+    language?: string;
   };
   try {
     body = await req.json();
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
   }
 
   const { repoPath, location, question, target, noCapture } = body;
+  const language = body.language === "pt" || body.language === "en" ? body.language : "auto";
   if (!repoPath || (!location && !target)) {
     return NextResponse.json(
       { error: "repoPath and either a location or a target are required" },
@@ -105,7 +107,7 @@ export async function POST(req: Request) {
     const collectPath =
       gh || parseGitLabRepo(repoPath) ? repoPath : (await resolveRepoInput(repoPath)).path;
     result = await runWithTokens({ github: githubToken, gitlab: gitlabToken }, () =>
-      investigate({ repoPath: collectPath, ...collectArgs }),
+      investigate({ repoPath: collectPath, ...collectArgs }, { language }),
     );
   } catch (e) {
     return NextResponse.json(

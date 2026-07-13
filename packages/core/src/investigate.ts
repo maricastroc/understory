@@ -27,7 +27,7 @@ export async function investigate(input: CollectInput, config: LlmConfig = {}): 
   }
 
   try {
-    const narrative = await synthesize(evidence, model);
+    const narrative = await synthesize(evidence, model, config.language);
     const doEntail = config.entail ?? process.env.ENTAILMENT !== "0";
     let entailment: Entailment | undefined;
     if (doEntail) {

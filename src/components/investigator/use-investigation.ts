@@ -117,9 +117,9 @@ export function useInvestigation(user: AuthUser | null) {
     }
   }
 
-  async function investigate(input: Form, token?: string) {
+  async function investigate(input: Form, token?: string, language?: string) {
     await submit(
-      input,
+      { ...input, ...(language ? { language } : {}) },
       (caseId, data) => ({ caseId, form: input, result: data }),
       (caseId, data) => ({
         caseId,
@@ -138,10 +138,11 @@ export function useInvestigation(user: AuthUser | null) {
     anchor: ArtifactRef,
     repoPath: string,
     token?: string,
+    language?: string,
   ) {
     const label = anchor.ref ?? anchor.id;
     await submit(
-      { repoPath, target: anchor },
+      { repoPath, target: anchor, ...(language ? { language } : {}) },
       (caseId, data) => ({
         caseId,
         form: { repoPath, location: label, question: data.evidence.question },

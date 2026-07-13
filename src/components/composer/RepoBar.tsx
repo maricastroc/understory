@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { RepoMeta } from "@git-investigator/core/types";
-import { Alert, Branch, Check, Close, Lock } from "../icons";
+import { Alert, Branch, Check, Close, Lock, Repo } from "../icons";
 
 const kindLabel = { github: "GitHub", remote: "Cloned", local: "Local" } as const;
 
@@ -65,6 +65,7 @@ export function RepoBar({
           disabled={connecting || ready}
           className={`inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] font-medium transition-colors disabled:cursor-default ${openClass}`}
         >
+          {ready ? <Check className="size-3.5" /> : <Repo className="size-3.5" />}
           {connecting ? "Opening…" : ready ? "Opened" : "Open"}
         </button>
       </div>

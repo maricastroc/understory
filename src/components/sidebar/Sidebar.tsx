@@ -7,6 +7,7 @@ export function Sidebar({
   activeId,
   onSelect,
   onRemove,
+  onNewInvestigation,
   filtering = false,
   user,
 }: {
@@ -14,6 +15,7 @@ export function Sidebar({
   activeId: string | null;
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
+  onNewInvestigation?: () => void;
   filtering?: boolean;
   user?: AuthUser | null;
 }) {
@@ -27,6 +29,7 @@ export function Sidebar({
         activeId={activeId}
         onSelect={onSelect}
         onRemove={onRemove}
+        onNew={onNewInvestigation}
         filtering={filtering}
         user={user}
       />

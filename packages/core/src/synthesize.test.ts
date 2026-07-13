@@ -37,3 +37,22 @@ describe("buildSynthesisInput", () => {
     expect(prompt).not.toContain("[truncated]");
   });
 });
+
+describe("buildSynthesisInput — language", () => {
+  const ev = evidence([mk("commit:a", "x")]);
+
+  it("defaults to following the question's language", () => {
+    expect(buildSynthesisInput(ev).system).toContain("same language as the Question");
+  });
+
+  it("forces Portuguese when asked", () => {
+    const { system } = buildSynthesisInput(ev, "pt");
+    expect(system).toContain("Brazilian Portuguese");
+    expect(system).not.toContain("same language as the Question");
+  });
+
+  it("forces English when asked", () => {
+    const { system } = buildSynthesisInput(ev, "en");
+    expect(system).toContain("write `answer` in English, no matter");
+  });
+});

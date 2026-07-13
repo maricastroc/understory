@@ -4,5 +4,8 @@ export { getModel, type LlmConfig, type Model } from "./llm";
 export { buildSynthesisInput, synthesize } from "./synthesize";
 export { verify } from "./verify";
 export { checkEntailment, verifyQuote, finalizeCheck } from "./entail";
+export { investigateDiff, type DiffInput } from "./diff/investigate";
+export { collectDiff } from "./diff/collect";
+export { parseUnifiedDiff } from "./diff/parse";
 export { anchorQuestion } from "./anchor-question";
 export { type CollectInput, collect, parseLocation } from "./collect";
