@@ -184,13 +184,24 @@ describe("verify — entailment refines confidence", () => {
     expect(v.confidence.score).toBe(0.35);
   });
 
-  it("a 'weak' source does not lift a single citation to HIGH on its own", () => {
+  it("still counts a 'weak' (on-topic) source as primary — only misattribution is penalized", () => {
     const v = verify(
       ev(["c1", "c2"]),
       narr({ citations: ["c1", "c2"], recorded: true }),
       entail([check("c1", "supported"), check("c2", "weak")]),
     );
-    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.level).toBe("high");
+  });
+
+  it("leaves a well-grounded answer HIGH when sources are on-topic but not verbatim-quotable (all weak)", () => {
+    const v = verify(
+      ev(["c1", "c2"]),
+      narr({ citations: ["c1", "c2"], recorded: true }),
+      entail([check("c1", "weak"), check("c2", "weak")]),
+    );
+    expect(v.confidence.level).toBe("high");
+    expect(v.entailment?.supported).toBe(0);
+    expect(v.entailment?.misattributed).toBe(0);
   });
 
   it("leaves scoring untouched when the judge did not run (checked:false)", () => {
