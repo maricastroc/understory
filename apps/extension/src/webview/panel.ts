@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import type { DigResult } from "@git-investigator/core";
+import type { ArtifactRef, DigResult } from "@git-investigator/core";
 import { type ErrorView, renderError, renderLoading, renderResult } from "./render";
 
-export type WebviewMessage = { type: "retry" };
+export type WebviewMessage = { type: "retry" } | { type: "drill"; ref: ArtifactRef };
 
 let panel: vscode.WebviewPanel | undefined;
 let messageListener: ((msg: WebviewMessage) => void) | undefined;
@@ -40,8 +40,12 @@ export function showLoading(location: string): void {
   ensurePanel().webview.html = renderLoading(nonce(), location);
 }
 
-export function showResult(result: DigResult, location: string): void {
-  ensurePanel().webview.html = renderResult(nonce(), result, location);
+export function showResult(
+  result: DigResult,
+  location: string,
+  opts: { canDrill?: boolean } = {},
+): void {
+  ensurePanel().webview.html = renderResult(nonce(), result, location, opts);
 }
 
 export function showError(view: ErrorView, location: string): void {

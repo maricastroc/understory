@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import { getWebUrl } from "./config";
-import { investigate, investigateRemote, retry } from "./investigate";
+import { drill, investigate, investigateRemote, retry } from "./investigate";
 import { initSecrets, setGithubTokenInteractive, setGroqKeyInteractive } from "./secrets";
 import { getCurrentTarget } from "./target";
 import * as panel from "./webview/panel";
+import { isArtifactRef } from "./webview/render";
 import { buildWebUrl, detectRemoteUrl } from "./web-link";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -11,6 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   panel.setMessageListener((msg) => {
     if (msg.type === "retry") retry();
+    else if (msg.type === "drill" && isArtifactRef(msg.ref)) void drill(msg.ref);
   });
 
   context.subscriptions.push(

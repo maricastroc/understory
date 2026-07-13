@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import type { ArtifactRef } from "@git-investigator/core";
 import { runDig } from "./client/dig";
 import { DigError } from "./client/errors";
 import { runLocalDig } from "./client/local";
@@ -10,6 +11,11 @@ import type { ErrorView } from "./webview/render";
 import { detectRemoteUrl } from "./web-link";
 
 let lastRun: (() => Promise<void>) | undefined;
+
+// The repo spec + backend of the last API-backed investigation, so a drill from
+// the webview can re-anchor against the same source. Cleared for local runs
+// (local git has only commits — nothing rich to drill into).
+let drillContext: { repoPath: string; baseUrl: string } | undefined;
 
 function withProgress(
   title: string,
@@ -24,6 +30,7 @@ function withProgress(
 // "Why is this line?" — local (in-process) by default, or the configured backend.
 export async function investigate(target: InvestigationTarget): Promise<void> {
   lastRun = () => investigate(target);
+  drillContext = undefined;
   const mode = getMode();
   panel.showLoading(target.location);
 
@@ -103,7 +110,36 @@ async function runBackend(
     controller.signal,
     githubToken,
   );
-  panel.showResult(result, target.location);
+  // API-backed results carry full provenance (PRs/reviews/issues) worth drilling into.
+  drillContext = { repoPath, baseUrl };
+  panel.showResult(result, target.location, { canDrill: true });
+}
+
+// Click a cited artifact in the webview → open a fresh investigation anchored on it,
+// against the same remote repo, via the same API. Ignored when there's no API context.
+export async function drill(ref: ArtifactRef): Promise<void> {
+  const ctx = drillContext;
+  if (!ctx) return;
+  const label = ref.ref ?? ref.id;
+  lastRun = () => drill(ref);
+  panel.showLoading(label);
+
+  await withProgress(`Git Investigator — investigating ${label}…`, async (token) => {
+    try {
+      const controller = new AbortController();
+      token.onCancellationRequested(() => controller.abort());
+      const githubToken = await getGithubToken();
+      const result = await runDig(
+        ctx.baseUrl,
+        { repoPath: ctx.repoPath, target: ref },
+        controller.signal,
+        githubToken,
+      );
+      panel.showResult(result, label, { canDrill: true });
+    } catch (e) {
+      panel.showError(errorView(e, "backend"), label);
+    }
+  });
 }
 
 export function retry(): void {
