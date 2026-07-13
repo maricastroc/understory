@@ -3,6 +3,7 @@ import { createGroq } from "@ai-sdk/groq";
 export type LlmConfig = {
   apiKey?: string;
   model?: string;
+  entail?: boolean;
 };
 
 export function getModel(config: LlmConfig = {}) {

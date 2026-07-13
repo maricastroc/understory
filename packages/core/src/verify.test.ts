@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { Artifact, Contradiction, Evidence, Narrative } from "./types";
+import type {
+  Artifact,
+  CitationCheck,
+  Contradiction,
+  Entailment,
+  Evidence,
+  Narrative,
+} from "./types";
 import { verify } from "./verify";
 
 function art(id: string): Artifact {
@@ -124,5 +131,75 @@ describe("verify — contradiction penalty", () => {
     const v = verify(ev(["c1"], [contra("c1")]), narr({ citations: ["c1"], recorded: false }));
     expect(v.confidence.level).toBe("low");
     expect(v.confidence.score).toBe(0.3);
+  });
+});
+
+const check = (citation: string, status: CitationCheck["status"]): CitationCheck => ({
+  citation,
+  status,
+  quote: status === "supported" ? "verbatim proof" : null,
+  reason: status,
+});
+
+function entail(checks: CitationCheck[]): Entailment {
+  return {
+    checked: true,
+    checks,
+    supported: checks.filter((c) => c.status === "supported").length,
+    misattributed: checks.filter((c) => c.status === "unsupported").length,
+  };
+}
+
+describe("verify — entailment refines confidence", () => {
+  it("keeps HIGH when both cited sources are substantiated in-source", () => {
+    const v = verify(
+      ev(["c1", "c2"]),
+      narr({ citations: ["c1", "c2"], recorded: true }),
+      entail([check("c1", "supported"), check("c2", "supported")]),
+    );
+    expect(v.confidence.level).toBe("high");
+    expect(v.entailment?.supported).toBe(2);
+    expect(v.entailment?.misattributed).toBe(0);
+  });
+
+  it("demotes HIGH to MEDIUM when one cited source does not substantiate the claim", () => {
+    const v = verify(
+      ev(["c1", "c2"]),
+      narr({ citations: ["c1", "c2"], recorded: true }),
+      entail([check("c1", "supported"), check("c2", "unsupported")]),
+    );
+    expect(v.confidence.level).toBe("medium");
+    expect(v.entailment?.misattributed).toBe(1);
+    expect(v.confidence.primarySources).toBe(2);
+  });
+
+  it("drops a lone misattributed citation to LOW even though its id is real", () => {
+    const v = verify(
+      ev(["c1"]),
+      narr({ citations: ["c1"], recorded: true }),
+      entail([check("c1", "unsupported")]),
+    );
+    expect(v.grounded).toBe(true);
+    expect(v.confidence.level).toBe("low");
+    expect(v.confidence.score).toBe(0.35);
+  });
+
+  it("a 'weak' source does not lift a single citation to HIGH on its own", () => {
+    const v = verify(
+      ev(["c1", "c2"]),
+      narr({ citations: ["c1", "c2"], recorded: true }),
+      entail([check("c1", "supported"), check("c2", "weak")]),
+    );
+    expect(v.confidence.level).toBe("medium");
+  });
+
+  it("leaves scoring untouched when the judge did not run (checked:false)", () => {
+    const v = verify(
+      ev(["c1", "c2"]),
+      narr({ citations: ["c1", "c2"], recorded: true }),
+      { checked: false, checks: [], supported: 0, misattributed: 0 },
+    );
+    expect(v.confidence.level).toBe("high");
+    expect(v.entailment).toBeUndefined();
   });
 });

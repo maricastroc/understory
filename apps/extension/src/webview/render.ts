@@ -117,7 +117,24 @@ function renderNarrative(narrative: VerifiedNarrative | null): string {
     </div>
     <div class="answer">${answer}</div>
     ${grounding}
+    ${renderEntailment(narrative.entailment)}
   </section>`;
+}
+
+function renderEntailment(entailment: VerifiedNarrative["entailment"]): string {
+  if (!entailment?.checked) return "";
+
+  if (entailment.misattributed > 0) {
+    const n = entailment.misattributed;
+    return `<p class="ungrounded">⚠ ${n} cited source${n > 1 ? "s" : ""} not substantiated by its own content.</p>`;
+  }
+
+  const proven = entailment.checks.filter((x) => x.status === "supported" && x.quote);
+  if (proven.length === 0) return "";
+  const quotes = proven
+    .map((x) => `<li class="quote">“${esc(x.quote ?? "")}”</li>`)
+    .join("");
+  return `<div class="substantiated">✓ Substantiated in-source<ul class="quotes">${quotes}</ul></div>`;
 }
 
 function renderContradictions(contradictions: DigResult["evidence"]["contradictions"]): string {
@@ -195,6 +212,9 @@ const STYLES = `
   .confidence.medium .dot { background: var(--vscode-charts-yellow); }
   .confidence.low .dot { background: var(--vscode-charts-red); }
   .ungrounded { color: var(--vscode-editorWarning-foreground); font-size: 13px; }
+  .substantiated { color: var(--vscode-charts-green); font-size: 12px; margin-top: 8px; }
+  .quotes { margin: 4px 0 0; }
+  .quote { color: var(--vscode-descriptionForeground); font-style: italic; font-size: 12px; padding: 2px 0 2px 10px; border-left: 2px solid var(--vscode-charts-green); margin-top: 4px; }
 
   ul { list-style: none; padding: 0; margin: 0; }
   ul.flat li { padding: 6px 0; }

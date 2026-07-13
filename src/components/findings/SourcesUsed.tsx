@@ -1,5 +1,5 @@
-import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
-import { Check, ExternalLink, KindIcon } from "../icons";
+import type { Artifact, ArtifactKind, EntailmentStatus } from "@git-investigator/core/types";
+import { Alert, Check, ExternalLink, KindIcon } from "../icons";
 
 const sourceNoun = (kind: ArtifactKind): string =>
   kind === "pull_request"
@@ -10,12 +10,20 @@ const sourceNoun = (kind: ArtifactKind): string =>
         ? "Issue"
         : "Review";
 
+function SupportMark({ status }: { status?: EntailmentStatus }) {
+  if (status === "unsupported") return <Alert className="size-3.5 shrink-0 text-crit" />;
+  if (status === "weak") return <Check className="size-3.5 shrink-0 text-ink-3" />;
+  return <Check className="size-3.5 shrink-0 text-good" />;
+}
+
 export function SourcesUsed({
   resolved,
   byId,
+  statusById,
 }: {
   resolved: string[];
   byId: Map<string, Artifact>;
+  statusById?: Map<string, EntailmentStatus>;
 }) {
   if (resolved.length === 0) return null;
   return (
@@ -30,7 +38,7 @@ export function SourcesUsed({
           const label = `${sourceNoun(a.kind)} ${a.ref ?? id}`;
           const inner = (
             <>
-              <Check className="size-3.5 shrink-0 text-good" />
+              <SupportMark status={statusById?.get(id)} />
               <KindIcon kind={a.kind} className="size-3.5 shrink-0 text-ink-3" />
               <span className="font-semibold text-ink">{label}</span>
               {a.url && <ExternalLink className="size-3 shrink-0 text-ink-3" />}

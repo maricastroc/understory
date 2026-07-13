@@ -1,7 +1,8 @@
 import { type CollectInput, collect } from "./collect";
+import { checkEntailment } from "./entail";
 import { type LlmConfig, getModel } from "./llm";
 import { synthesize } from "./synthesize";
-import type { DigResult } from "./types";
+import type { DigResult, Entailment } from "./types";
 import { verify } from "./verify";
 
 const NO_LLM =
@@ -26,7 +27,19 @@ export async function investigate(input: CollectInput, config: LlmConfig = {}): 
   }
 
   try {
-    result.narrative = verify(evidence, await synthesize(evidence, model));
+    const narrative = await synthesize(evidence, model);
+    const doEntail = config.entail ?? process.env.ENTAILMENT !== "0";
+    let entailment: Entailment | undefined;
+    if (doEntail) {
+      // The judge is a best-effort second pass: if it's rate-limited or fails,
+      // fall back to citation-existence grounding rather than losing the whole result.
+      try {
+        entailment = await checkEntailment(evidence, narrative, model);
+      } catch {
+        entailment = undefined;
+      }
+    }
+    result.narrative = verify(evidence, narrative, entailment);
   } catch (e) {
     result.error = synthesisError(e);
   }

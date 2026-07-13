@@ -1,4 +1,5 @@
 import { collect, parseLocation } from "@git-investigator/core/collect";
+import { checkEntailment } from "@git-investigator/core/entail";
 import { getModel } from "@git-investigator/core/llm";
 import { buildSynthesisInput, synthesize } from "@git-investigator/core/synthesize";
 import { verify } from "@git-investigator/core/verify";
@@ -149,6 +150,22 @@ function printFindings(ev: Evidence, v: VerifiedNarrative) {
     console.log(`  ${red("⚠")} ${red(id)} ${red("— FABRICATED: not in collected evidence")}`);
   }
 
+  if (v.entailment?.checked) {
+    console.log();
+    console.log(gray("Substantiation:") + gray(" (does the cited source's own text back the claim?)"));
+    for (const check of v.entailment.checks) {
+      const hit = byId.get(check.citation);
+      const ex = hit ? `Exhibit ${hit.letter}` : check.citation;
+      if (check.status === "supported" && check.quote) {
+        console.log(`  ${green("✓")} ${ex} ${gray("·")} ${dim(`“${check.quote}”`)}`);
+      } else if (check.status === "unsupported") {
+        console.log(`  ${red("⚠")} ${ex} ${red("— source does not substantiate the claim")}`);
+      } else {
+        console.log(`  ${yellow("~")} ${ex} ${gray("— on topic, not stated in source")}`);
+      }
+    }
+  }
+
   const c = v.confidence;
   const paint = levelColor(c.level);
   console.log();
@@ -228,7 +245,8 @@ async function main() {
     const model = getModel();
     if (!model) keyMissing();
     const narrative = await synthesize(evidence, model);
-    verified = verify(evidence, narrative);
+    const entailment = await checkEntailment(evidence, narrative, model).catch(() => undefined);
+    verified = verify(evidence, narrative, entailment);
   }
 
   if (json) {

@@ -3,7 +3,9 @@ import { letter } from "../format";
 import { SectionLabel } from "../ui";
 import { ConfidencePanel } from "./ConfidencePanel";
 import { ContradictionAlert } from "./ContradictionAlert";
+import { EntailmentQuotes } from "./EntailmentQuotes";
 import { FabricationAlert } from "./FabricationAlert";
+import { MisattributionAlert } from "./MisattributionAlert";
 import { OutOfScopeCard } from "./OutOfScopeCard";
 import { SourcesUsed } from "./SourcesUsed";
 import { VerdictStrip } from "./VerdictStrip";
@@ -25,6 +27,10 @@ export function Findings({
   const citedSet = new Set(resolved);
   const contradictions = evidence.contradictions.filter((c) => citedSet.has(c.artifactId));
 
+  const entailment = narrative.entailment;
+  const checks = entailment?.checked ? entailment.checks : [];
+  const statusById = new Map(checks.map((c) => [c.citation, c.status]));
+
   return (
     <section className="mt-6">
       <SectionLabel
@@ -41,11 +47,17 @@ export function Findings({
               {narrative.answer}
             </p>
             <FabricationAlert ids={narrative.unknownCitations} />
+            <MisattributionAlert checks={checks} idToLetter={idToLetter} />
             <ContradictionAlert contradictions={contradictions} idToLetter={idToLetter} />
-            <SourcesUsed resolved={resolved} byId={byId} />
+            <SourcesUsed resolved={resolved} byId={byId} statusById={statusById} />
+            <EntailmentQuotes checks={checks} byId={byId} idToLetter={idToLetter} />
           </div>
 
-          <ConfidencePanel confidence={narrative.confidence} grounded={narrative.grounded} />
+          <ConfidencePanel
+            confidence={narrative.confidence}
+            grounded={narrative.grounded}
+            entailment={entailment}
+          />
         </div>
       </div>
     </section>

@@ -1,14 +1,42 @@
-import type { Confidence } from "@git-investigator/core/types";
+import type { Confidence, Entailment } from "@git-investigator/core/types";
 import { ConfidenceRing } from "../ConfidenceRing";
 import { levelLabel } from "../format";
 import { Alert, Check } from "../icons";
 
+function EntailmentLine({ entailment }: { entailment: Entailment }) {
+  const tone =
+    entailment.misattributed > 0
+      ? "text-crit"
+      : entailment.supported > 0
+        ? "text-good"
+        : "text-ink-3";
+  const label =
+    entailment.misattributed > 0
+      ? `${entailment.misattributed} not substantiated`
+      : entailment.supported > 0
+        ? `${entailment.supported} substantiated in-source`
+        : "citations checked in-source";
+
+  return (
+    <div className={`inline-flex items-center gap-1.5 text-[12px] font-medium ${tone}`}>
+      {entailment.misattributed > 0 ? (
+        <Alert className="size-3.5" />
+      ) : (
+        <Check className="size-3.5" />
+      )}
+      {label}
+    </div>
+  );
+}
+
 export function ConfidencePanel({
   confidence,
   grounded,
+  entailment,
 }: {
   confidence: Confidence;
   grounded: boolean;
+  entailment?: Entailment;
 }) {
   return (
     <div className="flex flex-col items-center gap-3 p-6 text-center">
@@ -25,6 +53,7 @@ export function ConfidencePanel({
           {grounded ? <Check className="size-3.5" /> : <Alert className="size-3.5" />}
           {grounded ? "Every citation grounded" : "Fabrication detected"}
         </div>
+        {entailment?.checked && <EntailmentLine entailment={entailment} />}
       </div>
     </div>
   );

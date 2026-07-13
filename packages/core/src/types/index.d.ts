@@ -8,6 +8,7 @@ export type { RepoRef } from "./repo-ref";
 export type { Evidence } from "./evidence";
 export type { Narrative } from "./narrative";
 export type { Confidence } from "./confidence";
+export type { EntailmentStatus, CitationCheck, Entailment } from "./entailment";
 export type { VerifiedNarrative } from "./verified-narrative";
 export type { DigResult } from "./dig-result";
 export type { InvestigateInput } from "./investigate-input";
