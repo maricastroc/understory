@@ -23,16 +23,12 @@ function Tick({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   );
 }
 
-// The audit trail behind a finding's confidence: what the dig turned up, whether every
-// citation resolved, and whether the judge could substantiate them in-source. Makes the
-// "High · 90%" pill traceable instead of asserted.
 export function ConfidenceLedger({ finding }: { finding: VerifiedDiffFinding }) {
   if (!finding.recorded) return null;
 
   const found = ORDER.map((kind) => ({ kind, n: countKind(finding, kind) })).filter((x) => x.n > 0);
   const e = finding.entailment;
-  // Grounded and cited, but no completed audit informed the score (disabled, rate-limited,
-  // or it threw). Confidence was capped — surface that instead of implying a silent pass.
+
   const auditUnavailable = finding.grounded && finding.citations.length > 0 && !e?.checked;
 
   return (

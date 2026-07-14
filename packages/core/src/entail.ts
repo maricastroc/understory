@@ -150,10 +150,6 @@ export async function judgeCitation(
   return finalizeCheck(a.id, a.body, object);
 }
 
-// Deterministic gate for a claim judged against several sources: the quote must appear
-// verbatim in ONE of them, and a 'supported' with no such quote is demoted — the judge
-// cannot vouch for itself. Returns which source carried the quote so the check can attach
-// it to the right exhibit.
 export function finalizeClaim(
   sources: Artifact[],
   raw: z.infer<typeof claimSchema>,
@@ -221,13 +217,6 @@ export async function judgeClaim(
 
 type ClaimTask = { index: number; text: string; sources: Artifact[] };
 
-// Second LLM pass, per CLAIM. Each claim is judged against ITS sources together, so a claim
-// that asserts a relationship ("A because B", citing two sources) is checked as a whole —
-// not as two isolated on-topic facts — and cannot be marked supported unless the sources
-// establish the link. One CitationCheck is emitted per source (the UI is source-keyed); the
-// sources of a claim share its verdict and index, and the verbatim quote sits on the source
-// it came from. verify groups by that index, so a single multi-source claim counts once.
-// Shared by the line answer and the PR summary — both reduce to "claims + their sources".
 export async function entailClaims(
   question: string,
   claims: Claim[],

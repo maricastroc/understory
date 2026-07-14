@@ -1,9 +1,5 @@
 import type { VerifiedClaim } from "@git-investigator/core/types";
 
-// The answer, rendered claim by claim. Each grounded assertion carries the exhibit
-// letters of the sources that back it; an uncited claim (grounded=false) is marked in
-// place, so the reader sees exactly which sentence the history does not support instead
-// of a smooth paragraph that hides the seam.
 export function Claims({
   claims,
   idToLetter,

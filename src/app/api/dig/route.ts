@@ -116,9 +116,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // Progressive reveal: stream the evidence the instant collection finishes, then the verified
-  // narrative once the two LLM passes return. The client renders the provenance chain and
-  // timeline from the first chunk and fills Findings in from the second — no blank wait.
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enc = new TextEncoder();

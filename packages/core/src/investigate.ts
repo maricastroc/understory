@@ -16,10 +16,6 @@ export function synthesisError(e: unknown): string {
   return "Could not generate the written summary — the collected evidence and provenance chain below still stand.";
 }
 
-// The LLM half of an investigation: turn already-collected evidence into a verified narrative
-// (or an honest error). Split out from investigate() so the web route can stream the evidence
-// the instant collect() finishes and run this second, filling the conclusion in when the model
-// returns — no wasted re-collection, one source of truth for the synthesize→entail→verify chain.
 export async function narrate(
   evidence: Evidence,
   config: LlmConfig = {},

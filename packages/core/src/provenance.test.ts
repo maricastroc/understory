@@ -35,7 +35,7 @@ describe("traceProvenance", () => {
   it("returns the latest-dated commit as the line owner", () => {
     const old = commit("aaa", "2023-01-01T00:00:00Z");
     const recent = commit("bbb", "2023-06-01T00:00:00Z");
-    // array order deliberately not chronological — owner is by date, not position
+
     expect(traceProvenance(ev([recent, old]))).toEqual({ commit: "commit:bbb" });
   });
 
@@ -48,7 +48,7 @@ describe("traceProvenance", () => {
   it("ignores a PR that hangs off an earlier commit, not the owner", () => {
     const old = commit("aaa", "2023-01-01T00:00:00Z");
     const owner = commit("bbb", "2023-06-01T00:00:00Z");
-    const stalePr = pr(7, "commit:aaa", "2023-01-01T00:00:00Z"); // parent is the OLD commit
+    const stalePr = pr(7, "commit:aaa", "2023-01-01T00:00:00Z");
     expect(traceProvenance(ev([old, owner, stalePr]))).toEqual({ commit: "commit:bbb" });
   });
 

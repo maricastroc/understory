@@ -64,10 +64,7 @@ async function runOnce(repo: string, c: Case): Promise<Run> {
     });
     const model = getModel();
     if (!model) throw new Error("GROQ_API_KEY is not set.");
-    // Mirror the production pipeline (investigate): synthesize → audit citations →
-    // verify. The audit is what earns confidence above the floor, so the eval must run
-    // it — otherwise every case caps at medium and the minScore gold no longer means
-    // anything.
+
     const narrative = await synthesize(ev, model);
     const entailment = await checkEntailment(ev, narrative, model).catch(() => undefined);
     const n = verify(ev, narrative, entailment);

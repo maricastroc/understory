@@ -42,7 +42,7 @@ function Chip({ a, kind, cited }: { a: Artifact; kind: ArtifactKind; cited: bool
 
 function Gap({ kind, text }: { kind: ArtifactKind; text: string }) {
   return (
-    <div className="flex min-w-[76px] shrink-0 flex-col justify-center rounded-md border border-dashed border-line-2 bg-surface-2 px-2 py-1.5">
+    <div className="flex min-w-19 shrink-0 flex-col justify-center rounded-md border border-dashed border-line-2 bg-surface-2 px-2 py-1.5">
       <div className="flex items-center gap-1.5">
         <span className="grid size-4.5 shrink-0 place-items-center rounded bg-inset text-ink-3 opacity-50">
           <KindIcon kind={kind} className="size-2.75" />
@@ -58,7 +58,7 @@ function Gap({ kind, text }: { kind: ArtifactKind; text: string }) {
 
 function Terminal({ label }: { label: string }) {
   return (
-    <div className="flex min-w-[76px] shrink-0 flex-col rounded-md border border-accent/40 bg-accent-tint/70 px-2 py-1.5">
+    <div className="flex min-w-19 shrink-0 flex-col rounded-md border border-accent/40 bg-accent-tint/70 px-2 py-1.5">
       <div className="flex items-center gap-1.5">
         <span className="grid size-4.5 shrink-0 place-items-center rounded bg-accent text-white">
           <FileIcon className="size-2.75" />
@@ -81,7 +81,7 @@ function laneNodes(lane: ChainLane, cited: Set<string>): React.ReactNode[] {
     return [
       <div
         key="direct"
-        className="flex min-w-[190px] shrink-0 items-center gap-1.5 rounded-md border border-dashed border-line-2 bg-surface-2 px-2.5 py-1.5 text-[11px] text-ink-3"
+        className="flex min-w-47.5 shrink-0 items-center gap-1.5 rounded-md border border-dashed border-line-2 bg-surface-2 px-2.5 py-1.5 text-[11px] text-ink-3"
       >
         <Alert className="size-3.5 shrink-0 opacity-70" />
         Committed directly — no issue, PR, or review in the trail
@@ -120,9 +120,6 @@ function laneNodes(lane: ChainLane, cited: Set<string>): React.ReactNode[] {
   ];
 }
 
-// The reconstructed causal path for one changed region: issue → PR → review → the origin
-// commit → the change under review, with dashed slots where the trail breaks. Reuses the
-// same chain-assembly logic as the line investigator so both engines read identically.
 export function Genealogy({ finding }: { finding: VerifiedDiffFinding }) {
   const chain = buildCausalChain(finding.artifacts);
   if (chain.mode === "empty") return null;

@@ -131,11 +131,6 @@ export function buildSynthesisInput(
   return { system: `${SYSTEM}\n${languageRule(language)}`, prompt };
 }
 
-// Derive the canonical narrative from the model's structured output. `claims` are the
-// single source of truth for an answered question: `answer` is their prose join and
-// `citations` their id union, so what the reader sees, what verify grounds, and what
-// entailment audits can never drift from one another. Abstention/out-of-scope carry no
-// claims and fall back to the model's one-line `answer`.
 export function toNarrative(object: z.infer<typeof narrativeSchema>): Narrative {
   const useClaims =
     object.answerable && object.recorded && object.claims.length > 0;

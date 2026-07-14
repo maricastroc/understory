@@ -44,9 +44,6 @@ describe("resolveToken — precedence", () => {
   });
 });
 
-// The collectors call resolveToken() deep inside an async chain (collect → enrich → graphql),
-// so the token must survive `await` boundaries — this is what lets the VS Code local mode and
-// the web backend inject a token via runWithTokens. AsyncLocalStorage guarantees it; lock it.
 describe("runWithTokens — survives awaits", () => {
   it("keeps the request token across awaits inside an async callback", async () => {
     const seen = await runWithTokens({ github: "req-token" }, async () => {

@@ -15,6 +15,7 @@
     "format:check": "prettier --check .",
     "dig": "tsx scripts/dig.ts",
     "eval": "tsx scripts/eval.ts",
+    "variance": "tsx scripts/variance.ts",
     "mine:intents": "tsx scripts/mine-intents.ts",
     "seed:demo": "bash scripts/seed-demo.sh",
     "test": "vitest run",

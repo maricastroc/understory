@@ -87,8 +87,6 @@ async function runLocal(target: InvestigationTarget, token: vscode.CancellationT
         if (pick) void vscode.commands.executeCommand("gitInvestigator.setGroqKey");
       });
   } else if (!githubToken && result.evidence.repo.remoteUrl?.includes("github.com")) {
-    // Enriched from commits only; a GitHub token would add the PR/issue/review trail. Fire
-    // once, and only when it would actually help — a GitHub remote with no token set yet.
     void nudgeOnce(
       "githubTokenLocalEnrich",
       "Git Investigator: set a GitHub token to enrich local history with the PRs, issues, and reviews behind each commit.",

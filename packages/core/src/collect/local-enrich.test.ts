@@ -63,17 +63,14 @@ describe("buildLocalArtifacts", () => {
     const arts = buildLocalArtifacts(commits, repo, new Map([["bbbbbbb1111", [pr]]]));
     const ids = arts.map((a) => a.id);
 
-    // both commits present, plus the PR trail hung off the enriched one
     expect(ids).toContain("commit:aaaaaaa");
     expect(ids).toContain("commit:bbbbbbb");
     expect(ids).toContain("pr:42");
     expect(ids).toContain("issue:7");
     expect(ids).toContain("review:42-0");
 
-    // the PR conversation is folded into the body so grounding can quote the discussion
     expect(arts.find((a) => a.id === "pr:42")?.body).toContain("why 3 and not 5?");
 
-    // the commit URL points at the remote so it is clickable, not a bare local sha
     expect(arts.find((a) => a.id === "commit:bbbbbbb")?.url).toBe(
       "https://github.com/o/r/commit/bbbbbbb1111",
     );

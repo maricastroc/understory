@@ -67,7 +67,7 @@ describe("verifyDiff — grounding", () => {
       grounded: true,
       recorded: true,
     });
-    // No audit here → capped at medium (F6). HIGH lives in the entailment block below.
+
     expect(res.findings[0].confidence.level).toBe("medium");
   });
 
@@ -163,7 +163,7 @@ describe("verifyDiff — entailment (parity with the line flow)", () => {
         { citation: "pr:9", status: "unsupported", quote: null, reason: "about something else" },
       ]),
     );
-    // Two grounded citations would score HIGH; demoting one leaves effectivePrimary 1 → MEDIUM.
+
     expect(res.findings[0].confidence.level).toBe("medium");
     expect(res.findings[0].entailment?.misattributed).toBe(1);
   });

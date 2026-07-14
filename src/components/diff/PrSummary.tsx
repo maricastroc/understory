@@ -8,13 +8,9 @@ import { letter } from "../format";
 import { Clock } from "../icons";
 import { SectionLabel } from "../ui";
 
-// The PR's executive history, grounded like the line answer: each sentence is a cited claim,
-// audited in-source, with uncited interpolation flagged in place — no longer a free-prose
-// overview that only claims to be reconstructed from the evidence.
 export function PrSummary({ result }: { result: DiffResult }) {
   const claims = result.summaryClaims ?? [];
 
-  // Fallback for PR results captured before the summary was decomposed into claims.
   if (claims.length === 0) {
     if (!result.summary) return null;
     return (

@@ -13,6 +13,5 @@ export type Evidence = {
   artifacts: Artifact[];
   contradictions: Contradiction[];
   note?: string;
-  // Set for line-located investigations; absent for artifact drill-downs (no line to blame).
   coverage?: Coverage;
 };

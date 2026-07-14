@@ -4,10 +4,6 @@ import { Branch, ExternalLink, KindIcon } from "../icons";
 const noun = (kind: ArtifactKind): string =>
   kind === "pull_request" ? "PR" : kind === "commit" ? "Commit" : kind === "issue" ? "Issue" : "Review";
 
-// The deterministic "where this line comes from" — shown even when the history does NOT
-// explain WHY, so an honest MEDIUM reads as "origin traced, rationale thin" rather than
-// "the tool failed". Deliberately carries no support mark: it's a fact about the code, not
-// a judged citation, and it never touches the confidence score.
 export function OriginTrace({
   provenance,
   byId,

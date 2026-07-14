@@ -96,8 +96,6 @@ describe("verify — confidence scoring", () => {
   });
 
   it("grounded sources with no completed audit never reach high — capped at medium (0.5)", () => {
-    // F6: HIGH is earned by the entailment pass, not by citation count. Without an
-    // audit, even two grounded sources cap at medium; see the entailment block for HIGH.
     const v = verify(ev(["c1", "c2"]), narr({ citations: ["c1", "c2"], recorded: true }));
     expect(v.confidence.level).toBe("medium");
     expect(v.confidence.score).toBe(0.5);
@@ -119,8 +117,6 @@ describe("verify — confidence scoring", () => {
 
 describe("verify — contradiction penalty", () => {
   it("demotes a two-source HIGH to MEDIUM when one cited source is contradicted", () => {
-    // Genuinely HIGH first (audited, both substantiated), so the contradiction has a
-    // HIGH to soften rather than an already-capped medium.
     const v = verify(
       ev(["c1", "c2"], [contra("c1")]),
       narr({ citations: ["c1", "c2"], recorded: true }),
@@ -206,8 +202,6 @@ describe("verify — entailment refines confidence", () => {
   });
 
   it("does not let a 'weak' source count toward HIGH — one supported + one weak is medium (0.65)", () => {
-    // F5: only quote-verified "supported" sources earn HIGH. A weak source is real and
-    // on-topic (it does not lower confidence), but it cannot be the second pillar of HIGH.
     const v = verify(
       ev(["c1", "c2"]),
       narr({ citations: ["c1", "c2"], recorded: true }),
@@ -219,7 +213,6 @@ describe("verify — entailment refines confidence", () => {
   });
 
   it("weak-only support is medium, never high (0.55)", () => {
-    // F5: on-topic sources with no single line that proves the point stay medium.
     const v = verify(
       ev(["c1", "c2"]),
       narr({ citations: ["c1", "c2"], recorded: true }),
@@ -232,21 +225,18 @@ describe("verify — entailment refines confidence", () => {
   });
 
   it("caps confidence at medium when the judge did not run (checked:false)", () => {
-    // F6: an audit that produced no verdicts cannot certify support, so it cannot certify
-    // HIGH. The result degrades to medium and the entailment block is dropped entirely.
-    const v = verify(
-      ev(["c1", "c2"]),
-      narr({ citations: ["c1", "c2"], recorded: true }),
-      { checked: false, checks: [], supported: 0, misattributed: 0 },
-    );
+    const v = verify(ev(["c1", "c2"]), narr({ citations: ["c1", "c2"], recorded: true }), {
+      checked: false,
+      checks: [],
+      supported: 0,
+      misattributed: 0,
+    });
     expect(v.confidence.level).toBe("medium");
     expect(v.confidence.score).toBe(0.5);
     expect(v.entailment).toBeUndefined();
   });
 
   it("caps confidence at medium when the entailment pass threw (undefined)", () => {
-    // F6: the orchestrator passes undefined when checkEntailment throws (e.g. rate limit).
-    // Grounded, but unverified — never HIGH.
     const v = verify(ev(["c1", "c2"]), narr({ citations: ["c1", "c2"], recorded: true }));
     expect(v.confidence.level).toBe("medium");
     expect(v.confidence.score).toBe(0.5);
@@ -269,7 +259,6 @@ describe("verify — uncited claims (F1)", () => {
   });
 
   it("a minority of uncited claims caps a would-be HIGH at medium", () => {
-    // Two substantiated sources would score HIGH; one stray uncited sentence forbids it.
     const v = verify(
       ev(["c1", "c2"]),
       narr({
@@ -327,8 +316,6 @@ describe("verify — uncited claims (F1)", () => {
 
 describe("verify — a claim is the unit of confidence (F3)", () => {
   it("counts a single multi-source claim once — a composed claim can't reach HIGH alone", () => {
-    // Two supported citations would have scored HIGH under per-citation counting; but both
-    // belong to ONE claim ("A because B"), so the causal claim counts once → medium.
     const v = verify(
       ev(["a", "b"]),
       narr({
@@ -402,8 +389,6 @@ describe("verify — collection granularity (F2)", () => {
   });
 
   it("caps a would-be HIGH at medium when only file-level history was available", () => {
-    // Two substantiated sources would be HIGH — but blame fell back to the file's history,
-    // so the evidence is about the file, not this exact line: it can't certify the line.
     const v = verify(
       coarse(["c1", "c2"]),
       narr({ citations: ["c1", "c2"], recorded: true }),
@@ -430,5 +415,211 @@ describe("verify — collection granularity (F2)", () => {
     );
     expect(v.confidence.level).toBe("medium");
     expect(v.confidence.score).toBe(0.65);
+  });
+});
+
+describe("verify — the owning change explains itself (provenance HIGH)", () => {
+  const owner = (id: string): Artifact => ({ ...art(id), date: "2024-06-01T00:00:00Z" });
+
+  function evWith(artifacts: Artifact[]): Evidence {
+    return {
+      question: "why is this line the way it is?",
+      repo: { path: "/repo" },
+      location: { file: "a.ts", startLine: 1, endLine: 1 },
+      artifacts,
+      contradictions: [],
+    };
+  }
+
+  it("a claim citing only the owning commit, substantiated verbatim, reaches HIGH alone", () => {
+    const v = verify(
+      evWith([owner("commit:o"), art("commit:other")]),
+      narr({
+        claims: [claim("the owning commit states the rationale", ["commit:o"])],
+        citations: ["commit:o"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 0,
+        checks: [
+          { citation: "commit:o", claim: 0, status: "supported", quote: "proof", reason: "" },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("high");
+    expect(v.confidence.score).toBe(0.85);
+  });
+
+  it("a claim citing the owning commit's PR, substantiated verbatim, reaches HIGH", () => {
+    const pr: Artifact = {
+      id: "pr:5",
+      kind: "pull_request",
+      title: "PR",
+      body: "",
+      url: "",
+      date: "2024-06-01T00:00:00Z",
+      parentId: "commit:o",
+    };
+    const v = verify(
+      evWith([owner("commit:o"), pr]),
+      narr({
+        claims: [claim("the PR explains why the line was added", ["pr:5"])],
+        citations: ["pr:5"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 0,
+        checks: [{ citation: "pr:5", claim: 0, status: "supported", quote: "proof", reason: "" }],
+      },
+    );
+    expect(v.confidence.level).toBe("high");
+  });
+
+  it("reproduces the dotenv case: owning commit substantiated + PR weak → HIGH", () => {
+    const commit: Artifact = { ...art("commit:b8275a0"), date: "2024-01-20T15:05:00Z" };
+    const pr: Artifact = {
+      id: "pr:469",
+      kind: "pull_request",
+      title: "…",
+      body: "",
+      url: "",
+      date: "2024-01-20T20:07:00Z",
+      parentId: "commit:b8275a0",
+    };
+    const v = verify(
+      evWith([commit, pr]),
+      narr({
+        claims: [
+          claim("a commit consistently uses 'overwrite' in place of 'overload'", [
+            "commit:b8275a0",
+          ]),
+          claim("the PR keeps overload as an undocumented alias", ["pr:469"]),
+        ],
+        citations: ["commit:b8275a0", "pr:469"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 0,
+        checks: [
+          {
+            citation: "commit:b8275a0",
+            claim: 0,
+            status: "supported",
+            quote: "Consistently use",
+            reason: "",
+          },
+          {
+            citation: "pr:469",
+            claim: 1,
+            status: "weak",
+            quote: null,
+            reason: "on topic, not stated",
+          },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("high");
+    expect(v.confidence.score).toBe(0.85);
+  });
+
+  it("does not reach HIGH on the owner alone when another citation is misattributed", () => {
+    const v = verify(
+      evWith([owner("commit:o"), art("commit:bad")]),
+      narr({
+        claims: [
+          claim("the owning commit states the rationale", ["commit:o"]),
+          claim("and this source caused it", ["commit:bad"]),
+        ],
+        citations: ["commit:o", "commit:bad"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 1,
+        checks: [
+          { citation: "commit:o", claim: 0, status: "supported", quote: "proof", reason: "" },
+          {
+            citation: "commit:bad",
+            claim: 1,
+            status: "unsupported",
+            quote: null,
+            reason: "off-topic",
+          },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("medium");
+  });
+
+  it("a composed claim leaning on the owner AND another source stays medium — needs two independent sources", () => {
+    const v = verify(
+      evWith([owner("commit:o"), art("commit:two")]),
+      narr({
+        claims: [claim("the line exists because of the other change", ["commit:o", "commit:two"])],
+        citations: ["commit:o", "commit:two"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 0,
+        checks: [
+          { citation: "commit:o", claim: 0, status: "supported", quote: "proof", reason: "" },
+          { citation: "commit:two", claim: 0, status: "supported", quote: null, reason: "" },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("medium");
+  });
+
+  it("stays medium when only file-level history was available, even if the owner is substantiated", () => {
+    const base = evWith([owner("commit:o")]);
+    const v = verify(
+      { ...base, coverage: { granularity: "file" } },
+      narr({
+        claims: [claim("the owning commit states the rationale", ["commit:o"])],
+        citations: ["commit:o"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 0,
+        checks: [
+          { citation: "commit:o", claim: 0, status: "supported", quote: "proof", reason: "" },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("medium");
+  });
+
+  it("demotes an owner-substantiated HIGH to LOW when the owning commit was reverted", () => {
+    const v = verify(
+      {
+        ...evWith([owner("commit:o")]),
+        contradictions: [{ artifactId: "commit:o", kind: "revert", detail: "undone" }],
+      },
+      narr({
+        claims: [claim("the owning commit states the rationale", ["commit:o"])],
+        citations: ["commit:o"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 0,
+        checks: [
+          { citation: "commit:o", claim: 0, status: "supported", quote: "proof", reason: "" },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("low");
   });
 });

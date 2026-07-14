@@ -45,7 +45,7 @@ const result = (findings: VerifiedDiffFinding[]): DiffResult => ({
 
 describe("prMetrics", () => {
   it("counts distinct upstream evidence across regions, once each", () => {
-    const shared = art("pr:9", "pull_request"); // cited from two regions — must count once
+    const shared = art("pr:9", "pull_request");
     const m = prMetrics(
       result([
         finding({ artifacts: [art("commit:a", "commit"), shared, art("issue:7", "issue")] }),
@@ -53,7 +53,7 @@ describe("prMetrics", () => {
       ]),
     );
     expect(m.originCommits).toBe(2);
-    expect(m.pullRequests).toBe(1); // shared PR counted once
+    expect(m.pullRequests).toBe(1);
     expect(m.issues).toBe(1);
     expect(m.reviews).toBe(1);
   });
@@ -62,8 +62,8 @@ describe("prMetrics", () => {
     const m = prMetrics(
       result([
         finding({ recorded: true, grounded: true }),
-        finding({ recorded: false, grounded: true }), // history silent
-        finding({ recorded: true, grounded: false }), // fabrication caught
+        finding({ recorded: false, grounded: true }),
+        finding({ recorded: true, grounded: false }),
       ]),
     );
     expect(m.regionsExplained).toBe(1);

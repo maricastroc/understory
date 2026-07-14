@@ -6,8 +6,6 @@ export function initNudge(memento: vscode.Memento): void {
   state = memento;
 }
 
-// A one-time, non-blocking suggestion. Marks itself seen BEFORE showing, so it never repeats
-// even if the user dismisses it. No-op once seen, or before init.
 export async function nudgeOnce(
   key: string,
   message: string,

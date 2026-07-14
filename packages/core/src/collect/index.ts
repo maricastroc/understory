@@ -74,10 +74,6 @@ async function collectLocal(
   const repo = await resolveRepo(repoPath);
   const commits = await lineHistory(repoPath, location);
 
-  // Commits alone rarely record the "why" — that lives in the PR/issue/review discussion.
-  // When the checkout points at a GitHub remote and a token is available, enrich each commit
-  // with its PR trail (full line history AND the discussion); otherwise (no remote, no token,
-  // offline) fall back to commits only — never worse than before.
   const gh = parseGitHubRepo(repo.remoteUrl ?? "");
   const artifacts =
     gh && resolveToken()

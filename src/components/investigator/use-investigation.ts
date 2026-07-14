@@ -15,7 +15,6 @@ export type Entry = {
   result: DigResult;
   parentCaseId?: string;
   parentQuestion?: string;
-  // Evidence has arrived and is on screen, but the verified conclusion is still being written.
   pending?: boolean;
 };
 export type View = "browse" | "case";
@@ -24,7 +23,6 @@ type StreamMessage =
   | { phase: "evidence"; evidence: DigResult["evidence"] }
   | { phase: "final"; narrative: DigResult["narrative"]; error?: string };
 
-// Read a newline-delimited JSON stream, invoking onMessage per complete line.
 async function readNdjson(
   body: ReadableStream<Uint8Array>,
   onMessage: (m: StreamMessage) => void,
@@ -139,7 +137,6 @@ export function useInvestigation(user: AuthUser | null) {
 
       const streamed = !!res.body && (res.headers.get("content-type") ?? "").includes("ndjson");
 
-      // On-prem collector delegation (and any non-streamed path) returns a single DigResult.
       if (!streamed) {
         const data = (await res.json()) as DigResult & { error?: string };
         if (!data.evidence) {
@@ -154,8 +151,6 @@ export function useInvestigation(user: AuthUser | null) {
         return;
       }
 
-      // Progressive reveal: render the evidence the instant it streams in, then swap the
-      // pending conclusion for the verified narrative when the model's chunk arrives.
       let caseId: string | null = null;
       let evidence: DigResult["evidence"] | null = null;
 

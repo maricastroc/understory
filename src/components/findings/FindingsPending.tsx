@@ -1,8 +1,5 @@
 import { SectionLabel } from "../ui";
 
-// Shown in the Findings slot after the evidence has streamed in but before the model's
-// verified conclusion arrives. The provenance chain and timeline below are already complete;
-// only the reconstructed answer is still being written and its citations audited in-source.
 export function FindingsPending() {
   return (
     <section className="mt-6">

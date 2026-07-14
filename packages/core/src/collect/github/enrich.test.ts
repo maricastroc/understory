@@ -62,12 +62,11 @@ describe("expandCommit", () => {
       "commit:abc123",
       "pr:42",
       "issue:7",
-      "review:42-0", // the whitespace-only review (index 1) is dropped
+      "review:42-0",
     ]);
   });
 
   it("does NOT dedupe — that is the caller's job (line collector vs per-cluster)", () => {
-    // Two PRs closing the same issue: expandCommit emits the issue twice; callers collapse it.
     const commit = bc({ associatedPullRequests: { nodes: [pr(42, 7), pr(43, 7)] } });
     const ids = expandCommit(commit).map((a) => a.id);
     expect(ids.filter((id) => id === "issue:7")).toHaveLength(2);

@@ -1,7 +1,5 @@
 import { Alert } from "../icons";
 
-// Deterministic F1 gate: the model wrote assertions no collected source backs. They are
-// shown (marked in place by Claims) but never count toward confidence.
 export function UncitedClaimsAlert({ count }: { count: number }) {
   if (count === 0) return null;
   return (

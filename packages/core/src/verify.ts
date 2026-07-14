@@ -1,4 +1,5 @@
 import { cosmeticOrigin } from "./cosmetic";
+import { traceProvenance } from "./provenance";
 import type {
   Confidence,
   EntailmentStatus,
@@ -19,10 +20,6 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
 
   const grounded = unknownCitations.length === 0;
 
-  // Per-claim grounding: a claim is grounded when at least one of its citations resolves
-  // to a collected artifact. A claim citing nothing is uncited interpolation — prose with
-  // no source — which entailment never sees (it audits citations, and there is none), so
-  // this deterministic gate is the only thing that catches it.
   const claims = n.claims.map((c) => ({
     ...c,
     grounded: c.citations.some((id) => realIds.has(id)),
@@ -35,20 +32,32 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
 
   const audited = entailment?.checked === true;
   const checks = audited && entailment ? entailment.checks : [];
-  // Group verdicts by claim so a single multi-source claim counts once — a composed claim
-  // ("A because B" citing two sources) can't reach HIGH on its own. Checks with no claim
-  // index (the diff flow, direct tests) fall back to per-citation groups, unchanged.
+
   const groupStatus = new Map<string, EntailmentStatus>();
   for (const c of checks) {
     groupStatus.set(c.claim !== undefined ? `c${c.claim}` : `x${c.citation}`, c.status);
   }
   const verdicts = [...groupStatus.values()];
-  // A claim only fails when the judge actively refuted it; supported/weak stay primary.
+
   const effectivePrimary = audited
     ? verdicts.filter((s) => s !== "unsupported").length
     : groundedCitations.length;
-  // But only a judge-substantiated, quote-verified "supported" claim earns HIGH.
+
   const supportedPrimary = verdicts.filter((s) => s === "supported").length;
+
+  const provenance = traceProvenance(ev);
+  const ownerIds = new Set<string>(
+    provenance ? [provenance.commit, ...(provenance.pr ? [provenance.pr] : [])] : [],
+  );
+  const ownerSelfExplains =
+    ownerIds.size > 0 &&
+    n.claims.some(
+      (c, i) =>
+        c.citations.length > 0 &&
+        c.citations.every((id) => ownerIds.has(id)) &&
+        checks.some((k) => k.claim === i && k.status === "supported" && !!k.quote),
+    );
+  const misattributed = audited && entailment ? entailment.misattributed : 0;
 
   return {
     ...n,
@@ -67,6 +76,8 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
       groundedClaims,
       coarseGranularity: ev.coverage?.granularity === "file",
       cosmeticOrigin: cosmeticOrigin(ev) !== null,
+      ownerSelfExplains,
+      misattributed,
       totalCollected: ev.artifacts.length,
       contradicting,
     }),
@@ -85,6 +96,8 @@ export function scoreConfidence(s: {
   groundedClaims: number;
   coarseGranularity: boolean;
   cosmeticOrigin?: boolean;
+  ownerSelfExplains?: boolean;
+  misattributed?: number;
   totalCollected: number;
   contradicting: number;
 }): Confidence {
@@ -104,22 +117,18 @@ export function scoreConfidence(s: {
     level = "low";
     score = 0.35;
   } else if (!audited) {
-    // No completed citation audit ran (disabled, rate-limited, or it threw). The
-    // citations are grounded, but their support is unverified — never award HIGH on
-    // citation count alone; the entailment pass is what earns it.
     level = "medium";
     score = 0.5;
   } else if (supportedPrimary >= 2) {
-    // Two or more sources the judge substantiated in-source, each proven by a
-    // verbatim quote. This is the only path to HIGH.
     level = "high";
     score = 0.9;
+  } else if (s.ownerSelfExplains && !s.coarseGranularity && (s.misattributed ?? 0) === 0) {
+    level = "high";
+    score = 0.85;
   } else if (supportedPrimary === 1) {
     level = "medium";
     score = 0.65;
   } else {
-    // Audited and on-topic, but no single line proves the point (weak-only). "weak"
-    // is a real source, so it stays medium — but it does not count toward HIGH.
     level = "medium";
     score = 0.55;
   }
@@ -137,9 +146,6 @@ export function scoreConfidence(s: {
     }
   }
 
-  // A claim that cites no collected source is uncited interpolation: it cannot raise
-  // confidence, and it lowers the ceiling. A partly-uncited answer is never HIGH; one
-  // that is at least half uncited is LOW. Applied as a cap so it only ever lowers.
   if (s.grounded && s.recorded && s.ungroundedClaims > 0) {
     if (s.ungroundedClaims >= s.groundedClaims && score > 0.4) {
       level = "low";
@@ -150,17 +156,11 @@ export function scoreConfidence(s: {
     }
   }
 
-  // Line-level history was unavailable (large file or blame failure) and we fell back to the
-  // file's commit history: the evidence speaks to the file, not this exact line, so it can't
-  // be HIGH-confidence about the line itself. Caps, never raises.
   if (s.coarseGranularity && level === "high") {
     level = "medium";
     score = 0.55;
   }
 
-  // The line's most recent change looks cosmetic (a reformat/refactor/rename), so blame is
-  // anchored on the janitor's commit, not the one that explains the line — it can't be HIGH
-  // about the rationale on that basis. Caps, never raises.
   if (s.cosmeticOrigin && level === "high") {
     level = "medium";
     score = 0.55;

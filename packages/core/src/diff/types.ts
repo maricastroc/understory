@@ -61,8 +61,6 @@ export type RawDiffFinding = {
 };
 
 export type DiffNarrative = {
-  // The executive overview, decomposed into individually-cited historical claims (the same
-  // treatment the line answer gets). `summary` prose is derived from these.
   summaryClaims: import("../types").Claim[];
   findings: RawDiffFinding[];
 };

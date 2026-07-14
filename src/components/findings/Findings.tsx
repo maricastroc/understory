@@ -26,8 +26,6 @@ export function Findings({
     return <OutOfScopeCard answer={narrative.answer} />;
   }
 
-  // Default for investigations persisted before claims existed — they render via the
-  // plain-answer fallback below rather than throwing on a missing array.
   const claims = narrative.claims ?? [];
   const ungroundedClaims = narrative.ungroundedClaims ?? 0;
 
@@ -43,14 +41,9 @@ export function Findings({
   const checks = entailment?.checked ? entailment.checks : [];
   const statusById = new Map(checks.map((c) => [c.citation, c.status]));
 
-  // The citation audit was expected here (grounded, recorded, with citations) but no
-  // completed pass informed the score — it was disabled, rate-limited, or it threw.
-  // Confidence is capped at medium; say so instead of implying a silent pass.
   const auditUnavailable =
     narrative.recorded && narrative.grounded && resolved.length > 0 && !entailment?.checked;
 
-  // Blame fell back to the file's commit history — the evidence is about the file, not this
-  // exact line — so confidence was capped below high. Say so next to the score.
   const coarseGranularity = evidence.coverage?.granularity === "file";
 
   return (

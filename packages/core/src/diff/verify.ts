@@ -53,11 +53,6 @@ function verifyFinding(
 
   const citedSet = new Set(citations);
   const contradicting = cluster.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
-
-  // Same rule as the line flow's verify: only a "unsupported" verdict (a real
-  // misattribution) demotes a citation from "primary"; "supported"/"weak"/unjudged
-  // stay primary. But HIGH is reserved for judge-substantiated "supported" sources,
-  // and an absent audit caps confidence — see scoreConfidence.
   const audited = entailment?.checked === true;
   const status = new Map(
     (audited ? entailment!.checks : []).map((c) => [c.citation, c.status]),
@@ -80,11 +75,8 @@ function verifyFinding(
       effectivePrimary,
       supportedPrimary,
       audited,
-      // The diff flow's finer unit is the per-region `why`, already citation-bound; it has
-      // no free-prose claims to gate (that parity is a follow-up).
       ungroundedClaims: 0,
       groundedClaims: 0,
-      // Every diff cluster is blamed line-level against the base commit.
       coarseGranularity: false,
       totalCollected: cluster.artifacts.length,
       contradicting,
@@ -112,9 +104,6 @@ export function verifyDiff(
       : silentFinding(ref, cluster);
   });
 
-  // Ground the summary's claims exactly like the line answer's: a claim with no resolving
-  // citation is uncited interpolation. `summary` prose is their join — one source of truth,
-  // so what the reader sees matches what was grounded and audited.
   const summaryClaims = narrative.summaryClaims.map((c) => ({
     ...c,
     grounded: c.citations.some((id) => realIds.has(id)),
