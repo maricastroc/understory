@@ -2,7 +2,7 @@ import { type CollectInput, collect } from "./collect";
 import { checkEntailment } from "./entail";
 import { type LlmConfig, getModel } from "./llm";
 import { synthesize } from "./synthesize";
-import type { DigResult, Entailment } from "./types";
+import type { DigResult, Entailment, Evidence, VerifiedNarrative } from "./types";
 import { verify } from "./verify";
 
 const NO_LLM =
@@ -16,15 +16,16 @@ export function synthesisError(e: unknown): string {
   return "Could not generate the written summary — the collected evidence and provenance chain below still stand.";
 }
 
-export async function investigate(input: CollectInput, config: LlmConfig = {}): Promise<DigResult> {
-  const evidence = await collect(input);
-  const result: DigResult = { evidence, narrative: null };
-
+// The LLM half of an investigation: turn already-collected evidence into a verified narrative
+// (or an honest error). Split out from investigate() so the web route can stream the evidence
+// the instant collect() finishes and run this second, filling the conclusion in when the model
+// returns — no wasted re-collection, one source of truth for the synthesize→entail→verify chain.
+export async function narrate(
+  evidence: Evidence,
+  config: LlmConfig = {},
+): Promise<{ narrative: VerifiedNarrative | null; error?: string }> {
   const model = getModel(config);
-  if (!model) {
-    result.error = NO_LLM;
-    return result;
-  }
+  if (!model) return { narrative: null, error: NO_LLM };
 
   try {
     const narrative = await synthesize(evidence, model, config.language);
@@ -37,9 +38,14 @@ export async function investigate(input: CollectInput, config: LlmConfig = {}): 
         entailment = undefined;
       }
     }
-    result.narrative = verify(evidence, narrative, entailment);
+    return { narrative: verify(evidence, narrative, entailment) };
   } catch (e) {
-    result.error = synthesisError(e);
+    return { narrative: null, error: synthesisError(e) };
   }
-  return result;
+}
+
+export async function investigate(input: CollectInput, config: LlmConfig = {}): Promise<DigResult> {
+  const evidence = await collect(input);
+  const { narrative, error } = await narrate(evidence, config);
+  return { evidence, narrative, ...(error ? { error } : {}) };
 }

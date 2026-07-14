@@ -2,6 +2,7 @@ import type { Artifact, ArtifactRef } from "@git-investigator/core/types";
 import { CausalChain } from "../chain/CausalChain";
 import { Evidence } from "../Evidence";
 import { Findings } from "../findings/Findings";
+import { FindingsPending } from "../findings/FindingsPending";
 import { basename, levelLabel, toArtifactRef } from "../format";
 import { Alert, Branch, ChevronLeft, FileIcon, KindIcon, kindLabel } from "../icons";
 import { Timeline } from "../Timeline";
@@ -19,7 +20,7 @@ export function CaseView({
   onDrill?: (ref: ArtifactRef) => void;
   onOpenParent?: (caseId: string) => void;
 }) {
-  const { result, caseId, form, parentCaseId, parentQuestion } = entry;
+  const { result, caseId, form, parentCaseId, parentQuestion, pending } = entry;
 
   const ev = result.evidence;
 
@@ -42,13 +43,15 @@ export function CaseView({
 
   const outOfScope = narrative?.answerable === false;
 
-  const status = !narrative
-    ? { tone: "neutral" as const, label: "Evidence only" }
-    : outOfScope
-      ? { tone: "neutral" as const, label: "Out of scope" }
-      : narrative.recorded
-        ? { tone: "good" as const, label: "Concluded" }
-        : { tone: "warn" as const, label: "Inconclusive" };
+  const status = pending
+    ? { tone: "neutral" as const, label: "Reconstructing…" }
+    : !narrative
+      ? { tone: "neutral" as const, label: "Evidence only" }
+      : outOfScope
+        ? { tone: "neutral" as const, label: "Out of scope" }
+        : narrative.recorded
+          ? { tone: "good" as const, label: "Concluded" }
+          : { tone: "warn" as const, label: "Inconclusive" };
 
   return (
     <>
@@ -131,6 +134,8 @@ export function CaseView({
 
       {narrative ? (
         <Findings evidence={ev} narrative={narrative} />
+      ) : pending ? (
+        <FindingsPending />
       ) : (
         <div className="mt-6 flex items-start gap-2 rounded-[10px] border border-warn/30 bg-warn-tint p-4 text-[13px] text-warn">
           <Alert className="mt-0.5 size-4 shrink-0" />

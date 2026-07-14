@@ -11,4 +11,6 @@ export type CaseItem = {
   level: Confidence["level"];
   score: number;
   child: boolean;
+  // Evidence is shown but the conclusion is still being reconstructed.
+  pending: boolean;
 };

@@ -12,8 +12,13 @@ export function CaseRow({
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
 }) {
-  const dot =
-    !item.hasNarrative || !item.answerable ? "bg-ink-3" : item.recorded ? "bg-good" : "bg-warn";
+  const dot = item.pending
+    ? "bg-accent animate-pulse"
+    : !item.hasNarrative || !item.answerable
+      ? "bg-ink-3"
+      : item.recorded
+        ? "bg-good"
+        : "bg-warn";
 
   return (
     <div
@@ -41,11 +46,13 @@ export function CaseRow({
           </span>
           <span className="mt-0.5 block font-mono text-[11px] text-ink-3">
             {item.caseId}
-            {!item.hasNarrative
-              ? " · evidence only"
-              : !item.answerable
-                ? " · out of scope"
-                : ` · ${item.recorded ? "resolved" : "inconclusive"} · ${Math.round(item.score * 100)}%`}
+            {item.pending
+              ? " · reconstructing…"
+              : !item.hasNarrative
+                ? " · evidence only"
+                : !item.answerable
+                  ? " · out of scope"
+                  : ` · ${item.recorded ? "resolved" : "inconclusive"} · ${Math.round(item.score * 100)}%`}
           </span>
         </span>
       </button>

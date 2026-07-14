@@ -2,16 +2,16 @@ import { NextResponse } from "next/server";
 import { anchorQuestion } from "@git-investigator/core/anchor-question";
 import { sessionToken } from "@/lib/auth/current-user";
 import { captureQuestion } from "@/lib/capture";
-import { type CollectInput, parseLocation } from "@git-investigator/core/collect";
+import { type CollectInput, collect, parseLocation } from "@git-investigator/core/collect";
 import { parseGitHubRepo } from "@git-investigator/core/collect/github";
 import { parseGitLabRepo } from "@git-investigator/core/collect/gitlab";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithTokens } from "@git-investigator/core/collect/token-context";
 import { githubAppConfigured, installUrl, installationTokenForRepo } from "@/lib/github-app";
-import { investigate } from "@git-investigator/core/investigate";
+import { narrate } from "@git-investigator/core/investigate";
 import { rateLimit } from "@/lib/ratelimit";
-import type { ArtifactRef, DigResult } from "@git-investigator/core/types";
+import type { ArtifactRef, Evidence } from "@git-investigator/core/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -102,12 +102,12 @@ export async function POST(req: Request) {
     }
   }
 
-  let result: DigResult;
+  let evidence: Evidence;
   try {
     const collectPath =
       gh || parseGitLabRepo(repoPath) ? repoPath : (await resolveRepoInput(repoPath)).path;
-    result = await runWithTokens({ github: githubToken, gitlab: gitlabToken }, () =>
-      investigate({ repoPath: collectPath, ...collectArgs }, { language }),
+    evidence = await runWithTokens({ github: githubToken, gitlab: gitlabToken }, () =>
+      collect({ repoPath: collectPath, ...collectArgs }),
     );
   } catch (e) {
     return NextResponse.json(
@@ -116,5 +116,29 @@ export async function POST(req: Request) {
     );
   }
 
-  return NextResponse.json(result);
+  // Progressive reveal: stream the evidence the instant collection finishes, then the verified
+  // narrative once the two LLM passes return. The client renders the provenance chain and
+  // timeline from the first chunk and fills Findings in from the second — no blank wait.
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const enc = new TextEncoder();
+      const send = (obj: unknown) => controller.enqueue(enc.encode(`${JSON.stringify(obj)}\n`));
+      try {
+        send({ phase: "evidence", evidence });
+        const { narrative, error } = await narrate(evidence, { language });
+        send({ phase: "final", narrative, error });
+      } catch (e) {
+        send({ phase: "final", narrative: null, error: e instanceof Error ? e.message : String(e) });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "content-type": "application/x-ndjson; charset=utf-8",
+      "cache-control": "no-store",
+    },
+  });
 }

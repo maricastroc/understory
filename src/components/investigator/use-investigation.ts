@@ -15,8 +15,38 @@ export type Entry = {
   result: DigResult;
   parentCaseId?: string;
   parentQuestion?: string;
+  // Evidence has arrived and is on screen, but the verified conclusion is still being written.
+  pending?: boolean;
 };
 export type View = "browse" | "case";
+
+type StreamMessage =
+  | { phase: "evidence"; evidence: DigResult["evidence"] }
+  | { phase: "final"; narrative: DigResult["narrative"]; error?: string };
+
+// Read a newline-delimited JSON stream, invoking onMessage per complete line.
+async function readNdjson(
+  body: ReadableStream<Uint8Array>,
+  onMessage: (m: StreamMessage) => void,
+): Promise<void> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    let nl = buf.indexOf("\n");
+    while (nl >= 0) {
+      const line = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (line) onMessage(JSON.parse(line) as StreamMessage);
+      nl = buf.indexOf("\n");
+    }
+  }
+  const tail = buf.trim();
+  if (tail) onMessage(JSON.parse(tail) as StreamMessage);
+}
 
 type SavedInvestigation = {
   caseId: string;
@@ -81,6 +111,15 @@ export function useInvestigation(user: AuthUser | null) {
     setError(null);
     setView("case");
 
+    const persist = (caseId: string, data: DigResult) => {
+      if (!user) return;
+      void fetch("/api/investigations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildSave(caseId, data)),
+      }).catch(() => {});
+    };
+
     try {
       const res = await fetch("/api/dig", {
         method: "POST",
@@ -90,24 +129,64 @@ export function useInvestigation(user: AuthUser | null) {
         },
         body: JSON.stringify(reqBody),
       });
-      const data = (await res.json()) as DigResult & { error?: string };
-      if (!res.ok || !data.evidence) {
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
         setError(data.error || `Request failed (${res.status})`);
         setView("browse");
         return;
       }
 
-      const caseId = `GI-${counter.current++}`;
+      const streamed = !!res.body && (res.headers.get("content-type") ?? "").includes("ndjson");
 
-      setHistory((h) => [buildEntry(caseId, data), ...h]);
+      // On-prem collector delegation (and any non-streamed path) returns a single DigResult.
+      if (!streamed) {
+        const data = (await res.json()) as DigResult & { error?: string };
+        if (!data.evidence) {
+          setError(data.error || `Request failed (${res.status})`);
+          setView("browse");
+          return;
+        }
+        const caseId = `GI-${counter.current++}`;
+        setHistory((h) => [buildEntry(caseId, data), ...h]);
+        setActiveId(caseId);
+        persist(caseId, data);
+        return;
+      }
 
-      setActiveId(caseId);
-      if (user) {
-        void fetch("/api/investigations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(buildSave(caseId, data)),
-        }).catch(() => {});
+      // Progressive reveal: render the evidence the instant it streams in, then swap the
+      // pending conclusion for the verified narrative when the model's chunk arrives.
+      let caseId: string | null = null;
+      let evidence: DigResult["evidence"] | null = null;
+
+      await readNdjson(res.body!, (msg) => {
+        if (msg.phase === "evidence") {
+          evidence = msg.evidence;
+          const id = `GI-${counter.current++}`;
+          caseId = id;
+          const partial: DigResult = { evidence: msg.evidence, narrative: null };
+          setHistory((h) => [{ ...buildEntry(id, partial), pending: true }, ...h]);
+          setActiveId(id);
+          setLoading(false); // evidence is on screen; the conclusion fills in next
+        } else if (msg.phase === "final") {
+          const id = caseId;
+          const ev = evidence;
+          if (!id || !ev) return;
+          const full: DigResult = {
+            evidence: ev,
+            narrative: msg.narrative,
+            ...(msg.error ? { error: msg.error } : {}),
+          };
+          setHistory((h) =>
+            h.map((e) => (e.caseId === id ? { ...buildEntry(id, full), pending: false } : e)),
+          );
+          persist(id, full);
+        }
+      });
+
+      if (!caseId) {
+        setError("The investigation did not return any evidence.");
+        setView("browse");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -217,6 +296,7 @@ export function useInvestigation(user: AuthUser | null) {
       level: e.result.narrative?.confidence.level ?? "low",
       score: e.result.narrative?.confidence.score ?? 0,
       child: !!e.parentCaseId,
+      pending: e.pending ?? false,
     };
   });
 
