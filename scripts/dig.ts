@@ -1,5 +1,6 @@
 import { collect, parseLocation } from "@git-investigator/core/collect";
 import { checkEntailment } from "@git-investigator/core/entail";
+import { cosmeticOrigin } from "@git-investigator/core/cosmetic";
 import { getModel } from "@git-investigator/core/llm";
 import { traceProvenance } from "@git-investigator/core/provenance";
 import { buildSynthesisInput, synthesize } from "@git-investigator/core/synthesize";
@@ -192,6 +193,16 @@ function printFindings(ev: Evidence, v: VerifiedNarrative) {
       .join(" · ");
     console.log();
     console.log(`${gray("Origin:")} this line traces to ${cyan(label)}`);
+  }
+
+  const cosmetic = cosmeticOrigin(ev);
+  if (cosmetic) {
+    console.log();
+    console.log(
+      yellow(
+        `Note: last touch ${cosmetic.ref ?? cosmetic.id} looks cosmetic — the original reason may be in an earlier commit.`,
+      ),
+    );
   }
   console.log(RULE);
 }

@@ -11,4 +11,5 @@ export { parseUnifiedDiff } from "./diff/parse";
 export { anchorQuestion } from "./anchor-question";
 export { type CollectInput, collect, parseLocation } from "./collect";
 export { traceProvenance } from "./provenance";
+export { cosmeticOrigin, looksCosmetic } from "./cosmetic";
 export { runWithTokens, runWithToken } from "./collect/token-context";

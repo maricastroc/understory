@@ -1,3 +1,4 @@
+import { cosmeticOrigin } from "./cosmetic";
 import type {
   Confidence,
   EntailmentStatus,
@@ -65,6 +66,7 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
       ungroundedClaims,
       groundedClaims,
       coarseGranularity: ev.coverage?.granularity === "file",
+      cosmeticOrigin: cosmeticOrigin(ev) !== null,
       totalCollected: ev.artifacts.length,
       contradicting,
     }),
@@ -82,6 +84,7 @@ export function scoreConfidence(s: {
   ungroundedClaims: number;
   groundedClaims: number;
   coarseGranularity: boolean;
+  cosmeticOrigin?: boolean;
   totalCollected: number;
   contradicting: number;
 }): Confidence {
@@ -151,6 +154,14 @@ export function scoreConfidence(s: {
   // file's commit history: the evidence speaks to the file, not this exact line, so it can't
   // be HIGH-confidence about the line itself. Caps, never raises.
   if (s.coarseGranularity && level === "high") {
+    level = "medium";
+    score = 0.55;
+  }
+
+  // The line's most recent change looks cosmetic (a reformat/refactor/rename), so blame is
+  // anchored on the janitor's commit, not the one that explains the line — it can't be HIGH
+  // about the rationale on that basis. Caps, never raises.
+  if (s.cosmeticOrigin && level === "high") {
     level = "medium";
     score = 0.55;
   }

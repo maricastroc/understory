@@ -1,3 +1,4 @@
+import { cosmeticOrigin } from "@git-investigator/core/cosmetic";
 import { traceProvenance } from "@git-investigator/core/provenance";
 import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
 import { letter } from "../format";
@@ -33,6 +34,7 @@ export function Findings({
   const idToLetter = new Map(evidence.artifacts.map((a, i) => [a.id, letter(i)]));
   const byId = new Map(evidence.artifacts.map((a) => [a.id, a]));
   const provenance = traceProvenance(evidence);
+  const cosmetic = cosmeticOrigin(evidence);
   const resolved = narrative.citations.filter((id) => idToLetter.has(id));
   const citedSet = new Set(resolved);
   const contradictions = evidence.contradictions.filter((c) => citedSet.has(c.artifactId));
@@ -85,6 +87,7 @@ export function Findings({
             entailment={entailment}
             auditUnavailable={auditUnavailable}
             coarseGranularity={coarseGranularity}
+            cosmeticRef={cosmetic?.ref}
           />
         </div>
       </div>
