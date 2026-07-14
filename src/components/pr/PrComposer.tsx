@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "../Button";
 import { Alert, Close, Lock, Search } from "../icons";
 
 const EXAMPLE = "chalk/chalk#664";
@@ -64,15 +65,10 @@ export function PrComposer({
             <Close className="size-3.5" />
           </button>
         )}
-        <button
-          type="button"
-          onClick={onRun}
-          disabled={loading || !pr.trim()}
-          className="inline-flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-accent px-2.5 text-[12.5px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press disabled:cursor-default disabled:opacity-70"
-        >
+        <Button type="button" size="xs" onClick={onRun} disabled={loading || !pr.trim()}>
           <Search className="size-3.5" />
           {loading ? "Reading…" : "Explain"}
-        </button>
+        </Button>
       </div>
 
       {tokenOpen ? (

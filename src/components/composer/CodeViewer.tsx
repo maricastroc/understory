@@ -1,4 +1,5 @@
 import type { SymbolSpan } from "@git-investigator/core/collect/symbol";
+import { Button } from "../Button";
 import { Braces, FileIcon, Pencil } from "../icons";
 import { GoToLine } from "./GoToLine";
 import type { OpenFile } from "./use-file-viewer";
@@ -178,13 +179,9 @@ export function CodeViewer({
                 className="h-11 w-full rounded-md border border-line-2 bg-surface pr-3 pl-9 text-[14px] text-ink shadow-sm transition-[border-color,box-shadow] outline-none placeholder:text-ink-3 focus:border-accent/50 focus:ring-2 focus:ring-accent/15"
               />
             </div>
-            <button
-              type="button"
-              onClick={onRun}
-              className="inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-md bg-accent px-5 text-[13.5px] font-semibold text-white shadow-sm transition-colors hover:bg-accent-press"
-            >
+            <Button type="button" size="lg" onClick={onRun}>
               {runLabel}
-            </button>
+            </Button>
           </div>
           <p className="text-[11.5px] text-ink-2">
             Edit the question before investigating — it steers how the history is reconstructed.

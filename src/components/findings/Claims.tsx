@@ -12,7 +12,7 @@ export function Claims({
 }) {
   const { language } = useLanguage();
   return (
-    <p lang={language} className="max-w-[68ch] text-[16.5px] leading-[1.72] text-[#2a2d36]">
+    <p lang={language} className="max-w-[68ch] text-[16.5px] leading-[1.72] text-ink-body">
       {claims.map((c, i) => {
         const letters = c.citations
           .map((id) => idToLetter.get(id))

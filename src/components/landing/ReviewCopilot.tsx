@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonClass } from "@/components/Button";
 import { Check, ChevronRight, Commit, Issue, PullRequest, Review } from "@/components/icons";
 import { reviewCopilot } from "./content";
 
@@ -23,10 +24,7 @@ export function ReviewCopilot() {
             </h2>
             <p className="mt-4 max-w-[52ch] text-[14.5px] leading-relaxed text-ink-2">{body}</p>
             <div className="mt-7 flex flex-wrap items-center gap-4">
-              <Link
-                href="/pr"
-                className="inline-flex h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
-              >
+              <Link href="/pr" className={buttonClass({ size: "lg" })}>
                 {cta}
                 <ChevronRight className="size-4" />
               </Link>
@@ -48,7 +46,7 @@ export function ReviewCopilot() {
               </span>
             </div>
 
-            <p className="mt-4 text-[13.5px] leading-relaxed text-[#2a2d36]">{finding.why}</p>
+            <p className="mt-4 text-[13.5px] leading-relaxed text-ink-body">{finding.why}</p>
 
             <div className="mt-auto border-t border-line pt-3">
               <div className="mb-2 font-mono text-[10.5px] tracking-[0.06em] text-ink-3 uppercase">

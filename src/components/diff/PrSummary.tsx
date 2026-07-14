@@ -22,7 +22,7 @@ export function PrSummary({ result }: { result: DiffResult }) {
         <SectionLabel title="Why the changed code exists" meta="narrative overview" />
         <div className="flex items-start gap-3 rounded-[10px] border border-accent/25 bg-accent-tint/50 p-5 shadow-card">
           <Clock className="mt-0.5 size-5 shrink-0 text-accent-press" />
-          <p lang={language} className="max-w-[72ch] text-[15px] leading-relaxed text-[#2a2d36]">
+          <p lang={language} className="max-w-[72ch] text-[15px] leading-relaxed text-ink-body">
             {result.summary}
           </p>
         </div>

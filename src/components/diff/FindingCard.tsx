@@ -86,7 +86,7 @@ export function FindingCard({ finding, index }: { finding: VerifiedDiffFinding; 
 
         <div className="mt-3">
           {finding.recorded ? (
-            <p className="max-w-[70ch] text-[14.5px] leading-relaxed whitespace-pre-wrap text-[#2a2d36]">
+            <p className="max-w-[70ch] text-[14.5px] leading-relaxed whitespace-pre-wrap text-ink-body">
               {finding.why}
             </p>
           ) : (

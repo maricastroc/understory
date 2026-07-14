@@ -68,7 +68,7 @@ export function Findings({
             ) : (
               <p
                 lang={language}
-                className="max-w-[68ch] text-[16.5px] leading-[1.72] whitespace-pre-wrap text-[#2a2d36]"
+                className="max-w-[68ch] text-[16.5px] leading-[1.72] whitespace-pre-wrap text-ink-body"
               >
                 {narrative.answer}
               </p>

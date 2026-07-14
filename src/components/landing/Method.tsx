@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonClass } from "@/components/Button";
 import { ChevronRight, Shield } from "@/components/icons";
 import { steps } from "./content";
 
@@ -35,10 +36,7 @@ export function Method() {
             Point it at a repository and a line — see what the history really says.
           </p>
         </div>
-        <Link
-          href="/app"
-          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
-        >
+        <Link href="/app" className={buttonClass({ size: "lg" })}>
           Explain a line
           <ChevronRight className="size-4" />
         </Link>

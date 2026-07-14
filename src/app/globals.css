@@ -8,6 +8,7 @@
   --color-line: #e0e2e9;
   --color-line-2: #cdd0da;
   --color-ink: #1a1c23;
+  --color-ink-body: #2a2d36;
   --color-ink-2: #565c6b;
   --color-ink-3: #646b7a;
   --color-accent: #b45309;
@@ -15,8 +16,8 @@
   --color-accent-tint: #faead0;
   --color-good: #12744a;
   --color-good-tint: #e7f3ec;
-  --color-warn: #5a6474;
-  --color-warn-tint: #eceef2;
+  --color-warn: #886308;
+  --color-warn-tint: #f7eecf;
   --color-crit: #be3b32;
   --color-crit-tint: #fbeae8;
 }

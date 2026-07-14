@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonClass } from "@/components/Button";
 import { ConfidenceRing } from "@/components/ConfidenceRing";
 import { Check, ChevronRight, Commit, Issue, PullRequest } from "@/components/icons";
 import { codeLines, sampleConfidence } from "./content";
@@ -33,17 +34,11 @@ export function Hero() {
       </p>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
-        <Link
-          href="/app"
-          className="inline-flex h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
-        >
+        <Link href="/app" className={buttonClass({ size: "lg" })}>
           Explain a line
           <ChevronRight className="size-4" />
         </Link>
-        <a
-          href="#how"
-          className="inline-flex h-11 items-center rounded-md border border-line-2 bg-surface px-5 text-[14px] font-medium text-ink transition-colors hover:bg-inset"
-        >
+        <a href="#how" className={buttonClass({ variant: "secondary", size: "lg" })}>
           How it works
         </a>
       </div>
@@ -89,7 +84,7 @@ export function Hero() {
             </div>
           </div>
 
-          <p className="mt-4 text-[13.5px] leading-relaxed text-[#2a2d36]">
+          <p className="mt-4 text-[13.5px] leading-relaxed text-ink-body">
             Capped at three after an unbounded loop double-billed customers during a Stripe outage —
             three attempts stay inside the 10-second webhook window.
           </p>
