@@ -6,6 +6,8 @@ export type { CodeLocation } from "./code-location";
 export type { Contradiction } from "./contradiction";
 export type { RepoRef } from "./repo-ref";
 export type { Evidence } from "./evidence";
+export type { Claim } from "./claim";
+export type { VerifiedClaim } from "./verified-claim";
 export type { Narrative } from "./narrative";
 export type { Confidence } from "./confidence";
 export type { EntailmentStatus, CitationCheck, Entailment } from "./entailment";

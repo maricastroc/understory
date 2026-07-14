@@ -1,6 +1,7 @@
 import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
 import { letter } from "../format";
 import { SectionLabel } from "../ui";
+import { Claims } from "./Claims";
 import { ConfidencePanel } from "./ConfidencePanel";
 import { ContradictionAlert } from "./ContradictionAlert";
 import { EntailmentQuotes } from "./EntailmentQuotes";
@@ -8,6 +9,7 @@ import { FabricationAlert } from "./FabricationAlert";
 import { MisattributionAlert } from "./MisattributionAlert";
 import { OutOfScopeCard } from "./OutOfScopeCard";
 import { SourcesUsed } from "./SourcesUsed";
+import { UncitedClaimsAlert } from "./UncitedClaimsAlert";
 import { VerdictStrip } from "./VerdictStrip";
 
 export function Findings({
@@ -20,6 +22,11 @@ export function Findings({
   if (narrative.answerable === false) {
     return <OutOfScopeCard answer={narrative.answer} />;
   }
+
+  // Default for investigations persisted before claims existed — they render via the
+  // plain-answer fallback below rather than throwing on a missing array.
+  const claims = narrative.claims ?? [];
+  const ungroundedClaims = narrative.ungroundedClaims ?? 0;
 
   const idToLetter = new Map(evidence.artifacts.map((a, i) => [a.id, letter(i)]));
   const byId = new Map(evidence.artifacts.map((a) => [a.id, a]));
@@ -49,10 +56,15 @@ export function Findings({
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_216px]">
           <div className="border-b border-line p-7 md:border-r md:border-b-0">
-            <p className="max-w-[68ch] text-[16.5px] leading-[1.72] whitespace-pre-wrap text-[#2a2d36]">
-              {narrative.answer}
-            </p>
+            {claims.length > 0 ? (
+              <Claims claims={claims} idToLetter={idToLetter} />
+            ) : (
+              <p className="max-w-[68ch] text-[16.5px] leading-[1.72] whitespace-pre-wrap text-[#2a2d36]">
+                {narrative.answer}
+              </p>
+            )}
             <FabricationAlert ids={narrative.unknownCitations} />
+            <UncitedClaimsAlert count={ungroundedClaims} />
             <MisattributionAlert checks={checks} idToLetter={idToLetter} />
             <ContradictionAlert contradictions={contradictions} idToLetter={idToLetter} />
             <SourcesUsed resolved={resolved} byId={byId} statusById={statusById} />

@@ -11,6 +11,17 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
 
   const grounded = unknownCitations.length === 0;
 
+  // Per-claim grounding: a claim is grounded when at least one of its citations resolves
+  // to a collected artifact. A claim citing nothing is uncited interpolation — prose with
+  // no source — which entailment never sees (it audits citations, and there is none), so
+  // this deterministic gate is the only thing that catches it.
+  const claims = n.claims.map((c) => ({
+    ...c,
+    grounded: c.citations.some((id) => realIds.has(id)),
+  }));
+  const ungroundedClaims = claims.filter((c) => !c.grounded).length;
+  const groundedClaims = claims.length - ungroundedClaims;
+
   const citedSet = new Set(groundedCitations);
   const contradicting = ev.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
 
@@ -30,8 +41,10 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
 
   return {
     ...n,
+    claims,
     grounded,
     unknownCitations,
+    ungroundedClaims,
     confidence: scoreConfidence({
       recorded: n.recorded,
       grounded,
@@ -39,6 +52,8 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
       effectivePrimary,
       supportedPrimary,
       audited,
+      ungroundedClaims,
+      groundedClaims,
       totalCollected: ev.artifacts.length,
       contradicting,
     }),
@@ -53,6 +68,8 @@ export function scoreConfidence(s: {
   effectivePrimary: number;
   supportedPrimary: number;
   audited: boolean;
+  ungroundedClaims: number;
+  groundedClaims: number;
   totalCollected: number;
   contradicting: number;
 }): Confidence {
@@ -102,6 +119,19 @@ export function scoreConfidence(s: {
     } else {
       level = "low";
       score = 0.4;
+    }
+  }
+
+  // A claim that cites no collected source is uncited interpolation: it cannot raise
+  // confidence, and it lowers the ceiling. A partly-uncited answer is never HIGH; one
+  // that is at least half uncited is LOW. Applied as a cap so it only ever lowers.
+  if (s.grounded && s.recorded && s.ungroundedClaims > 0) {
+    if (s.ungroundedClaims >= s.groundedClaims && score > 0.4) {
+      level = "low";
+      score = 0.4;
+    } else if (level === "high") {
+      level = "medium";
+      score = 0.55;
     }
   }
 

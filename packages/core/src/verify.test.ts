@@ -30,8 +30,20 @@ const contra = (artifactId: string): Contradiction => ({
 });
 
 function narr(partial: Partial<Narrative>): Narrative {
-  return { answer: "because reasons", citations: [], recorded: true, answerable: true, ...partial };
+  return {
+    answer: "because reasons",
+    claims: [],
+    citations: [],
+    recorded: true,
+    answerable: true,
+    ...partial,
+  };
 }
+
+const claim = (text: string, citations: string[]): Narrative["claims"][number] => ({
+  text,
+  citations,
+});
 
 describe("verify — grounding", () => {
   it("marks a narrative grounded when every citation was collected", () => {
@@ -239,5 +251,76 @@ describe("verify — entailment refines confidence", () => {
     expect(v.confidence.level).toBe("medium");
     expect(v.confidence.score).toBe(0.5);
     expect(v.entailment).toBeUndefined();
+  });
+});
+
+describe("verify — uncited claims (F1)", () => {
+  it("marks each claim grounded or not against the collected ids", () => {
+    const v = verify(
+      ev(["c1", "c2"]),
+      narr({
+        claims: [claim("backed by a real commit", ["c1"]), claim("cites nothing", [])],
+        citations: ["c1"],
+        recorded: true,
+      }),
+    );
+    expect(v.claims.map((c) => c.grounded)).toEqual([true, false]);
+    expect(v.ungroundedClaims).toBe(1);
+  });
+
+  it("a minority of uncited claims caps a would-be HIGH at medium", () => {
+    // Two substantiated sources would score HIGH; one stray uncited sentence forbids it.
+    const v = verify(
+      ev(["c1", "c2"]),
+      narr({
+        claims: [claim("A", ["c1"]), claim("B", ["c2"]), claim("uncited aside", [])],
+        citations: ["c1", "c2"],
+        recorded: true,
+      }),
+      entail([check("c1", "supported"), check("c2", "supported")]),
+    );
+    expect(v.ungroundedClaims).toBe(1);
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.55);
+  });
+
+  it("an answer at least half uncited drops to LOW", () => {
+    const v = verify(
+      ev(["c1"]),
+      narr({
+        claims: [claim("A", ["c1"]), claim("uncited 1", []), claim("uncited 2", [])],
+        citations: ["c1"],
+        recorded: true,
+      }),
+      entail([check("c1", "supported")]),
+    );
+    expect(v.ungroundedClaims).toBe(2);
+    expect(v.confidence.level).toBe("low");
+    expect(v.confidence.score).toBe(0.4);
+  });
+
+  it("leaves a fully-cited answer untouched (no ungrounded claims)", () => {
+    const v = verify(
+      ev(["c1", "c2"]),
+      narr({
+        claims: [claim("A", ["c1"]), claim("B", ["c2"])],
+        citations: ["c1", "c2"],
+        recorded: true,
+      }),
+      entail([check("c1", "supported"), check("c2", "supported")]),
+    );
+    expect(v.ungroundedClaims).toBe(0);
+    expect(v.confidence.level).toBe("high");
+  });
+
+  it("a claim citing only a fabricated id is caught by the fabrication gate first (low 0.2)", () => {
+    const v = verify(
+      ev(["c1"]),
+      narr({ claims: [claim("invented", ["ghost"])], citations: ["ghost"], recorded: true }),
+    );
+    expect(v.grounded).toBe(false);
+    expect(v.claims[0].grounded).toBe(false);
+    expect(v.confidence.level).toBe("low");
+    expect(v.confidence.score).toBe(0.2);
   });
 });

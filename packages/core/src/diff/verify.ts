@@ -28,6 +28,8 @@ function silentFinding(ref: string, cluster: DiffCluster): VerifiedDiffFinding {
       effectivePrimary: 0,
       supportedPrimary: 0,
       audited: false,
+      ungroundedClaims: 0,
+      groundedClaims: 0,
       totalCollected: cluster.artifacts.length,
       contradicting: 0,
     }),
@@ -77,6 +79,10 @@ function verifyFinding(
       effectivePrimary,
       supportedPrimary,
       audited,
+      // The diff flow's finer unit is the per-region `why`, already citation-bound; it has
+      // no free-prose claims to gate (that parity is a follow-up).
+      ungroundedClaims: 0,
+      groundedClaims: 0,
       totalCollected: cluster.artifacts.length,
       contradicting,
     }),
