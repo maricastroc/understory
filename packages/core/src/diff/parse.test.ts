@@ -168,7 +168,7 @@ index 1..2 100644
 +## new subtitle
  body`;
     const f = parseUnifiedDiff(diff).files[0];
-    expect(f.oldPath).toBe("a.md"); // NOT "old subtitle"
+    expect(f.oldPath).toBe("a.md");
     expect(f.status).toBe("modified");
     expect(f.removedRanges).toEqual([{ start: 2, end: 2 }]);
   });

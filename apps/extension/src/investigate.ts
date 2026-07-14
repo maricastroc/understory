@@ -24,8 +24,7 @@ function withProgress(
   );
 }
 
-// "Why is this line?" — local (in-process) by default, or the configured backend.
-export async function investigate(target: InvestigationTarget): Promise<void> {
+=export async function investigate(target: InvestigationTarget): Promise<void> {
   lastRun = () => investigate(target);
   drillContext = undefined;
   const mode = getMode();
@@ -63,7 +62,6 @@ export async function investigateRemote(target: InvestigationTarget): Promise<vo
     `Git Investigator — full investigation of ${target.location}…`,
     async (token) => {
       try {
-        // Full provenance is collected the same way the web does — via the hosted app's API.
         await runBackend(target, remote, getWebUrl(), token);
       } catch (e) {
         panel.showError(errorView(e, "backend"), target.location);

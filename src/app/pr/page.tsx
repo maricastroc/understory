@@ -30,7 +30,6 @@ export default function PrPage() {
     runPr(EXAMPLE);
   };
 
-  // Re-run the active PR when the analysis language changes (from the header toggle).
   const firstLang = useRef(true);
   useEffect(() => {
     if (firstLang.current) {

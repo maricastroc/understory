@@ -1,7 +1,5 @@
 export type PrSpec = { owner: string; repo: string; number: number };
 
-// Accepts a GitHub PR URL (…/owner/repo/pull/123, with any trailing path/query)
-// or the short "owner/repo#123" form.
 export function parsePr(input: string): PrSpec | null {
   const s = input.trim();
 

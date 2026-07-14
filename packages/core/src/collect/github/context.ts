@@ -10,22 +10,7 @@ import {
   reviewArtifact,
 } from "./artifacts";
 import { graphql } from "./client";
-
-type Comment = { author: { login: string } | null; body: string; createdAt: string };
-
-const MAX_COMMENTS = 8;
-
-function foldComments(header: string, comments: Comment[]): string {
-  const real = comments.filter((c) => c.body?.trim());
-  if (!real.length) return header;
-  const digest = real
-    .slice(0, MAX_COMMENTS)
-    .map((c) => `@${c.author?.login ?? "someone"}: ${c.body.trim()}`)
-    .join("\n\n");
-  return header ? `${header}\n\n— discussion —\n${digest}` : digest;
-}
-
-const COMMENTS = "comments(first: 8) { nodes { author { login } body createdAt } }";
+import { type Comment, COMMENTS, foldComments } from "./comments";
 
 const PR_CONTEXT_QUERY = `
 query PrContext($owner:String!, $repo:String!, $number:Int!) {

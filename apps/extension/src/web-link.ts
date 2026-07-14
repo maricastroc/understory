@@ -13,10 +13,8 @@ export async function detectRemoteUrl(workspacePath: string): Promise<string | n
 }
 
 function normalizeRemote(remote: string): string | null {
-  // git@host:owner/repo(.git)  →  https://host/owner/repo
   let m = remote.match(/^[^@]+@([^:]+):(.+?)(?:\.git)?\/?$/);
   if (m) return `https://${m[1]}/${m[2]}`;
-  // ssh://…, https://…, http://…  (optionally with user@)
   m = remote.match(/^(?:ssh|https?):\/\/(?:[^@/]+@)?([^/]+)\/(.+?)(?:\.git)?\/?$/);
   if (m) return `https://${m[1]}/${m[2]}`;
   return null;

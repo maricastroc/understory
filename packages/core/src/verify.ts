@@ -14,10 +14,6 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
   const citedSet = new Set(groundedCitations);
   const contradicting = ev.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
 
-  // Entailment only docks confidence for a real misattribution: a citation whose
-  // source does not substantiate the claim at all. "supported" and "weak" (on-topic
-  // but no verbatim smoking gun) both still count as primary sources, and unchecked
-  // citations stay neutral — so behaviour is identical when no entailment was run.
   const status = new Map(
     (entailment?.checked ? entailment.checks : []).map((c) => [c.citation, c.status]),
   );

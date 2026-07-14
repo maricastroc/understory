@@ -33,7 +33,7 @@ describe("session sign/verify", () => {
     const token = signSession(user, "gho_secret_token");
     expect(sessionGithubToken(token)).toBe("gho_secret_token");
     expect(verifySession(token)).toEqual(user);
-    // the raw token must not appear in the (signed-but-readable) cookie body
+
     expect(Buffer.from(token.split(".")[0], "base64url").toString()).not.toContain(
       "gho_secret_token",
     );

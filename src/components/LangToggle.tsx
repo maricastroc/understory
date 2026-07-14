@@ -17,8 +17,6 @@ export function LangToggle({
   onChange: (l: Language) => void;
   className?: string;
 }) {
-  // The stored language isn't known during SSR/first paint. Highlight only after
-  // hydration so a wrong value never flashes (and there's no hydration mismatch).
   const mounted = useSyncExternalStore(
     noop,
     () => true,

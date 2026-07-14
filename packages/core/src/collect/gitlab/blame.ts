@@ -18,8 +18,6 @@ type RawCommit = {
   author_email: string | null;
 };
 
-// The blame API embeds a leaner commit than the commits API — it omits short_id
-// and title, so derive them from id/message.
 function toCommit(c: RawCommit, host: string, project: string): GlCommit {
   const message = c.message ?? "";
   return {

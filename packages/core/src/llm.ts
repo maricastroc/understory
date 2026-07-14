@@ -1,7 +1,5 @@
 import { createGroq } from "@ai-sdk/groq";
 
-// Language of the written analysis only. "auto" = follow the question (line-level)
-// or default to English (diff-level). Grounding/verification are language-agnostic.
 export type Language = "auto" | "en" | "pt";
 
 export type LlmConfig = {

@@ -15,8 +15,6 @@ import type { BlamedTarget, DiffCluster, DiffCollection } from "./types";
 const MAX_DETAILED = 8;
 const BLAME_CONCURRENCY = 5;
 
-// Build the evidence for each origin commit: the commit plus its associated PRs,
-// reviews and closing issues — mirroring how collectFromGitHub enriches a commit.
 export function buildClusters(
   blamed: BlamedTarget[],
   byId: Map<string, BlameCommit>,
@@ -44,8 +42,6 @@ export function buildClusters(
   });
 }
 
-// A reviewer's attention is scarcest where the code being touched carries risky
-// or contested history — rank those first so the report and the bot stay dense.
 function scoreCluster(c: DiffCluster): number {
   let s = c.targets.length * 0.1;
   if (c.contradictions.length) s += 3;
@@ -59,9 +55,6 @@ export function rankAndBudget(
   clusters: DiffCluster[],
   max = MAX_DETAILED,
 ): { kept: DiffCluster[]; droppedCount: number } {
-  // commitId is the tie-break so the budget cut is deterministic: without it, two
-  // equally-ranked clusters straddling the `max` boundary would be kept or dropped
-  // based on their arrival order, which depends on concurrent blame timing.
   const ranked = clusters
     .map((c) => ({ ...c, rank: scoreCluster(c) }))
     .sort((a, b) => b.rank - a.rank || a.commitId.localeCompare(b.commitId));
@@ -83,8 +76,6 @@ async function mapLimit<T>(
   await Promise.all(workers);
 }
 
-// PR → the changed code with recorded history, triaged and ranked. Network
-// orchestration (untested, like collectFromGitHub); the pure pieces above are tested.
 export async function collectDiff(
   owner: string,
   repo: string,
@@ -129,9 +120,6 @@ export async function collectDiff(
     }
   });
 
-  // Blame calls resolve concurrently, so `blamed` arrives in a nondeterministic order.
-  // Sort before clustering so cluster formation order, per-cluster target order, and the
-  // rank tie-break downstream are all reproducible for the same pull request.
   blamed.sort(
     (a, b) =>
       a.target.path.localeCompare(b.target.path) ||

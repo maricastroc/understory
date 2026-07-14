@@ -33,7 +33,7 @@ export async function runDig(
       const data = (await res.json()) as { error?: string };
       if (data?.error) detail = ` — ${data.error}`;
     } catch {
-      // response had no JSON body
+      // 
     }
     throw new DigError("http", `Backend returned ${res.status}${detail}`);
   }

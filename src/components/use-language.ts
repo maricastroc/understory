@@ -36,8 +36,6 @@ function subscribe(fn: () => void) {
   };
 }
 
-// A single analysis-language preference shared across every screen and persisted
-// per browser. useSyncExternalStore keeps concurrent readers in sync without a provider.
 export function useLanguage() {
   const language = useSyncExternalStore(subscribe, read, () => "en" as Language);
   return { language, setLanguage: write };

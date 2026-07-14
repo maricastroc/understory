@@ -1,10 +1,12 @@
 import { graphql, rest } from "./client";
+import { type Comment, COMMENTS } from "./comments";
 
 export type PrReview = {
   author: { login: string } | null;
   state: string;
   body: string;
   submittedAt: string;
+  comments?: { nodes: Comment[] };
 };
 export type PrIssue = {
   number: number;
@@ -14,6 +16,7 @@ export type PrIssue = {
   createdAt: string;
   state?: string;
   stateReason?: string | null;
+  comments?: { nodes: Comment[] };
 };
 export type AssociatedPr = {
   number: number;
@@ -21,6 +24,7 @@ export type AssociatedPr = {
   body: string;
   url: string;
   createdAt: string;
+  comments?: { nodes: Comment[] };
   reviews: { nodes: PrReview[] };
   closingIssuesReferences: { nodes: PrIssue[] };
 };
@@ -48,8 +52,9 @@ const PR_FIELDS = `associatedPullRequests(first: 1) {
     body
     url
     createdAt
-    reviews(first: 5) { nodes { author { login } state body submittedAt } }
-    closingIssuesReferences(first: 5) { nodes { number title body url createdAt state stateReason } }
+    ${COMMENTS}
+    reviews(first: 5) { nodes { author { login } state body submittedAt ${COMMENTS} } }
+    closingIssuesReferences(first: 5) { nodes { number title body url createdAt state stateReason ${COMMENTS} } }
   }
 }`;
 

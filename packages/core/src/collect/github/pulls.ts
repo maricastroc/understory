@@ -23,7 +23,6 @@ export async function getPullRequest(
   return { number: pr.number, title: pr.title, url: pr.html_url, baseSha: pr.base.sha, headSha: pr.head.sha };
 }
 
-// The unified diff, straight from GitHub — parsed line-for-line downstream.
 export function getPullRequestDiff(owner: string, repo: string, number: number): Promise<string> {
   return restDiff(`/repos/${owner}/${repo}/pulls/${number}`);
 }

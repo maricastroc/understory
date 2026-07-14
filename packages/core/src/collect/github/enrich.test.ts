@@ -73,3 +73,79 @@ describe("expandCommit", () => {
     expect(ids.filter((id) => id === "issue:7")).toHaveLength(2);
   });
 });
+
+const threaded = () =>
+  bc({
+    associatedPullRequests: {
+      nodes: [
+        {
+          number: 42,
+          title: "add retry cap",
+          body: "caps retries",
+          url: "https://gh/x/pull/42",
+          createdAt: "2024-01-01T00:00:00Z",
+          comments: {
+            nodes: [
+              { author: { login: "lee" }, body: "does this cover webhooks?", createdAt: "x" },
+            ],
+          },
+          reviews: {
+            nodes: [
+              {
+                author: { login: "eve" },
+                state: "COMMENTED",
+                body: "",
+                submittedAt: "2024-01-02T00:00:00Z",
+                comments: {
+                  nodes: [
+                    {
+                      author: { login: "eve" },
+                      body: "why exactly 3 and not configurable?",
+                      createdAt: "x",
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          closingIssuesReferences: {
+            nodes: [
+              {
+                number: 7,
+                title: "retry storm",
+                body: "double billing",
+                url: "https://gh/x/issues/7",
+                createdAt: "2024-01-01T00:00:00Z",
+                comments: {
+                  nodes: [
+                    {
+                      author: { login: "ana" },
+                      body: "seen in prod during the outage",
+                      createdAt: "x",
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
+
+describe("expandCommit — folds discussion into bodies", () => {
+  it("keeps an empty-body review that argued the point in an inline thread", () => {
+    const review = expandCommit(threaded()).find((a) => a.id === "review:42-0");
+    expect(review).toBeDefined();
+    expect(review!.body).toContain("why exactly 3 and not configurable?");
+  });
+
+  it("folds the PR conversation and issue comments into their bodies", () => {
+    const arts = expandCommit(threaded());
+    const pr = arts.find((a) => a.id === "pr:42")!;
+    const issue = arts.find((a) => a.id === "issue:7")!;
+    expect(pr.body).toContain("— discussion —");
+    expect(pr.body).toContain("does this cover webhooks?");
+    expect(issue.body).toContain("seen in prod during the outage");
+  });
+});

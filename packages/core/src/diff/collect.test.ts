@@ -79,7 +79,7 @@ describe("buildClusters", () => {
       "commit:abc123",
       "pr:42",
       "issue:7",
-      "review:42-0", // the empty-body review (index 1) is dropped
+      "review:42-0",
     ]);
   });
 
@@ -130,7 +130,6 @@ describe("rankAndBudget", () => {
   });
 
   it("breaks rank ties by commitId, so the budget cut is deterministic", () => {
-    // Every cluster has identical rank — only the tie-break decides who survives.
     const ids = ["c", "a", "e", "b", "d"];
     const forward = rankAndBudget(
       ids.map((id) => cl({ commitId: id })),
@@ -141,7 +140,6 @@ describe("rankAndBudget", () => {
       2,
     );
     expect(forward.kept.map((k) => k.commitId)).toEqual(["a", "b"]);
-    // Same kept set regardless of the order the clusters arrived in.
     expect(reversed.kept.map((k) => k.commitId)).toEqual(forward.kept.map((k) => k.commitId));
   });
 });

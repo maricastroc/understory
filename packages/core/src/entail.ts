@@ -51,8 +51,6 @@ function clampBody(body: string, cap: number): string {
 
 const normalize = (s: string): string => s.replace(/\s+/g, " ").trim().toLowerCase();
 
-// A quote only counts as proof when it is genuinely present in the source body.
-// This is the deterministic gate that stops the judge from vouching for itself.
 export function verifyQuote(body: string, quote: string): string | null {
   const q = quote.trim();
   if (q.length < QUOTE_MIN) return null;
@@ -80,9 +78,6 @@ export function finalizeCheck(
   return { citation, status: raw.status, quote: verified, reason: raw.reason };
 }
 
-// Audit one cited source against the claim it supposedly backs. Shared by the
-// line-history judge (checkEntailment) and the PR-diff judge (checkDiffEntailment)
-// so both are boxed by the same verbatim-quote gate in finalizeCheck.
 export async function judgeCitation(
   question: string,
   answer: string,
@@ -114,9 +109,6 @@ function judge(ev: Evidence, n: Narrative, a: Artifact, model: Model): Promise<C
   return judgeCitation(ev.question, n.answer, a, model);
 }
 
-// Second LLM layer, boxed the same way synthesis is: the judge may only claim
-// "supported" when it can quote the source, and verifyQuote confirms the quote is
-// real before it counts. Answerable/recorded gate keeps it off abstentions.
 export async function checkEntailment(
   ev: Evidence,
   n: Narrative,

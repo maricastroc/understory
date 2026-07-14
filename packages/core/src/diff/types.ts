@@ -1,4 +1,3 @@
-// 1-based, inclusive line range.
 export type LineRange = { start: number; end: number };
 
 export type FileChangeStatus = "added" | "deleted" | "modified" | "renamed";

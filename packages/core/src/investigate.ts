@@ -31,8 +31,6 @@ export async function investigate(input: CollectInput, config: LlmConfig = {}): 
     const doEntail = config.entail ?? process.env.ENTAILMENT !== "0";
     let entailment: Entailment | undefined;
     if (doEntail) {
-      // The judge is a best-effort second pass: if it's rate-limited or fails,
-      // fall back to citation-existence grounding rather than losing the whole result.
       try {
         entailment = await checkEntailment(evidence, narrative, model);
       } catch {
