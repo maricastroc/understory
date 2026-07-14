@@ -4,6 +4,7 @@ import { runDig } from "./client/dig";
 import { DigError } from "./client/errors";
 import { runLocalDig } from "./client/local";
 import { type Mode, getBackendUrl, getMode, getWebUrl } from "./config";
+import { nudgeOnce } from "./nudge";
 import { getGithubToken, getGroqKey } from "./secrets";
 import type { InvestigationTarget } from "./target";
 import * as panel from "./webview/panel";
@@ -24,7 +25,7 @@ function withProgress(
   );
 }
 
-=export async function investigate(target: InvestigationTarget): Promise<void> {
+export async function investigate(target: InvestigationTarget): Promise<void> {
   lastRun = () => investigate(target);
   drillContext = undefined;
   const mode = getMode();
@@ -71,8 +72,8 @@ export async function investigateRemote(target: InvestigationTarget): Promise<vo
 }
 
 async function runLocal(target: InvestigationTarget, token: vscode.CancellationToken): Promise<void> {
-  const apiKey = await getGroqKey();
-  const result = await runLocalDig(target, apiKey);
+  const [apiKey, githubToken] = await Promise.all([getGroqKey(), getGithubToken()]);
+  const result = await runLocalDig(target, apiKey, githubToken);
   if (token.isCancellationRequested) return;
   panel.showResult(result, target.location);
 
@@ -85,6 +86,15 @@ async function runLocal(target: InvestigationTarget, token: vscode.CancellationT
       .then((pick) => {
         if (pick) void vscode.commands.executeCommand("gitInvestigator.setGroqKey");
       });
+  } else if (!githubToken && result.evidence.repo.remoteUrl?.includes("github.com")) {
+    // Enriched from commits only; a GitHub token would add the PR/issue/review trail. Fire
+    // once, and only when it would actually help — a GitHub remote with no token set yet.
+    void nudgeOnce(
+      "githubTokenLocalEnrich",
+      "Git Investigator: set a GitHub token to enrich local history with the PRs, issues, and reviews behind each commit.",
+      "Set GitHub Token",
+      "gitInvestigator.setGithubToken",
+    );
   }
 }
 

@@ -2,6 +2,8 @@ import type { Artifact, ArtifactRef, CodeLocation, Coverage, Evidence, RepoRef }
 import type { BlameCommit } from "./github";
 import { detectContradictions } from "./contradictions";
 import { commitToArtifact, isGitRepo, lineHistory, resolveRepo } from "./git";
+import { enrichLocalCommits } from "./local-enrich";
+import { resolveToken } from "./token-context";
 import {
   blameLines,
   commitContextArtifacts,
@@ -71,7 +73,17 @@ async function collectLocal(
   }
   const repo = await resolveRepo(repoPath);
   const commits = await lineHistory(repoPath, location);
-  const artifacts = commits.map((c) => commitToArtifact(c, repo));
+
+  // Commits alone rarely record the "why" — that lives in the PR/issue/review discussion.
+  // When the checkout points at a GitHub remote and a token is available, enrich each commit
+  // with its PR trail (full line history AND the discussion); otherwise (no remote, no token,
+  // offline) fall back to commits only — never worse than before.
+  const gh = parseGitHubRepo(repo.remoteUrl ?? "");
+  const artifacts =
+    gh && resolveToken()
+      ? await enrichLocalCommits(gh.owner, gh.repo, commits, repo)
+      : commits.map((c) => commitToArtifact(c, repo));
+
   return { question, repo, location, artifacts, coverage: { granularity: "line" } };
 }
 

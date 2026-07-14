@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { getWebUrl } from "./config";
 import { drill, investigate, investigateRemote, retry } from "./investigate";
+import { initNudge } from "./nudge";
 import { initSecrets, setGithubTokenInteractive, setGroqKeyInteractive } from "./secrets";
 import { getCurrentTarget } from "./target";
 import * as panel from "./webview/panel";
@@ -9,6 +10,7 @@ import { buildWebUrl, detectRemoteUrl } from "./web-link";
 
 export function activate(context: vscode.ExtensionContext) {
   initSecrets(context.secrets);
+  initNudge(context.globalState);
 
   panel.setMessageListener((msg) => {
     if (msg.type === "retry") retry();

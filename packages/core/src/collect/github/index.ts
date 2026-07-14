@@ -6,7 +6,7 @@ export {
   getFileContentGitHub,
   getFileSizeGitHub,
 } from "./browse";
-export { blameLines, fileHistoryGitHub } from "./blame";
+export { blameLines, enrichCommits, fileHistoryGitHub } from "./blame";
 export type { PrReview, PrIssue, AssociatedPr, BlameCommit } from "./blame";
 export { commitArtifact, prArtifact, issueArtifact, reviewArtifact } from "./artifacts";
 export { expandCommit } from "./enrich";

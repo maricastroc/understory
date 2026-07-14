@@ -83,7 +83,7 @@ query Blame($owner:String!, $repo:String!, $ref:String!, $path:String!) {
   }
 }`;
 
-async function enrichCommits(
+export async function enrichCommits(
   owner: string,
   repo: string,
   oids: string[],

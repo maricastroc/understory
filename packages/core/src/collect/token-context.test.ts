@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { getRequestToken, resolveToken, runWithToken } from "./token-context";
+import { getRequestToken, resolveToken, runWithToken, runWithTokens } from "./token-context";
 
 describe("runWithToken / getRequestToken", () => {
   it("is undefined outside any run", () => {
@@ -41,5 +41,19 @@ describe("resolveToken — precedence", () => {
   it("is undefined when neither is present", () => {
     delete process.env.GITHUB_TOKEN;
     expect(resolveToken()).toBeUndefined();
+  });
+});
+
+// The collectors call resolveToken() deep inside an async chain (collect → enrich → graphql),
+// so the token must survive `await` boundaries — this is what lets the VS Code local mode and
+// the web backend inject a token via runWithTokens. AsyncLocalStorage guarantees it; lock it.
+describe("runWithTokens — survives awaits", () => {
+  it("keeps the request token across awaits inside an async callback", async () => {
+    const seen = await runWithTokens({ github: "req-token" }, async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      return resolveToken();
+    });
+    expect(seen).toBe("req-token");
   });
 });
