@@ -7,6 +7,7 @@ import { PrComposer } from "@/components/pr/PrComposer";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { PrRail, PrRailContent } from "@/components/pr/PrRail";
 import { PrRow } from "@/components/pr/PrRow";
+import { entryKey } from "@/components/pr/pr-entry";
 import { usePrHistory } from "@/components/pr/use-pr-history";
 import { HistoryDrawer } from "@/components/shell/HistoryDrawer";
 import { HistorySidebar } from "@/components/shell/HistorySidebar";
@@ -23,7 +24,7 @@ export default function PrPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { language } = useLanguage();
   const { loading, error, result, run } = useExplainDiff();
-  const { entries, activeKey, active, select, remove } = usePrHistory(result);
+  const { entries, activeKey, active, select, remove, hydrated } = usePrHistory(result);
 
   const gh = () => token.trim() || undefined;
   const runPr = (value = pr) => {
@@ -45,6 +46,33 @@ export default function PrPage() {
   }, [language]);
 
   const activeResult = active?.result ?? null;
+
+  const didDeepLink = useRef(false);
+  useEffect(() => {
+    if (!hydrated || didDeepLink.current) return;
+    didDeepLink.current = true;
+    const deep = new URLSearchParams(window.location.search).get("pr");
+    if (!deep) return;
+
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (entries.some((e) => e.key === deep)) {
+      select(deep);
+    } else {
+      setPr(deep);
+      void run(deep, language, gh());
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!didDeepLink.current) return;
+    const params = new URLSearchParams(window.location.search);
+    if (activeResult) params.set("pr", entryKey(activeResult));
+    else params.delete("pr");
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+  }, [activeResult]);
 
   const renderPrs = (onSelect: (key: string) => void) =>
     entries.map((e) => (

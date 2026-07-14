@@ -162,7 +162,7 @@ export function useInvestigation(user: AuthUser | null) {
           const partial: DigResult = { evidence: msg.evidence, narrative: null };
           setHistory((h) => [{ ...buildEntry(id, partial), pending: true }, ...h]);
           setActiveId(id);
-          setLoading(false); // evidence is on screen; the conclusion fills in next
+          setLoading(false);
         } else if (msg.phase === "final") {
           const id = caseId;
           const ev = evidence;
