@@ -30,6 +30,7 @@ function silentFinding(ref: string, cluster: DiffCluster): VerifiedDiffFinding {
       audited: false,
       ungroundedClaims: 0,
       groundedClaims: 0,
+      coarseGranularity: false,
       totalCollected: cluster.artifacts.length,
       contradicting: 0,
     }),
@@ -83,6 +84,8 @@ function verifyFinding(
       // no free-prose claims to gate (that parity is a follow-up).
       ungroundedClaims: 0,
       groundedClaims: 0,
+      // Every diff cluster is blamed line-level against the base commit.
+      coarseGranularity: false,
       totalCollected: cluster.artifacts.length,
       contradicting,
     }),

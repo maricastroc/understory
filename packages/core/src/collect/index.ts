@@ -1,4 +1,4 @@
-import type { Artifact, ArtifactRef, CodeLocation, Evidence, RepoRef } from "../types";
+import type { Artifact, ArtifactRef, CodeLocation, Coverage, Evidence, RepoRef } from "../types";
 import type { BlameCommit } from "./github";
 import { detectContradictions } from "./contradictions";
 import { commitToArtifact, isGitRepo, lineHistory, resolveRepo } from "./git";
@@ -72,7 +72,7 @@ async function collectLocal(
   const repo = await resolveRepo(repoPath);
   const commits = await lineHistory(repoPath, location);
   const artifacts = commits.map((c) => commitToArtifact(c, repo));
-  return { question, repo, location, artifacts };
+  return { question, repo, location, artifacts, coverage: { granularity: "line" } };
 }
 
 const LARGE_FILE_BYTES = 1_000_000;
@@ -94,10 +94,12 @@ async function collectFromGitHub(
 
   let commits: BlameCommit[];
   let note: string | undefined;
+  let granularity: Coverage["granularity"] = "line";
 
   const size = await getFileSizeGitHub(owner, repo, meta.branch, location.file).catch(() => 0);
   if (size > LARGE_FILE_BYTES) {
     commits = await fileHistoryGitHub(owner, repo, meta.branch, location.file);
+    granularity = "file";
     note =
       "This file is too large for GitHub's blame API, so line-level history isn't available here — showing recent commits that touched the file instead. A local checkout gives full line-level history.";
   } else {
@@ -112,6 +114,7 @@ async function collectFromGitHub(
       );
     } catch {
       commits = await fileHistoryGitHub(owner, repo, meta.branch, location.file);
+      granularity = "file";
       note =
         "GitHub's blame API couldn't resolve line-level history for this file — showing recent commits that touched it instead.";
     }
@@ -131,7 +134,7 @@ async function collectFromGitHub(
   }
 
   artifacts.sort((a, b) => a.date.localeCompare(b.date));
-  return { question, repo: repoRef, location, artifacts, note };
+  return { question, repo: repoRef, location, artifacts, note, coverage: { granularity } };
 }
 
 async function collectAroundArtifact(
@@ -194,10 +197,12 @@ async function collectFromGitLab(
 
   let commits: GitLabCommit[];
   let note: string | undefined;
+  let granularity: Coverage["granularity"] = "line";
 
   const size = await getFileSizeGitLab(host, project, meta.branch, location.file).catch(() => 0);
   if (size > LARGE_FILE_BYTES) {
     commits = await fileHistoryGitLab(host, project, meta.branch, location.file);
+    granularity = "file";
     note =
       "This file is too large for GitLab's blame API, so line-level history isn't available here — showing recent commits that touched the file instead. A local checkout gives full line-level history.";
   } else {
@@ -212,6 +217,7 @@ async function collectFromGitLab(
       );
     } catch {
       commits = await fileHistoryGitLab(host, project, meta.branch, location.file);
+      granularity = "file";
       note =
         "GitLab's blame API couldn't resolve line-level history for this file — showing recent commits that touched it instead.";
     }
@@ -260,7 +266,7 @@ async function collectFromGitLab(
   }
 
   artifacts.sort((a, b) => a.date.localeCompare(b.date));
-  return { question, repo: repoRef, location, artifacts, note };
+  return { question, repo: repoRef, location, artifacts, note, coverage: { granularity } };
 }
 
 async function collectAroundGitLabArtifact(

@@ -64,6 +64,7 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
       audited,
       ungroundedClaims,
       groundedClaims,
+      coarseGranularity: ev.coverage?.granularity === "file",
       totalCollected: ev.artifacts.length,
       contradicting,
     }),
@@ -80,6 +81,7 @@ export function scoreConfidence(s: {
   audited: boolean;
   ungroundedClaims: number;
   groundedClaims: number;
+  coarseGranularity: boolean;
   totalCollected: number;
   contradicting: number;
 }): Confidence {
@@ -143,6 +145,14 @@ export function scoreConfidence(s: {
       level = "medium";
       score = 0.55;
     }
+  }
+
+  // Line-level history was unavailable (large file or blame failure) and we fell back to the
+  // file's commit history: the evidence speaks to the file, not this exact line, so it can't
+  // be HIGH-confidence about the line itself. Caps, never raises.
+  if (s.coarseGranularity && level === "high") {
+    level = "medium";
+    score = 0.55;
   }
 
   return { score, level, primarySources: s.primarySources, corroborating, contradicting };

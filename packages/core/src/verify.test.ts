@@ -394,3 +394,41 @@ describe("verify — a claim is the unit of confidence (F3)", () => {
     expect(v.confidence.score).toBe(0.55);
   });
 });
+
+describe("verify — collection granularity (F2)", () => {
+  const coarse = (ids: string[]): Evidence => ({
+    ...ev(ids),
+    coverage: { granularity: "file" },
+  });
+
+  it("caps a would-be HIGH at medium when only file-level history was available", () => {
+    // Two substantiated sources would be HIGH — but blame fell back to the file's history,
+    // so the evidence is about the file, not this exact line: it can't certify the line.
+    const v = verify(
+      coarse(["c1", "c2"]),
+      narr({ citations: ["c1", "c2"], recorded: true }),
+      entail([check("c1", "supported"), check("c2", "supported")]),
+    );
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.55);
+  });
+
+  it("leaves line-level evidence (the default) at HIGH", () => {
+    const v = verify(
+      ev(["c1", "c2"]),
+      narr({ citations: ["c1", "c2"], recorded: true }),
+      entail([check("c1", "supported"), check("c2", "supported")]),
+    );
+    expect(v.confidence.level).toBe("high");
+  });
+
+  it("only caps — it never lowers an already-medium answer further", () => {
+    const v = verify(
+      coarse(["c1"]),
+      narr({ citations: ["c1"], recorded: true }),
+      entail([check("c1", "supported")]),
+    );
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.65);
+  });
+});

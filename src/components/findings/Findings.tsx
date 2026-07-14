@@ -44,6 +44,10 @@ export function Findings({
   const auditUnavailable =
     narrative.recorded && narrative.grounded && resolved.length > 0 && !entailment?.checked;
 
+  // Blame fell back to the file's commit history — the evidence is about the file, not this
+  // exact line — so confidence was capped below high. Say so next to the score.
+  const coarseGranularity = evidence.coverage?.granularity === "file";
+
   return (
     <section className="mt-6">
       <SectionLabel
@@ -76,6 +80,7 @@ export function Findings({
             grounded={narrative.grounded}
             entailment={entailment}
             auditUnavailable={auditUnavailable}
+            coarseGranularity={coarseGranularity}
           />
         </div>
       </div>

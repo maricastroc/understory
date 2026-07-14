@@ -34,11 +34,13 @@ export function ConfidencePanel({
   grounded,
   entailment,
   auditUnavailable = false,
+  coarseGranularity = false,
 }: {
   confidence: Confidence;
   grounded: boolean;
   entailment?: Entailment;
   auditUnavailable?: boolean;
+  coarseGranularity?: boolean;
 }) {
   return (
     <div className="flex flex-col items-center gap-3 p-6 text-center">
@@ -63,6 +65,12 @@ export function ConfidencePanel({
             Citation audit unavailable — capped
           </div>
         ) : null}
+        {coarseGranularity && (
+          <div className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink-3">
+            <Alert className="size-3.5" />
+            File-level history — not line-level
+          </div>
+        )}
       </div>
     </div>
   );
