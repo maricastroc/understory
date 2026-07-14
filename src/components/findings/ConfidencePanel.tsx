@@ -33,10 +33,12 @@ export function ConfidencePanel({
   confidence,
   grounded,
   entailment,
+  auditUnavailable = false,
 }: {
   confidence: Confidence;
   grounded: boolean;
   entailment?: Entailment;
+  auditUnavailable?: boolean;
 }) {
   return (
     <div className="flex flex-col items-center gap-3 p-6 text-center">
@@ -53,7 +55,14 @@ export function ConfidencePanel({
           {grounded ? <Check className="size-3.5" /> : <Alert className="size-3.5" />}
           {grounded ? "Every citation grounded" : "Fabrication detected"}
         </div>
-        {entailment?.checked && <EntailmentLine entailment={entailment} />}
+        {entailment?.checked ? (
+          <EntailmentLine entailment={entailment} />
+        ) : auditUnavailable ? (
+          <div className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink-3">
+            <Alert className="size-3.5" />
+            Citation audit unavailable — capped
+          </div>
+        ) : null}
       </div>
     </div>
   );

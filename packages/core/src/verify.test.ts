@@ -77,16 +77,18 @@ describe("verify — confidence scoring", () => {
     expect(v.confidence.score).toBe(0.35);
   });
 
-  it("a single primary source is medium (0.65)", () => {
+  it("a single grounded source without an audit is capped at medium (0.5)", () => {
     const v = verify(ev(["c1", "c2"]), narr({ citations: ["c1"], recorded: true }));
     expect(v.confidence.level).toBe("medium");
-    expect(v.confidence.score).toBe(0.65);
+    expect(v.confidence.score).toBe(0.5);
   });
 
-  it("two or more primary sources is high (0.9)", () => {
+  it("grounded sources with no completed audit never reach high — capped at medium (0.5)", () => {
+    // F6: HIGH is earned by the entailment pass, not by citation count. Without an
+    // audit, even two grounded sources cap at medium; see the entailment block for HIGH.
     const v = verify(ev(["c1", "c2"]), narr({ citations: ["c1", "c2"], recorded: true }));
-    expect(v.confidence.level).toBe("high");
-    expect(v.confidence.score).toBe(0.9);
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.5);
   });
 
   it("corroborating = collected artifacts not cited as primary", () => {
@@ -105,9 +107,12 @@ describe("verify — confidence scoring", () => {
 
 describe("verify — contradiction penalty", () => {
   it("demotes a two-source HIGH to MEDIUM when one cited source is contradicted", () => {
+    // Genuinely HIGH first (audited, both substantiated), so the contradiction has a
+    // HIGH to soften rather than an already-capped medium.
     const v = verify(
       ev(["c1", "c2"], [contra("c1")]),
       narr({ citations: ["c1", "c2"], recorded: true }),
+      entail([check("c1", "supported"), check("c2", "supported")]),
     );
     expect(v.confidence.contradicting).toBe(1);
     expect(v.confidence.level).toBe("medium");
@@ -121,7 +126,11 @@ describe("verify — contradiction penalty", () => {
   });
 
   it("ignores a contradiction that hits an uncited artifact", () => {
-    const v = verify(ev(["c1", "c2"], [contra("c2")]), narr({ citations: ["c1"], recorded: true }));
+    const v = verify(
+      ev(["c1", "c2"], [contra("c2")]),
+      narr({ citations: ["c1"], recorded: true }),
+      entail([check("c1", "supported")]),
+    );
     expect(v.confidence.contradicting).toBe(0);
     expect(v.confidence.level).toBe("medium");
     expect(v.confidence.score).toBe(0.65);
@@ -184,33 +193,51 @@ describe("verify — entailment refines confidence", () => {
     expect(v.confidence.score).toBe(0.35);
   });
 
-  it("still counts a 'weak' (on-topic) source as primary — only misattribution is penalized", () => {
+  it("does not let a 'weak' source count toward HIGH — one supported + one weak is medium (0.65)", () => {
+    // F5: only quote-verified "supported" sources earn HIGH. A weak source is real and
+    // on-topic (it does not lower confidence), but it cannot be the second pillar of HIGH.
     const v = verify(
       ev(["c1", "c2"]),
       narr({ citations: ["c1", "c2"], recorded: true }),
       entail([check("c1", "supported"), check("c2", "weak")]),
     );
-    expect(v.confidence.level).toBe("high");
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.65);
+    expect(v.entailment?.misattributed).toBe(0);
   });
 
-  it("leaves a well-grounded answer HIGH when sources are on-topic but not verbatim-quotable (all weak)", () => {
+  it("weak-only support is medium, never high (0.55)", () => {
+    // F5: on-topic sources with no single line that proves the point stay medium.
     const v = verify(
       ev(["c1", "c2"]),
       narr({ citations: ["c1", "c2"], recorded: true }),
       entail([check("c1", "weak"), check("c2", "weak")]),
     );
-    expect(v.confidence.level).toBe("high");
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.55);
     expect(v.entailment?.supported).toBe(0);
     expect(v.entailment?.misattributed).toBe(0);
   });
 
-  it("leaves scoring untouched when the judge did not run (checked:false)", () => {
+  it("caps confidence at medium when the judge did not run (checked:false)", () => {
+    // F6: an audit that produced no verdicts cannot certify support, so it cannot certify
+    // HIGH. The result degrades to medium and the entailment block is dropped entirely.
     const v = verify(
       ev(["c1", "c2"]),
       narr({ citations: ["c1", "c2"], recorded: true }),
       { checked: false, checks: [], supported: 0, misattributed: 0 },
     );
-    expect(v.confidence.level).toBe("high");
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.5);
+    expect(v.entailment).toBeUndefined();
+  });
+
+  it("caps confidence at medium when the entailment pass threw (undefined)", () => {
+    // F6: the orchestrator passes undefined when checkEntailment throws (e.g. rate limit).
+    // Grounded, but unverified — never HIGH.
+    const v = verify(ev(["c1", "c2"]), narr({ citations: ["c1", "c2"], recorded: true }));
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.5);
     expect(v.entailment).toBeUndefined();
   });
 });

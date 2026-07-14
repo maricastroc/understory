@@ -14,11 +14,18 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
   const citedSet = new Set(groundedCitations);
   const contradicting = ev.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
 
+  const audited = entailment?.checked === true;
   const status = new Map(
-    (entailment?.checked ? entailment.checks : []).map((c) => [c.citation, c.status]),
+    (audited ? entailment!.checks : []).map((c) => [c.citation, c.status]),
   );
+  // A citation only fails when the judge actively refuted it. Everything else —
+  // supported, weak, or (past MAX_CHECKS) unjudged — stays a primary source.
   const effectivePrimary = groundedCitations.filter(
     (id) => status.get(id) !== "unsupported",
+  ).length;
+  // But only a judge-substantiated, quote-verified "supported" earns HIGH.
+  const supportedPrimary = groundedCitations.filter(
+    (id) => status.get(id) === "supported",
   ).length;
 
   return {
@@ -30,10 +37,12 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
       grounded,
       primarySources: groundedCitations.length,
       effectivePrimary,
+      supportedPrimary,
+      audited,
       totalCollected: ev.artifacts.length,
       contradicting,
     }),
-    ...(entailment?.checked ? { entailment } : {}),
+    ...(audited ? { entailment } : {}),
   };
 }
 
@@ -42,11 +51,13 @@ export function scoreConfidence(s: {
   grounded: boolean;
   primarySources: number;
   effectivePrimary: number;
+  supportedPrimary: number;
+  audited: boolean;
   totalCollected: number;
   contradicting: number;
 }): Confidence {
   const corroborating = Math.max(0, s.totalCollected - s.primarySources);
-  const { contradicting, effectivePrimary } = s;
+  const { contradicting, effectivePrimary, supportedPrimary, audited } = s;
 
   let level: Confidence["level"];
   let score: number;
@@ -60,12 +71,25 @@ export function scoreConfidence(s: {
   } else if (effectivePrimary === 0) {
     level = "low";
     score = 0.35;
-  } else if (effectivePrimary === 1) {
+  } else if (!audited) {
+    // No completed citation audit ran (disabled, rate-limited, or it threw). The
+    // citations are grounded, but their support is unverified — never award HIGH on
+    // citation count alone; the entailment pass is what earns it.
+    level = "medium";
+    score = 0.5;
+  } else if (supportedPrimary >= 2) {
+    // Two or more sources the judge substantiated in-source, each proven by a
+    // verbatim quote. This is the only path to HIGH.
+    level = "high";
+    score = 0.9;
+  } else if (supportedPrimary === 1) {
     level = "medium";
     score = 0.65;
   } else {
-    level = "high";
-    score = 0.9;
+    // Audited and on-topic, but no single line proves the point (weak-only). "weak"
+    // is a real source, so it stays medium — but it does not count toward HIGH.
+    level = "medium";
+    score = 0.55;
   }
 
   if (s.grounded && s.recorded && contradicting > 0) {

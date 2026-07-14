@@ -31,6 +31,12 @@ export function Findings({
   const checks = entailment?.checked ? entailment.checks : [];
   const statusById = new Map(checks.map((c) => [c.citation, c.status]));
 
+  // The citation audit was expected here (grounded, recorded, with citations) but no
+  // completed pass informed the score — it was disabled, rate-limited, or it threw.
+  // Confidence is capped at medium; say so instead of implying a silent pass.
+  const auditUnavailable =
+    narrative.recorded && narrative.grounded && resolved.length > 0 && !entailment?.checked;
+
   return (
     <section className="mt-6">
       <SectionLabel
@@ -57,6 +63,7 @@ export function Findings({
             confidence={narrative.confidence}
             grounded={narrative.grounded}
             entailment={entailment}
+            auditUnavailable={auditUnavailable}
           />
         </div>
       </div>

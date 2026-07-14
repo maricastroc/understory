@@ -47,7 +47,7 @@ const narr = (findings: DiffNarrative["findings"], summary = "s"): DiffNarrative
 });
 
 describe("verifyDiff — grounding", () => {
-  it("keeps a finding whose citations all resolve, HIGH with two sources", () => {
+  it("keeps a finding whose citations all resolve, grounded and recorded", () => {
     const col = collection([
       cluster({ artifacts: [art("commit:c1"), art("pr:9", "pull_request")] }),
     ]);
@@ -67,7 +67,8 @@ describe("verifyDiff — grounding", () => {
       grounded: true,
       recorded: true,
     });
-    expect(res.findings[0].confidence.level).toBe("high");
+    // No audit here → capped at medium (F6). HIGH lives in the entailment block below.
+    expect(res.findings[0].confidence.level).toBe("medium");
   });
 
   it("flags a fabricated citation and drops to LOW", () => {
@@ -179,14 +180,25 @@ describe("verifyDiff — entailment (parity with the line flow)", () => {
     expect(res.findings[0].confidence.level).toBe("high");
   });
 
-  it("scores identically with and without the entailment pass when nothing is misattributed", () => {
-    const withOut = verifyDiff(twoSources(), narr(both()));
-    const withWeak = verifyDiff(
+  it("caps an unaudited finding at medium — HIGH requires the audit (F6)", () => {
+    const res = verifyDiff(twoSources(), narr(both()));
+    expect(res.findings[0].confidence.level).toBe("medium");
+    expect(res.findings[0].confidence.score).toBe(0.5);
+    expect(res.findings[0].entailment).toBeUndefined();
+  });
+
+  it("keeps weak-only support at medium, never high (F5)", () => {
+    const res = verifyDiff(
       twoSources(),
       narr(both()),
-      entail([{ citation: "commit:c1", status: "weak", quote: null, reason: "on-topic" }]),
+      entail([
+        { citation: "commit:c1", status: "weak", quote: null, reason: "on-topic" },
+        { citation: "pr:9", status: "weak", quote: null, reason: "on-topic" },
+      ]),
     );
-    expect(withWeak.findings[0].confidence).toEqual(withOut.findings[0].confidence);
+    expect(res.findings[0].confidence.level).toBe("medium");
+    expect(res.findings[0].entailment?.supported).toBe(0);
+    expect(res.findings[0].entailment?.misattributed).toBe(0);
   });
 });
 

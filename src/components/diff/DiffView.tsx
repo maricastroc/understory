@@ -67,13 +67,20 @@ export function DiffView({ result }: { result: DiffResult }) {
         <section>
           <SectionLabel
             title="Why the changed code exists"
-            meta="executive context, reconstructed from commits, PRs, reviews and issues"
+            meta="narrative overview — not citation-checked; the cited, verified findings are region by region below"
           />
           <div className="flex items-start gap-3 rounded-[10px] border border-accent/25 bg-accent-tint/50 p-5 shadow-card">
             <Clock className="mt-0.5 size-5 shrink-0 text-accent-press" />
-            <p className="max-w-[72ch] text-[15px] leading-relaxed text-[#2a2d36]">
-              {result.summary}
-            </p>
+            <div className="flex flex-col gap-2.5">
+              <p className="max-w-[72ch] text-[15px] leading-relaxed text-[#2a2d36]">
+                {result.summary}
+              </p>
+              <p className="inline-flex items-center gap-1.5 text-[11.5px] text-ink-3">
+                <Alert className="size-3.5 shrink-0" />
+                Overview only — not citation-checked. Each region below is traced to cited,
+                verified sources.
+              </p>
+            </div>
           </div>
         </section>
       )}

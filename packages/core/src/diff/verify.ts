@@ -26,6 +26,8 @@ function silentFinding(ref: string, cluster: DiffCluster): VerifiedDiffFinding {
       grounded: true,
       primarySources: 0,
       effectivePrimary: 0,
+      supportedPrimary: 0,
+      audited: false,
       totalCollected: cluster.artifacts.length,
       contradicting: 0,
     }),
@@ -50,12 +52,15 @@ function verifyFinding(
   const contradicting = cluster.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
 
   // Same rule as the line flow's verify: only a "unsupported" verdict (a real
-  // misattribution) demotes a citation; "supported"/"weak"/unchecked stay primary,
-  // so confidence is identical when no entailment pass ran.
+  // misattribution) demotes a citation from "primary"; "supported"/"weak"/unjudged
+  // stay primary. But HIGH is reserved for judge-substantiated "supported" sources,
+  // and an absent audit caps confidence — see scoreConfidence.
+  const audited = entailment?.checked === true;
   const status = new Map(
-    (entailment?.checked ? entailment.checks : []).map((c) => [c.citation, c.status]),
+    (audited ? entailment!.checks : []).map((c) => [c.citation, c.status]),
   );
   const effectivePrimary = citations.filter((id) => status.get(id) !== "unsupported").length;
+  const supportedPrimary = citations.filter((id) => status.get(id) === "supported").length;
 
   return {
     ref,
@@ -70,6 +75,8 @@ function verifyFinding(
       grounded,
       primarySources: citations.length,
       effectivePrimary,
+      supportedPrimary,
+      audited,
       totalCollected: cluster.artifacts.length,
       contradicting,
     }),

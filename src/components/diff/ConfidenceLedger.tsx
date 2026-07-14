@@ -31,6 +31,9 @@ export function ConfidenceLedger({ finding }: { finding: VerifiedDiffFinding }) 
 
   const found = ORDER.map((kind) => ({ kind, n: countKind(finding, kind) })).filter((x) => x.n > 0);
   const e = finding.entailment;
+  // Grounded and cited, but no completed audit informed the score (disabled, rate-limited,
+  // or it threw). Confidence was capped — surface that instead of implying a silent pass.
+  const auditUnavailable = finding.grounded && finding.citations.length > 0 && !e?.checked;
 
   return (
     <div className="mt-4 rounded-md border border-line bg-inset/40 px-3 py-2.5">
@@ -52,6 +55,12 @@ export function ConfidenceLedger({ finding }: { finding: VerifiedDiffFinding }) 
           ) : e.supported > 0 ? (
             <Tick ok>{e.supported} substantiated in-source</Tick>
           ) : null)}
+        {auditUnavailable && (
+          <span className="inline-flex items-center gap-1 text-ink-3">
+            <Alert className="size-3" />
+            citation audit unavailable
+          </span>
+        )}
       </div>
     </div>
   );
