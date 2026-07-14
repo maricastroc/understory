@@ -10,3 +10,4 @@ export { collectDiff } from "./diff/collect";
 export { parseUnifiedDiff } from "./diff/parse";
 export { anchorQuestion } from "./anchor-question";
 export { type CollectInput, collect, parseLocation } from "./collect";
+export { traceProvenance } from "./provenance";

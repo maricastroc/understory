@@ -1,6 +1,7 @@
 import { collect, parseLocation } from "@git-investigator/core/collect";
 import { checkEntailment } from "@git-investigator/core/entail";
 import { getModel } from "@git-investigator/core/llm";
+import { traceProvenance } from "@git-investigator/core/provenance";
 import { buildSynthesisInput, synthesize } from "@git-investigator/core/synthesize";
 import { verify } from "@git-investigator/core/verify";
 import type { Artifact, Evidence, VerifiedNarrative } from "@git-investigator/core/types";
@@ -180,6 +181,18 @@ function printFindings(ev: Evidence, v: VerifiedNarrative) {
       ? dim("Every citation resolves to a real artifact — grounded.")
       : red(`✗ ${v.unknownCitations.length} fabricated citation(s) caught by verify.ts.`),
   );
+
+  const prov = traceProvenance(ev);
+  if (prov) {
+    const label = [prov.pr, prov.commit]
+      .filter((id): id is string => Boolean(id))
+      .map((id) => ev.artifacts.find((a) => a.id === id))
+      .filter((a): a is Artifact => Boolean(a))
+      .map((a) => `${a.kind === "pull_request" ? "PR" : "commit"} ${a.ref ?? a.id}`)
+      .join(" · ");
+    console.log();
+    console.log(`${gray("Origin:")} this line traces to ${cyan(label)}`);
+  }
   console.log(RULE);
 }
 

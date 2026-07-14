@@ -5,6 +5,7 @@ export type { ArtifactRef } from "./artifact-ref";
 export type { CodeLocation } from "./code-location";
 export type { Contradiction } from "./contradiction";
 export type { Coverage } from "./coverage";
+export type { Provenance } from "./provenance";
 export type { RepoRef } from "./repo-ref";
 export type { Evidence } from "./evidence";
 export type { Claim } from "./claim";
