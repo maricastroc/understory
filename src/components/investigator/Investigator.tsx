@@ -14,6 +14,7 @@ import { useLanguage } from "../use-language";
 import { useAuth } from "./use-auth";
 import { CaseView } from "./CaseView";
 import { LoadingCard } from "./LoadingCard";
+import { Onboarding } from "./Onboarding";
 import { useInvestigation } from "./use-investigation";
 import { AppHeader } from "../shell/AppHeader";
 
@@ -159,6 +160,7 @@ export function Investigator() {
             )}
 
             <div className={browsing ? "" : "hidden"}>
+              {items.length === 0 && <Onboarding repoReady={repo.ready} signedIn={!!user} />}
               <Composer
                 key={resetKey}
                 repo={repo}
