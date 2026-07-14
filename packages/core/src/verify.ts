@@ -1,4 +1,11 @@
-import type { Confidence, Entailment, Evidence, Narrative, VerifiedNarrative } from "./types";
+import type {
+  Confidence,
+  EntailmentStatus,
+  Entailment,
+  Evidence,
+  Narrative,
+  VerifiedNarrative,
+} from "./types";
 
 const unique = (xs: string[]): string[] => Array.from(new Set(xs));
 
@@ -26,18 +33,21 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
   const contradicting = ev.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
 
   const audited = entailment?.checked === true;
-  const status = new Map(
-    (audited ? entailment!.checks : []).map((c) => [c.citation, c.status]),
-  );
-  // A citation only fails when the judge actively refuted it. Everything else —
-  // supported, weak, or (past MAX_CHECKS) unjudged — stays a primary source.
-  const effectivePrimary = groundedCitations.filter(
-    (id) => status.get(id) !== "unsupported",
-  ).length;
-  // But only a judge-substantiated, quote-verified "supported" earns HIGH.
-  const supportedPrimary = groundedCitations.filter(
-    (id) => status.get(id) === "supported",
-  ).length;
+  const checks = audited && entailment ? entailment.checks : [];
+  // Group verdicts by claim so a single multi-source claim counts once — a composed claim
+  // ("A because B" citing two sources) can't reach HIGH on its own. Checks with no claim
+  // index (the diff flow, direct tests) fall back to per-citation groups, unchanged.
+  const groupStatus = new Map<string, EntailmentStatus>();
+  for (const c of checks) {
+    groupStatus.set(c.claim !== undefined ? `c${c.claim}` : `x${c.citation}`, c.status);
+  }
+  const verdicts = [...groupStatus.values()];
+  // A claim only fails when the judge actively refuted it; supported/weak stay primary.
+  const effectivePrimary = audited
+    ? verdicts.filter((s) => s !== "unsupported").length
+    : groundedCitations.length;
+  // But only a judge-substantiated, quote-verified "supported" claim earns HIGH.
+  const supportedPrimary = verdicts.filter((s) => s === "supported").length;
 
   return {
     ...n,

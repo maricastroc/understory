@@ -324,3 +324,73 @@ describe("verify — uncited claims (F1)", () => {
     expect(v.confidence.score).toBe(0.2);
   });
 });
+
+describe("verify — a claim is the unit of confidence (F3)", () => {
+  it("counts a single multi-source claim once — a composed claim can't reach HIGH alone", () => {
+    // Two supported citations would have scored HIGH under per-citation counting; but both
+    // belong to ONE claim ("A because B"), so the causal claim counts once → medium.
+    const v = verify(
+      ev(["a", "b"]),
+      narr({
+        claims: [claim("A was added because of B", ["a", "b"])],
+        citations: ["a", "b"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 0,
+        checks: [
+          { citation: "a", claim: 0, status: "supported", quote: "proof", reason: "" },
+          { citation: "b", claim: 0, status: "supported", quote: null, reason: "" },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.65);
+  });
+
+  it("two independently-substantiated claims reach HIGH", () => {
+    const v = verify(
+      ev(["a", "b"]),
+      narr({
+        claims: [claim("A", ["a"]), claim("B", ["b"])],
+        citations: ["a", "b"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 2,
+        misattributed: 0,
+        checks: [
+          { citation: "a", claim: 0, status: "supported", quote: "proof", reason: "" },
+          { citation: "b", claim: 1, status: "supported", quote: "proof", reason: "" },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("high");
+    expect(v.confidence.score).toBe(0.9);
+  });
+
+  it("a multi-source claim the judge could not prove (weak) is on-topic but not HIGH", () => {
+    const v = verify(
+      ev(["a", "b"]),
+      narr({
+        claims: [claim("A because B", ["a", "b"])],
+        citations: ["a", "b"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 0,
+        misattributed: 0,
+        checks: [
+          { citation: "a", claim: 0, status: "weak", quote: null, reason: "link not stated" },
+          { citation: "b", claim: 0, status: "weak", quote: null, reason: "link not stated" },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.55);
+  });
+});

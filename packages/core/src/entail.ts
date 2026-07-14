@@ -1,13 +1,57 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import type { Model } from "./llm";
-import type { Artifact, CitationCheck, Entailment, Evidence, Narrative } from "./types";
+import type {
+  Artifact,
+  CitationCheck,
+  Entailment,
+  EntailmentStatus,
+  Evidence,
+  Narrative,
+} from "./types";
 
 const MAX_CHECKS = 6;
 const JUDGE_BODY_CAP = 1_600;
 const QUOTE_MIN = 8;
 
 const EMPTY: Entailment = { checked: false, checks: [], supported: 0, misattributed: 0 };
+
+const claimSchema = z.object({
+  status: z
+    .enum(["supported", "weak", "unsupported"])
+    .describe(
+      "supported = the source(s) state or clearly imply the WHOLE claim, including any relationship it asserts (quote required); weak = the right sources / on-topic, but no single line proves the specific point — use this when the claim asserts a link (e.g. 'X because Y') the sources do not actually establish; unsupported = the sources are about something else and the claim could not have come from them.",
+    ),
+  quote: z
+    .string()
+    .describe(
+      "For 'supported': a snippet copied VERBATIM from ONE of the sources that proves the claim (character for character, never paraphrased). Empty string otherwise.",
+    ),
+  reason: z
+    .string()
+    .describe("One short line: why the sources do or do not substantiate the claim."),
+});
+
+const CLAIM_SYSTEM = [
+  "You are a citation auditor. An answer about a line of code's history makes ONE claim, drawn",
+  "from the source(s) shown. Judge ONLY whether these sources substantiate THIS claim — from the",
+  "source text alone, never outside knowledge, never what merely seems plausible.",
+  "",
+  "The claim may assert a RELATIONSHIP between facts — 'X was added because of Y', 'A fixed B',",
+  "'this replaced Z'. A relationship is 'supported' only if the sources actually establish it:",
+  "that Y motivated X, not merely that X and Y each happened. Two true facts do not prove a link",
+  "between them. When several sources are shown, judge whether they TOGETHER establish the claim.",
+  "",
+  "- supported: the sources state or clearly imply the whole claim, its relationship included.",
+  "  You MUST copy a verbatim snippet from one source into `quote` as proof.",
+  "- weak: the sources are on-topic / the right ones, but no single line proves the specific",
+  "  point — in particular a link the sources do not establish. Reserve for genuine thinness.",
+  "- unsupported: the sources are about something else — the claim could not be drawn from them.",
+  "",
+  "`quote` must be copied EXACTLY from one source, character for character — never paraphrase,",
+  "never invent. If you cannot find a real snippet that proves the claim, leave `quote` empty and",
+  "do NOT answer 'supported'. Keep `reason` to one short line.",
+].join("\n");
 
 const checkSchema = z.object({
   status: z
@@ -105,10 +149,83 @@ export async function judgeCitation(
   return finalizeCheck(a.id, a.body, object);
 }
 
-function judge(ev: Evidence, n: Narrative, a: Artifact, model: Model): Promise<CitationCheck> {
-  return judgeCitation(ev.question, n.answer, a, model);
+// Deterministic gate for a claim judged against several sources: the quote must appear
+// verbatim in ONE of them, and a 'supported' with no such quote is demoted — the judge
+// cannot vouch for itself. Returns which source carried the quote so the check can attach
+// it to the right exhibit.
+export function finalizeClaim(
+  sources: Artifact[],
+  raw: z.infer<typeof claimSchema>,
+): { status: EntailmentStatus; quote: string | null; quoteSourceId: string | null; reason: string } {
+  if (raw.status === "unsupported") {
+    return { status: "unsupported", quote: null, quoteSourceId: null, reason: raw.reason };
+  }
+  let quote: string | null = null;
+  let quoteSourceId: string | null = null;
+  for (const s of sources) {
+    const v = verifyQuote(s.body, raw.quote);
+    if (v) {
+      quote = v;
+      quoteSourceId = s.id;
+      break;
+    }
+  }
+  if (raw.status === "supported" && !quote) {
+    const note = "the cited quote was not found in the source";
+    return {
+      status: "unsupported",
+      quote: null,
+      quoteSourceId: null,
+      reason: raw.reason ? `${raw.reason} (${note})` : note,
+    };
+  }
+  return { status: raw.status, quote, quoteSourceId, reason: raw.reason };
 }
 
+export async function judgeClaim(
+  question: string,
+  claimText: string,
+  sources: Artifact[],
+  model: Model,
+): Promise<z.infer<typeof claimSchema>> {
+  const rendered = sources
+    .map((a) => {
+      const who = a.author?.name ? ` · ${a.author.name}` : "";
+      return `[${a.id}] ${a.kind} · ${a.date.slice(0, 10)}${who}:\n${clampBody(a.body, JUDGE_BODY_CAP)}`;
+    })
+    .join("\n\n---\n\n");
+  const lead =
+    sources.length > 1
+      ? `The claim cites ${sources.length} sources — judge whether they TOGETHER substantiate it:`
+      : "Source being audited:";
+  const prompt = [
+    `Question: ${question}`,
+    "",
+    "Claim under review:",
+    claimText,
+    "",
+    lead,
+    rendered,
+  ].join("\n");
+
+  const { object } = await generateObject({
+    model,
+    schema: claimSchema,
+    system: CLAIM_SYSTEM,
+    prompt,
+    temperature: 0,
+  });
+  return object;
+}
+
+type ClaimTask = { index: number; text: string; sources: Artifact[] };
+
+// Second LLM pass, per CLAIM. Each claim is judged against ITS sources together, so a claim
+// that asserts a relationship ("A because B", citing two sources) is checked as a whole —
+// not as two isolated on-topic facts — and cannot be marked supported unless the sources
+// establish the link. One CitationCheck is emitted per source (the UI is source-keyed); the
+// sources of a claim share its verdict and index, and the verbatim quote sits on the source
+// it came from. verify groups by that index, so a single multi-source claim counts once.
 export async function checkEntailment(
   ev: Evidence,
   n: Narrative,
@@ -117,21 +234,46 @@ export async function checkEntailment(
   if (!n.answerable || !n.recorded) return EMPTY;
 
   const byId = new Map(ev.artifacts.map((a) => [a.id, a]));
-  const cited = Array.from(new Set(n.citations)).filter((id) => byId.has(id));
-  if (cited.length === 0) return EMPTY;
+  const tasks: ClaimTask[] = n.claims
+    .map((c, index) => ({
+      index,
+      text: c.text,
+      sources: Array.from(new Set(c.citations))
+        .map((id) => byId.get(id))
+        .filter((a): a is Artifact => Boolean(a)),
+    }))
+    .filter((t) => t.sources.length > 0)
+    .slice(0, MAX_CHECKS);
+  if (tasks.length === 0) return EMPTY;
 
   const settled = await Promise.allSettled(
-    cited.slice(0, MAX_CHECKS).map((id) => judge(ev, n, byId.get(id)!, model)),
+    tasks.map((t) =>
+      judgeClaim(ev.question, t.text, t.sources, model).then((raw) => ({
+        t,
+        verdict: finalizeClaim(t.sources, raw),
+      })),
+    ),
   );
-  const checks = settled
-    .filter((s): s is PromiseFulfilledResult<CitationCheck> => s.status === "fulfilled")
-    .map((s) => s.value);
+
+  const checks: CitationCheck[] = [];
+  let supported = 0;
+  let misattributed = 0;
+  for (const s of settled) {
+    if (s.status !== "fulfilled") continue;
+    const { t, verdict } = s.value;
+    if (verdict.status === "supported") supported++;
+    else if (verdict.status === "unsupported") misattributed++;
+    for (const src of t.sources) {
+      checks.push({
+        citation: src.id,
+        claim: t.index,
+        status: verdict.status,
+        quote: verdict.quoteSourceId === src.id ? verdict.quote : null,
+        reason: verdict.reason,
+      });
+    }
+  }
   if (checks.length === 0) return EMPTY;
 
-  return {
-    checked: true,
-    checks,
-    supported: checks.filter((c) => c.status === "supported").length,
-    misattributed: checks.filter((c) => c.status === "unsupported").length,
-  };
+  return { checked: true, checks, supported, misattributed };
 }

@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { finalizeCheck, verifyQuote } from "./entail";
+import { finalizeCheck, finalizeClaim, verifyQuote } from "./entail";
+import type { Artifact } from "./types";
+
+const artifact = (id: string, body: string): Artifact => ({
+  id,
+  kind: "commit",
+  title: id,
+  body,
+  url: "",
+  date: "2024-01-01T00:00:00Z",
+});
 
 const BODY = "Cap retries at 3 because the upstream gateway rate-limits\nbursts above five per second.";
 
@@ -65,5 +75,47 @@ describe("finalizeCheck — the judge cannot vouch for itself", () => {
     });
     expect(c.status).toBe("unsupported");
     expect(c.quote).toBeNull();
+  });
+});
+
+describe("finalizeClaim — a claim judged against several sources", () => {
+  const outage = artifact(
+    "issue:7",
+    "The Stripe webhook backlog caused duplicate charges during the outage.",
+  );
+  const retry = artifact("commit:c1", "Bound the charge retries to three attempts.");
+
+  it("verifies the quote against whichever source contains it and tags that source", () => {
+    const r = finalizeClaim([retry, outage], {
+      status: "supported",
+      quote: "duplicate charges during the outage",
+      reason: "outage motivated the change",
+    });
+    expect(r.status).toBe("supported");
+    expect(r.quote).toBe("duplicate charges during the outage");
+    expect(r.quoteSourceId).toBe("issue:7");
+  });
+
+  it("demotes 'supported' to 'unsupported' when no source contains the quote", () => {
+    const r = finalizeClaim([retry, outage], {
+      status: "supported",
+      quote: "because the database was slow",
+      reason: "invented link",
+    });
+    expect(r.status).toBe("unsupported");
+    expect(r.quote).toBeNull();
+    expect(r.quoteSourceId).toBeNull();
+    expect(r.reason).toMatch(/not found in the source/);
+  });
+
+  it("keeps 'weak' without requiring a quote — an asserted link the sources don't prove", () => {
+    const r = finalizeClaim([retry, outage], {
+      status: "weak",
+      quote: "",
+      reason: "both facts present, link not stated",
+    });
+    expect(r.status).toBe("weak");
+    expect(r.quote).toBeNull();
+    expect(r.quoteSourceId).toBeNull();
   });
 });
