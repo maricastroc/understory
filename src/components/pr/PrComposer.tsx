@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "../Button";
-import { Alert, Close, Lock, Search } from "../icons";
+import { ErrorState } from "../ErrorState";
+import { Close, Github, Lock, Search } from "../icons";
+import { authEnabled } from "../investigator/use-auth";
 
 const EXAMPLE = "chalk/chalk#664";
 const LABEL = "w-16 shrink-0 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase";
@@ -16,6 +18,7 @@ export function PrComposer({
   error,
   onRun,
   onExample,
+  signedIn = false,
 }: {
   pr: string;
   setPr: (v: string) => void;
@@ -25,6 +28,7 @@ export function PrComposer({
   error: string | null;
   onRun: () => void;
   onExample: () => void;
+  signedIn?: boolean;
 }) {
   const [showToken, setShowToken] = useState(false);
   const looksPrivate = /404|not found|private/i.test(error ?? "");
@@ -71,42 +75,66 @@ export function PrComposer({
         </Button>
       </div>
 
-      {tokenOpen ? (
-        <div className="flex items-center gap-3 border-b border-line px-3.5 py-2 transition-colors focus-within:bg-inset/40">
-          <span className={LABEL}>Token</span>
-          <Lock className="size-3.5 shrink-0 text-ink-3" />
-          <input
-            type="password"
-            aria-label="GitHub personal access token"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && onRun()}
-            placeholder="ghp_… — for a private PR, kept in this tab only"
-            className="min-w-0 flex-1 bg-transparent font-mono text-[13px] text-ink placeholder:font-sans placeholder:text-ink-3"
-            autoComplete="off"
-            spellCheck={false}
-          />
-          {token.trim() !== "" && (
-            <button
-              type="button"
-              aria-label="Clear token"
-              onClick={() => setToken("")}
-              className="grid size-6 shrink-0 cursor-pointer place-items-center rounded-md text-ink-3 transition-colors hover:bg-inset hover:text-ink-2"
-            >
-              <Close className="size-3.5" />
-            </button>
-          )}
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setShowToken(true)}
-          className="flex w-full cursor-pointer items-center gap-2 border-b border-line bg-accent-tint/30 px-3.5 py-2 text-[12px] font-semibold text-accent-press transition-colors hover:bg-accent-tint/60"
-        >
-          <Lock className="size-3.5" />
-          Private PR? Add a token
-        </button>
-      )}
+      {!signedIn &&
+        (tokenOpen ? (
+          <div className="flex items-center gap-3 border-b border-line px-3.5 py-2 transition-colors focus-within:bg-inset/40">
+            <span className={LABEL}>Token</span>
+            <Lock className="size-3.5 shrink-0 text-ink-3" />
+            <input
+              type="password"
+              aria-label="GitHub personal access token"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && onRun()}
+              placeholder="ghp_… — for a private PR, kept in this tab only"
+              className="min-w-0 flex-1 bg-transparent font-mono text-[13px] text-ink placeholder:font-sans placeholder:text-ink-3"
+              autoComplete="off"
+              spellCheck={false}
+            />
+            {token.trim() !== "" && (
+              <button
+                type="button"
+                aria-label="Clear token"
+                onClick={() => setToken("")}
+                className="grid size-6 shrink-0 cursor-pointer place-items-center rounded-md text-ink-3 transition-colors hover:bg-inset hover:text-ink-2"
+              >
+                <Close className="size-3.5" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line bg-accent-tint/30 px-3.5 py-2 text-[12px]">
+            <Lock className="size-3.5 shrink-0 text-accent-press" />
+            <span className="font-semibold text-accent-press">Private PR?</span>
+            {authEnabled ? (
+              <>
+                <a
+                  href="/api/auth/login"
+                  className="inline-flex items-center gap-1 font-semibold text-accent-press underline-offset-2 hover:underline"
+                >
+                  <Github className="size-3.5" />
+                  Sign in with GitHub
+                </a>
+                <span className="text-ink-3">— no token needed. Or</span>
+                <button
+                  type="button"
+                  onClick={() => setShowToken(true)}
+                  className="cursor-pointer font-medium text-ink-2 underline-offset-2 hover:text-ink hover:underline"
+                >
+                  add a token
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowToken(true)}
+                className="cursor-pointer font-semibold text-accent-press underline-offset-2 hover:underline"
+              >
+                Add a token
+              </button>
+            )}
+          </div>
+        ))}
 
       {loading && (
         <div
@@ -118,14 +146,7 @@ export function PrComposer({
         </div>
       )}
       {error && !loading && (
-        <div
-          id="pr-error"
-          role="alert"
-          className="flex items-start gap-2 border-b border-line bg-crit-tint px-3.5 py-2 text-[12.5px] text-crit"
-        >
-          <Alert className="mt-0.5 size-3.5 shrink-0" />
-          <span>{error}</span>
-        </div>
+        <ErrorState id="pr-error" message={error} onRetry={onRun} signedIn={signedIn} flush />
       )}
       {!loading && (
         <button

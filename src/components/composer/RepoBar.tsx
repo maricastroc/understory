@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import type { RepoMeta } from "@git-investigator/core/types";
-import { Alert, Branch, Check, Close, Lock, Repo } from "../icons";
+import { ErrorState } from "../ErrorState";
+import { Branch, Check, Close, Github, Lock, Repo } from "../icons";
+import { authEnabled } from "../investigator/use-auth";
 
 const kindLabel = { github: "GitHub", remote: "Cloned", local: "Local" } as const;
 
@@ -16,6 +18,7 @@ export function RepoBar({
   error,
   token,
   onTokenChange,
+  signedIn = false,
 }: {
   repoPath: string;
   onEdit: (v: string) => void;
@@ -26,6 +29,7 @@ export function RepoBar({
   error: string | null;
   token: string;
   onTokenChange: (v: string) => void;
+  signedIn?: boolean;
 }) {
   const [showToken, setShowToken] = useState(false);
   const looksPrivate = /404|not found|private/i.test(error ?? "");
@@ -72,42 +76,67 @@ export function RepoBar({
         </button>
       </div>
 
-      {!ready && (tokenOpen ? (
-        <div className="flex items-center gap-3 border-b border-line px-3.5 py-2 transition-colors focus-within:bg-inset/40">
-          <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
-            Token
-          </span>
-          <Lock className="size-3.5 shrink-0 text-ink-3" />
-          <input
-            type="password"
-            aria-label="GitHub personal access token"
-            value={token}
-            onChange={(e) => onTokenChange(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && onOpen()}
-            placeholder="ghp_… — for a private repo, kept in this tab only"
-            className="min-w-0 flex-1 bg-transparent font-mono text-[13px] text-ink placeholder:font-sans placeholder:text-ink-3"
-          />
-          {token.trim() !== "" && (
-            <button
-              type="button"
-              aria-label="Clear token"
-              onClick={() => onTokenChange("")}
-              className="grid size-6 shrink-0 cursor-pointer place-items-center rounded-md text-ink-3 transition-colors hover:bg-inset hover:text-ink-2"
-            >
-              <Close className="size-3.5" />
-            </button>
-          )}
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setShowToken(true)}
-          className="flex w-full cursor-pointer items-center gap-2 border-b border-line bg-accent-tint/30 px-3.5 py-2 text-[12px] font-semibold text-accent-press transition-colors hover:bg-accent-tint/60"
-        >
-          <Lock className="size-3.5" />
-          Private repo? Add a token
-        </button>
-      ))}
+      {!ready &&
+        !signedIn &&
+        (tokenOpen ? (
+          <div className="flex items-center gap-3 border-b border-line px-3.5 py-2 transition-colors focus-within:bg-inset/40">
+            <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
+              Token
+            </span>
+            <Lock className="size-3.5 shrink-0 text-ink-3" />
+            <input
+              type="password"
+              aria-label="GitHub personal access token"
+              value={token}
+              onChange={(e) => onTokenChange(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && onOpen()}
+              placeholder="ghp_… — for a private repo, kept in this tab only"
+              className="min-w-0 flex-1 bg-transparent font-mono text-[13px] text-ink placeholder:font-sans placeholder:text-ink-3"
+            />
+            {token.trim() !== "" && (
+              <button
+                type="button"
+                aria-label="Clear token"
+                onClick={() => onTokenChange("")}
+                className="grid size-6 shrink-0 cursor-pointer place-items-center rounded-md text-ink-3 transition-colors hover:bg-inset hover:text-ink-2"
+              >
+                <Close className="size-3.5" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line bg-accent-tint/30 px-3.5 py-2 text-[12px]">
+            <Lock className="size-3.5 shrink-0 text-accent-press" />
+            <span className="font-semibold text-accent-press">Private repo?</span>
+            {authEnabled ? (
+              <>
+                <a
+                  href="/api/auth/login"
+                  className="inline-flex items-center gap-1 font-semibold text-accent-press underline-offset-2 hover:underline"
+                >
+                  <Github className="size-3.5" />
+                  Sign in with GitHub
+                </a>
+                <span className="text-ink-3">— no token needed. Or</span>
+                <button
+                  type="button"
+                  onClick={() => setShowToken(true)}
+                  className="cursor-pointer font-medium text-ink-2 underline-offset-2 hover:text-ink hover:underline"
+                >
+                  add a token
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowToken(true)}
+                className="cursor-pointer font-semibold text-accent-press underline-offset-2 hover:underline"
+              >
+                Add a token
+              </button>
+            )}
+          </div>
+        ))}
 
       {connecting && (
         <div
@@ -137,14 +166,7 @@ export function RepoBar({
         </div>
       )}
       {error && (
-        <div
-          id="repo-error"
-          role="alert"
-          className="flex items-start gap-2 border-b border-line bg-crit-tint px-3.5 py-2 text-[12.5px] text-crit"
-        >
-          <Alert className="mt-0.5 size-3.5 shrink-0" />
-          <span>{error}</span>
-        </div>
+        <ErrorState id="repo-error" message={error} onRetry={onOpen} signedIn={signedIn} flush />
       )}
     </>
   );

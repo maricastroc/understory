@@ -18,6 +18,7 @@ export function Composer({
   token,
   setToken,
   onInvestigate,
+  signedIn = false,
 }: {
   repo: Repo;
   repoPath: string;
@@ -25,6 +26,7 @@ export function Composer({
   token: string;
   setToken: (s: string) => void;
   onInvestigate: (input: InvestigateInput) => void;
+  signedIn?: boolean;
 }) {
   const viewer = useFileViewer(repoPath);
   const search = useFileSearch(repoPath, repo.ready, viewer.file?.path, token.trim() || undefined);
@@ -98,6 +100,7 @@ export function Composer({
           error={repo.error}
           token={token}
           onTokenChange={setToken}
+          signedIn={signedIn}
         />
         <FileFinder
           query={search.query}

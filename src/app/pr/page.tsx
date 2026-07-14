@@ -131,6 +131,7 @@ export default function PrPage() {
               error={error}
               onRun={() => runPr()}
               onExample={tryExample}
+              signedIn={!!user}
             />
 
             {activeResult && !loading && (

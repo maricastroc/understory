@@ -6,6 +6,7 @@ import { Claims } from "../findings/Claims";
 import { EntailmentQuotes } from "../findings/EntailmentQuotes";
 import { SourcesUsed } from "../findings/SourcesUsed";
 import { UncitedClaimsAlert } from "../findings/UncitedClaimsAlert";
+import { CopyButton } from "../CopyButton";
 import { letter } from "../format";
 import { Clock } from "../icons";
 import { useLanguage } from "../use-language";
@@ -19,7 +20,10 @@ export function PrSummary({ result }: { result: DiffResult }) {
     if (!result.summary) return null;
     return (
       <section>
-        <SectionLabel title="Why the changed code exists" meta="narrative overview" />
+        <div className="flex items-start justify-between gap-3">
+          <SectionLabel title="Why the changed code exists" meta="narrative overview" />
+          <CopyButton text={result.summary} label="Copy the why" />
+        </div>
         <div className="flex items-start gap-3 rounded-[10px] border border-accent/25 bg-accent-tint/50 p-5 shadow-card">
           <Clock className="mt-0.5 size-5 shrink-0 text-accent-press" />
           <p lang={language} className="max-w-[72ch] text-[15px] leading-relaxed text-ink-body">
@@ -44,10 +48,13 @@ export function PrSummary({ result }: { result: DiffResult }) {
 
   return (
     <section>
-      <SectionLabel
-        title="Why the changed code exists"
-        meta="executive history — each sentence traced to a cited, verified source"
-      />
+      <div className="flex items-start justify-between gap-3">
+        <SectionLabel
+          title="Why the changed code exists"
+          meta="executive history — each sentence traced to a cited, verified source"
+        />
+        <CopyButton text={claims.map((c) => c.text).join(" ")} label="Copy the why" />
+      </div>
       <div className="rounded-[10px] border border-accent/25 bg-accent-tint/50 p-5 shadow-card">
         <div className="flex items-start gap-3">
           <Clock className="mt-0.5 size-5 shrink-0 text-accent-press" />

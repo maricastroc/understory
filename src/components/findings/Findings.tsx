@@ -3,6 +3,7 @@
 import { cosmeticOrigin } from "@git-investigator/core/cosmetic";
 import { traceProvenance } from "@git-investigator/core/provenance";
 import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
+import { CopyButton } from "../CopyButton";
 import { letter } from "../format";
 import { useLanguage } from "../use-language";
 import { SectionLabel } from "../ui";
@@ -53,10 +54,13 @@ export function Findings({
 
   return (
     <section className="mt-6">
-      <SectionLabel
-        title="Findings"
-        meta="Reconstructed conclusion — every claim linked to a primary source"
-      />
+      <div className="flex items-start justify-between gap-3">
+        <SectionLabel
+          title="Findings"
+          meta="Reconstructed conclusion — every claim linked to a primary source"
+        />
+        {narrative.answer && <CopyButton text={narrative.answer} label="Copy the why" />}
+      </div>
 
       <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-card">
         <VerdictStrip recorded={narrative.recorded} />

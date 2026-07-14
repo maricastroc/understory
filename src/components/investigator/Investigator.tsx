@@ -2,7 +2,8 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Alert, Search } from "../icons";
+import { Search } from "../icons";
+import { ErrorState } from "../ErrorState";
 import { RailContent, RightRail } from "../rail/RightRail";
 import { HistoryDrawer } from "../shell/HistoryDrawer";
 import { HistorySidebar } from "../shell/HistorySidebar";
@@ -152,12 +153,8 @@ export function Investigator() {
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto max-w-270 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             {error && browsing && (
-              <div
-                role="alert"
-                className="mb-4 flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-4 text-[13px] text-crit"
-              >
-                <Alert className="mt-0.5 size-4 shrink-0" />
-                <span>{error}</span>
+              <div className="mb-4">
+                <ErrorState message={error} signedIn={!!user} />
               </div>
             )}
 
@@ -170,6 +167,7 @@ export function Investigator() {
                 token={token}
                 setToken={setToken}
                 onInvestigate={(input) => investigate(input, token.trim() || undefined, language)}
+                signedIn={!!user}
               />
             </div>
 
