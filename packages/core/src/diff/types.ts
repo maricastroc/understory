@@ -60,7 +60,12 @@ export type RawDiffFinding = {
   recorded: boolean;
 };
 
-export type DiffNarrative = { summary: string; findings: RawDiffFinding[] };
+export type DiffNarrative = {
+  // The executive overview, decomposed into individually-cited historical claims (the same
+  // treatment the line answer gets). `summary` prose is derived from these.
+  summaryClaims: import("../types").Claim[];
+  findings: RawDiffFinding[];
+};
 
 export type VerifiedDiffFinding = {
   ref: string;
@@ -81,6 +86,8 @@ export type DiffResult = {
   pr: PullRef;
   triage: DiffTriage;
   summary: string;
+  summaryClaims: import("../types").VerifiedClaim[];
+  summaryEntailment?: import("../types").Entailment;
   findings: VerifiedDiffFinding[];
   note?: string;
   error?: string;

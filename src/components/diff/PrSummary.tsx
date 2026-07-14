@@ -1,0 +1,62 @@
+import type { DiffResult } from "@git-investigator/core/diff/types";
+import type { Artifact } from "@git-investigator/core/types";
+import { Claims } from "../findings/Claims";
+import { EntailmentQuotes } from "../findings/EntailmentQuotes";
+import { SourcesUsed } from "../findings/SourcesUsed";
+import { UncitedClaimsAlert } from "../findings/UncitedClaimsAlert";
+import { letter } from "../format";
+import { Clock } from "../icons";
+import { SectionLabel } from "../ui";
+
+// The PR's executive history, grounded like the line answer: each sentence is a cited claim,
+// audited in-source, with uncited interpolation flagged in place — no longer a free-prose
+// overview that only claims to be reconstructed from the evidence.
+export function PrSummary({ result }: { result: DiffResult }) {
+  const claims = result.summaryClaims ?? [];
+
+  // Fallback for PR results captured before the summary was decomposed into claims.
+  if (claims.length === 0) {
+    if (!result.summary) return null;
+    return (
+      <section>
+        <SectionLabel title="Why the changed code exists" meta="narrative overview" />
+        <div className="flex items-start gap-3 rounded-[10px] border border-accent/25 bg-accent-tint/50 p-5 shadow-card">
+          <Clock className="mt-0.5 size-5 shrink-0 text-accent-press" />
+          <p className="max-w-[72ch] text-[15px] leading-relaxed text-[#2a2d36]">
+            {result.summary}
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  const byId = new Map<string, Artifact>();
+  for (const f of result.findings) for (const a of f.artifacts) byId.set(a.id, a);
+
+  const resolved = Array.from(new Set(claims.flatMap((c) => c.citations))).filter((id) =>
+    byId.has(id),
+  );
+  const idToLetter = new Map(resolved.map((id, i) => [id, letter(i)]));
+
+  const checks = result.summaryEntailment?.checked ? result.summaryEntailment.checks : [];
+  const statusById = new Map(checks.map((c) => [c.citation, c.status]));
+  const ungrounded = claims.filter((c) => !c.grounded).length;
+
+  return (
+    <section>
+      <SectionLabel
+        title="Why the changed code exists"
+        meta="executive history — each sentence traced to a cited, verified source"
+      />
+      <div className="rounded-[10px] border border-accent/25 bg-accent-tint/50 p-5 shadow-card">
+        <div className="flex items-start gap-3">
+          <Clock className="mt-0.5 size-5 shrink-0 text-accent-press" />
+          <Claims claims={claims} idToLetter={idToLetter} />
+        </div>
+        <UncitedClaimsAlert count={ungrounded} />
+        <SourcesUsed resolved={resolved} byId={byId} statusById={statusById} />
+        <EntailmentQuotes checks={checks} byId={byId} idToLetter={idToLetter} />
+      </div>
+    </section>
+  );
+}

@@ -24,14 +24,18 @@ export async function investigateDiff(
     const narrative = await synthesizeDiff(collection, model, config.language);
     const doEntail = config.entail ?? process.env.ENTAILMENT !== "0";
     let entailByRef: Map<string, Entailment> | undefined;
+    let summaryEntailment: Entailment | undefined;
     if (doEntail) {
       try {
-        entailByRef = await checkDiffEntailment(collection.clusters, narrative, model);
+        const e = await checkDiffEntailment(collection.clusters, narrative, model);
+        entailByRef = e.byRef;
+        summaryEntailment = e.summary;
       } catch {
         entailByRef = undefined;
+        summaryEntailment = undefined;
       }
     }
-    return verifyDiff(collection, narrative, entailByRef);
+    return verifyDiff(collection, narrative, entailByRef, summaryEntailment);
   } catch (e) {
     return collectionToResult(collection, synthesisError(e));
   }

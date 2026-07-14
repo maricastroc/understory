@@ -39,6 +39,7 @@ const result = (findings: VerifiedDiffFinding[]): DiffResult => ({
     truncated: false,
   },
   summary: "s",
+  summaryClaims: [],
   findings,
 });
 

@@ -4,6 +4,7 @@ import type { Model } from "./llm";
 import type {
   Artifact,
   CitationCheck,
+  Claim,
   Entailment,
   EntailmentStatus,
   Evidence,
@@ -226,15 +227,14 @@ type ClaimTask = { index: number; text: string; sources: Artifact[] };
 // establish the link. One CitationCheck is emitted per source (the UI is source-keyed); the
 // sources of a claim share its verdict and index, and the verbatim quote sits on the source
 // it came from. verify groups by that index, so a single multi-source claim counts once.
-export async function checkEntailment(
-  ev: Evidence,
-  n: Narrative,
+// Shared by the line answer and the PR summary — both reduce to "claims + their sources".
+export async function entailClaims(
+  question: string,
+  claims: Claim[],
+  byId: Map<string, Artifact>,
   model: Model,
 ): Promise<Entailment> {
-  if (!n.answerable || !n.recorded) return EMPTY;
-
-  const byId = new Map(ev.artifacts.map((a) => [a.id, a]));
-  const tasks: ClaimTask[] = n.claims
+  const tasks: ClaimTask[] = claims
     .map((c, index) => ({
       index,
       text: c.text,
@@ -248,7 +248,7 @@ export async function checkEntailment(
 
   const settled = await Promise.allSettled(
     tasks.map((t) =>
-      judgeClaim(ev.question, t.text, t.sources, model).then((raw) => ({
+      judgeClaim(question, t.text, t.sources, model).then((raw) => ({
         t,
         verdict: finalizeClaim(t.sources, raw),
       })),
@@ -276,4 +276,13 @@ export async function checkEntailment(
   if (checks.length === 0) return EMPTY;
 
   return { checked: true, checks, supported, misattributed };
+}
+
+export async function checkEntailment(
+  ev: Evidence,
+  n: Narrative,
+  model: Model,
+): Promise<Entailment> {
+  if (!n.answerable || !n.recorded) return EMPTY;
+  return entailClaims(ev.question, n.claims, new Map(ev.artifacts.map((a) => [a.id, a])), model);
 }

@@ -22,11 +22,22 @@ const findingSchema = z.object({
     ),
 });
 
-const schema = z.object({
-  summary: z
+const summaryClaimSchema = z.object({
+  text: z
     .string()
+    .describe("One sentence of executive history about the code this PR changes."),
+  citations: z
+    .array(z.string())
     .describe(
-      "2–4 sentences of executive history: why the code this PR changes was introduced, then — only as a consequence — which regions carry the heaviest or most-contested past. Grounded in the evidence; never a description of the diff or generic review advice.",
+      "Exact artifact id(s) from ANY region that back THIS sentence, copied verbatim (e.g. commit:abc123, pr:42). Every historical sentence must cite at least one.",
+    ),
+});
+
+const schema = z.object({
+  summaryClaims: z
+    .array(summaryClaimSchema)
+    .describe(
+      "2–4 executive-history sentences, EACH a separately-cited claim: why the code this PR changes was introduced, then — only as a consequence — which region(s) carry the heaviest or most-contested past. Grounded in the evidence; never a description of the diff or generic review advice.",
     ),
   findings: z.array(findingSchema),
 });
@@ -45,21 +56,23 @@ const SYSTEM = [
   "  recorded=false and say the history doesn't explain it. Never invent a reason to fill the gap.",
   "- Be concise: one or two sentences. No filler, no hedging.",
   "",
-  "Then write `summary`: 2–4 sentences of executive context for whoever reads this PR next.",
-  "LEAD with why the code this PR changes was introduced — the mechanisms it touches and the",
-  "reasons, decisions or incidents that shaped them, drawn only from the evidence. THEN, and only",
-  "as a consequence of that history, note which region(s) carry the weightiest or most-contested",
-  "past (code that was reverted, that fixed an incident, or that was argued over in review) and so",
-  "deserve the closest read. Do NOT describe what the diff does, do NOT restate the PR description,",
-  "and do NOT give generic review advice like 'verify that…' or 'this may impact…'. If the recorded",
-  "history is thin, say that plainly instead of inventing significance.",
+  "Then write `summaryClaims`: 2–4 sentences of executive context for whoever reads this PR next,",
+  "EACH a separate claim with its own `citations` (the same rule as the findings). LEAD with why",
+  "the code this PR changes was introduced — the mechanisms it touches and the reasons, decisions",
+  "or incidents that shaped them, drawn only from the evidence. THEN, and only as a consequence of",
+  "that history, note which region(s) carry the weightiest or most-contested past (code that was",
+  "reverted, that fixed an incident, or that was argued over in review) and so deserve the closest",
+  "read. Every sentence MUST cite at least one artifact id it draws on; if you cannot back a",
+  "sentence with a collected source, do not write it. Do NOT describe what the diff does, do NOT",
+  "restate the PR description, and do NOT give generic review advice like 'verify that…'. If the",
+  "recorded history is thin, say that plainly instead of inventing significance.",
   "Only cite ids that literally appear in the evidence; never fabricate one.",
 ].join("\n");
 
 function languageRule(language: Language): string {
   return language === "pt"
-    ? "Write `summary` and every `why` in Brazilian Portuguese (pt-BR)."
-    : "Write `summary` and every `why` in English.";
+    ? "Write every `summaryClaims` text and every `why` in Brazilian Portuguese (pt-BR)."
+    : "Write every `summaryClaims` text and every `why` in English.";
 }
 
 const EVIDENCE_BUDGET = 12_000;

@@ -99,6 +99,7 @@ export function verifyDiff(
   col: DiffCollection,
   narrative: DiffNarrative,
   entailByRef?: Map<string, Entailment>,
+  summaryEntailment?: Entailment,
 ): DiffResult {
   const realIds = new Set(col.clusters.flatMap((c) => c.artifacts.map((a) => a.id)));
   const byRef = new Map(narrative.findings.map((f) => [f.cluster.trim().toUpperCase(), f]));
@@ -111,13 +112,24 @@ export function verifyDiff(
       : silentFinding(ref, cluster);
   });
 
+  // Ground the summary's claims exactly like the line answer's: a claim with no resolving
+  // citation is uncited interpolation. `summary` prose is their join — one source of truth,
+  // so what the reader sees matches what was grounded and audited.
+  const summaryClaims = narrative.summaryClaims.map((c) => ({
+    ...c,
+    grounded: c.citations.some((id) => realIds.has(id)),
+  }));
+  const summary = summaryClaims.map((c) => c.text).join(" ");
+
   return {
     repo: col.repo,
     pr: col.pr,
     triage: col.triage,
-    summary: narrative.summary,
+    summary,
+    summaryClaims,
     findings,
     note: col.note,
+    ...(summaryEntailment?.checked ? { summaryEntailment } : {}),
   };
 }
 
@@ -127,6 +139,7 @@ export function collectionToResult(col: DiffCollection, error?: string): DiffRes
     pr: col.pr,
     triage: col.triage,
     summary: "",
+    summaryClaims: [],
     findings: col.clusters.map((cluster, i) => silentFinding(clusterRef(i), cluster)),
     note: col.note,
     error,

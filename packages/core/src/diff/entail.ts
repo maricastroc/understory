@@ -1,4 +1,4 @@
-import { judgeCitation } from "../entail";
+import { entailClaims, judgeCitation } from "../entail";
 import type { Model } from "../llm";
 import type { Artifact, CitationCheck, Entailment } from "../types";
 import { clusterRef } from "./synthesize";
@@ -21,13 +21,13 @@ export async function checkDiffEntailment(
   clusters: DiffCluster[],
   narrative: DiffNarrative,
   model: Model,
-): Promise<Map<string, Entailment>> {
-  const byRef = new Map(narrative.findings.map((f) => [f.cluster.trim().toUpperCase(), f]));
+): Promise<{ byRef: Map<string, Entailment>; summary: Entailment }> {
+  const byRefFinding = new Map(narrative.findings.map((f) => [f.cluster.trim().toUpperCase(), f]));
 
   const tasks: Task[] = [];
   clusters.forEach((cluster, i) => {
     const ref = clusterRef(i);
-    const raw = byRef.get(ref);
+    const raw = byRefFinding.get(ref);
     if (!raw || !raw.recorded) return; // gate off abstentions, exactly like checkEntailment
     const byId = new Map(cluster.artifacts.map((a) => [a.id, a]));
     for (const id of new Set(raw.citations)) {
@@ -35,12 +35,15 @@ export async function checkDiffEntailment(
       if (artifact) tasks.push({ ref, why: raw.why, artifact });
     }
   });
-  if (tasks.length === 0) return new Map();
-
   const chosen = tasks.slice(0, MAX_DIFF_CHECKS);
-  const settled = await Promise.allSettled(
-    chosen.map((t) => judgeCitation(DIFF_QUESTION, t.why, t.artifact, model)),
-  );
+
+  // The summary is cross-region, so it's judged per-claim against every artifact the PR
+  // gathered — in parallel with the per-region finding checks.
+  const allById = new Map(clusters.flatMap((c) => c.artifacts).map((a) => [a.id, a]));
+  const [settled, summary] = await Promise.all([
+    Promise.allSettled(chosen.map((t) => judgeCitation(DIFF_QUESTION, t.why, t.artifact, model))),
+    entailClaims(DIFF_QUESTION, narrative.summaryClaims, allById, model),
+  ]);
 
   const checksByRef = new Map<string, CitationCheck[]>();
   settled.forEach((s, idx) => {
@@ -51,14 +54,14 @@ export async function checkDiffEntailment(
     checksByRef.set(ref, list);
   });
 
-  const out = new Map<string, Entailment>();
+  const byRef = new Map<string, Entailment>();
   for (const [ref, checks] of checksByRef) {
-    out.set(ref, {
+    byRef.set(ref, {
       checked: true,
       checks,
       supported: checks.filter((c) => c.status === "supported").length,
       misattributed: checks.filter((c) => c.status === "unsupported").length,
     });
   }
-  return out;
+  return { byRef, summary };
 }

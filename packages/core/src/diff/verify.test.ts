@@ -42,7 +42,7 @@ function collection(clusters: DiffCluster[]): DiffCollection {
 }
 
 const narr = (findings: DiffNarrative["findings"], summary = "s"): DiffNarrative => ({
-  summary,
+  summaryClaims: summary ? [{ text: summary, citations: [] }] : [],
   findings,
 });
 
@@ -199,6 +199,46 @@ describe("verifyDiff — entailment (parity with the line flow)", () => {
     expect(res.findings[0].confidence.level).toBe("medium");
     expect(res.findings[0].entailment?.supported).toBe(0);
     expect(res.findings[0].entailment?.misattributed).toBe(0);
+  });
+});
+
+describe("verifyDiff — summary grounding (F1 parity)", () => {
+  it("grounds each summary claim and derives the summary prose from them", () => {
+    const col = collection([cluster({ artifacts: [art("commit:c1")] })]);
+    const res = verifyDiff(col, {
+      summaryClaims: [
+        { text: "The retry cap was added after an outage.", citations: ["commit:c1"] },
+        { text: "An aside with no source.", citations: [] },
+      ],
+      findings: [],
+    });
+    expect(res.summary).toBe("The retry cap was added after an outage. An aside with no source.");
+    expect(res.summaryClaims.map((c) => c.grounded)).toEqual([true, false]);
+  });
+
+  it("flags a summary claim that cites nothing real as ungrounded", () => {
+    const col = collection([cluster({ artifacts: [art("commit:c1")] })]);
+    const res = verifyDiff(col, {
+      summaryClaims: [{ text: "invented", citations: ["commit:ghost"] }],
+      findings: [],
+    });
+    expect(res.summaryClaims[0].grounded).toBe(false);
+  });
+
+  it("attaches the summary entailment when the judge ran", () => {
+    const col = collection([cluster({ artifacts: [art("commit:c1")] })]);
+    const res = verifyDiff(
+      col,
+      { summaryClaims: [{ text: "x", citations: ["commit:c1"] }], findings: [] },
+      undefined,
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 0,
+        checks: [{ citation: "commit:c1", claim: 0, status: "supported", quote: "q", reason: "" }],
+      },
+    );
+    expect(res.summaryEntailment?.supported).toBe(1);
   });
 });
 
