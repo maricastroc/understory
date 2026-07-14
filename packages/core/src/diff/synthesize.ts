@@ -17,23 +17,26 @@ const findingSchema = z.object({
     ),
   recorded: z
     .boolean()
-    .describe("true if the evidence genuinely explains it; false = honest abstention (history is silent)."),
+    .describe(
+      "true if the evidence genuinely explains it; false = honest abstention (history is silent).",
+    ),
 });
 
 const schema = z.object({
   summary: z
     .string()
     .describe(
-      "1–3 sentences: what the reviewer most needs to know before approving, leading with anything risky or contested. If nothing stands out, say so plainly.",
+      "2–4 sentences of executive history: why the code this PR changes was introduced, then — only as a consequence — which regions carry the heaviest or most-contested past. Grounded in the evidence; never a description of the diff or generic review advice.",
     ),
   findings: z.array(findingSchema),
 });
 
 const SYSTEM = [
-  "You are a code-review assistant. A reviewer is looking at a pull request; your job is to",
-  "reconstruct why the EXISTING code being changed exists, so they know what they are touching.",
-  "You are given the changed regions (C1, C2, …), each with the commits, pull requests, reviews",
-  "and issues behind the code being changed.",
+  "You are a software archaeologist. A pull request is changing existing code; your job is to",
+  "reconstruct WHY that existing code was there in the first place — the reasons, decisions and",
+  "incidents behind it — from the recorded history ALONE. This is the same question the line-level",
+  "investigator answers, asked of every region a PR touches. You are given the changed regions",
+  "(C1, C2, …), each with the commits, pull requests, reviews and issues behind the code.",
   "",
   "For EACH region, using ONLY that region's evidence:",
   "- Explain why that existing code exists or what it was for. Put the exact ids you used in",
@@ -42,9 +45,14 @@ const SYSTEM = [
   "  recorded=false and say the history doesn't explain it. Never invent a reason to fill the gap.",
   "- Be concise: one or two sentences. No filler, no hedging.",
   "",
-  "Then write `summary`: the 1–3 things the reviewer most needs to know before approving. Lead with",
-  "anything risky or contested — a change to code that was reverted, that fixed an incident, or that",
-  "was argued over in review. If nothing stands out, say so plainly.",
+  "Then write `summary`: 2–4 sentences of executive context for whoever reads this PR next.",
+  "LEAD with why the code this PR changes was introduced — the mechanisms it touches and the",
+  "reasons, decisions or incidents that shaped them, drawn only from the evidence. THEN, and only",
+  "as a consequence of that history, note which region(s) carry the weightiest or most-contested",
+  "past (code that was reverted, that fixed an incident, or that was argued over in review) and so",
+  "deserve the closest read. Do NOT describe what the diff does, do NOT restate the PR description,",
+  "and do NOT give generic review advice like 'verify that…' or 'this may impact…'. If the recorded",
+  "history is thin, say that plainly instead of inventing significance.",
   "Only cite ids that literally appear in the evidence; never fabricate one.",
 ].join("\n");
 
@@ -67,7 +75,9 @@ function clamp(body: string, cap: number): string {
 
 export function formatTargets(targets: BlameTarget[]): string {
   return targets
-    .map((t) => `${t.path}:${t.range.start}${t.range.end !== t.range.start ? `-${t.range.end}` : ""}`)
+    .map(
+      (t) => `${t.path}:${t.range.start}${t.range.end !== t.range.start ? `-${t.range.end}` : ""}`,
+    )
     .join(", ");
 }
 
@@ -83,8 +93,13 @@ export function buildDiffSynthesisInput(
   language: Language = "auto",
 ): { system: string; prompt: string } {
   const totalArtifacts = col.clusters.reduce((n, c) => n + c.artifacts.length, 0);
-  const perItem = Math.min(MAX_BODY, Math.max(MIN_BODY, Math.floor(EVIDENCE_BUDGET / Math.max(1, totalArtifacts))));
-  const regions = col.clusters.map((c, i) => renderCluster(c, clusterRef(i), perItem)).join("\n\n---\n\n");
+  const perItem = Math.min(
+    MAX_BODY,
+    Math.max(MIN_BODY, Math.floor(EVIDENCE_BUDGET / Math.max(1, totalArtifacts))),
+  );
+  const regions = col.clusters
+    .map((c, i) => renderCluster(c, clusterRef(i), perItem))
+    .join("\n\n---\n\n");
   const prompt = [
     `Pull request #${col.pr.number}: ${col.pr.title}`,
     `Repository: ${col.repo.name ?? col.repo.path}`,

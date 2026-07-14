@@ -12,9 +12,6 @@ import { detectRemoteUrl } from "./web-link";
 
 let lastRun: (() => Promise<void>) | undefined;
 
-// The repo spec + backend of the last API-backed investigation, so a drill from
-// the webview can re-anchor against the same source. Cleared for local runs
-// (local git has only commits — nothing rich to drill into).
 let drillContext: { repoPath: string; baseUrl: string } | undefined;
 
 function withProgress(
@@ -44,8 +41,6 @@ export async function investigate(target: InvestigationTarget): Promise<void> {
   });
 }
 
-// Full provenance (commits + PRs + reviews + issues) rendered in the editor panel.
-// Collected from the repo's GitHub/GitLab remote via the backend API.
 export async function investigateRemote(target: InvestigationTarget): Promise<void> {
   lastRun = () => investigateRemote(target);
   panel.showLoading(target.location);
@@ -110,13 +105,11 @@ async function runBackend(
     controller.signal,
     githubToken,
   );
-  // API-backed results carry full provenance (PRs/reviews/issues) worth drilling into.
+  //
   drillContext = { repoPath, baseUrl };
   panel.showResult(result, target.location, { canDrill: true });
 }
 
-// Click a cited artifact in the webview → open a fresh investigation anchored on it,
-// against the same remote repo, via the same API. Ignored when there's no API context.
 export async function drill(ref: ArtifactRef): Promise<void> {
   const ctx = drillContext;
   if (!ctx) return;

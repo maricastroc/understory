@@ -2,13 +2,10 @@ import { detectContradictions } from "../collect/contradictions";
 import {
   type BlameCommit,
   blameLines,
-  commitArtifact,
+  expandCommit,
   getPullRequest,
   getPullRequestDiff,
   getRepoMeta,
-  issueArtifact,
-  prArtifact,
-  reviewArtifact,
 } from "../collect/github";
 import type { Artifact, RepoRef } from "../types";
 import { parseUnifiedDiff } from "./parse";
@@ -35,18 +32,15 @@ export function buildClusters(
           artifacts.push(a);
         }
       };
-      const commit = commitArtifact(bc);
-      add(commit);
-      for (const pr of bc.associatedPullRequests.nodes) {
-        const prCard = prArtifact(pr, commit.id);
-        add(prCard);
-        for (const iss of pr.closingIssuesReferences.nodes) add(issueArtifact(iss, prCard.id));
-        pr.reviews.nodes.forEach((rv, i) => {
-          if (rv.body.trim()) add(reviewArtifact(pr.number, pr.url, rv, i, prCard.id));
-        });
-      }
+      for (const a of expandCommit(bc)) add(a);
     }
-    return { commitId, targets, artifacts, contradictions: detectContradictions(artifacts), rank: 0 };
+    return {
+      commitId,
+      targets,
+      artifacts,
+      contradictions: detectContradictions(artifacts),
+      rank: 0,
+    };
   });
 }
 
@@ -65,9 +59,12 @@ export function rankAndBudget(
   clusters: DiffCluster[],
   max = MAX_DETAILED,
 ): { kept: DiffCluster[]; droppedCount: number } {
+  // commitId is the tie-break so the budget cut is deterministic: without it, two
+  // equally-ranked clusters straddling the `max` boundary would be kept or dropped
+  // based on their arrival order, which depends on concurrent blame timing.
   const ranked = clusters
     .map((c) => ({ ...c, rank: scoreCluster(c) }))
-    .sort((a, b) => b.rank - a.rank);
+    .sort((a, b) => b.rank - a.rank || a.commitId.localeCompare(b.commitId));
   const kept = ranked.slice(0, max);
   return { kept, droppedCount: ranked.length - kept.length };
 }
@@ -131,6 +128,17 @@ export async function collectDiff(
       blamed.push({ target: t, commitId: id });
     }
   });
+
+  // Blame calls resolve concurrently, so `blamed` arrives in a nondeterministic order.
+  // Sort before clustering so cluster formation order, per-cluster target order, and the
+  // rank tie-break downstream are all reproducible for the same pull request.
+  blamed.sort(
+    (a, b) =>
+      a.target.path.localeCompare(b.target.path) ||
+      a.target.range.start - b.target.range.start ||
+      a.target.range.end - b.target.range.end ||
+      a.commitId.localeCompare(b.commitId),
+  );
 
   const all = buildClusters(blamed, byId);
   const { kept, droppedCount } = rankAndBudget(all);

@@ -29,12 +29,30 @@ const richPr = {
   createdAt: "2024-01-01T00:00:00Z",
   reviews: {
     nodes: [
-      { author: { login: "bob" }, state: "CHANGES_REQUESTED", body: "why exactly 3?", submittedAt: "2024-01-02T00:00:00Z" },
-      { author: { login: "eve" }, state: "COMMENTED", body: "", submittedAt: "2024-01-02T00:00:00Z" },
+      {
+        author: { login: "bob" },
+        state: "CHANGES_REQUESTED",
+        body: "why exactly 3?",
+        submittedAt: "2024-01-02T00:00:00Z",
+      },
+      {
+        author: { login: "eve" },
+        state: "COMMENTED",
+        body: "",
+        submittedAt: "2024-01-02T00:00:00Z",
+      },
     ],
   },
   closingIssuesReferences: {
-    nodes: [{ number: 7, title: "retry storm", body: "double billing", url: "https://gh/x/issues/7", createdAt: "2024-01-01T00:00:00Z" }],
+    nodes: [
+      {
+        number: 7,
+        title: "retry storm",
+        body: "double billing",
+        url: "https://gh/x/issues/7",
+        createdAt: "2024-01-01T00:00:00Z",
+      },
+    ],
   },
 };
 
@@ -53,7 +71,9 @@ describe("buildClusters", () => {
 
   it("enriches with the PR, its issues and its non-empty reviews", () => {
     const commit = bc({ associatedPullRequests: { nodes: [richPr] } });
-    const blamed: BlamedTarget[] = [{ target: target("a.ts", range(6, 6)), commitId: "commit:abc123" }];
+    const blamed: BlamedTarget[] = [
+      { target: target("a.ts", range(6, 6)), commitId: "commit:abc123" },
+    ];
     const clusters = buildClusters(blamed, new Map([["commit:abc123", commit]]));
     expect(clusters[0].artifacts.map((a) => a.id)).toEqual([
       "commit:abc123",
@@ -64,7 +84,9 @@ describe("buildClusters", () => {
   });
 
   it("tolerates a blamed commit that is missing from the map", () => {
-    const blamed: BlamedTarget[] = [{ target: target("a.ts", range(1, 1)), commitId: "commit:ghost" }];
+    const blamed: BlamedTarget[] = [
+      { target: target("a.ts", range(1, 1)), commitId: "commit:ghost" },
+    ];
     const clusters = buildClusters(blamed, new Map());
     expect(clusters[0].artifacts).toEqual([]);
   });
@@ -92,7 +114,9 @@ describe("rankAndBudget", () => {
     const bare = cl({ commitId: "bare" });
     const reviewed = cl({
       commitId: "reviewed",
-      artifacts: [{ id: "review:1-0", kind: "review", title: "r", body: "b", url: "", date: "2024-01-01" }],
+      artifacts: [
+        { id: "review:1-0", kind: "review", title: "r", body: "b", url: "", date: "2024-01-01" },
+      ],
     });
     const { kept } = rankAndBudget([bare, reviewed]);
     expect(kept[0].commitId).toBe("reviewed");
@@ -103,5 +127,21 @@ describe("rankAndBudget", () => {
     const { kept, droppedCount } = rankAndBudget(many, 2);
     expect(kept).toHaveLength(2);
     expect(droppedCount).toBe(3);
+  });
+
+  it("breaks rank ties by commitId, so the budget cut is deterministic", () => {
+    // Every cluster has identical rank — only the tie-break decides who survives.
+    const ids = ["c", "a", "e", "b", "d"];
+    const forward = rankAndBudget(
+      ids.map((id) => cl({ commitId: id })),
+      2,
+    );
+    const reversed = rankAndBudget(
+      [...ids].reverse().map((id) => cl({ commitId: id })),
+      2,
+    );
+    expect(forward.kept.map((k) => k.commitId)).toEqual(["a", "b"]);
+    // Same kept set regardless of the order the clusters arrived in.
+    expect(reversed.kept.map((k) => k.commitId)).toEqual(forward.kept.map((k) => k.commitId));
   });
 });

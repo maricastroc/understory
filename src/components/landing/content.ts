@@ -56,15 +56,15 @@ export const sampleConfidence: Confidence = {
 };
 
 export const reviewCopilot = {
-  tag: "// review copilot",
-  title: "Reviewing a pull request? See the why behind every change.",
-  body: "Paste a GitHub PR and read the grounded reasoning behind the code it touches — riskiest changes first, each claim linked to the commits, pull requests, and reviews that justify it. The context a diff never shows you.",
+  tag: "// code archaeology · at PR scale",
+  title: "See why the code a pull request changes was written in the first place.",
+  body: "It's Explain a line at pull-request scale: paste a GitHub PR and read the grounded reasoning behind the code it changes — each claim linked to the commits, pull requests, reviews and issues that explain it. The context a diff never shows you.",
   cta: "Explain a PR",
   example: "chalk/chalk#664",
   finding: {
-    risk: "High risk",
+    confidence: "Grounded · 92%",
     target: "src/index.js:42",
-    why: "This retry cap was set to 3 after issue #1187 — an unbounded loop double-charged customers during an outage. Loosening it here reopens that incident.",
+    why: "This retry cap was set to 3 after issue #1187, when an unbounded loop double-charged customers during an outage — the limit was argued down to 3 in review.",
     grounded: [
       { kind: "pr", id: "pr:812" },
       { kind: "issue", id: "issue:1187" },

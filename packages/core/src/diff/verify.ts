@@ -1,3 +1,4 @@
+import type { Entailment } from "../types";
 import { scoreConfidence } from "../verify";
 import { clusterRef } from "./synthesize";
 import type {
@@ -38,6 +39,7 @@ function verifyFinding(
   cluster: DiffCluster,
   raw: RawDiffFinding,
   realIds: Set<string>,
+  entailment?: Entailment,
 ): VerifiedDiffFinding {
   const cited = unique(raw.citations);
   const citations = cited.filter((id) => realIds.has(id));
@@ -46,6 +48,14 @@ function verifyFinding(
 
   const citedSet = new Set(citations);
   const contradicting = cluster.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
+
+  // Same rule as the line flow's verify: only a "unsupported" verdict (a real
+  // misattribution) demotes a citation; "supported"/"weak"/unchecked stay primary,
+  // so confidence is identical when no entailment pass ran.
+  const status = new Map(
+    (entailment?.checked ? entailment.checks : []).map((c) => [c.citation, c.status]),
+  );
+  const effectivePrimary = citations.filter((id) => status.get(id) !== "unsupported").length;
 
   return {
     ref,
@@ -59,23 +69,30 @@ function verifyFinding(
       recorded: raw.recorded,
       grounded,
       primarySources: citations.length,
-      effectivePrimary: citations.length,
+      effectivePrimary,
       totalCollected: cluster.artifacts.length,
       contradicting,
     }),
     artifacts: cluster.artifacts,
     contradictions: cluster.contradictions,
+    ...(entailment?.checked ? { entailment } : {}),
   };
 }
 
-export function verifyDiff(col: DiffCollection, narrative: DiffNarrative): DiffResult {
+export function verifyDiff(
+  col: DiffCollection,
+  narrative: DiffNarrative,
+  entailByRef?: Map<string, Entailment>,
+): DiffResult {
   const realIds = new Set(col.clusters.flatMap((c) => c.artifacts.map((a) => a.id)));
   const byRef = new Map(narrative.findings.map((f) => [f.cluster.trim().toUpperCase(), f]));
 
   const findings = col.clusters.map((cluster, i) => {
     const ref = clusterRef(i);
     const raw = byRef.get(ref);
-    return raw ? verifyFinding(ref, cluster, raw, realIds) : silentFinding(ref, cluster);
+    return raw
+      ? verifyFinding(ref, cluster, raw, realIds, entailByRef?.get(ref))
+      : silentFinding(ref, cluster);
   });
 
   return {

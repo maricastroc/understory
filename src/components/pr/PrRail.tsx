@@ -1,9 +1,14 @@
 import type { DiffResult } from "@git-investigator/core/diff/types";
-import { ExternalLink, PullRequest } from "../icons";
+import { prMetrics } from "../diff/pr-metrics";
+import { ExternalLink, PullRequest, Search } from "../icons";
 import { MetaRow, RailCard } from "../rail/RailCard";
 
+function Count({ n }: { n: number }) {
+  return <span className={`tnum ${n === 0 ? "text-ink-3" : ""}`}>{n}</span>;
+}
+
 function PrRailContent({ result }: { result: DiffResult }) {
-  const t = result.triage;
+  const m = prMetrics(result);
 
   return (
     <>
@@ -15,11 +20,8 @@ function PrRailContent({ result }: { result: DiffResult }) {
         <p className="mt-2 line-clamp-3 text-[12.5px] leading-relaxed text-ink-2">
           {result.pr.title}
         </p>
-        <div className="mt-3">
-          <MetaRow k="Files changed" v={<span className="tnum">{t.filesChanged}</span>} />
-          <MetaRow k="With history" v={<span className="tnum">{t.filesConsidered}</span>} />
-          <MetaRow k="Regions explained" v={<span className="tnum">{t.clustersDetailed}</span>} />
-          {result.pr.url && (
+        {result.pr.url && (
+          <div className="mt-3">
             <MetaRow
               k="Source"
               v={
@@ -29,17 +31,35 @@ function PrRailContent({ result }: { result: DiffResult }) {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-accent-press hover:underline"
                 >
-                  open <ExternalLink className="size-3" />
+                  open on GitHub <ExternalLink className="size-3" />
                 </a>
               }
             />
-          )}
-        </div>
+          </div>
+        )}
+      </RailCard>
+
+      <RailCard icon={<Search className="size-3.75" />} title="Investigation">
+        <MetaRow k="Files changed" v={<Count n={m.filesChanged} />} />
+        <MetaRow k="Files with history" v={<Count n={m.filesWithHistory} />} />
+        <MetaRow
+          k="Regions explained"
+          v={
+            <span className="tnum">
+              {m.regionsExplained}
+              <span className="text-ink-3"> / {result.triage.clustersDetailed}</span>
+            </span>
+          }
+        />
+        <MetaRow k="Origin commits" v={<Count n={m.originCommits} />} />
+        <MetaRow k="Pull requests" v={<Count n={m.pullRequests} />} />
+        <MetaRow k="Reviews" v={<Count n={m.reviews} />} />
+        <MetaRow k="Issues" v={<Count n={m.issues} />} />
       </RailCard>
 
       <div className="rounded-[10px] border border-dashed border-line-2 bg-surface px-4 py-3 text-[12px] leading-relaxed text-ink-3">
-        Every region below links to the commit, PR, or review that justifies the existing code —
-        riskiest changes first.
+        Every region links back to the commit, PR, review, or issue that explains why the existing
+        code was there.
       </div>
     </>
   );
@@ -48,8 +68,8 @@ function PrRailContent({ result }: { result: DiffResult }) {
 function Placeholder() {
   return (
     <div className="rounded-[10px] border border-dashed border-line-2 bg-surface p-5 text-[12.5px] leading-relaxed text-ink-3">
-      Paste a pull request above — the risk summary, changed regions, and their provenance appear
-      here once it runs.
+      Paste a pull request above — the reconstructed history behind the code it changes, region by
+      region, appears here once it runs.
     </div>
   );
 }

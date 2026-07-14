@@ -4,17 +4,14 @@ import { detectContradictions } from "./contradictions";
 import { commitToArtifact, isGitRepo, lineHistory, resolveRepo } from "./git";
 import {
   blameLines,
-  commitArtifact,
   commitContextArtifacts,
+  expandCommit,
   fileHistoryGitHub,
   getFileSizeGitHub,
   getRepoMeta,
-  issueArtifact,
   issueContextArtifacts,
   parseGitHubRepo,
-  prArtifact,
   prContextArtifacts,
-  reviewArtifact,
 } from "./github";
 import {
   type GitLabCommit,
@@ -130,16 +127,7 @@ async function collectFromGitHub(
   };
 
   for (const c of commits) {
-    const commit = commitArtifact(c);
-    add(commit);
-    for (const pr of c.associatedPullRequests.nodes) {
-      const prCard = prArtifact(pr, commit.id);
-      add(prCard);
-      for (const iss of pr.closingIssuesReferences.nodes) add(issueArtifact(iss, prCard.id));
-      pr.reviews.nodes.forEach((rv, i) => {
-        if (rv.body.trim()) add(reviewArtifact(pr.number, pr.url, rv, i, prCard.id));
-      });
-    }
+    for (const a of expandCommit(c)) add(a);
   }
 
   artifacts.sort((a, b) => a.date.localeCompare(b.date));

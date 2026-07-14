@@ -20,7 +20,9 @@ const checkSchema = z.object({
     .describe(
       "For 'supported': a snippet copied VERBATIM from the source text that proves the fact (character for character, never paraphrased). Empty string otherwise.",
     ),
-  reason: z.string().describe("One short line: why the source does or does not substantiate the claim."),
+  reason: z
+    .string()
+    .describe("One short line: why the source does or does not substantiate the claim."),
 });
 
 const SYSTEM = [
@@ -78,13 +80,21 @@ export function finalizeCheck(
   return { citation, status: raw.status, quote: verified, reason: raw.reason };
 }
 
-async function judge(ev: Evidence, n: Narrative, a: Artifact, model: Model): Promise<CitationCheck> {
+// Audit one cited source against the claim it supposedly backs. Shared by the
+// line-history judge (checkEntailment) and the PR-diff judge (checkDiffEntailment)
+// so both are boxed by the same verbatim-quote gate in finalizeCheck.
+export async function judgeCitation(
+  question: string,
+  answer: string,
+  a: Artifact,
+  model: Model,
+): Promise<CitationCheck> {
   const who = a.author?.name ? ` · ${a.author.name}` : "";
   const prompt = [
-    `Question: ${ev.question}`,
+    `Question: ${question}`,
     "",
     "Answer under review:",
-    n.answer,
+    answer,
     "",
     `Source being audited — [${a.id}] ${a.kind} · ${a.date.slice(0, 10)}${who}:`,
     clampBody(a.body, JUDGE_BODY_CAP),
@@ -98,6 +108,10 @@ async function judge(ev: Evidence, n: Narrative, a: Artifact, model: Model): Pro
     temperature: 0,
   });
   return finalizeCheck(a.id, a.body, object);
+}
+
+function judge(ev: Evidence, n: Narrative, a: Artifact, model: Model): Promise<CitationCheck> {
+  return judgeCitation(ev.question, n.answer, a, model);
 }
 
 // Second LLM layer, boxed the same way synthesis is: the judge may only claim

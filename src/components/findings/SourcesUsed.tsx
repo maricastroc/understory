@@ -20,16 +20,18 @@ export function SourcesUsed({
   resolved,
   byId,
   statusById,
+  label = "Sources used",
 }: {
   resolved: string[];
   byId: Map<string, Artifact>;
   statusById?: Map<string, EntailmentStatus>;
+  label?: string;
 }) {
   if (resolved.length === 0) return null;
   return (
     <div className="mt-6">
       <div className="mb-2.5 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
-        Sources used
+        {label}
       </div>
       <div className="flex flex-wrap gap-2">
         {resolved.map((id) => {

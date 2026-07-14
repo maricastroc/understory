@@ -34,9 +34,9 @@ export function PrComposer({
       <div className="border-b border-line px-3.5 py-3">
         <h1 className="text-[15px] font-semibold tracking-tight">Explain a pull request</h1>
         <p className="mt-0.5 text-[12.5px] text-ink-2">
-          Paste a GitHub pull request — get the grounded <b className="font-medium text-ink">why</b>{" "}
-          behind the existing code it changes, riskiest first, every claim linked to real commits,
-          PRs and reviews.
+          The same investigation as Explain a line, at pull-request scale — the grounded{" "}
+          <b className="font-medium text-ink">why</b> behind the code it changes, every claim linked
+          to the commits, PRs, reviews and issues that explain it.
         </p>
       </div>
 

@@ -74,6 +74,7 @@ export type VerifiedDiffFinding = {
   confidence: import("../types").Confidence;
   artifacts: import("../types").Artifact[];
   contradictions: import("../types").Contradiction[];
+  entailment?: import("../types").Entailment;
 };
 
 export type DiffResult = {

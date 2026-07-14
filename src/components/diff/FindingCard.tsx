@@ -1,11 +1,11 @@
 import type { BlameTarget, VerifiedDiffFinding } from "@git-investigator/core/diff/types";
-import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
-import { levelLabel } from "../format";
-import { Alert, Check, ExternalLink, KindIcon } from "../icons";
+import type { EntailmentStatus } from "@git-investigator/core/types";
+import { SourcesUsed } from "../findings/SourcesUsed";
+import { fmtDate, levelLabel } from "../format";
+import { Alert, Clock } from "../icons";
 import { Pill } from "../ui";
-
-const sourceNoun = (k: ArtifactKind): string =>
-  k === "pull_request" ? "PR" : k === "commit" ? "Commit" : k === "issue" ? "Issue" : "Review";
+import { ConfidenceLedger } from "./ConfidenceLedger";
+import { Genealogy } from "./Genealogy";
 
 const loc = (t: BlameTarget): string =>
   `${t.path}:${t.range.start}${t.range.end !== t.range.start ? `-${t.range.end}` : ""}`;
@@ -22,51 +22,27 @@ function status(f: VerifiedDiffFinding): {
   return { tone, label: `${levelLabel[f.confidence.level]} · ${pct}%` };
 }
 
-function Sources({ finding }: { finding: VerifiedDiffFinding }) {
-  const byId = new Map(finding.artifacts.map((a) => [a.id, a] as const));
-  const cited = finding.citations.map((id) => byId.get(id)).filter((a): a is Artifact => !!a);
-  if (cited.length === 0) return null;
+const MAX_TARGETS = 4;
+
+function Origin({ finding }: { finding: VerifiedDiffFinding }) {
+  const commit = finding.artifacts.find((a) => a.kind === "commit");
+  if (!commit) return null;
   return (
-    <div className="mt-4">
-      <div className="mb-2 text-[10.5px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
-        Grounded in
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {cited.map((a) => {
-          const label = `${sourceNoun(a.kind)} ${a.ref ?? a.id}`;
-          const inner = (
-            <>
-              <Check className="size-3.5 shrink-0 text-good" />
-              <KindIcon kind={a.kind} className="size-3.5 shrink-0 text-ink-3" />
-              <span className="font-semibold text-ink">{label}</span>
-              {a.url && <ExternalLink className="size-3 shrink-0 text-ink-3" />}
-            </>
-          );
-          return a.url ? (
-            <a
-              key={a.id}
-              href={a.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-md border border-line bg-inset px-2.5 py-1.5 text-[12.5px] transition-colors hover:border-accent/40 hover:bg-accent-tint"
-            >
-              {inner}
-            </a>
-          ) : (
-            <span
-              key={a.id}
-              className="inline-flex items-center gap-1.5 rounded-md border border-line bg-inset px-2.5 py-1.5 text-[12.5px]"
-            >
-              {inner}
-            </span>
-          );
-        })}
-      </div>
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11.5px] text-ink-3">
+      <Clock className="size-3.5 shrink-0" />
+      <span className="font-semibold tracking-[0.04em] text-ink-3 uppercase">Origin</span>
+      <span className="font-mono text-ink-2">{commit.ref ?? commit.id}</span>
+      <span aria-hidden>·</span>
+      <span>{fmtDate(commit.date)}</span>
+      {commit.author?.name && (
+        <>
+          <span aria-hidden>·</span>
+          <span>{commit.author.name}</span>
+        </>
+      )}
     </div>
   );
 }
-
-const MAX_TARGETS = 4;
 
 export function FindingCard({ finding, index }: { finding: VerifiedDiffFinding; index: number }) {
   const s = status(finding);
@@ -74,6 +50,13 @@ export function FindingCard({ finding, index }: { finding: VerifiedDiffFinding; 
   const contradictions = finding.contradictions.filter((c) => cited.has(c.artifactId));
   const shownTargets = finding.targets.slice(0, MAX_TARGETS);
   const extraTargets = finding.targets.length - shownTargets.length;
+
+  const byId = new Map(finding.artifacts.map((a) => [a.id, a] as const));
+  const statusById = finding.entailment?.checked
+    ? new Map<string, EntailmentStatus>(
+        finding.entailment.checks.map((c) => [c.citation, c.status]),
+      )
+    : undefined;
 
   return (
     <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-card">
@@ -99,19 +82,23 @@ export function FindingCard({ finding, index }: { finding: VerifiedDiffFinding; 
       </div>
 
       <div className="p-4">
-        {finding.recorded ? (
-          <p className="max-w-[70ch] text-[14.5px] leading-relaxed whitespace-pre-wrap text-[#2a2d36]">
-            {finding.why}
-          </p>
-        ) : (
-          <p className="flex items-start gap-2 text-[13.5px] text-ink-2">
-            <Alert className="mt-0.5 size-4 shrink-0 text-ink-3" />
-            <span>
-              The recorded history doesn&apos;t explain why this code exists — the trail is silent
-              here.
-            </span>
-          </p>
-        )}
+        <Origin finding={finding} />
+
+        <div className="mt-3">
+          {finding.recorded ? (
+            <p className="max-w-[70ch] text-[14.5px] leading-relaxed whitespace-pre-wrap text-[#2a2d36]">
+              {finding.why}
+            </p>
+          ) : (
+            <p className="flex items-start gap-2 text-[13.5px] text-ink-2">
+              <Alert className="mt-0.5 size-4 shrink-0 text-ink-3" />
+              <span>
+                The recorded history doesn&apos;t explain why this code exists — the trail is silent
+                here. The genealogy below is what the dig could reconstruct.
+              </span>
+            </p>
+          )}
+        </div>
 
         {finding.unknownCitations.length > 0 && (
           <div className="mt-4 flex items-start gap-2 rounded-md border border-crit/25 bg-crit-tint px-3 py-2 text-[12.5px] text-crit">
@@ -128,7 +115,7 @@ export function FindingCard({ finding, index }: { finding: VerifiedDiffFinding; 
           <div className="mt-4 flex flex-col gap-1.5 rounded-md border border-crit/25 bg-crit-tint px-3 py-2.5 text-[12.5px] text-crit">
             <div className="flex items-center gap-2 font-semibold">
               <Alert className="size-4 shrink-0" />
-              You&apos;re changing code that was later contradicted
+              Contested history — this code was later reverted or reversed
             </div>
             {contradictions.map((c) => (
               <span key={`${c.artifactId}:${c.kind}`} className="opacity-90">
@@ -139,7 +126,16 @@ export function FindingCard({ finding, index }: { finding: VerifiedDiffFinding; 
           </div>
         )}
 
-        <Sources finding={finding} />
+        <Genealogy finding={finding} />
+
+        <SourcesUsed
+          resolved={finding.citations}
+          byId={byId}
+          statusById={statusById}
+          label="Grounded in"
+        />
+
+        <ConfidenceLedger finding={finding} />
       </div>
     </div>
   );

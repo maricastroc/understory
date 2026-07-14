@@ -38,9 +38,9 @@ export function ReviewCopilot() {
 
           <div className="flex flex-col rounded-xl border border-line bg-surface p-5 shadow-[0_10px_40px_rgba(20,22,30,0.06)]">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-5.5 items-center gap-1.5 rounded-full bg-crit-tint px-2.5 text-[11.5px] font-semibold text-crit">
-                <span className="size-1.5 rounded-full bg-crit" />
-                {finding.risk}
+              <span className="inline-flex h-5.5 items-center gap-1.5 rounded-full bg-good-tint px-2.5 text-[11.5px] font-semibold text-good">
+                <span className="size-1.5 rounded-full bg-good" />
+                {finding.confidence}
               </span>
               <span className="font-mono text-[11.5px] text-ink-2">{finding.target}</span>
               <span className="ml-auto rounded bg-inset px-2 py-0.5 font-mono text-[10.5px] text-ink-3">
