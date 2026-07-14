@@ -43,6 +43,8 @@ export function RepoBar({
         </span>
         <input
           aria-label="Repository URL or path"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? "repo-error" : undefined}
           value={repoPath}
           onChange={(e) => onEdit(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onOpen()}
@@ -70,7 +72,7 @@ export function RepoBar({
         </button>
       </div>
 
-      {tokenOpen ? (
+      {!ready && (tokenOpen ? (
         <div className="flex items-center gap-3 border-b border-line px-3.5 py-2 transition-colors focus-within:bg-inset/40">
           <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
             Token
@@ -105,10 +107,13 @@ export function RepoBar({
           <Lock className="size-3.5" />
           Private repo? Add a token
         </button>
-      )}
+      ))}
 
       {connecting && (
-        <div className="flex items-center gap-2 border-b border-line bg-surface-2 px-3.5 py-2 text-[12.5px] text-ink-2">
+        <div
+          role="status"
+          className="flex items-center gap-2 border-b border-line bg-surface-2 px-3.5 py-2 text-[12.5px] text-ink-2"
+        >
           <span className="size-3.5 animate-spin rounded-full border-2 border-line-2 border-t-accent" />
           Opening repository… cloning from a URL the first time can take a moment.
         </div>
@@ -129,13 +134,14 @@ export function RepoBar({
               {meta.branch}
             </span>
           )}
-          <span className="ml-0.5 min-w-0 truncate font-mono text-[12px] text-ink">
-            {meta.name}
-          </span>
         </div>
       )}
       {error && (
-        <div className="flex items-start gap-2 border-b border-line bg-crit-tint px-3.5 py-2 text-[12.5px] text-crit">
+        <div
+          id="repo-error"
+          role="alert"
+          className="flex items-start gap-2 border-b border-line bg-crit-tint px-3.5 py-2 text-[12.5px] text-crit"
+        >
           <Alert className="mt-0.5 size-3.5 shrink-0" />
           <span>{error}</span>
         </div>

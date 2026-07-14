@@ -2,18 +2,19 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Alert } from "../icons";
+import { Alert, Search } from "../icons";
 import { RailContent, RightRail } from "../rail/RightRail";
-import { MobileSidebar } from "../sidebar/MobileSidebar";
-import { Sidebar } from "../sidebar/Sidebar";
+import { HistoryDrawer } from "../shell/HistoryDrawer";
+import { HistorySidebar } from "../shell/HistorySidebar";
+import { CaseRow } from "../sidebar/CaseRow";
 import { Composer } from "../composer/Composer";
 import { useRepo } from "../composer/use-repo";
 import { useLanguage } from "../use-language";
 import { useAuth } from "./use-auth";
 import { CaseView } from "./CaseView";
-import { Header } from "./Header";
 import { LoadingCard } from "./LoadingCard";
 import { useInvestigation } from "./use-investigation";
+import { AppHeader } from "../shell/AppHeader";
 
 export function Investigator() {
   const user = useAuth();
@@ -84,9 +85,26 @@ export function Investigator() {
   const railResult = view === "case" && !loading ? (current?.result ?? null) : null;
   const railMeta = browsing && repo.ready ? repo.meta : null;
 
+  const activeCaseId = view === "case" ? activeId : null;
+  const emptyTitle = filterQuery ? "No matches" : "No investigations yet";
+  const emptyBody = filterQuery
+    ? "Nothing matches your search. Try a different term."
+    : "Open a repo, click a line, and run one — each case files itself here.";
+  const renderCases = (onSelect: (id: string) => void) =>
+    shownItems.map((it) => (
+      <CaseRow
+        key={it.caseId}
+        item={it}
+        active={it.caseId === activeCaseId}
+        onSelect={onSelect}
+        onRemove={removeCase}
+      />
+    ));
+
   return (
     <div className="flex h-screen flex-col">
-      <Header
+      <AppHeader
+        mode="line"
         repoPath={repoPath}
         filter={caseFilter}
         onFilterChange={setCaseFilter}
@@ -95,35 +113,49 @@ export function Investigator() {
       />
 
       <div className="flex min-h-0 flex-1">
-        <Sidebar
-          items={shownItems}
-          activeId={view === "case" ? activeId : null}
-          onSelect={selectCase}
-          onRemove={removeCase}
-          onNewInvestigation={handleNewInvestigation}
-          filtering={filterQuery.length > 0}
+        <HistorySidebar
+          ariaLabel="Investigations"
+          label="Investigations"
+          count={shownItems.length}
+          onNew={handleNewInvestigation}
+          newLabel="New investigation"
+          emptyIcon={<Search className="size-4.5" />}
+          emptyTitle={emptyTitle}
+          emptyBody={emptyBody}
           user={user}
-        />
+        >
+          {renderCases(selectCase)}
+        </HistorySidebar>
 
-        <MobileSidebar
+        <HistoryDrawer
           open={menuOpen}
           onClose={() => setMenuOpen(false)}
-          items={shownItems}
-          activeId={view === "case" ? activeId : null}
-          onSelect={(id) => {
-            selectCase(id);
+          ariaLabel="Investigations"
+          label="Investigations"
+          count={shownItems.length}
+          onNew={() => {
+            handleNewInvestigation();
             setMenuOpen(false);
           }}
-          onRemove={removeCase}
-          onNewInvestigation={handleNewInvestigation}
-          filtering={filterQuery.length > 0}
+          newLabel="New investigation"
+          emptyIcon={<Search className="size-4.5" />}
+          emptyTitle={emptyTitle}
+          emptyBody={emptyBody}
           user={user}
-        />
+        >
+          {renderCases((id) => {
+            selectCase(id);
+            setMenuOpen(false);
+          })}
+        </HistoryDrawer>
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto max-w-270 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             {error && browsing && (
-              <div className="mb-4 flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-4 text-[13px] text-crit">
+              <div
+                role="alert"
+                className="mb-4 flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-4 text-[13px] text-crit"
+              >
                 <Alert className="mt-0.5 size-4 shrink-0" />
                 <span>{error}</span>
               </div>

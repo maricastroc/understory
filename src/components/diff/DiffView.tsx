@@ -58,7 +58,10 @@ export function DiffView({ result }: { result: DiffResult }) {
       </div>
 
       {result.error && (
-        <div className="flex items-start gap-2 rounded-[10px] border border-warn/30 bg-warn-tint p-4 text-[13px] text-warn">
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-[10px] border border-warn/30 bg-warn-tint p-4 text-[13px] text-warn"
+        >
           <Alert className="mt-0.5 size-4 shrink-0" />
           <span>{result.error}</span>
         </div>

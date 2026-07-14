@@ -1,31 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { AuthUser } from "../investigator/use-auth";
-import { SidebarBody } from "./SidebarBody";
-import type { CaseItem } from "./case-item";
+import { HistoryPanel, type HistoryPanelProps } from "./HistoryPanel";
 
-export function MobileSidebar({
+export function HistoryDrawer({
   open,
   onClose,
-  items,
-  activeId,
-  onSelect,
-  onRemove,
-  onNewInvestigation,
-  filtering = false,
-  user,
-}: {
-  open: boolean;
-  onClose: () => void;
-  items: CaseItem[];
-  activeId: string | null;
-  onSelect: (id: string) => void;
-  onRemove: (id: string) => void;
-  onNewInvestigation?: () => void;
-  filtering?: boolean;
-  user?: AuthUser | null;
-}) {
+  ariaLabel,
+  ...panel
+}: HistoryPanelProps & { open: boolean; onClose: () => void; ariaLabel: string }) {
   const asideRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -77,28 +60,12 @@ export function MobileSidebar({
         ref={asideRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Investigations"
+        aria-label={ariaLabel}
         className={`absolute inset-y-0 left-0 flex w-[min(19rem,85vw)] flex-col border-r border-line-2 bg-surface-2 shadow-panel transition-transform duration-200 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <SidebarBody
-          items={items}
-          activeId={activeId}
-          onSelect={onSelect}
-          onRemove={onRemove}
-          onNew={
-            onNewInvestigation
-              ? () => {
-                  onNewInvestigation();
-                  onClose();
-                }
-              : undefined
-          }
-          filtering={filtering}
-          user={user}
-          onClose={onClose}
-        />
+        <HistoryPanel {...panel} onClose={onClose} />
       </aside>
     </div>
   );

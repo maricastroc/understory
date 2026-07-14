@@ -4,10 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { DiffView } from "@/components/diff/DiffView";
 import { useExplainDiff } from "@/components/diff/use-explain-diff";
 import { PrComposer } from "@/components/pr/PrComposer";
-import { PrHeader } from "@/components/pr/PrHeader";
-import { PrRail } from "@/components/pr/PrRail";
-import { PrSidebar } from "@/components/pr/PrSidebar";
+import { AppHeader } from "@/components/shell/AppHeader";
+import { PrRail, PrRailContent } from "@/components/pr/PrRail";
+import { PrRow } from "@/components/pr/PrRow";
 import { usePrHistory } from "@/components/pr/use-pr-history";
+import { HistoryDrawer } from "@/components/shell/HistoryDrawer";
+import { HistorySidebar } from "@/components/shell/HistorySidebar";
+import { PullRequest } from "@/components/icons";
 import { useAuth } from "@/components/investigator/use-auth";
 import { useLanguage } from "@/components/use-language";
 
@@ -17,6 +20,7 @@ export default function PrPage() {
   const user = useAuth();
   const [pr, setPr] = useState("");
   const [token, setToken] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
   const { language } = useLanguage();
   const { loading, error, result, run } = useExplainDiff();
   const { entries, activeKey, active, select, remove } = usePrHistory(result);
@@ -42,18 +46,51 @@ export default function PrPage() {
 
   const activeResult = active?.result ?? null;
 
+  const renderPrs = (onSelect: (key: string) => void) =>
+    entries.map((e) => (
+      <PrRow
+        key={e.key}
+        entry={e}
+        active={e.key === activeKey}
+        onSelect={onSelect}
+        onRemove={remove}
+      />
+    ));
+  const prEmpty = {
+    emptyIcon: <PullRequest className="size-4.5" />,
+    emptyTitle: "No pull requests yet",
+    emptyBody: "Paste a PR above and explain it — each analysis files itself here.",
+  };
+
   return (
     <div className="flex h-screen flex-col">
-      <PrHeader user={user} />
+      <AppHeader mode="pr" user={user} onMenuClick={() => setMenuOpen(true)} />
 
       <div className="flex min-h-0 flex-1">
-        <PrSidebar
-          entries={entries}
-          activeKey={activeKey}
-          onSelect={select}
-          onRemove={remove}
+        <HistorySidebar
+          ariaLabel="Explained pull requests"
+          label="Pull requests"
+          count={entries.length}
           user={user}
-        />
+          {...prEmpty}
+        >
+          {renderPrs(select)}
+        </HistorySidebar>
+
+        <HistoryDrawer
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          ariaLabel="Explained pull requests"
+          label="Pull requests"
+          count={entries.length}
+          user={user}
+          {...prEmpty}
+        >
+          {renderPrs((key) => {
+            select(key);
+            setMenuOpen(false);
+          })}
+        </HistoryDrawer>
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto max-w-270 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
@@ -71,6 +108,9 @@ export default function PrPage() {
             {activeResult && !loading && (
               <div className="mt-5">
                 <DiffView result={activeResult} />
+                <div className="mt-5 flex flex-col gap-3.5 xl:hidden">
+                  <PrRailContent result={activeResult} />
+                </div>
               </div>
             )}
           </div>

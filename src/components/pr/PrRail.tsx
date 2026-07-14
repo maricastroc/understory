@@ -7,7 +7,7 @@ function Count({ n }: { n: number }) {
   return <span className={`tnum ${n === 0 ? "text-ink-3" : ""}`}>{n}</span>;
 }
 
-function PrRailContent({ result }: { result: DiffResult }) {
+export function PrRailContent({ result }: { result: DiffResult }) {
   const m = prMetrics(result);
 
   return (

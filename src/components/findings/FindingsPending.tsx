@@ -6,7 +6,10 @@ export function FindingsPending() {
       <SectionLabel title="Findings" meta="Reconstructing the conclusion from the evidence…" />
 
       <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-card">
-        <div className="flex items-center gap-2.5 border-b border-line bg-surface-2 px-6 py-3.5">
+        <div
+          role="status"
+          className="flex items-center gap-2.5 border-b border-line bg-surface-2 px-6 py-3.5"
+        >
           <span
             aria-hidden
             className="size-4 animate-spin rounded-full border-2 border-line-2 border-t-accent"

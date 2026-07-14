@@ -39,7 +39,7 @@ export function Method() {
           href="/app"
           className="inline-flex h-11 shrink-0 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
         >
-          Start investigating
+          Explain a line
           <ChevronRight className="size-4" />
         </Link>
       </div>

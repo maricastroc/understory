@@ -44,6 +44,8 @@ export function PrComposer({
         <span className={LABEL}>PR</span>
         <input
           aria-label="GitHub pull request URL"
+          aria-invalid={error && !loading ? true : undefined}
+          aria-describedby={error && !loading ? "pr-error" : undefined}
           value={pr}
           onChange={(e) => setPr(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onRun()}
@@ -111,13 +113,20 @@ export function PrComposer({
       )}
 
       {loading && (
-        <div className="flex items-center gap-2 bg-surface-2 px-3.5 py-2 text-[12.5px] text-ink-2">
+        <div
+          role="status"
+          className="flex items-center gap-2 bg-surface-2 px-3.5 py-2 text-[12.5px] text-ink-2"
+        >
           <span className="size-3.5 animate-spin rounded-full border-2 border-line-2 border-t-accent" />
           Reading the diff and reconstructing the history behind each change…
         </div>
       )}
       {error && !loading && (
-        <div className="flex items-start gap-2 border-b border-line bg-crit-tint px-3.5 py-2 text-[12.5px] text-crit">
+        <div
+          id="pr-error"
+          role="alert"
+          className="flex items-start gap-2 border-b border-line bg-crit-tint px-3.5 py-2 text-[12.5px] text-crit"
+        >
           <Alert className="mt-0.5 size-3.5 shrink-0" />
           <span>{error}</span>
         </div>

@@ -1,5 +1,5 @@
 import type { DigResult, Evidence } from "@git-investigator/core/types";
-import { ExternalLink, Lock, Repo, Shield, Users } from "../icons";
+import { ExternalLink, Github, Repo, Shield, Users } from "../icons";
 import { Avatar } from "../ui";
 import { MetaRow, RailCard } from "./RailCard";
 import { Provenance } from "./Provenance";
@@ -24,7 +24,11 @@ export function CaseRail({ result }: { result: DigResult }) {
     <>
       <RailCard icon={<Repo className="size-3.75" />} title="Repository">
         <div className="flex items-center gap-2 text-[14px] font-semibold tracking-tight">
-          {!ev.repo.remoteUrl && <Lock className="size-3.5 shrink-0 text-ink-3" />}
+          {ev.repo.remoteUrl?.includes("github.com") ? (
+            <Github className="size-4 shrink-0 text-ink-2" />
+          ) : (
+            <Repo className="size-3.5 shrink-0 text-ink-3" />
+          )}
           <span className="truncate font-mono">{repoName}</span>
         </div>
         <div className="mt-3">

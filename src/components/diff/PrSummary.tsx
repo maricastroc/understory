@@ -1,3 +1,5 @@
+"use client";
+
 import type { DiffResult } from "@git-investigator/core/diff/types";
 import type { Artifact } from "@git-investigator/core/types";
 import { Claims } from "../findings/Claims";
@@ -6,9 +8,11 @@ import { SourcesUsed } from "../findings/SourcesUsed";
 import { UncitedClaimsAlert } from "../findings/UncitedClaimsAlert";
 import { letter } from "../format";
 import { Clock } from "../icons";
+import { useLanguage } from "../use-language";
 import { SectionLabel } from "../ui";
 
 export function PrSummary({ result }: { result: DiffResult }) {
+  const { language } = useLanguage();
   const claims = result.summaryClaims ?? [];
 
   if (claims.length === 0) {
@@ -18,7 +22,7 @@ export function PrSummary({ result }: { result: DiffResult }) {
         <SectionLabel title="Why the changed code exists" meta="narrative overview" />
         <div className="flex items-start gap-3 rounded-[10px] border border-accent/25 bg-accent-tint/50 p-5 shadow-card">
           <Clock className="mt-0.5 size-5 shrink-0 text-accent-press" />
-          <p className="max-w-[72ch] text-[15px] leading-relaxed text-[#2a2d36]">
+          <p lang={language} className="max-w-[72ch] text-[15px] leading-relaxed text-[#2a2d36]">
             {result.summary}
           </p>
         </div>

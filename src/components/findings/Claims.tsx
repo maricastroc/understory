@@ -1,4 +1,7 @@
+"use client";
+
 import type { VerifiedClaim } from "@git-investigator/core/types";
+import { useLanguage } from "../use-language";
 
 export function Claims({
   claims,
@@ -7,8 +10,9 @@ export function Claims({
   claims: VerifiedClaim[];
   idToLetter: Map<string, string>;
 }) {
+  const { language } = useLanguage();
   return (
-    <p className="max-w-[68ch] text-[16.5px] leading-[1.72] text-[#2a2d36]">
+    <p lang={language} className="max-w-[68ch] text-[16.5px] leading-[1.72] text-[#2a2d36]">
       {claims.map((c, i) => {
         const letters = c.citations
           .map((id) => idToLetter.get(id))

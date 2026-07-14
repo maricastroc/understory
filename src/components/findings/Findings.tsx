@@ -1,7 +1,10 @@
+"use client";
+
 import { cosmeticOrigin } from "@git-investigator/core/cosmetic";
 import { traceProvenance } from "@git-investigator/core/provenance";
 import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
 import { letter } from "../format";
+import { useLanguage } from "../use-language";
 import { SectionLabel } from "../ui";
 import { Claims } from "./Claims";
 import { ConfidencePanel } from "./ConfidencePanel";
@@ -22,6 +25,8 @@ export function Findings({
   evidence: Evidence;
   narrative: VerifiedNarrative;
 }) {
+  const { language } = useLanguage();
+
   if (narrative.answerable === false) {
     return <OutOfScopeCard answer={narrative.answer} />;
   }
@@ -61,7 +66,10 @@ export function Findings({
             {claims.length > 0 ? (
               <Claims claims={claims} idToLetter={idToLetter} />
             ) : (
-              <p className="max-w-[68ch] text-[16.5px] leading-[1.72] whitespace-pre-wrap text-[#2a2d36]">
+              <p
+                lang={language}
+                className="max-w-[68ch] text-[16.5px] leading-[1.72] whitespace-pre-wrap text-[#2a2d36]"
+              >
                 {narrative.answer}
               </p>
             )}

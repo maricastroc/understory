@@ -26,7 +26,7 @@ export function RepoRail({ meta }: { meta: RepoMeta }) {
           </p>
         )}
         <div className="mt-3">
-          <MetaRow k="Default branch" v={meta.branch ?? "—"} mono />
+          <MetaRow k="Branch" v={meta.branch ?? "—"} mono />
           {meta.language && <MetaRow k="Language" v={meta.language} />}
           {meta.stars != null && (
             <MetaRow k="Stars" v={<span className="tnum">{fmtCount(meta.stars)}</span>} />

@@ -58,7 +58,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rise {
+  .rise,
+  .animate-spin,
+  .animate-pulse {
     animation: none;
   }
 }

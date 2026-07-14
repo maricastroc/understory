@@ -1,40 +1,44 @@
-import { Close, Plus, Search, User } from "../icons";
+import type { ReactNode } from "react";
+import { Close, Plus, User } from "../icons";
 import type { AuthUser } from "../investigator/use-auth";
 import { Avatar } from "../ui";
-import { CaseRow } from "./CaseRow";
-import type { CaseItem } from "./case-item";
 
-export function SidebarBody({
-  items,
-  activeId,
-  onSelect,
-  onRemove,
-  onNew,
-  filtering = false,
-  user,
-  onClose,
-}: {
-  items: CaseItem[];
-  activeId: string | null;
-  onSelect: (id: string) => void;
-  onRemove: (id: string) => void;
+export type HistoryPanelProps = {
+  label: string;
+  count: number;
   onNew?: () => void;
-  filtering?: boolean;
+  newLabel?: string;
+  emptyIcon: ReactNode;
+  emptyTitle: string;
+  emptyBody: string;
   user?: AuthUser | null;
-  onClose?: () => void;
-}) {
+  children: ReactNode;
+};
+
+export function HistoryPanel({
+  label,
+  count,
+  onNew,
+  newLabel = "New",
+  onClose,
+  emptyIcon,
+  emptyTitle,
+  emptyBody,
+  user,
+  children,
+}: HistoryPanelProps & { onClose?: () => void }) {
   return (
     <>
       <div className="flex items-center gap-2 px-4 py-4">
         <span className="text-[11px] font-semibold tracking-[0.07em] text-ink-2 uppercase">
-          Investigations
+          {label}
         </span>
-        <span className="ml-auto text-[11px] font-semibold text-ink-3 tnum">{items.length}</span>
+        <span className="ml-auto text-[11px] font-semibold text-ink-3 tnum">{count}</span>
         {onNew && (
           <button
             type="button"
-            aria-label="New investigation"
-            title="New investigation"
+            aria-label={newLabel}
+            title={newLabel}
             onClick={onNew}
             className="grid size-7 cursor-pointer place-items-center rounded-md border border-line-2 bg-surface text-ink-2 transition-colors hover:bg-inset hover:text-ink"
           >
@@ -54,32 +58,16 @@ export function SidebarBody({
       </div>
 
       <div className="flex-1 overflow-y-auto px-2.5 pb-4">
-        {items.length === 0 ? (
+        {count === 0 ? (
           <div className="mt-8 flex flex-col items-center px-4 text-center">
             <span className="grid size-11 place-items-center rounded-full border border-line bg-surface text-ink-3 shadow-card">
-              <Search className="size-4.5" />
+              {emptyIcon}
             </span>
-            <p className="mt-3 text-[13px] font-semibold text-ink-2">
-              {filtering ? "No matches" : "No investigations yet"}
-            </p>
-            <p className="mt-1 text-[12px] leading-relaxed text-ink-3">
-              {filtering
-                ? "Nothing matches your search. Try a different term."
-                : "Open a repo, click a line, and run one — each case files itself here."}
-            </p>
+            <p className="mt-3 text-[13px] font-semibold text-ink-2">{emptyTitle}</p>
+            <p className="mt-1 text-[12px] leading-relaxed text-ink-3">{emptyBody}</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-0.5">
-            {items.map((it) => (
-              <CaseRow
-                key={it.caseId}
-                item={it}
-                active={it.caseId === activeId}
-                onSelect={onSelect}
-                onRemove={onRemove}
-              />
-            ))}
-          </div>
+          <div className="flex flex-col gap-0.5">{children}</div>
         )}
       </div>
 

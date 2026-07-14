@@ -115,7 +115,10 @@ export function Composer({
       )}
 
       {(search.error || viewer.error) && (
-        <div className="flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-3 text-[12.5px] text-crit">
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-3 text-[12.5px] text-crit"
+        >
           <Alert className="mt-0.5 size-4 shrink-0" />
           <span>{search.error || viewer.error}</span>
         </div>

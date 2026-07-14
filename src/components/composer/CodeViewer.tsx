@@ -144,12 +144,14 @@ export function CodeViewer({
               className="inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-md border border-accent/30 bg-surface px-2.5 py-1.5 text-[12px] text-accent-press shadow-sm transition-colors hover:bg-accent-tint"
             >
               <Braces className="size-3.5" />
-              Expand to the whole
+              Expand to the whole{" "}
               {enclosing.name ? (
-                <code className="font-mono font-semibold">{enclosing.name}</code>
+                <>
+                  <code className="font-mono font-semibold">{enclosing.name}</code>{" "}
+                </>
               ) : null}
               {symbolNoun(enclosing.kind)}
-              <span className="text-ink-3">· {enclosing.end - enclosing.start + 1} lines</span>
+              <span className="text-ink-3">{" · "}{enclosing.end - enclosing.start + 1} lines</span>
             </button>
           )}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -195,6 +197,7 @@ export function CodeViewer({
             <label className="flex w-fit cursor-pointer items-center gap-1.5 text-[11px] text-ink-3">
               <input
                 type="checkbox"
+                aria-label="Don't log this question"
                 checked={noCapture}
                 onChange={(e) => setNoCapture(e.target.checked)}
                 className="size-3.5 cursor-pointer accent-accent"

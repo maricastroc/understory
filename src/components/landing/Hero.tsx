@@ -37,7 +37,7 @@ export function Hero() {
           href="/app"
           className="inline-flex h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-medium text-white shadow-sm transition-colors hover:bg-accent-press"
         >
-          Open a case
+          Explain a line
           <ChevronRight className="size-4" />
         </Link>
         <a
@@ -81,7 +81,7 @@ export function Hero() {
           <div className="flex items-center gap-2">
             <span className="inline-flex h-5.5 items-center gap-1.5 rounded-full bg-good-tint px-2.5 text-[11.5px] font-semibold text-good">
               <span className="size-1.5 rounded-full bg-good" />
-              Solved
+              Resolved
             </span>
             <span className="font-mono text-[11px] text-ink-3">GI-2049</span>
             <div className="ml-auto">

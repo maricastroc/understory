@@ -15,11 +15,16 @@ export function AccountMenu({
   showPlaceholder?: boolean;
 }) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape")
+        setMenuOpen((open) => {
+          if (open) triggerRef.current?.focus();
+          return false;
+        });
     }
     function onClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
@@ -36,8 +41,11 @@ export function AccountMenu({
     return (
       <div className="relative" ref={menuRef}>
         <button
+          ref={triggerRef}
           type="button"
           aria-label="Account menu"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
           onClick={() => setMenuOpen((o) => !o)}
           className="flex cursor-pointer items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
         >
@@ -65,7 +73,7 @@ export function AccountMenu({
 
   if (authEnabled) {
     return (
-      <a href="/api/auth/login" className={signInClassName}>
+      <a href="/api/auth/login" aria-label="Sign in" className={signInClassName}>
         <Github className="size-4 shrink-0" />
         <span className="hidden sm:inline">Sign in</span>
       </a>
