@@ -8,6 +8,14 @@ const MAX_DIFF_CHECKS = 8;
 
 const DIFF_QUESTION = "Why does the existing code being changed here exist, and what was it for?";
 
+const ENTAIL_CLUSTER_CAP = 6;
+const ENTAIL_ARTIFACT_CAP = 12;
+
+export function diffEntailmentAffordable(clusters: DiffCluster[]): boolean {
+  const totalArtifacts = clusters.reduce((n, c) => n + c.artifacts.length, 0);
+  return clusters.length <= ENTAIL_CLUSTER_CAP && totalArtifacts <= ENTAIL_ARTIFACT_CAP;
+}
+
 type Task = { ref: string; why: string; artifact: Artifact };
 
 export async function checkDiffEntailment(

@@ -168,9 +168,6 @@ export function PrComposer({
             <span className="truncate text-ink-3">
               reconstructing the history behind each change
             </span>
-            <span className="ml-auto shrink-0 tnum text-[11px] font-medium text-ink-3">
-              {stage + 1}/{STAGES.length}
-            </span>
           </div>
           <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-line/70">
             <div className="animate-indeterminate h-full w-2/5 rounded-full bg-accent" />

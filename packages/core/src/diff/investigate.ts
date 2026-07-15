@@ -2,7 +2,7 @@ import { synthesisError } from "../investigate";
 import { type LlmConfig, getModel } from "../llm";
 import type { Entailment } from "../types";
 import { collectDiff } from "./collect";
-import { checkDiffEntailment } from "./entail";
+import { checkDiffEntailment, diffEntailmentAffordable } from "./entail";
 import { synthesizeDiff } from "./synthesize";
 import type { DiffResult } from "./types";
 import { collectionToResult, verifyDiff } from "./verify";
@@ -22,7 +22,10 @@ export async function investigateDiff(
 
   try {
     const narrative = await synthesizeDiff(collection, model, config.language);
-    const doEntail = config.entail ?? process.env.ENTAILMENT !== "0";
+    const enabled = config.entail ?? process.env.ENTAILMENT !== "0";
+    const forced = config.entail === true;
+    const skippedForSize = enabled && !forced && !diffEntailmentAffordable(collection.clusters);
+    const doEntail = enabled && !skippedForSize;
     let entailByRef: Map<string, Entailment> | undefined;
     let summaryEntailment: Entailment | undefined;
     if (doEntail) {
@@ -35,7 +38,16 @@ export async function investigateDiff(
         summaryEntailment = undefined;
       }
     }
-    return verifyDiff(collection, narrative, entailByRef, summaryEntailment);
+    const result = verifyDiff(collection, narrative, entailByRef, summaryEntailment);
+    if (skippedForSize) {
+      result.note = [
+        result.note,
+        "Entailment checks were skipped for this large pull request to stay within the model's rate limit — the citations and provenance chain are unaffected.",
+      ]
+        .filter(Boolean)
+        .join(" ");
+    }
+    return result;
   } catch (e) {
     return collectionToResult(collection, synthesisError(e));
   }
