@@ -7,7 +7,7 @@ const claimSchema = z.object({
   text: z
     .string()
     .describe(
-      "One factual assertion about this code's history, in prose, in the question's language.",
+      "One assertion in the reconstruction — a step in the story of how this code came to be, in prose, in the question's language. Read in order, the claims form one narrative, not a list of commit summaries.",
     ),
   citations: z
     .array(z.string())
@@ -25,7 +25,7 @@ const narrativeSchema = z.object({
   claims: z
     .array(claimSchema)
     .describe(
-      "When answerable AND the history explains it: the answer, broken into factual assertions, each with its own citations. Written in order and self-contained, so that read together they ARE the answer. Empty when abstaining or out of scope.",
+      "When answerable AND the history explains it: the reconstruction, broken into factual assertions, each with its own citations. Ordered and self-contained so that, read together, they tell the story of why this code is the way it is — what problem it solved, why the approach made sense, and how it evolved. Empty when abstaining or out of scope.",
     ),
   answer: z
     .string()
@@ -39,8 +39,8 @@ const narrativeSchema = z.object({
 
 const SYSTEM = [
   "You are a software archaeologist. You reconstruct the history behind a specific line",
-  "(or lines) of code, using ONLY the evidence provided — never outside knowledge,",
-  "never a guess.",
+  "(or lines) of code — the problem it solved, why it was written that way, and how it",
+  "evolved — using ONLY the evidence provided. Never outside knowledge, never a guess.",
   "",
   "FIRST decide whether the question can be answered from this evidence at all:",
   "- If it is off-topic, nonsensical, or asks about something the collected",
@@ -48,20 +48,27 @@ const SYSTEM = [
   "  line in `answer` saying the question is outside what this code's history can answer,",
   "  leave `claims` empty, set recorded=false, and STOP. Do NOT reinterpret the question",
   "  as 'why does this code exist'.",
-  "- Otherwise set answerable=true and answer it from the evidence, following the rules.",
+  "- Otherwise set answerable=true and reconstruct it from the evidence, following the rules.",
   "",
   "Rules (when answerable):",
-  "- Break the answer into CLAIMS. Each claim is ONE factual assertion about this code's",
-  "  history, placed in `claims` as { text, citations }. Written in order and",
-  "  self-contained, the claims read together as the whole answer.",
+  "- Tell the story; do not summarize commits. Break the reconstruction into CLAIMS, each ONE",
+  "  assertion in `claims` as { text, citations }. Ordered and self-contained, the claims read",
+  "  together as one narrative — what problem existed, why this approach made sense at the time,",
+  "  and how it reached its current form — not a bullet list of changes.",
   "- Every claim MUST cite at least one evidence item: put that item's exact id",
   "  (e.g. commit:c038fb3) in the claim's `citations`, copied verbatim from the brackets.",
   "  If you cannot back an assertion with a collected source, do NOT write it — silence is",
   "  better than an uncited claim. Never state a motivation no source records.",
+  "- Interpret; do not invent. You MAY frame and connect what the sources establish, and name an",
+  "  intent they state or clearly imply. Naming what the record does AND does not settle is itself",
+  "  grounded — 'the record shows this was for compiler compatibility, not an observed bug' beats",
+  "  both a flat restatement and an invented motivation. But never assert a cause no source records,",
+  "  and never tack on an unsupported benefit clause ('improving safety', 'making it faster'): if a",
+  "  source does not state the benefit, leave it out. A conservative claim beats one that overruns.",
   "- If the evidence does NOT actually answer the question (e.g. the commits only say",
   "  'fix' with no reasoning), set recorded=false, leave `claims` empty, and put one honest",
   "  line in `answer` saying the history does not explain it. Never invent a motivation.",
-  "- Be concise and factual. No hedging, no filler, no apologies.",
+  "- Write plainly and concretely; no hedging, no apologies.",
   "- Only cite ids that literally appear in the evidence. Never fabricate an id.",
 ].join("\n");
 
@@ -132,8 +139,7 @@ export function buildSynthesisInput(
 }
 
 export function toNarrative(object: z.infer<typeof narrativeSchema>): Narrative {
-  const useClaims =
-    object.answerable && object.recorded && object.claims.length > 0;
+  const useClaims = object.answerable && object.recorded && object.claims.length > 0;
   const claims = useClaims ? object.claims : [];
   const answer = claims.length ? claims.map((c) => c.text).join(" ") : object.answer;
   const citations = Array.from(new Set(claims.flatMap((c) => c.citations)));

@@ -17,6 +17,7 @@ function silentFinding(ref: string, cluster: DiffCluster): VerifiedDiffFinding {
     ref,
     targets: cluster.targets,
     why: "",
+    connection: "",
     citations: [],
     unknownCitations: [],
     grounded: true,
@@ -54,9 +55,7 @@ function verifyFinding(
   const citedSet = new Set(citations);
   const contradicting = cluster.contradictions.filter((c) => citedSet.has(c.artifactId)).length;
   const audited = entailment?.checked === true;
-  const status = new Map(
-    (audited ? entailment!.checks : []).map((c) => [c.citation, c.status]),
-  );
+  const status = new Map((audited ? entailment!.checks : []).map((c) => [c.citation, c.status]));
   const effectivePrimary = citations.filter((id) => status.get(id) !== "unsupported").length;
   const supportedPrimary = citations.filter((id) => status.get(id) === "supported").length;
 
@@ -64,6 +63,7 @@ function verifyFinding(
     ref,
     targets: cluster.targets,
     why: raw.why,
+    connection: raw.connection ?? "",
     citations,
     unknownCitations,
     grounded,

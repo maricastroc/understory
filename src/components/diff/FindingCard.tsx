@@ -2,7 +2,7 @@ import type { BlameTarget, VerifiedDiffFinding } from "@git-investigator/core/di
 import type { EntailmentStatus } from "@git-investigator/core/types";
 import { SourcesUsed } from "../findings/SourcesUsed";
 import { fmtDate, levelLabel } from "../format";
-import { Alert, Clock } from "../icons";
+import { Alert, Clock, Fork } from "../icons";
 import { Pill } from "../ui";
 import { ConfidenceLedger } from "./ConfidenceLedger";
 import { Genealogy } from "./Genealogy";
@@ -99,6 +99,25 @@ export function FindingCard({ finding, index }: { finding: VerifiedDiffFinding; 
             </p>
           )}
         </div>
+
+        {finding.connection && (
+          <div className="mt-3 flex items-start gap-2.5 rounded-md border border-l-2 border-line bg-inset px-3 py-2.5">
+            <Fork className="mt-0.5 size-4 shrink-0 text-ink-3" />
+            <div className="flex flex-col gap-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-semibold tracking-[0.04em] text-ink-3 uppercase">
+                  Why this PR touches here
+                </span>
+                <span className="rounded border border-line bg-surface px-1.5 py-px text-[9.5px] font-medium tracking-[0.06em] text-ink-3 uppercase">
+                  inference
+                </span>
+              </div>
+              <p className="max-w-[68ch] text-[13.5px] leading-relaxed text-ink-2">
+                {finding.connection}
+              </p>
+            </div>
+          </div>
+        )}
 
         {finding.unknownCitations.length > 0 && (
           <div className="mt-4 flex items-start gap-2 rounded-md border border-crit/25 bg-crit-tint px-3 py-2 text-[12.5px] text-crit">

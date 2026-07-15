@@ -52,14 +52,14 @@ export function SourcesUsed({
               href={a.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-md border border-line bg-inset px-2.5 py-1.5 text-[12.5px] transition-colors hover:border-accent/40 hover:bg-accent-tint"
+              className="inline-flex items-center gap-1.5 rounded-md border border-line-2 bg-surface px-2.5 py-1.5 text-[12.5px] shadow-card transition-colors hover:border-accent/50 hover:bg-accent-tint/60"
             >
               {inner}
             </a>
           ) : (
             <span
               key={id}
-              className="inline-flex items-center gap-1.5 rounded-md border border-line bg-inset px-2.5 py-1.5 text-[12.5px]"
+              className="inline-flex items-center gap-1.5 rounded-md border border-line-2 bg-surface px-2.5 py-1.5 text-[12.5px] shadow-card"
             >
               {inner}
             </span>

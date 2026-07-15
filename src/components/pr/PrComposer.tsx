@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../Button";
 import { ErrorState } from "../ErrorState";
 import { Close, Github, Lock, Search } from "../icons";
 import { authEnabled } from "../investigator/use-auth";
 
 const EXAMPLE = "chalk/chalk#664";
+
+const STAGES = [
+  "Reading the diff",
+  "Blaming the changed lines",
+  "Collecting commits, PRs & reviews",
+  "Reconstructing the why",
+  "Verifying every citation",
+];
 const LABEL = "w-16 shrink-0 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase";
 
 export function PrComposer({
@@ -31,8 +39,24 @@ export function PrComposer({
   signedIn?: boolean;
 }) {
   const [showToken, setShowToken] = useState(false);
+  const [stage, setStage] = useState(0);
+  const [prevLoading, setPrevLoading] = useState(loading);
   const looksPrivate = /404|not found|private/i.test(error ?? "");
   const tokenOpen = showToken || token.trim() !== "" || looksPrivate;
+
+  if (loading !== prevLoading) {
+    setPrevLoading(loading);
+    if (loading) setStage(0);
+  }
+
+  useEffect(() => {
+    if (!loading) return;
+    const id = setInterval(
+      () => setStage((s) => Math.min(s + 1, STAGES.length - 1)),
+      1600,
+    );
+    return () => clearInterval(id);
+  }, [loading]);
 
   return (
     <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-panel">
@@ -137,12 +161,20 @@ export function PrComposer({
         ))}
 
       {loading && (
-        <div
-          role="status"
-          className="flex items-center gap-2 bg-surface-2 px-3.5 py-2 text-[12.5px] text-ink-2"
-        >
-          <span className="size-3.5 animate-spin rounded-full border-2 border-line-2 border-t-accent" />
-          Reading the diff and reconstructing the history behind each change…
+        <div role="status" aria-live="polite" className="bg-surface-2 px-3.5 py-2.5">
+          <div className="flex items-center gap-2 text-[12.5px]">
+            <span className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-line-2 border-t-accent" />
+            <span className="font-medium text-ink">{STAGES[stage]}…</span>
+            <span className="truncate text-ink-3">
+              reconstructing the history behind each change
+            </span>
+            <span className="ml-auto shrink-0 tnum text-[11px] font-medium text-ink-3">
+              {stage + 1}/{STAGES.length}
+            </span>
+          </div>
+          <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-line/70">
+            <div className="animate-indeterminate h-full w-2/5 rounded-full bg-accent" />
+          </div>
         </div>
       )}
       {error && !loading && (

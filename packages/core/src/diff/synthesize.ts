@@ -8,12 +8,17 @@ const findingSchema = z.object({
   why: z
     .string()
     .describe(
-      "Why the EXISTING code being changed here exists / what it was for — from this region's evidence only. One or two sentences.",
+      "A short historical reconstruction of the EXISTING code being changed here, written for a new teammate: what problem brought it into being, how the changes since then connect and accreted, and how it reached the shape this PR now touches. Weave this region's commits/PRs/reviews/issues into ONE causal account, not a timeline of separate facts. This is RECORDED HISTORY only — do NOT say why the current PR touches it (that belongs in `connection`). State only what the sources establish: do NOT assert a benefit or objective (safer, faster, cleaner, more correct) unless a source says so — if the record does not give the reason, say so rather than supplying one.",
+    ),
+  connection: z
+    .string()
+    .describe(
+      "One or two sentences on why THIS PR's stated purpose inevitably lands on this region — the through-line from the history in `why` to the change now in front of the reviewer. This is an INFERENCE from the history plus the PR, NOT recorded history and NOT a citation-backed claim; keep it OUT of `why`. Leave EMPTY ('') if the connection is not evident from the evidence.",
     ),
   citations: z
     .array(z.string())
     .describe(
-      "Exact artifact ids this relies on, copied verbatim, e.g. 'commit:abc123', 'pr:42'. Only ids from this region's evidence.",
+      "Exact artifact ids the `why` relies on, copied verbatim, e.g. 'commit:abc123', 'pr:42'. Only ids from this region's evidence. `connection` is not cited.",
     ),
   recorded: z
     .boolean()
@@ -25,7 +30,9 @@ const findingSchema = z.object({
 const summaryClaimSchema = z.object({
   text: z
     .string()
-    .describe("One sentence of executive history about the code this PR changes."),
+    .describe(
+      "One sentence of executive history for whoever reviews this PR next — part of a synthesis across the regions, not a description of the diff.",
+    ),
   citations: z
     .array(z.string())
     .describe(
@@ -37,35 +44,56 @@ const schema = z.object({
   summaryClaims: z
     .array(summaryClaimSchema)
     .describe(
-      "2–4 executive-history sentences, EACH a separately-cited claim: why the code this PR changes was introduced, then — only as a consequence — which region(s) carry the heaviest or most-contested past. Grounded in the evidence; never a description of the diff or generic review advice.",
+      "2–5 executive-history sentences, EACH a separately-cited claim. Together they should place the whole review in context: name the distinct historical threads the changed code belongs to (a modernization, an old algorithm, a later cleanup, …), then which region(s) carry the heaviest or most-contested past and why it matters that this PR touches them. A synthesis across regions, not a concatenation of them; grounded in the evidence; never a description of the diff or generic review advice.",
     ),
   findings: z.array(findingSchema),
 });
 
 const SYSTEM = [
   "You are a software archaeologist. A pull request is changing existing code; your job is to",
-  "reconstruct WHY that existing code was there in the first place — the reasons, decisions and",
-  "incidents behind it — from the recorded history ALONE. This is the same question the line-level",
-  "investigator answers, asked of every region a PR touches. You are given the changed regions",
-  "(C1, C2, …), each with the commits, pull requests, reviews and issues behind the code.",
+  "reconstruct WHY that existing code was there — the problems, decisions and incidents behind it —",
+  "and hand the next reviewer a history they can trust, from the recorded evidence ALONE. You are",
+  "given the changed regions (C1, C2, …), each with the commits, pull requests, reviews and issues",
+  "behind the code it touches.",
   "",
+  "Write for an engineer who just joined the team and is about to review this PR. Reconstruct the",
+  "history; do not summarize commits. Keep two things strictly apart: `why` is RECORDED HISTORY",
+  "(auditable, cited); `connection` is your INFERENCE about the current PR (not history, not cited).",
   "For EACH region, using ONLY that region's evidence:",
-  "- Explain why that existing code exists or what it was for. Put the exact ids you used in",
-  "  `citations` (e.g. commit:abc123, pr:42), copied verbatim from the brackets.",
-  "- If the evidence does NOT actually explain it (e.g. the commit only says 'fix'), set",
-  "  recorded=false and say the history doesn't explain it. Never invent a reason to fill the gap.",
-  "- Be concise: one or two sentences. No filler, no hedging.",
+  "- In `why`, tell the story of the EXISTING code: what problem brought it into being, and how the",
+  "  fixes, reworks and decisions since then connect and accreted into the shape this PR now touches.",
+  "  Weave the region's commits, PRs, reviews and issues into ONE causal account, not a timeline of",
+  "  separate facts. Put the exact ids you drew on in `citations`, copied verbatim. This is history —",
+  "  a reconstruction, not a changelog line — and it must NOT talk about the current PR.",
+  "- In `connection`, CLOSE THE LOOP: one or two sentences on why THIS PR's stated purpose inevitably",
+  "  lands on this region — the through-line from the history above to the change now in front of the",
+  "  reviewer. It is not enough that the code merely exists here; explain why those threads left code",
+  "  this PR must touch. This is an INFERENCE from the history plus the PR, NOT recorded history; keep",
+  "  it OUT of `why` and do not treat it as a cited fact. If the evidence does not make the connection",
+  "  evident, leave `connection` empty rather than manufacturing one.",
   "",
-  "Then write `summaryClaims`: 2–4 sentences of executive context for whoever reads this PR next,",
-  "EACH a separate claim with its own `citations` (the same rule as the findings). LEAD with why",
-  "the code this PR changes was introduced — the mechanisms it touches and the reasons, decisions",
-  "or incidents that shaped them, drawn only from the evidence. THEN, and only as a consequence of",
-  "that history, note which region(s) carry the weightiest or most-contested past (code that was",
-  "reverted, that fixed an incident, or that was argued over in review) and so deserve the closest",
-  "read. Every sentence MUST cite at least one artifact id it draws on; if you cannot back a",
-  "sentence with a collected source, do not write it. Do NOT describe what the diff does, do NOT",
-  "restate the PR description, and do NOT give generic review advice like 'verify that…'. If the",
-  "recorded history is thin, say that plainly instead of inventing significance.",
+  "Interpret; do not invent. You MAY frame, sequence and contextualize what the sources establish,",
+  "and name an intent they state or clearly imply. Naming what the record does AND does not settle",
+  "is itself grounded and is often the most useful thing you can say — 'the record shows this was",
+  "for compiler compatibility, not for an observed production bug' beats both a flat restatement and",
+  "an invented motivation. But NEVER assert a motivation, cause or intent no source records: on",
+  "those points, say the history does not record it. In particular, do NOT tack on evaluative",
+  "benefit clauses — 'reinforcing security and efficiency', 'improving readability', 'strengthening",
+  "correctness' — unless a source explicitly states that benefit; if the record shows only WHAT",
+  "changed, report what changed and stop. A conservative account beats an impressive one that",
+  "outruns the evidence. If a region's evidence does not actually explain the code (e.g. the commit",
+  "only says 'fix'), set recorded=false and say so. Never invent a reason to fill the gap.",
+  "",
+  "Then write `summaryClaims`: the executive history for whoever reviews this PR next, EACH sentence",
+  "a separate claim with its own `citations` (same rule as the findings). Do NOT just concatenate",
+  "the regions — step up a level. Name the distinct historical threads the changed code belongs to",
+  "(a modernization, an old algorithm, a later cleanup, …), then say which region(s) carry the",
+  "heaviest or most-contested past — code that was reverted, that fixed an incident, or that was",
+  "argued over in review — and why it matters that this PR touches them. Every sentence MUST cite at",
+  "least one artifact id; if you cannot back a sentence with a collected source, do not write it. Do",
+  "NOT describe what the diff does, do NOT restate the PR description, and do NOT give generic review",
+  "advice like 'verify that…'. If the recorded history is thin, say that plainly instead of",
+  "inventing significance.",
   "Only cite ids that literally appear in the evidence; never fabricate one.",
 ].join("\n");
 
