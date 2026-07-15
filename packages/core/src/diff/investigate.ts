@@ -1,5 +1,5 @@
 import { synthesisError } from "../investigate";
-import { type LlmConfig, getModel } from "../llm";
+import { type LlmConfig, getAuditModel, getModel } from "../llm";
 import type { Entailment } from "../types";
 import { collectDiff } from "./collect";
 import { checkDiffEntailment, diffEntailmentAffordable } from "./entail";
@@ -19,6 +19,7 @@ export async function investigateDiff(
 
   const model = getModel(config);
   if (!model) return collectionToResult(collection, NO_LLM);
+  const auditModel = getAuditModel(config) ?? model;
 
   try {
     const narrative = await synthesizeDiff(collection, model, config.language);
@@ -30,7 +31,7 @@ export async function investigateDiff(
     let summaryEntailment: Entailment | undefined;
     if (doEntail) {
       try {
-        const e = await checkDiffEntailment(collection.clusters, narrative, model);
+        const e = await checkDiffEntailment(collection.clusters, narrative, auditModel);
         entailByRef = e.byRef;
         summaryEntailment = e.summary;
       } catch {

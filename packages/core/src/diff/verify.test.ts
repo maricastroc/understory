@@ -88,6 +88,24 @@ describe("verifyDiff — grounding", () => {
     );
     expect(res.findings[0].why).toBe("ok");
   });
+
+  it("carries the un-audited PR connection through, empty when absent", () => {
+    const res = verifyDiff(
+      collection([cluster(), cluster({ commitId: "commit:c2" })]),
+      narr([
+        {
+          cluster: "C1",
+          why: "history",
+          connection: "this PR trims allocations this code owns",
+          citations: ["commit:c1"],
+          recorded: true,
+        },
+        { cluster: "C2", why: "more history", citations: ["commit:c2"], recorded: true },
+      ]),
+    );
+    expect(res.findings[0].connection).toBe("this PR trims allocations this code owns");
+    expect(res.findings[1].connection).toBe("");
+  });
 });
 
 describe("verifyDiff — abstention & silence", () => {

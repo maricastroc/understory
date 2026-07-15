@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { collect, parseLocation } from "@git-investigator/core/collect";
 import { checkEntailment } from "@git-investigator/core/entail";
-import { getModel } from "@git-investigator/core/llm";
+import { getAuditModel, getModel } from "@git-investigator/core/llm";
 import { synthesize } from "@git-investigator/core/synthesize";
 import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
 import { verify } from "@git-investigator/core/verify";
@@ -66,7 +66,8 @@ async function runOnce(repo: string, c: Case): Promise<Run> {
     if (!model) throw new Error("GROQ_API_KEY is not set.");
 
     const narrative = await synthesize(ev, model);
-    const entailment = await checkEntailment(ev, narrative, model).catch(() => undefined);
+    const auditModel = getAuditModel() ?? model;
+    const entailment = await checkEntailment(ev, narrative, auditModel).catch(() => undefined);
     const n = verify(ev, narrative, entailment);
     return { fails: checkExpect(c.expect, n, ev), answerable: n.answerable, answer: n.answer };
   } catch (err) {

@@ -8,12 +8,17 @@ const findingSchema = z.object({
   why: z
     .string()
     .describe(
-      "A short historical reconstruction of the EXISTING code being changed here, written for a new teammate: what problem or need brought it into being, why that approach made sense then, and — where the record shows it — how it reached the shape this PR now touches and why it is notable that the PR touches it. Weave this region's commits/PRs/reviews/issues into ONE account, not an artifact-by-artifact summary. A few sentences of real substance, not a changelog line. Interpret what the sources establish; never assert a motivation no source records, and do not tack on an unsupported benefit ('safer', 'faster', 'cleaner') unless a source says so.",
+      "A short historical reconstruction of the EXISTING code being changed here, written for a new teammate: what problem brought it into being, how the changes since then connect and accreted, and how it reached the shape this PR now touches. Weave this region's commits/PRs/reviews/issues into ONE causal account, not a timeline of separate facts. This is RECORDED HISTORY only — do NOT say why the current PR touches it (that belongs in `connection`). State only what the sources establish: do NOT assert a benefit or objective (safer, faster, cleaner, more correct) unless a source says so — if the record does not give the reason, say so rather than supplying one.",
+    ),
+  connection: z
+    .string()
+    .describe(
+      "One or two sentences on why THIS PR's stated purpose inevitably lands on this region — the through-line from the history in `why` to the change now in front of the reviewer. This is an INFERENCE from the history plus the PR, NOT recorded history and NOT a citation-backed claim; keep it OUT of `why`. Leave EMPTY ('') if the connection is not evident from the evidence.",
     ),
   citations: z
     .array(z.string())
     .describe(
-      "Exact artifact ids this relies on, copied verbatim, e.g. 'commit:abc123', 'pr:42'. Only ids from this region's evidence.",
+      "Exact artifact ids the `why` relies on, copied verbatim, e.g. 'commit:abc123', 'pr:42'. Only ids from this region's evidence. `connection` is not cited.",
     ),
   recorded: z
     .boolean()
@@ -52,25 +57,32 @@ const SYSTEM = [
   "behind the code it touches.",
   "",
   "Write for an engineer who just joined the team and is about to review this PR. Reconstruct the",
-  "history; do not summarize commits. For EACH region, using ONLY that region's evidence, tell the",
-  "story of the code being changed:",
-  "- What problem or need brought this code into being, and why the chosen approach made sense then.",
-  "- How it reached the shape this PR now touches — the fixes, reworks or decisions along the way.",
-  "  Weave the region's commits, PRs, reviews and issues into ONE account; do not narrate them one",
-  "  by one. Where the record allows, say why this code has survived and why it is notable that this",
-  "  PR is touching it.",
-  "- Put the exact ids you drew on in `citations` (e.g. commit:abc123, pr:42), copied verbatim.",
-  "- A few sentences of real substance — a reconstruction, not a changelog line.",
+  "history; do not summarize commits. Keep two things strictly apart: `why` is RECORDED HISTORY",
+  "(auditable, cited); `connection` is your INFERENCE about the current PR (not history, not cited).",
+  "For EACH region, using ONLY that region's evidence:",
+  "- In `why`, tell the story of the EXISTING code: what problem brought it into being, and how the",
+  "  fixes, reworks and decisions since then connect and accreted into the shape this PR now touches.",
+  "  Weave the region's commits, PRs, reviews and issues into ONE causal account, not a timeline of",
+  "  separate facts. Put the exact ids you drew on in `citations`, copied verbatim. This is history —",
+  "  a reconstruction, not a changelog line — and it must NOT talk about the current PR.",
+  "- In `connection`, CLOSE THE LOOP: one or two sentences on why THIS PR's stated purpose inevitably",
+  "  lands on this region — the through-line from the history above to the change now in front of the",
+  "  reviewer. It is not enough that the code merely exists here; explain why those threads left code",
+  "  this PR must touch. This is an INFERENCE from the history plus the PR, NOT recorded history; keep",
+  "  it OUT of `why` and do not treat it as a cited fact. If the evidence does not make the connection",
+  "  evident, leave `connection` empty rather than manufacturing one.",
   "",
   "Interpret; do not invent. You MAY frame, sequence and contextualize what the sources establish,",
   "and name an intent they state or clearly imply. Naming what the record does AND does not settle",
   "is itself grounded and is often the most useful thing you can say — 'the record shows this was",
   "for compiler compatibility, not for an observed production bug' beats both a flat restatement and",
   "an invented motivation. But NEVER assert a motivation, cause or intent no source records: on",
-  "those points, say the history does not record it. Do NOT tack on unsupported benefit clauses",
-  "('reinforcing security and efficiency', 'improving readability') unless a source states the",
-  "benefit. If a region's evidence does not actually explain the code (e.g. the commit only says",
-  "'fix'), set recorded=false and say so. Never invent a reason to fill the gap.",
+  "those points, say the history does not record it. In particular, do NOT tack on evaluative",
+  "benefit clauses — 'reinforcing security and efficiency', 'improving readability', 'strengthening",
+  "correctness' — unless a source explicitly states that benefit; if the record shows only WHAT",
+  "changed, report what changed and stop. A conservative account beats an impressive one that",
+  "outruns the evidence. If a region's evidence does not actually explain the code (e.g. the commit",
+  "only says 'fix'), set recorded=false and say so. Never invent a reason to fill the gap.",
   "",
   "Then write `summaryClaims`: the executive history for whoever reviews this PR next, EACH sentence",
   "a separate claim with its own `citations` (same rule as the findings). Do NOT just concatenate",

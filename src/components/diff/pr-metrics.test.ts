@@ -16,6 +16,7 @@ const finding = (over: Partial<VerifiedDiffFinding> = {}): VerifiedDiffFinding =
   ref: "C1",
   targets: [{ path: "a.ts", range: { start: 1, end: 1 } }],
   why: "x",
+  connection: "",
   citations: [],
   unknownCitations: [],
   grounded: true,

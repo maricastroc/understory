@@ -1,7 +1,7 @@
 import { collect, parseLocation } from "@git-investigator/core/collect";
 import { checkEntailment } from "@git-investigator/core/entail";
 import { cosmeticOrigin } from "@git-investigator/core/cosmetic";
-import { getModel } from "@git-investigator/core/llm";
+import { getAuditModel, getModel } from "@git-investigator/core/llm";
 import { traceProvenance } from "@git-investigator/core/provenance";
 import { buildSynthesisInput, synthesize } from "@git-investigator/core/synthesize";
 import { verify } from "@git-investigator/core/verify";
@@ -154,7 +154,9 @@ function printFindings(ev: Evidence, v: VerifiedNarrative) {
 
   if (v.entailment?.checked) {
     console.log();
-    console.log(gray("Substantiation:") + gray(" (does the cited source's own text back the claim?)"));
+    console.log(
+      gray("Substantiation:") + gray(" (does the cited source's own text back the claim?)"),
+    );
     for (const check of v.entailment.checks) {
       const hit = byId.get(check.citation);
       const ex = hit ? `Exhibit ${hit.letter}` : check.citation;
@@ -269,7 +271,10 @@ async function main() {
     const model = getModel();
     if (!model) keyMissing();
     const narrative = await synthesize(evidence, model);
-    const entailment = await checkEntailment(evidence, narrative, model).catch(() => undefined);
+    const auditModel = getAuditModel() ?? model;
+    const entailment = await checkEntailment(evidence, narrative, auditModel).catch(
+      () => undefined,
+    );
     verified = verify(evidence, narrative, entailment);
   }
 

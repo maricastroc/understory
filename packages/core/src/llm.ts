@@ -5,15 +5,32 @@ export type Language = "auto" | "en" | "pt";
 export type LlmConfig = {
   apiKey?: string;
   model?: string;
+  auditModel?: string;
   entail?: boolean;
   language?: Language;
 };
 
-export function getModel(config: LlmConfig = {}) {
+const SYNTHESIS_MODEL = "openai/gpt-oss-120b";
+// The entailment auditor is a narrower judge-and-quote task and makes most of the calls in an
+// investigation (one synthesis, then ~8 audits). It runs on a smaller, faster, cheaper model from
+// the SAME family as the synthesizer — a deliberate middle ground: about half the price and twice
+// the throughput, without the quote-copying risk of dropping to a different, tiny model. Override
+// with GROQ_AUDIT_MODEL (set it to the synthesis model to run everything on one).
+const AUDIT_MODEL = "openai/gpt-oss-20b";
+
+function provider(config: LlmConfig) {
   const apiKey = config.apiKey ?? process.env.GROQ_API_KEY;
-  if (!apiKey) return null;
-  const provider = createGroq({ apiKey });
-  return provider(config.model ?? process.env.GROQ_MODEL ?? "openai/gpt-oss-120b");
+  return apiKey ? createGroq({ apiKey }) : null;
+}
+
+export function getModel(config: LlmConfig = {}) {
+  const p = provider(config);
+  return p ? p(config.model ?? process.env.GROQ_MODEL ?? SYNTHESIS_MODEL) : null;
+}
+
+export function getAuditModel(config: LlmConfig = {}) {
+  const p = provider(config);
+  return p ? p(config.auditModel ?? process.env.GROQ_AUDIT_MODEL ?? AUDIT_MODEL) : null;
 }
 
 export type Model = NonNullable<ReturnType<typeof getModel>>;
