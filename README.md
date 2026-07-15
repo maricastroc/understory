@@ -1,18 +1,34 @@
-<div align="center">
+<h1 align="center">
+  <br>
+  <img src="public/logo.svg" alt="Git Investigator" width="40">
+  <br>
+  Git Investigator
+  <br>
+</h1>
 
-# Git Investigator
+<h4 align="center">Software archaeology for a line of code, or a whole pull request — every claim checked against real evidence.</h4>
 
-**🕵️ Software Archaeology — for a Line of Code, or a Whole Pull Request**
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=groq&logoColor=white" alt="Groq" />
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+</p>
 
-Point at any line — or paste a pull request — and get back _why_ that code exists, reconstructed from the commits, PRs, issues and reviews that shaped it.<br/>
-Not a plausible story: every claim is checked against real evidence, and when the trail is cold, it says so.
+<p align="center">
+  <a href="#-features">Features</a> •
+  <a href="#-how-it-works">How It Works</a> •
+  <a href="#-design-notes">Design Notes</a> •
+  <a href="#ℹ%EF%B8%8F-how-to-run-the-application">How To Run</a> •
+  <a href="#-license">License</a>
+</p>
 
-<br/>
-
-[![Features](https://img.shields.io/badge/★_Features-1a1a1a?style=for-the-badge)](#-features)
-[![Docs](https://img.shields.io/badge/▣_Docs-1a1a1a?style=for-the-badge)](#ℹ%EF%B8%8F-how-to-run-the-application)
-
-</div>
+<p align="center">
+  Point at any line — or paste a pull request — and get back <em>why</em> that code exists, reconstructed from the commits, PRs, issues and reviews that shaped it. Not a plausible story: every claim is checked against real evidence, and when the trail is cold, it says so.
+</p>
 
 <br/>
 
