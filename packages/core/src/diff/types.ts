@@ -56,7 +56,6 @@ export type DiffCollection = {
 export type RawDiffFinding = {
   cluster: string;
   why: string;
-  connection?: string;
   citations: string[];
   recorded: boolean;
 };
@@ -70,7 +69,6 @@ export type VerifiedDiffFinding = {
   ref: string;
   targets: BlameTarget[];
   why: string;
-  connection: string;
   citations: string[];
   unknownCitations: string[];
   grounded: boolean;
