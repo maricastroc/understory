@@ -1,10 +1,11 @@
 import type { BlameSpan } from "../types";
+import { MAX_BLAME_WINDOW } from "./blame-limits";
 import { blameWindowLocal, isGitRepo } from "./git";
 import { blameWindowGitHub, parseGitHubRepo } from "./github";
 import { blameWindowGitLab, parseGitLabRepo } from "./gitlab";
 import { isCommitSha } from "./sha";
 
-export const MAX_BLAME_WINDOW = 400;
+export { MAX_BLAME_WINDOW };
 
 export async function blameWindow(input: {
   repoPath: string;

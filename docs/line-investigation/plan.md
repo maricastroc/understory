@@ -193,7 +193,7 @@ comentários no código.
 | 3 | `computeBoreLayout` | §7 + critérios de aceite do bore |
 | 4 | Core/API do §5 | artefatos, lookup, sha, parsers de blame, validação das rotas |
 | — | **Checkpoint de revisão** | — |
-| 5 | `CodeSpecimen`, janela de código, barras de blame, `datumY`; fontes; jsdom/RTL/axe | puros + componentes |
+| 5 | `CodeSpecimen`, janela de código, barras de blame, `datumY`; fontes; jsdom/RTL/axe | puros + componentes + Playwright nos estados canônicos |
 | 6 | `Bore` (SVG `aria-hidden` + `<ol>`), atrás de flag | builders de path, axe |
 | 7 | `ClauseRow` + reducer | reducer, teclado |
 | 8 | Nova composição só para casos com `location` | regressão `/pr` |
@@ -219,8 +219,33 @@ comentários no código.
 - Commit local que não existe no GitHub (não enviado) resulta em `prLookup: failed`.
 - GitLab: só `prLookup` e `mergedAt`; ausência de review/issue fica "não verificada".
 
-## 11. Estado
+## 11. Etapa 5 — CodeSpecimen: decisões de implementação
 
-Etapas 0–4 implementadas (a etapa 4 foi feita primeiro nos tipos, porque as etapas 2–3 a
-consomem). Checkpoint de revisão antes da etapa 5. jsdom, Testing Library e vitest-axe entram
-na etapa 5, a primeira com componentes.
+| Tema | Handoff | Implementação e motivo |
+|---|---|---|
+| `datumY` | "headerH + padTop + index × rowH + rowH" | Inclui a borda superior de 1px: 281 no caso retry-cap, o mesmo pixel medido no DOM do v4. |
+| Respiro inferior | painel fixo de 580px | 8px entre a última linha e o rodapé, como o v4 (painel 460 × 580 nos dois). |
+| Linhas acima escondidas | só o rodapé colapsa | No modo painel, uma linha de controle no topo (`⋯ lines 1–N`) ocupa uma fileira, para o datum continuar no alvo. |
+| Voltar a colapsar | não especificado | O rodapé expandido vira "Show less". |
+| Linhas em branco | sem barra no mock | Sem barra de blame (apresentação; o blame existe). |
+| `aria-label` por linha | pedido no handoff | Texto `sr-only` dentro da linha: `aria-label` esconderia o código do leitor de tela. |
+| Tom "mesmo commit" em intervalo | não especificado | Só o commit que mudou o intervalo por último, como o `owningCommit` do core. |
+| Largura das barras | valores do mock | `40 × idade ÷ idade mais antiga visível`, mínimo 2px. |
+| Estados de blame | não especificados | Cabeçalho diz "loading blame…", "blame unavailable for this revision" ou "current HEAD, not the investigated revision"; nunca desenha barras sem dados. |
+| Texto neutro | neutral-500/600 | `text-muted` (#666669) por D8. |
+| Número de linha clicável | "manter o comportamento do Composer" | Não interativo no specimen; o Composer continua igual. |
+| Modo faixa (820–1099 / < 820) | ±3 / ±2 com "Show file" | Implementado; o rail e o resto do instrumento reorganizam nas etapas 8, 10 e 12. |
+
+Preview só de desenvolvimento em `/dev/specimen` (`page.dev.tsx`, fora do build de produção via
+`pageExtensions`), com a fixture sintética ou, com `?source=demo`, dados reais da demo semeada.
+
+`next.config.ts` fixa `turbopack.root` no projeto: um `package-lock.json` solto na home fazia o
+Turbopack vigiar a home inteira (requisições de ~20s e reinícios por memória em dev).
+
+Testes: Vitest em dois projetos (`node` para `*.test.ts`, `dom`/jsdom para `*.test.tsx`), axe via
+vitest-axe no jsdom sem a regra de contraste (jsdom não calcula cor) e axe completo no Chrome via
+Playwright (`npm run test:e2e`, usa o Chrome instalado localmente).
+
+## 12. Estado
+
+Etapas 0–5 implementadas. Checkpoint de revisão visual antes da etapa 6 (Bore).
