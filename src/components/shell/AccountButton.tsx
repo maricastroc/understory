@@ -7,7 +7,13 @@ import { liButton } from "../line-investigation/parts/button-class";
 import { initials } from "./initials";
 import { useDismiss } from "./use-dismiss";
 
-export function AccountButton({ user }: { user: AuthUser | null }) {
+export function AccountButton({
+  user,
+  signIn = "secondary",
+}: {
+  user: AuthUser | null;
+  signIn?: "secondary" | "ghost";
+}) {
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
@@ -17,6 +23,13 @@ export function AccountButton({ user }: { user: AuthUser | null }) {
 
   if (!user) {
     if (!authEnabled) return null;
+    if (signIn === "ghost") {
+      return (
+        <a href="/api/auth/login" className={liButton("ghost")}>
+          Sign in
+        </a>
+      );
+    }
     return (
       <a href="/api/auth/login" className={liButton("secondary")}>
         <Github className="size-4 shrink-0" />

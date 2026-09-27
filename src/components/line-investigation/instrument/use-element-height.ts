@@ -6,7 +6,7 @@ export function useElementHeight(): [(el: HTMLElement | null) => (() => void) | 
   const [height, setHeight] = useState(0);
   const ref = useCallback((el: HTMLElement | null) => {
     if (!el) return;
-    const read = () => setHeight(Math.round(el.getBoundingClientRect().height));
+    const read = () => setHeight(el.offsetHeight);
     read();
     const observer = new ResizeObserver(read);
     observer.observe(el);

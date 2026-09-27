@@ -72,6 +72,7 @@
 @theme inline {
   --font-li-body: var(--font-barlow), system-ui, sans-serif;
   --font-li-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-li-display: var(--font-barlow-condensed), var(--font-barlow), system-ui, sans-serif;
 }
 
 @utility tnum {

@@ -35,6 +35,7 @@ export function WhyZone({
   onClear,
   onRings,
   compact,
+  demo = false,
   phase,
   failure,
 }: {
@@ -48,6 +49,7 @@ export function WhyZone({
   onClear: () => void;
   onRings: (rings: Map<string, number>) => void;
   compact: boolean;
+  demo?: boolean;
   phase?: CasePhase;
   failure?: ReactNode;
 }) {
@@ -93,9 +95,11 @@ export function WhyZone({
           Reconstructed why
         </h2>
         <span className="text-xs text-li-text-subtle">
-          {hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
+          {demo
+            ? "hover a clause to trace its evidence"
+            : hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
         </span>
-        {pinned && (
+        {pinned && !demo && (
           <button
             type="button"
             onClick={onClear}
@@ -118,6 +122,7 @@ export function WhyZone({
               marked={!effective && marked.has(clause.id)}
               quiet={effective !== null && effective !== clause.id}
               compact={compact}
+              dense={demo && !compact}
               tabIndex={i === focusIndex ? 0 : -1}
               onEnter={() => onHover(clause.id)}
               onLeave={() => onHover(null)}

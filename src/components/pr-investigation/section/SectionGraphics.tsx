@@ -1,6 +1,7 @@
-import { useId } from "react";
 import { ArtifactGlyph } from "../../line-investigation/bore/ArtifactGlyph";
 import { AxisBreakMark } from "../../line-investigation/bore/AxisBreakMark";
+import { DatumRule } from "../../line-investigation/bore/DatumRule";
+import { GapHatch } from "../../line-investigation/bore/GapHatch";
 import { PR_SECTION as G } from "../layout/pr-geometry";
 import type { PrSectionLayout } from "../layout/types";
 import type { PrClause, PrView } from "../model/types";
@@ -27,7 +28,6 @@ export function SectionGraphics({
   selected: string | null;
   inspected: string | null;
 }) {
-  const hatch = useId();
   const { datumY, axisX } = layout;
   const coreActive = new Map(
     layout.cores.map((c) => [
@@ -72,18 +72,6 @@ export function SectionGraphics({
       width="100%"
       height={layout.bottom}
     >
-      <defs>
-        <pattern
-          id={hatch}
-          width="6"
-          height="6"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(45)"
-        >
-          <line x1="0" y1="0" x2="0" y2="6" strokeWidth="1" className="stroke-li-gap" />
-        </pattern>
-      </defs>
-
       {selectedCore && (
         <rect
           x={selectedCore.x - 22}
@@ -235,15 +223,7 @@ export function SectionGraphics({
       ))}
       {layout.hatches.map((h) => (
         <g key={h.id} opacity={artifactOpacity(h.id)} className={FADE}>
-          <rect
-            x={h.x - G.hatchWidth / 2}
-            y={h.top}
-            width={G.hatchWidth}
-            height={h.height}
-            fill={`url(#${hatch})`}
-            strokeDasharray="3 3"
-            className="stroke-li-gap"
-          />
+          <GapHatch x={h.x} top={h.top} height={h.height} width={G.hatchWidth} />
         </g>
       ))}
 
@@ -258,14 +238,7 @@ export function SectionGraphics({
         />
       )}
 
-      <line
-        x1={axisX - 50}
-        x2={width}
-        y1={datumY}
-        y2={datumY}
-        strokeWidth={2}
-        className="stroke-li-datum"
-      />
+      <DatumRule x1={axisX - 50} x2={width} y={datumY} />
     </svg>
   );
 }

@@ -1,27 +1,24 @@
-import { SiteHeader } from "@/components/SiteHeader";
-import { Braces, PullRequest } from "@/components/icons";
+import { ClosingCta } from "@/components/landing/ClosingCta";
+import { EvidenceStandard } from "@/components/landing/EvidenceStandard";
 import { Hero } from "@/components/landing/Hero";
 import { Method } from "@/components/landing/Method";
-import { Principles } from "@/components/landing/Principles";
-import { ReviewCopilot } from "@/components/landing/ReviewCopilot";
+import { PrScale } from "@/components/landing/PrScale";
 import { SiteFooter } from "@/components/landing/SiteFooter";
+import { SiteHeader } from "@/components/landing/SiteHeader";
+import { displayFont, lineInvestigationFonts } from "@/components/line-investigation/fonts";
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
-      <SiteHeader
-        secondary={{
-          href: "/pr",
-          label: "Explain a PR",
-          icon: <PullRequest className="size-4 text-ink-3" />,
-        }}
-        cta={{ href: "/app", label: "Explain a line", icon: <Braces className="size-4" /> }}
-      />
+    <div
+      className={`${lineInvestigationFonts} ${displayFont} min-h-screen bg-li-paper font-li-body text-li-ink`}
+    >
+      <SiteHeader />
       <main>
         <Hero />
-        <ReviewCopilot />
-        <Principles />
+        <PrScale />
+        <EvidenceStandard />
         <Method />
+        <ClosingCta />
       </main>
       <SiteFooter />
     </div>

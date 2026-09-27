@@ -1,9 +1,9 @@
-import { useId } from "react";
 import { BORE } from "../layout/geometry";
 import type { BoreLayout } from "../layout/types";
 import type { ViewGap } from "../model/types";
 import { ArtifactGlyph } from "./ArtifactGlyph";
 import { AxisBreakMark } from "./AxisBreakMark";
+import { GapHatch } from "./GapHatch";
 import { markCenter } from "./bore-marks";
 import type { BoreMark, TraceModel } from "./types";
 
@@ -41,7 +41,6 @@ export function BoreGraphics({
   trace: TraceModel | null;
   arrival?: Map<string, number> | null;
 }) {
-  const hatch = useId();
   const leaderFor = new Map(layout.leaders.map((l) => [l.id, l]));
   const coreEnd = Math.max(
     datumY + BORE.firstSegment,
@@ -63,17 +62,6 @@ export function BoreGraphics({
 
   return (
     <g transform={`translate(${shift} 0)`}>
-      <defs>
-        <pattern
-          id={hatch}
-          width="6"
-          height="6"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(45)"
-        >
-          <line x1="0" y1="0" x2="0" y2="6" strokeWidth="1" className="stroke-li-gap" />
-        </pattern>
-      </defs>
       <line
         x1={BORE.coreX}
         x2={BORE.coreX}
@@ -94,15 +82,7 @@ export function BoreGraphics({
         const host = marks.find((m) => m.id === g.afterId);
         return (
           <g key={g.id} opacity={host && !host.active ? 0.25 : 1} {...arriving(g.id)}>
-            <rect
-              x={BORE.coreX - 9}
-              y={g.top}
-              width={18}
-              height={g.height}
-              fill={verified ? `url(#${hatch})` : "none"}
-              strokeDasharray="3 3"
-              className={verified ? "stroke-li-gap" : "stroke-li-unverified"}
-            />
+            <GapHatch x={BORE.coreX} top={g.top} height={g.height} verified={verified} />
             {leader && (
               <path
                 d={`M${leader.points.map((p) => p.join(" ")).join(" L")}`}
