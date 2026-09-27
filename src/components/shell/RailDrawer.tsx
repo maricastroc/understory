@@ -45,7 +45,7 @@ export function RailDrawer({
 
   return (
     <div
-      className={`fixed inset-0 z-40 min-[768px]:hidden ${open ? "" : "pointer-events-none"}`}
+      className={`fixed inset-0 z-40 min-[1360px]:hidden ${open ? "" : "pointer-events-none"}`}
       inert={!open}
     >
       <div

@@ -26,6 +26,7 @@ import { useSpecimenLayout } from "@/components/line-investigation/specimen/use-
 import { AppHeader } from "@/components/shell/AppHeader";
 import { AppShell } from "@/components/shell/AppShell";
 import { CaseRail } from "@/components/shell/CaseRail";
+import { CaseStrip } from "@/components/shell/CaseStrip";
 import { railFooterInfo } from "@/components/shell/rail-footer-info";
 import { filterRail, lineRailItems, prRailItems } from "@/components/shell/rail-items";
 import type { RailFilter } from "@/components/shell/types";
@@ -123,6 +124,13 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
           onMenuClick={() => setMenuOpen(true)}
         />
       }
+      strip={
+        <CaseStrip
+          items={filterRail(lineItems, prItems, filter)}
+          expanded={menuOpen}
+          onOpen={() => setMenuOpen(true)}
+        />
+      }
       rail={(onClose) => (
         <CaseRail
           items={filterRail(lineItems, prItems, filter)}
@@ -135,7 +143,7 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
         />
       )}
     >
-      <div className="min-w-0 px-8 pt-6 pb-20 max-[767px]:px-4">
+      <div className="min-w-0 px-8 pt-6 pb-20 max-[820px]:px-4">
         <LineInvestigation
           key={state}
           result={result}

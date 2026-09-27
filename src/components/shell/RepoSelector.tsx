@@ -38,7 +38,9 @@ export function RepoSelector({
           }`}
         />
         <span className="truncate">{repo.name}</span>
-        {repo.detail && <span className="shrink-0 text-li-text-muted">{repo.detail}</span>}
+        {repo.detail && (
+          <span className="shrink-0 text-li-text-muted max-[1100px]:hidden">{repo.detail}</span>
+        )}
         <span aria-hidden className="text-li-text-muted">
           ▾
         </span>

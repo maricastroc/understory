@@ -135,7 +135,7 @@ export function HeaderSearch({
   );
 
   return (
-    <div ref={box} className="relative ml-3 max-w-115 min-w-0 flex-1 max-[1279px]:hidden">
+    <div ref={box} className="relative ml-3 max-w-115 min-w-0 flex-1 max-[1280px]:hidden">
       <label className="flex items-center gap-2 rounded border border-li-divider px-2.5 py-1.5 text-[13px] text-li-text-subtle focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-li-steel">
         <Search className="size-3.5 shrink-0" />
         <span className="sr-only">{placeholder}</span>

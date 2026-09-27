@@ -76,7 +76,7 @@ export function SpecimenPreview({
 
   return (
     <main
-      className={`${lineInvestigationFonts} min-h-screen bg-li-paper px-8 py-6 font-li-body text-li-ink max-[819px]:px-4`}
+      className={`${lineInvestigationFonts} min-h-screen bg-li-paper px-8 py-6 font-li-body text-li-ink max-[820px]:px-4`}
     >
       <p className="mb-4 font-li-mono text-[11px] leading-4 text-li-text-muted">
         dev preview · CodeSpecimen · {demo ? `live ${demo.repo}` : "synthetic fixture"} · {state} ·{" "}

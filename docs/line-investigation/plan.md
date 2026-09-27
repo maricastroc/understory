@@ -289,7 +289,7 @@ fixture sintética e suas variantes).
 | Rodapé | "Cases saved across devices" | Convidado: "Sign in to save line cases". Logado: "Line cases saved across devices" só quando o servidor persiste (`GET /api/investigations` devolve `persisted`); senão "Line cases aren't saved on this server". PRs continuam só no navegador. |
 | Fonte | Barlow no app todo | Barlow só no header e no rail; corpos do Composer e do `/pr` não mudam (D6). |
 | `/pr` | — | Mesmo shell; o rail lista PRs do navegador e casos de linha salvos (abrem em `/app?case=`). Corpo e `PrRail` inalterados; rail direito com altura total. |
-| Mobile (< 768) | drawer | Botão de menu abre o rail num diálogo com foco preso, Esc e ✕ no cabeçalho do rail; foco volta ao botão. |
+| Mobile (< 820) | drawer | Botão de menu abre o rail num diálogo com foco preso, Esc e ✕ no cabeçalho do rail; foco volta ao botão (entre 820 e 1359 o mesmo diálogo abre pela faixa de 56 px, §14). |
 | Drawer de evidência | top 56 px | Top 56 px (header novo). |
 | Pai/filho | `parentCaseId` | Coluna `parentCaseId` (migração `20260927160000_investigation_parent_case`). "Ask a follow-up" grava o pai quando a nova pergunta é no mesmo arquivo; drill-down grava o pai. A API tolera banco sem a coluna (P2022): salva sem o pai e devolve `parentSaved: false`. **A migração precisa ser aplicada antes do deploy.** |
 | `?case=ID` | — | Abre o caso salvo depois de carregar a lista; id desconhecido é ignorado. |
@@ -302,7 +302,7 @@ Mantidos para o passe de refinamento visual (sem problema funcional ou de acessi
 Decisão de produto pendente: veredito "Resolved" com claims misattributed (§12). Comportamento
 atual preservado.
 
-## 14. Etapa 11 — estados
+## 14. Etapas 11–12 — estados e responsivo
 
 | Tema | Handoff | Implementação e motivo |
 |---|---|---|
@@ -311,9 +311,13 @@ atual preservado.
 | Stagger | 60 ms, de cima para baixo, nenhum com reduced motion | Só na chegada real da evidência numa tela que estava coletando; caso salvo aberto pelo rail não anima. Ordem pela profundidade do glifo; o rótulo anima junto com o seu glifo. `animation-fill-mode: backwards` para não brigar com o esmaecimento por opacidade. |
 | Erro | shell mantido, mensagem + Retry na área do instrumento | Erro de caso de linha fica no lugar do "why", com `ErrorState` ("Try again" repete a mesma pergunta, com o mesmo pai) e "Back to code". Drill-down (sem `location`) continua no caminho antigo (D2). |
 | Vazio | "no history yet… added in the working tree" | "No history was found for this line." + "The investigation read <sha7> and found no commit that changed it…". O sistema não sabe se a linha está só na working tree (o collect lê o HEAD); o texto diz apenas o que foi lido. Sem bore, sem "All evidence · 0" e sem Key. |
-| Overflow de código | `overflow-x: auto` só no painel | Já era assim desde a etapa 5 (a "linha cortada" anotada na etapa 10 era rolagem horizontal com barra oculta). |
+| Overflow de código | `overflow-x: auto` só no painel | Já era assim desde a etapa 5 (a "linha cortada" anotada na etapa 10 era rolagem horizontal com barra oculta). Quando as linhas transbordam (painel de 420 px), a área de rolagem vira região focável com nome, para ser rolada pelo teclado (axe `scrollable-region-focusable`). |
 | Recuperação parcial | cláusulas silenciosas por cláusula | Não existe (depende da etapa 13, fora do escopo). |
+| Rail 1100–1359 | faixa de 56 px só com glifos; lista abre como overlay | Faixa de 56 px de 820 a 1359: um único botão ("Show cases, N. Open case: …") com os glifos de status; abre o mesmo overlay do rail usado no celular (foco preso, Esc, foco volta à faixa). |
+| < 820 | rail pelo botão de menu do header | Igual. O seletor de repo some abaixo de 820; branch · sha somem abaixo de 1100 (o nome tem prioridade; o detalhe continua no popover). |
+| Breakpoints | 1360 / 1100 / 820 | Todos os `max-[…]` passaram de `N−1` para `N`: no Tailwind v4 `max-[N]` é `width < N`, e `max-[1359px]` deixava o rail cheio exatamente em 1359. Shell e instrumento trocam juntos em cada borda (teste Playwright em 1360/1359/1100/1099/820/819). |
+| Núcleo do bore < 820 | x = 24 | x = 48 (§12). |
 
 ## 15. Estado
 
-Etapas 0–11 implementadas e comitadas; etapa 12 (responsivo) em seguida. A etapa 13 ficou fora desta entrega.
+Etapas 0–12 implementadas e comitadas. A etapa 13 ficou fora desta entrega.

@@ -14,6 +14,7 @@ import { fetchSavedCases } from "@/components/investigator/saved-cases";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { AppShell } from "@/components/shell/AppShell";
 import { CaseRail } from "@/components/shell/CaseRail";
+import { CaseStrip } from "@/components/shell/CaseStrip";
 import { railFooterInfo } from "@/components/shell/rail-footer-info";
 import { filterRail, lineRailItems, prRailItems } from "@/components/shell/rail-items";
 import type { RailFilter, RailItem, RepoSummary } from "@/components/shell/types";
@@ -147,6 +148,13 @@ export default function PrPage() {
           crossLink="line"
           user={user}
           onMenuClick={() => setMenuOpen(true)}
+        />
+      }
+      strip={
+        <CaseStrip
+          items={filterRail(lineItems, prItems, filter)}
+          expanded={menuOpen}
+          onOpen={() => setMenuOpen(true)}
         />
       }
       rail={(onClose) => (

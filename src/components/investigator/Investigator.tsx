@@ -12,6 +12,7 @@ import { RailContent, RightRail } from "../rail/RightRail";
 import { AppHeader } from "../shell/AppHeader";
 import { AppShell } from "../shell/AppShell";
 import { CaseRail } from "../shell/CaseRail";
+import { CaseStrip } from "../shell/CaseStrip";
 import { railFooterInfo } from "../shell/rail-footer-info";
 import { repoDisplayName } from "../shell/repo-display-name";
 import { filterRail, lineRailItems, prRailItems } from "../shell/rail-items";
@@ -210,6 +211,7 @@ export function Investigator() {
           onMenuClick={() => setMenuOpen(true)}
         />
       }
+      strip={<CaseStrip items={railItems} expanded={menuOpen} onOpen={() => setMenuOpen(true)} />}
       rail={(onClose) => (
         <CaseRail
           items={railItems}
@@ -226,7 +228,7 @@ export function Investigator() {
         <div
           className={
             lineCase || draftCase
-              ? "min-w-0 flex-1 px-8 pt-6 pb-20 max-[767px]:px-4"
+              ? "min-w-0 flex-1 px-8 pt-6 pb-20 max-[820px]:px-4"
               : "mx-auto max-w-270 min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8"
           }
         >

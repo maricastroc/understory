@@ -15,6 +15,7 @@ import { SpecimenHeader } from "./SpecimenHeader";
 import { SpecimenLine } from "./SpecimenLine";
 import { SPECIMEN } from "./specimen-metrics";
 import type { BlameStatus, LineRange, SpecimenLayout, SpecimenWidth } from "./types";
+import { useHorizontalOverflow } from "./use-horizontal-overflow";
 
 const WIDTH: Record<SpecimenWidth, string> = { wide: "w-115", narrow: "w-105", full: "w-full" };
 
@@ -46,6 +47,7 @@ export function CodeSpecimen({
   onDatumY?: (y: number) => void;
 }) {
   const listId = useId();
+  const [scrollRef, scrolls] = useHorizontalOverflow();
   const enclosing = useMemo(
     () => enclosingSymbol(lines, datum.end, path),
     [lines, datum.end, path],
@@ -99,7 +101,13 @@ export function CodeSpecimen({
       className={`flex flex-col border border-li-divider bg-li-neutral-100 font-li-mono text-xs text-li-neutral-800 shadow-li-sm ${WIDTH[layout.width]}`}
     >
       <SpecimenHeader path={path} status={blameStatus} hasBars={bars.size > 0} />
-      <div className="overflow-x-auto pt-2.5 pb-2">
+      <div
+        ref={scrollRef}
+        tabIndex={scrolls ? 0 : undefined}
+        aria-label={scrolls ? "Code lines, scroll sideways for long lines" : undefined}
+        role={scrolls ? "region" : undefined}
+        className="overflow-x-auto pt-2.5 pb-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel"
+      >
         {win.padRows > 0 && (
           <div aria-hidden style={{ height: win.padRows * SPECIMEN.rowHeight }} />
         )}

@@ -20,7 +20,7 @@ export function AccountButton({ user }: { user: AuthUser | null }) {
     return (
       <a href="/api/auth/login" className={liButton("secondary")}>
         <Github className="size-4 shrink-0" />
-        <span className="max-[639px]:sr-only">Sign in with GitHub</span>
+        <span className="max-[640px]:sr-only">Sign in with GitHub</span>
       </a>
     );
   }

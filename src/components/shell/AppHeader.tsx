@@ -43,24 +43,24 @@ export function AppHeader({
       <span aria-hidden className="min-[640px]:hidden">
         +
       </span>
-      <span className="max-[639px]:sr-only">New investigation</span>
+      <span className="max-[640px]:sr-only">New investigation</span>
     </>
   );
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4.5 border-b border-li-divider bg-li-paper px-5 font-li-body text-li-ink max-[767px]:gap-3 max-[767px]:px-4">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-4.5 border-b border-li-divider bg-li-paper px-5 font-li-body text-li-ink max-[820px]:gap-3 max-[820px]:px-4">
       <button
         type="button"
         aria-label="Open cases"
         onClick={onMenuClick}
-        className="-ml-1 grid size-8 shrink-0 cursor-pointer place-items-center rounded text-li-ink hover:bg-li-neutral-200 min-[768px]:hidden"
+        className="-ml-1 grid size-8 shrink-0 cursor-pointer place-items-center rounded text-li-ink hover:bg-li-neutral-200 min-[820px]:hidden"
       >
         <Menu className="size-5" />
       </button>
       <BrandMark />
-      <span aria-hidden className="h-5 w-px shrink-0 bg-li-divider max-[767px]:hidden" />
+      <span aria-hidden className="h-5 w-px shrink-0 bg-li-divider max-[820px]:hidden" />
       {repo && (
-        <div className="max-w-96 min-w-0 shrink max-[767px]:hidden">
+        <div className="max-w-96 min-w-0 shrink max-[820px]:hidden">
           <RepoSelector repo={repo} onNewInRepo={onNewInRepo} />
         </div>
       )}
@@ -73,11 +73,11 @@ export function AppHeader({
       <div className="ml-auto flex shrink-0 items-center gap-2">
         <LanguageSwitch language={language} onChange={setLanguage} />
         {crossLink === "pr" ? (
-          <Link href="/pr" className={liButton("secondary", "max-[639px]:hidden")}>
+          <Link href="/pr" className={liButton("secondary", "max-[640px]:hidden")}>
             Explain a PR
           </Link>
         ) : (
-          <Link href="/app" className={liButton("secondary", "max-[639px]:hidden")}>
+          <Link href="/app" className={liButton("secondary", "max-[640px]:hidden")}>
             Explain a line
           </Link>
         )}

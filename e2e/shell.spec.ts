@@ -82,3 +82,64 @@ test("on a phone the cases open in a drawer that traps focus and closes on Escap
   );
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+const EDGES = [
+  { width: 1360, rail: true, strip: false, menu: false, mode: "panel", code: 460 },
+  { width: 1359, rail: false, strip: true, menu: false, mode: "panel", code: 420 },
+  { width: 1100, rail: false, strip: true, menu: false, mode: "panel", code: 420 },
+  { width: 1099, rail: false, strip: true, menu: false, mode: "strip", code: null },
+  { width: 820, rail: false, strip: true, menu: false, mode: "strip", code: null },
+  { width: 819, rail: false, strip: false, menu: true, mode: "strip", code: null },
+] as const;
+
+async function inViewport(page: Page, selector: string) {
+  return page.locator(selector).evaluateAll((els) =>
+    els.some((el) => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && r.right > 0 && r.left < window.innerWidth;
+    }),
+  );
+}
+
+for (const edge of EDGES) {
+  test(`breakpoint ${edge.width}: shell and instrument switch together`, async ({ page }) => {
+    await open(page, edge.width);
+    expect(await inViewport(page, 'nav[aria-label="Case list"]')).toBe(edge.rail);
+    expect(await inViewport(page, 'button[aria-label^="Show cases, "]')).toBe(edge.strip);
+    expect(await inViewport(page, 'button[aria-label="Open cases"]')).toBe(edge.menu);
+    const specimen = page.locator("section[data-datum-y]");
+    await expect(specimen).toHaveAttribute("data-mode", edge.mode);
+    if (edge.code) expect(Math.round((await specimen.boundingBox())!.width)).toBe(edge.code);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
+}
+
+test("the collapsed strip opens the case list as an overlay and gives focus back", async ({
+  page,
+}) => {
+  await open(page, 1200);
+  const strip = page.getByRole("button", {
+    name: /^Show cases, 6\. Open case: Why exactly 3 retries\?/,
+  });
+  await strip.click();
+  const overlay = page.getByRole("dialog", { name: "Cases" });
+  await expect(overlay).toBeInViewport();
+  await expect(overlay.locator('button[aria-current="page"]')).toContainText(
+    "Why exactly 3 retries?",
+  );
+  expect(await axeViolations(page)).toEqual([]);
+  await page.keyboard.press("Escape");
+  await expect(overlay).not.toBeInViewport();
+  await expect(strip).toBeFocused();
+});
+
+for (const width of [1200, 960, 390]) {
+  test(`axe at ${width}, contrast included`, async ({ page }) => {
+    await open(page, width);
+    await page.mouse.move(0, 0);
+    expect(await axeViolations(page)).toEqual([]);
+  });
+}

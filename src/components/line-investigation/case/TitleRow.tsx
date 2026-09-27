@@ -49,11 +49,11 @@ export function TitleRow({
   const popoverId = useId();
   const anchor = useRef<HTMLDivElement>(null);
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 max-[819px]:flex-col max-[819px]:items-start">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 max-[820px]:flex-col max-[820px]:items-start">
       <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-4 gap-y-1.5">
         <h1
           title={view.question}
-          className="max-w-full min-w-0 truncate font-li-body text-[32px] leading-[1.1] font-semibold tracking-[-0.02em] text-li-ink max-[819px]:line-clamp-2 max-[819px]:text-2xl max-[819px]:whitespace-normal"
+          className="max-w-full min-w-0 truncate font-li-body text-[32px] leading-[1.1] font-semibold tracking-[-0.02em] text-li-ink max-[820px]:line-clamp-2 max-[820px]:text-2xl max-[820px]:whitespace-normal"
         >
           {view.question}
         </h1>
