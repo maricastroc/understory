@@ -1,6 +1,5 @@
 import type { RailStatus } from "./types";
-
-const HATCH = "repeating-linear-gradient(135deg, var(--color-li-gap) 0 1px, transparent 1px 3px)";
+import { HATCH } from "../line-investigation/parts/hatch";
 
 export function StatusGlyph({ status }: { status: RailStatus }) {
   if (status === "pr") {

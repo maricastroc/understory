@@ -1,4 +1,5 @@
 import type { TallyState, ViewClause } from "../model/types";
+import { HATCH_WIDE } from "../parts/hatch";
 
 const CELL: Record<TallyState, string> = {
   verified: "border-li-evidence bg-li-evidence",
@@ -9,15 +10,13 @@ const CELL: Record<TallyState, string> = {
   unknown: "border-li-ink",
 };
 
-const HATCH = "repeating-linear-gradient(135deg, var(--color-li-gap) 0 1px, transparent 1px 4px)";
-
 export function TallyCells({ clause }: { clause: ViewClause }) {
   if (clause.silent) {
     return (
       <span className="flex gap-0.5">
         <span
           className="h-2 w-3.5 border border-dashed border-li-gap"
-          style={{ background: HATCH }}
+          style={{ background: HATCH_WIDE }}
         />
       </span>
     );

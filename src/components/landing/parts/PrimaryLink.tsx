@@ -13,7 +13,7 @@ export function PrimaryLink({
   className?: string;
 }) {
   return (
-    <Link href={href} className={liButton("brand", className)}>
+    <Link href={href} className={liButton("primary", className)}>
       <BlueprintCorners />
       {children}
     </Link>

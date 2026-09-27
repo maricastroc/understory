@@ -1,6 +1,5 @@
 import type { PrRegion, RegionState } from "../model/types";
-
-const HATCH = "repeating-linear-gradient(135deg, var(--color-li-gap) 0 1px, transparent 1px 3px)";
+import { HATCH } from "../../line-investigation/parts/hatch";
 
 export function RegionCell({ state, height = 12 }: { state: RegionState; height?: number }) {
   if (state === "silent") {

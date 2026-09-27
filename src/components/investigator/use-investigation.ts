@@ -9,7 +9,7 @@ import { draftResult } from "./draft-result";
 import type { SavedCase } from "./saved-case";
 import { fetchSavedCases } from "./saved-cases";
 
-const DEFAULT_REPO = process.env.NEXT_PUBLIC_DEFAULT_REPO || ".demo/payments-service";
+export const DEFAULT_REPO = process.env.NEXT_PUBLIC_DEFAULT_REPO || ".demo/payments-service";
 const FIRST_CASE = 2049;
 
 export type Form = InvestigateInput;

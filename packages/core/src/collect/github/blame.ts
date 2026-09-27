@@ -1,5 +1,6 @@
 import type { BlameSpan, PrLookup } from "../../types";
 import { graphql, rest } from "./client";
+import { rememberGitHubBlame, rememberGitHubLookups } from "../history/remember";
 import { type Comment, COMMENTS } from "./comments";
 
 export type PrReview = {
@@ -63,8 +64,9 @@ const PR_FIELDS = `associatedPullRequests(first: 1) {
 }`;
 
 const LEAN_BLAME_QUERY = `
-query Blame($owner:String!, $repo:String!, $ref:String!, $path:String!) {
+query Blame($owner:String!, $repo:String!, $ref:String!, $path:String!, $blob:String!) {
   repository(owner:$owner, name:$repo) {
+    file: object(expression:$blob) { oid }
     object(expression:$ref) {
       ... on Commit {
         oid
@@ -157,12 +159,37 @@ async function blameFile(
   repo: string,
   ref: string,
   path: string,
-): Promise<{ oid: string | null; ranges: LeanRange[] }> {
+): Promise<{
+  oid: string | null;
+  ranges: LeanRange[];
+  blob: string | null;
+  remembered: Promise<void>;
+}> {
   const data = await graphql<{
-    repository: { object: { oid?: string; blame: { ranges: LeanRange[] } } | null } | null;
-  }>(LEAN_BLAME_QUERY, { owner, repo, ref, path });
+    repository: {
+      file: { oid?: string } | null;
+      object: { oid?: string; blame: { ranges: LeanRange[] } } | null;
+    } | null;
+  }>(LEAN_BLAME_QUERY, { owner, repo, ref, path, blob: `${ref}:${path}` });
   const object = data.repository?.object;
-  return { oid: object?.oid ?? null, ranges: object?.blame?.ranges ?? [] };
+  const ranges = object?.blame?.ranges ?? [];
+  const blob = data.repository?.file?.oid ?? null;
+  const remembered =
+    blob && ranges.length
+      ? rememberGitHubBlame(
+          owner,
+          repo,
+          path,
+          blob,
+          ranges.map((r) => ({
+            startLine: r.startingLine,
+            endLine: r.endingLine,
+            sha: r.commit.oid,
+            date: r.commit.committedDate,
+          })),
+        ).catch(() => {})
+      : Promise.resolve();
+  return { oid: object?.oid ?? null, ranges, blob, remembered };
 }
 
 export async function blameLinesAt(
@@ -173,7 +200,7 @@ export async function blameLinesAt(
   start: number,
   end: number,
 ): Promise<{ oid: string | null; commits: BlameCommit[] }> {
-  const { oid, ranges } = await blameFile(owner, repo, ref, path);
+  const { oid, ranges, blob, remembered } = await blameFile(owner, repo, ref, path);
 
   const byOid = new Map<string, LeanCommit>();
   for (const r of ranges) {
@@ -185,7 +212,14 @@ export async function blameLinesAt(
     a.committedDate.localeCompare(b.committedDate),
   );
 
-  return { oid, commits: await enrichAll(owner, repo, commits, commits.slice(0, MAX_ENRICH)) };
+  const enriched = await enrichAll(owner, repo, commits, commits.slice(0, MAX_ENRICH));
+  if (blob) {
+    const lookups = new Map(enriched.map((c) => [c.oid, c.prLookup ?? "skipped"] as const));
+    void remembered
+      .then(() => rememberGitHubLookups(owner, repo, path, blob, lookups))
+      .catch(() => {});
+  }
+  return { oid, commits: enriched };
 }
 
 export async function blameLines(
