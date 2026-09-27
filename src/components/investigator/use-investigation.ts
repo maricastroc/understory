@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { ArtifactRef, DigResult, InvestigateInput } from "@git-investigator/core/types";
 import type { AuthUser } from "./use-auth";
+import type { CaseDraft } from "./case-draft";
 import type { CaseParent } from "./case-parent";
+import { draftResult } from "./draft-result";
 import type { SavedCase } from "./saved-case";
 import { fetchSavedCases } from "./saved-cases";
 
@@ -18,6 +20,7 @@ export type Entry = {
   parentCaseId?: string;
   parentQuestion?: string;
   pending?: boolean;
+  mountKey?: string;
 };
 export type View = "browse" | "case";
 
@@ -69,7 +72,11 @@ export function useInvestigation(user: AuthUser | null) {
 
   const [resetKey, setResetKey] = useState(0);
 
+  const [draft, setDraft] = useState<CaseDraft | null>(null);
+
   const counter = useRef(FIRST_CASE);
+
+  const draftSeq = useRef(0);
 
   useEffect(() => {
     let alive = true;
@@ -103,11 +110,29 @@ export function useInvestigation(user: AuthUser | null) {
     buildEntry: (caseId: string, data: DigResult) => Entry,
     buildSave: (caseId: string, data: DigResult) => SavedCase,
     token?: string,
+    draftOf?: Omit<CaseDraft, "key" | "error"> & { key?: string },
   ) {
     if (loading) return;
     setLoading(true);
     setError(null);
     setView("case");
+
+    const key = draftOf ? (draftOf.key ?? `draft-${++draftSeq.current}`) : undefined;
+    if (draftOf && key) {
+      setActiveId(null);
+      setDraft({ key, form: draftOf.form, parent: draftOf.parent, error: null });
+    }
+    const settleDraft = () => {
+      if (key) setDraft((d) => (d?.key === key ? null : d));
+    };
+    const fail = (message: string) => {
+      if (key) {
+        setDraft((d) => (d?.key === key ? { ...d, error: message } : d));
+        return;
+      }
+      setError(message);
+      setView("browse");
+    };
 
     const persist = (caseId: string, data: DigResult) => {
       if (!user) return;
@@ -130,8 +155,7 @@ export function useInvestigation(user: AuthUser | null) {
 
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
-        setError(data.error || `Request failed (${res.status})`);
-        setView("browse");
+        fail(data.error || `Request failed (${res.status})`);
         return;
       }
 
@@ -140,13 +164,13 @@ export function useInvestigation(user: AuthUser | null) {
       if (!streamed) {
         const data = (await res.json()) as DigResult & { error?: string };
         if (!data.evidence) {
-          setError(data.error || `Request failed (${res.status})`);
-          setView("browse");
+          fail(data.error || `Request failed (${res.status})`);
           return;
         }
         const caseId = `GI-${counter.current++}`;
-        setHistory((h) => [buildEntry(caseId, data), ...h]);
+        setHistory((h) => [{ ...buildEntry(caseId, data), mountKey: key }, ...h]);
         setActiveId(caseId);
+        settleDraft();
         persist(caseId, data);
         return;
       }
@@ -160,8 +184,9 @@ export function useInvestigation(user: AuthUser | null) {
           const id = `GI-${counter.current++}`;
           caseId = id;
           const partial: DigResult = { evidence: msg.evidence, narrative: null };
-          setHistory((h) => [{ ...buildEntry(id, partial), pending: true }, ...h]);
+          setHistory((h) => [{ ...buildEntry(id, partial), pending: true, mountKey: key }, ...h]);
           setActiveId(id);
+          settleDraft();
           setLoading(false);
         } else if (msg.phase === "final") {
           const id = caseId;
@@ -173,25 +198,27 @@ export function useInvestigation(user: AuthUser | null) {
             ...(msg.error ? { error: msg.error } : {}),
           };
           setHistory((h) =>
-            h.map((e) => (e.caseId === id ? { ...buildEntry(id, full), pending: false } : e)),
+            h.map((e) => (e.caseId === id ? { ...e, ...buildEntry(id, full), pending: false } : e)),
           );
           persist(id, full);
         }
       });
 
-      if (!caseId) {
-        setError("The investigation did not return any evidence.");
-        setView("browse");
-      }
+      if (!caseId) fail("The investigation did not return any evidence.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-      setView("browse");
+      fail(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
   }
 
-  async function investigate(input: Form, token?: string, language?: string, parent?: CaseParent) {
+  async function investigate(
+    input: Form,
+    token?: string,
+    language?: string,
+    parent?: CaseParent,
+    draftKey?: string,
+  ) {
     await submit(
       { ...input, ...(language ? { language } : {}) },
       (caseId, data) => ({
@@ -209,7 +236,13 @@ export function useInvestigation(user: AuthUser | null) {
         ...(parent ? { parentCaseId: parent.caseId } : {}),
       }),
       token,
+      draftResult(input) ? { form: input, parent, key: draftKey } : undefined,
     );
+  }
+
+  function retryDraft(token?: string, language?: string) {
+    if (!draft || loading) return;
+    void investigate(draft.form, token, language, draft.parent, draft.key);
   }
 
   async function drillInto(
@@ -247,12 +280,14 @@ export function useInvestigation(user: AuthUser | null) {
       setActiveId(id);
       setView("case");
       setError(null);
+      setDraft((d) => (d?.error ? null : d));
     }
   }
 
   function backToCode() {
     setView("browse");
     setError(null);
+    setDraft((d) => (d?.error ? null : d));
   }
 
   function newInvestigation() {
@@ -260,6 +295,7 @@ export function useInvestigation(user: AuthUser | null) {
     setView("browse");
     setActiveId(null);
     setError(null);
+    setDraft((d) => (d?.error ? null : d));
   }
 
   function removeCase(id: string) {
@@ -276,7 +312,7 @@ export function useInvestigation(user: AuthUser | null) {
     }
   }
 
-  const browsing = view === "browse" && !loading;
+  const browsing = view === "browse";
 
   return {
     repoPath,
@@ -288,11 +324,13 @@ export function useInvestigation(user: AuthUser | null) {
     persisted,
     activeId,
     view,
+    draft,
     resetKey,
     current,
     browsing,
     investigate,
     drillInto,
+    retryDraft,
     selectCase,
     backToCode,
     newInvestigation,

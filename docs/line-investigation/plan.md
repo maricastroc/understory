@@ -201,7 +201,7 @@ comentários no código.
 | 10 | Shell, rail com filhos, migração `parentCaseId` | rail, zod, migração |
 | 11 | Estados | view model |
 | 12 | Responsivo | Playwright nos estados canônicos |
-| 13 | Headline e silêncio por cláusula (futuro, com `npm run eval`) | eval, variance |
+| 13 | ~~Headline e silêncio por cláusula~~ — fora do escopo desta entrega (decisão de 2026-09-27) | — |
 
 ## 10. Restrições conhecidas do repositório
 
@@ -298,12 +298,22 @@ Mantidos para o passe de refinamento visual (sem problema funcional ou de acessi
 
 - Trace e tick da régua se sobrepõem no lane x≈482.
 - Linhas vazias intencionais no topo do painel de código quando há poucas linhas acima do datum.
-- Linha de código longa cortada no painel de 460 px.
 
 Decisão de produto pendente: veredito "Resolved" com claims misattributed (§12). Comportamento
 atual preservado.
 
-## 14. Estado
+## 14. Etapa 11 — estados
 
-Etapas 0–10 implementadas; 0–9 comitadas. Checkpoint de revisão depois da etapa 10, antes das
-etapas 11–13.
+| Tema | Handoff | Implementação e motivo |
+|---|---|---|
+| Carregamento | código e datum na hora; bore progressivo por estágio | Enquanto o `/api/dig` coleta, o caso já aparece como rascunho a partir do formulário: título, código no HEAD (cabeçalho "loading blame…"), datum e o texto "Collecting the line's history…" com 4 linhas de skeleton. Sem legenda de estágios: a API não transmite estágios. Quando a evidência chega, o mesmo componente continua montado (a `key` do rascunho passa para o caso) e o arquivo troca para o sha do caso sem apagar as linhas. |
+| Espaço reservado no título | — | Durante a coleta, "blame @ ·······" e "Ask a follow-up" ficam reservados invisíveis, para a linha do título não quebrar na chegada; o datum não se move (medido: 161 → 161 px). |
+| Stagger | 60 ms, de cima para baixo, nenhum com reduced motion | Só na chegada real da evidência numa tela que estava coletando; caso salvo aberto pelo rail não anima. Ordem pela profundidade do glifo; o rótulo anima junto com o seu glifo. `animation-fill-mode: backwards` para não brigar com o esmaecimento por opacidade. |
+| Erro | shell mantido, mensagem + Retry na área do instrumento | Erro de caso de linha fica no lugar do "why", com `ErrorState` ("Try again" repete a mesma pergunta, com o mesmo pai) e "Back to code". Drill-down (sem `location`) continua no caminho antigo (D2). |
+| Vazio | "no history yet… added in the working tree" | "No history was found for this line." + "The investigation read <sha7> and found no commit that changed it…". O sistema não sabe se a linha está só na working tree (o collect lê o HEAD); o texto diz apenas o que foi lido. Sem bore, sem "All evidence · 0" e sem Key. |
+| Overflow de código | `overflow-x: auto` só no painel | Já era assim desde a etapa 5 (a "linha cortada" anotada na etapa 10 era rolagem horizontal com barra oculta). |
+| Recuperação parcial | cláusulas silenciosas por cláusula | Não existe (depende da etapa 13, fora do escopo). |
+
+## 15. Estado
+
+Etapas 0–11 implementadas e comitadas; etapa 12 (responsivo) em seguida. A etapa 13 ficou fora desta entrega.

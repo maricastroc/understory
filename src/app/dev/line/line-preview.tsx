@@ -2,8 +2,10 @@
 
 import type { DigResult } from "@git-investigator/core/types";
 import { useMemo, useState } from "react";
+import { CaseFailure } from "@/components/investigator/CaseFailure";
 import type { AuthUser } from "@/components/investigator/use-auth";
 import { LineInvestigation } from "@/components/line-investigation/case/LineInvestigation";
+import type { CasePhase } from "@/components/line-investigation/case/types";
 import {
   SYNTHETIC_FILE_PATH,
   syntheticChargeBlame,
@@ -32,8 +34,24 @@ const NOW = Date.parse(SYNTHETIC_NOW);
 const ACTIVE = "GI-2049";
 const SYNTHETIC_USER: AuthUser = { login: "synthetic", name: "Synthetic User", avatarUrl: "" };
 
+const DRAFT: DigResult = {
+  evidence: {
+    ...syntheticRetryCap.evidence,
+    repo: { path: syntheticRetryCap.evidence.repo.path },
+    artifacts: [],
+    contradictions: [],
+    coverage: undefined,
+  },
+  narrative: null,
+};
+
+const PHASES: Record<string, CasePhase> = { collecting: "collecting", failed: "failed" };
+
 const STATES: Record<string, () => DigResult> = {
   resolved: () => syntheticRetryCap,
+  collecting: () => DRAFT,
+  failed: () => DRAFT,
+  empty: states.syntheticNoHistory,
   pending: () => ({ evidence: syntheticRetryCap.evidence, narrative: null }),
   "not-recorded": states.syntheticNotRecorded,
   "evidence-only": states.syntheticEvidenceOnly,
@@ -49,18 +67,22 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
   const layout = useSpecimenLayout();
   const [filter, setFilter] = useState<RailFilter>("all");
   const [menuOpen, setMenuOpen] = useState(false);
-  const pending = state === "pending";
+  const phase = PHASES[state];
+  const pending = state === "pending" || !!phase;
   const result = (STATES[state] ?? STATES.resolved)();
   const loc = result.evidence.location!;
   const signedIn = user === "synthetic" ? SYNTHETIC_USER : null;
 
   const entries = useMemo(
-    () => syntheticCases.map((e) => (e.caseId === ACTIVE ? { ...e, result, pending } : e)),
-    [result, pending],
+    () =>
+      phase
+        ? syntheticCases
+        : syntheticCases.map((e) => (e.caseId === ACTIVE ? { ...e, result, pending } : e)),
+    [result, pending, phase],
   );
   const lineItems = useMemo(
-    () => lineRailItems(entries, { activeId: ACTIVE, now: NOW }),
-    [entries],
+    () => lineRailItems(entries, { activeId: phase ? null : ACTIVE, now: NOW }),
+    [entries, phase],
   );
   const prItems = useMemo(() => prRailItems(syntheticPrCases, null), []);
 
@@ -70,8 +92,8 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
       lines={syntheticChargeLines}
       datum={{ start: loc.startLine, end: loc.endLine }}
       question={result.evidence.question}
-      blame={syntheticChargeBlame}
-      blameStatus="ready"
+      blame={phase || state === "empty" ? null : syntheticChargeBlame}
+      blameStatus={phase === "collecting" ? "loading" : phase === "failed" ? "unpinned" : "ready"}
       now={NOW}
       {...slot}
     />
@@ -123,6 +145,17 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
           renderSpecimen={renderSpecimen}
           onDrill={() => {}}
           onFollowUp={() => {}}
+          phase={phase}
+          failure={
+            phase === "failed" ? (
+              <CaseFailure
+                message="Request failed (502)"
+                signedIn={!!signedIn}
+                onRetry={() => {}}
+                onBack={() => {}}
+              />
+            ) : undefined
+          }
         />
       </div>
     </AppShell>

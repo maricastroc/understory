@@ -1,12 +1,13 @@
 "use client";
 
 import type { ArtifactRef, DigResult } from "@git-investigator/core/types";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { toArtifactRef } from "../../format";
 import type { SpecimenSlot } from "../instrument/types";
 import { LiveCodeSpecimen } from "../specimen/LiveCodeSpecimen";
 import { useSpecimenLayout } from "../specimen/use-specimen-layout";
 import { LineInvestigation } from "./LineInvestigation";
+import type { CasePhase } from "./types";
 
 export function LiveLineInvestigation({
   result,
@@ -15,6 +16,8 @@ export function LiveLineInvestigation({
   token,
   onDrill,
   onFollowUp,
+  phase,
+  failure,
 }: {
   result: DigResult;
   repoPath: string;
@@ -22,6 +25,8 @@ export function LiveLineInvestigation({
   token?: string;
   onDrill?: (ref: ArtifactRef) => void;
   onFollowUp?: () => void;
+  phase?: CasePhase;
+  failure?: ReactNode;
 }) {
   const [now] = useState(() => Date.now());
   const layout = useSpecimenLayout();
@@ -38,6 +43,7 @@ export function LiveLineInvestigation({
       question={ev.question}
       now={now}
       token={token}
+      awaitingSha={phase === "collecting"}
       {...slot}
     />
   );
@@ -51,6 +57,8 @@ export function LiveLineInvestigation({
       renderSpecimen={renderSpecimen}
       onDrill={canDrill ? (a) => onDrill?.(toArtifactRef(a.source)) : undefined}
       onFollowUp={onFollowUp}
+      phase={phase}
+      failure={failure}
     />
   );
 }

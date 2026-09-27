@@ -1,9 +1,11 @@
 "use client";
 
-import { type Dispatch, useCallback, useMemo, useState } from "react";
+import { type Dispatch, type ReactNode, useCallback, useMemo, useState } from "react";
+import { arrivalDelays } from "../bore/arrival-delays";
 import { markCenter, boreMarks } from "../bore/bore-marks";
 import { BoreGraphics } from "../bore/BoreGraphics";
 import { BoreLabels } from "../bore/BoreLabels";
+import type { CasePhase } from "../case/types";
 import { tracePath } from "../bore/trace-path";
 import { boreInput } from "../layout/bore-input";
 import { computeBoreLayout } from "../layout/compute-bore-layout";
@@ -28,6 +30,9 @@ export function Instrument({
   layout,
   now,
   renderSpecimen,
+  phase,
+  failure,
+  arrive = false,
 }: {
   view: InvestigationView;
   state: CaseState;
@@ -35,6 +40,9 @@ export function Instrument({
   layout: SpecimenLayout;
   now: number;
   renderSpecimen: SpecimenSlot;
+  phase?: CasePhase;
+  failure?: ReactNode;
+  arrive?: boolean;
 }) {
   const geometry = instrumentGeometry(layout);
   const [whyRef, whyHeight] = useElementHeight();
@@ -82,7 +90,9 @@ export function Instrument({
         });
   }, [input, now, boreTop, userExpanded, active]);
 
-  const marks = bore ? boreMarks(bore, byId, active) : [];
+  const drawn = bore && (bore.glyphs.length > 0 || bore.gaps.length > 0) ? bore : null;
+  const marks = drawn ? boreMarks(drawn, byId, active) : [];
+  const arrival = useMemo(() => (arrive && drawn ? arrivalDelays(drawn) : null), [arrive, drawn]);
   const trace = (() => {
     if (!clause || clause.silent || boreTop === null) return null;
     const startY = panel ? rings.get(clause.id) : boreTop;
@@ -120,7 +130,7 @@ export function Instrument({
     [],
   );
 
-  const boreBottom = boreTop !== null && bore ? boreTop + bore.height : 0;
+  const boreBottom = boreTop !== null && drawn ? boreTop + drawn.height : 0;
   const height = Math.max(specimenTop + specimenHeight, boreBottom, whyHeight) + 8;
   const location = view.location;
   const datumLabel = location
@@ -143,6 +153,8 @@ export function Instrument({
           onClear={() => dispatch({ type: "clear-pin" })}
           onRings={onRings}
           compact={!panel}
+          phase={phase}
+          failure={failure}
         />
       </div>
 
@@ -176,15 +188,18 @@ export function Instrument({
               strokeWidth={2}
               className="stroke-li-datum"
             />
-            <BoreGraphics
-              layout={bore}
-              marks={marks}
-              gaps={gaps}
-              shift={geometry.shift}
-              datumY={boreTop}
-              inspected={state.inspected}
-              trace={trace}
-            />
+            {drawn && (
+              <BoreGraphics
+                layout={drawn}
+                marks={marks}
+                gaps={gaps}
+                shift={geometry.shift}
+                datumY={boreTop}
+                inspected={state.inspected}
+                trace={trace}
+                arrival={arrival}
+              />
+            )}
           </svg>
           {panel && (
             <span
@@ -194,23 +209,26 @@ export function Instrument({
               {datumLabel}
             </span>
           )}
-          <section aria-label="History" className="pointer-events-none absolute inset-0">
-            <BoreLabels
-              layout={bore}
-              byId={byId}
-              gaps={gaps}
-              clauses={view.clauses}
-              active={active}
-              revealed={active ?? new Set()}
-              hovered={state.hoverArtifact}
-              inspected={state.inspected}
-              shift={geometry.shift}
-              width={geometry.labelWidth}
-              onHover={(id) => dispatch({ type: "hover-artifact", id })}
-              onInspect={(id) => dispatch({ type: "inspect", id })}
-              onToggleGroup={toggleGroup}
-            />
-          </section>
+          {drawn && (
+            <section aria-label="History" className="pointer-events-none absolute inset-0">
+              <BoreLabels
+                layout={drawn}
+                byId={byId}
+                gaps={gaps}
+                clauses={view.clauses}
+                active={active}
+                revealed={active ?? new Set()}
+                hovered={state.hoverArtifact}
+                inspected={state.inspected}
+                shift={geometry.shift}
+                width={geometry.labelWidth}
+                onHover={(id) => dispatch({ type: "hover-artifact", id })}
+                onInspect={(id) => dispatch({ type: "inspect", id })}
+                onToggleGroup={toggleGroup}
+                arrival={arrival}
+              />
+            </section>
+          )}
         </>
       )}
     </div>

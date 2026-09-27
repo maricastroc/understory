@@ -37,6 +37,7 @@ export function buildInvestigationView(
     artifacts,
     clauses,
     gaps,
+    empty: artifacts.length === 0 && gaps.length === 0,
     links: countLinks(ev, artifacts, gaps),
     checklist: deriveChecklist(result, clauses, audited, quotes),
     confidence: narrative?.confidence ?? null,

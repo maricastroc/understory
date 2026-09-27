@@ -63,6 +63,7 @@ export function BoreGraphics({
   datumY,
   inspected,
   trace,
+  arrival = null,
 }: {
   layout: BoreLayout;
   marks: BoreMark[];
@@ -71,6 +72,7 @@ export function BoreGraphics({
   datumY: number;
   inspected: string | null;
   trace: TraceModel | null;
+  arrival?: Map<string, number> | null;
 }) {
   const hatch = useId();
   const leaderFor = new Map(layout.leaders.map((l) => [l.id, l]));
@@ -84,6 +86,13 @@ export function BoreGraphics({
     : null;
   const ringGap = inspected ? layout.gaps.find((g) => g.id === inspected) : undefined;
   const ringY = ringMark ? markCenter(ringMark) : ringGap ? ringGap.anchorY : null;
+  const arriving = (id: string) =>
+    arrival?.has(id)
+      ? {
+          className: `${FADE} animate-li-arrive`,
+          style: { animationDelay: `${arrival.get(id)}ms` },
+        }
+      : { className: FADE };
 
   return (
     <g transform={`translate(${shift} 0)`}>
@@ -141,7 +150,7 @@ export function BoreGraphics({
         const leader = leaderFor.get(g.id);
         const host = marks.find((m) => m.id === g.afterId);
         return (
-          <g key={g.id} opacity={host && !host.active ? 0.25 : 1} className={FADE}>
+          <g key={g.id} opacity={host && !host.active ? 0.25 : 1} {...arriving(g.id)}>
             <rect
               x={BORE.coreX - 9}
               y={g.top}
@@ -165,7 +174,7 @@ export function BoreGraphics({
       {marks.map((m) => {
         const leader = leaderFor.get(m.id);
         return (
-          <g key={m.id} opacity={m.active ? 1 : 0.25} className={FADE}>
+          <g key={m.id} opacity={m.active ? 1 : 0.25} {...arriving(m.id)}>
             <Glyph mark={m} />
             {leader && (
               <path

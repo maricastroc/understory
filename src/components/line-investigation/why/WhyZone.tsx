@@ -1,13 +1,26 @@
-import { type KeyboardEvent, useId, useLayoutEffect, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  type ReactNode,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import type { CasePhase } from "../case/types";
 import { clauseDescription } from "../copy/clause-copy";
 import type { InvestigationView, ViewArtifact } from "../model/types";
 import { ClauseRow } from "./ClauseRow";
 
 const RING_OFFSET = 14;
 
-function hintFor(view: InvestigationView, pinnedIndex: number | null): string {
+function showsClauses(view: InvestigationView, phase: CasePhase | undefined): boolean {
+  if (phase || view.clauses.length === 0) return false;
+  return !(view.empty && (view.verdict === "not-recorded" || view.verdict === "evidence-only"));
+}
+
+function hintFor(view: InvestigationView, pinnedIndex: number | null, clauses: boolean): string {
   if (pinnedIndex !== null) return `tracing clause ${pinnedIndex + 1} · other evidence dimmed`;
-  if (view.clauses.length === 0) return "";
+  if (!clauses) return "";
   return "hover a clause to see its evidence";
 }
 
@@ -22,6 +35,8 @@ export function WhyZone({
   onClear,
   onRings,
   compact,
+  phase,
+  failure,
 }: {
   view: InvestigationView;
   byId: Map<string, ViewArtifact>;
@@ -33,12 +48,15 @@ export function WhyZone({
   onClear: () => void;
   onRings: (rings: Map<string, number>) => void;
   compact: boolean;
+  phase?: CasePhase;
+  failure?: ReactNode;
 }) {
   const headingId = useId();
   const listRef = useRef<HTMLOListElement>(null);
   const buttons = useRef(new Map<string, HTMLButtonElement>());
   const [focusIndex, setFocusIndex] = useState(0);
   const pinnedIndex = view.clauses.findIndex((c) => c.id === pinned);
+  const clauses = showsClauses(view, phase);
 
   useLayoutEffect(() => {
     const list = listRef.current;
@@ -75,7 +93,7 @@ export function WhyZone({
           Reconstructed why
         </h2>
         <span className="text-xs text-li-text-subtle">
-          {hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null)}
+          {hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
         </span>
         {pinned && (
           <button
@@ -87,8 +105,8 @@ export function WhyZone({
           </button>
         )}
       </div>
-      <WhyBody view={view} />
-      {view.clauses.length > 0 && (
+      <WhyBody view={view} phase={phase} failure={failure} />
+      {clauses && (
         <ol ref={listRef} className="relative mt-1 flex flex-col gap-1.5">
           {view.clauses.map((clause, i) => (
             <ClauseRow
@@ -120,21 +138,45 @@ export function WhyZone({
   );
 }
 
-function WhyBody({ view }: { view: InvestigationView }) {
-  if (view.verdict === "pending") {
-    const n = view.artifacts.length;
-    return (
-      <div role="status" className="mt-1 flex flex-col gap-1.5 pl-7">
-        <span className="text-xs text-li-text-subtle">
-          Reconstructing from {n} artifact{n === 1 ? "" : "s"}…
+function Skeleton({ caption }: { caption: string }) {
+  return (
+    <div role="status" className="mt-1 flex flex-col gap-1.5 pl-7">
+      <span className="text-xs text-li-text-subtle">{caption}</span>
+      {[0.9, 0.7, 0.8, 0.55].map((w) => (
+        <span key={w} className="flex h-12.5 items-start pt-2">
+          <span className="h-3 bg-li-neutral-200" style={{ width: `${w * 100}%` }} />
         </span>
-        {[0.9, 0.7, 0.8, 0.55].map((w) => (
-          <span key={w} className="flex h-12.5 items-start pt-2">
-            <span className="h-3 bg-li-neutral-200" style={{ width: `${w * 100}%` }} />
-          </span>
-        ))}
+      ))}
+    </div>
+  );
+}
+
+function WhyBody({
+  view,
+  phase,
+  failure,
+}: {
+  view: InvestigationView;
+  phase?: CasePhase;
+  failure?: ReactNode;
+}) {
+  if (phase === "collecting") return <Skeleton caption="Collecting the line's history…" />;
+  if (phase === "failed") return <div className="mt-1 flex flex-col gap-2.5 pl-7">{failure}</div>;
+  if (view.empty && view.verdict !== "out-of-scope" && view.verdict !== "fabrication") {
+    return (
+      <div className="mt-1 flex flex-col gap-1.5 pl-7">
+        <p className="text-base text-li-ink">No history was found for this line.</p>
+        <p className="text-xs text-li-text-subtle">
+          {view.pinnedSha
+            ? `The investigation read ${view.pinnedSha.slice(0, 7)} and found no commit that changed it, so there is nothing to trace.`
+            : "The investigation found no commit that changed it, so there is nothing to trace."}
+        </p>
       </div>
     );
+  }
+  if (view.verdict === "pending") {
+    const n = view.artifacts.length;
+    return <Skeleton caption={`Reconstructing from ${n} artifact${n === 1 ? "" : "s"}…`} />;
   }
   if (view.verdict === "evidence-only") {
     return (

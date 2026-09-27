@@ -143,6 +143,15 @@ describe("buildInvestigationView — verdict states", () => {
     expect(v.checklist[0]).toMatchObject({ kind: "not-recorded", tone: "silent" });
   });
 
+  it("knows when the line has no history at all", () => {
+    const v = view(states.syntheticNoHistory());
+    expect(v.empty).toBe(true);
+    expect(v.verdict).toBe("not-recorded");
+    expect(v.links).toBeNull();
+    expect(view().empty).toBe(false);
+    expect(view(states.syntheticEvidenceOnly()).empty).toBe(false);
+  });
+
   it("has an explicit out-of-scope state with the model's one-line answer", () => {
     const v = view(states.syntheticOutOfScope());
     expect(v.verdict).toBe("out-of-scope");

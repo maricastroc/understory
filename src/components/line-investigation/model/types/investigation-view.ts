@@ -16,6 +16,7 @@ export type InvestigationView = {
   artifacts: ViewArtifact[];
   clauses: ViewClause[];
   gaps: ViewGap[];
+  empty: boolean;
   links: ChainLinks | null;
   checklist: ChecklistItem[];
   confidence: Confidence | null;

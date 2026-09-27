@@ -17,7 +17,9 @@ import { repoDisplayName } from "../shell/repo-display-name";
 import { filterRail, lineRailItems, prRailItems } from "../shell/rail-items";
 import type { RailFilter, RailItem, RepoSummary } from "../shell/types";
 import { useLanguage } from "../use-language";
+import { CaseFailure } from "./CaseFailure";
 import { CaseView } from "./CaseView";
+import { draftResult } from "./draft-result";
 import type { FollowUpParent } from "./follow-up-parent";
 import { LoadingCard } from "./LoadingCard";
 import { Onboarding } from "./Onboarding";
@@ -36,11 +38,13 @@ export function Investigator() {
     persisted,
     activeId,
     view,
+    draft,
     resetKey,
     current,
     browsing,
     investigate,
     drillInto,
+    retryDraft,
     selectCase,
     backToCode,
     newInvestigation,
@@ -91,8 +95,12 @@ export function Investigator() {
   }, [loaded, params, selectCase]);
 
   const tokenValue = token.trim() || undefined;
-  const lineCase = view === "case" && !loading && !!current?.result.evidence.location;
-  const railResult = view === "case" && !loading && !lineCase ? (current?.result ?? null) : null;
+  const collecting = !!draft && !draft.error;
+  const busy = loading && !collecting;
+  const draftCase = view === "case" && !current && draft ? draftResult(draft.form) : null;
+  const lineCase = view === "case" && !busy && !draftCase && !!current?.result.evidence.location;
+  const railResult =
+    view === "case" && !busy && !lineCase && !draftCase ? (current?.result ?? null) : null;
   const railMeta = browsing && repo.ready ? repo.meta : null;
   const activeCaseId = view === "case" ? activeId : null;
 
@@ -217,7 +225,7 @@ export function Investigator() {
       <div className="flex">
         <div
           className={
-            lineCase
+            lineCase || draftCase
               ? "min-w-0 flex-1 px-8 pt-6 pb-20 max-[767px]:px-4"
               : "mx-auto max-w-270 min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8"
           }
@@ -250,11 +258,30 @@ export function Investigator() {
             />
           </div>
 
-          {loading && <LoadingCard />}
+          {busy && <LoadingCard />}
 
-          {lineCase && current && (
+          {draftCase && draft ? (
             <LiveLineInvestigation
-              key={current.caseId}
+              key={draft.key}
+              result={draftCase}
+              repoPath={draft.form.repoPath}
+              pending
+              token={tokenValue}
+              phase={draft.error ? "failed" : "collecting"}
+              failure={
+                draft.error ? (
+                  <CaseFailure
+                    message={draft.error}
+                    signedIn={!!user}
+                    onRetry={() => retryDraft(tokenValue, language)}
+                    onBack={backToCode}
+                  />
+                ) : undefined
+              }
+            />
+          ) : lineCase && current ? (
+            <LiveLineInvestigation
+              key={current.mountKey ?? current.caseId}
               result={current.result}
               repoPath={current.form.repoPath}
               pending={current.pending ?? false}
@@ -262,9 +289,9 @@ export function Investigator() {
               onDrill={drill(current)}
               onFollowUp={() => followUp(current)}
             />
-          )}
+          ) : null}
 
-          {!loading && !lineCase && view === "case" && current && (
+          {!busy && !lineCase && !draftCase && view === "case" && current && (
             <CaseView
               entry={current}
               onBack={backToCode}
@@ -280,7 +307,7 @@ export function Investigator() {
           )}
         </div>
 
-        {!lineCase && (
+        {!lineCase && !draftCase && (
           <div className="sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
             <RightRail result={railResult} repoMeta={railMeta} />
           </div>

@@ -69,6 +69,20 @@ export function syntheticNotRecorded(): DigResult {
   });
 }
 
+export function syntheticNoHistory(): DigResult {
+  return withNarrative(
+    {
+      answerable: true,
+      recorded: false,
+      claims: [],
+      answer: "No commit in the history that was read touches this line.",
+      citations: [],
+    },
+    undefined,
+    { ...syntheticEvidence, artifacts: [], contradictions: [] },
+  );
+}
+
 export function syntheticOutOfScope(): DigResult {
   return withNarrative({
     answerable: false,

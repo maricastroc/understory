@@ -239,3 +239,99 @@ describe("LineInvestigation — pending", () => {
     act(() => {});
   });
 });
+
+const draft: DigResult = {
+  evidence: {
+    question: "Why exactly 3 retries?",
+    repo: { path: "synthetic/payments-service" },
+    location: { file: SYNTHETIC_FILE_PATH, startLine: 9, endLine: 9 },
+    artifacts: [],
+    contradictions: [],
+  },
+  narrative: null,
+};
+
+function renderPhase(phase: "collecting" | "failed", result: DigResult = draft) {
+  const onRetry = vi.fn();
+  const utils = render(
+    <LineInvestigation
+      result={result}
+      pending
+      now={NOW}
+      layout={SPECIMEN_LAYOUTS.wide}
+      renderSpecimen={slot}
+      phase={phase}
+      failure={
+        phase === "failed" ? (
+          <button type="button" onClick={onRetry}>
+            Try again
+          </button>
+        ) : undefined
+      }
+    />,
+  );
+  return { ...utils, onRetry };
+}
+
+describe("LineInvestigation — before the evidence arrives", () => {
+  it("shows the question, the code and the datum while collecting, and nothing it does not know", async () => {
+    const { container } = renderPhase("collecting");
+    expect(screen.getByRole("heading", { level: 1, name: "Why exactly 3 retries?" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: `Code, ${SYNTHETIC_FILE_PATH}` })).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toContain("Collecting the line's history…");
+    expect(screen.getByText("Collecting")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Resolved|Reconstructing/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /All evidence/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Ask a follow-up" })).toBeNull();
+    expect(screen.queryByRole("list", { name: "History, newest first" })).toBeNull();
+    expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it("keeps the instrument and offers a retry when the investigation fails", async () => {
+    const user = userEvent.setup();
+    const { onRetry } = renderPhase("failed");
+    expect(screen.getByText("Failed")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(onRetry).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("fades the history in, top to bottom, when the evidence arrives in the same view", () => {
+    const { rerender } = renderPhase("collecting");
+    rerender(
+      <LineInvestigation
+        result={{ evidence: syntheticRetryCap.evidence, narrative: null }}
+        pending
+        now={NOW}
+        layout={SPECIMEN_LAYOUTS.wide}
+        renderSpecimen={slot}
+      />,
+    );
+    const arriving = within(history())
+      .getAllByRole("listitem")
+      .filter((li) => li.classList.contains("animate-li-arrive"));
+    const delays = arriving.map((li) => Number.parseInt(li.style.animationDelay, 10));
+    expect(delays.length).toBeGreaterThan(1);
+    expect([...delays].sort((a, b) => a - b)).toEqual(delays.map((_, i) => i * 60));
+    const shallowest = arriving.find((li) =>
+      within(li).queryByRole("button", { name: /^A, commit/ }),
+    );
+    expect(shallowest?.style.animationDelay).toBe("0ms");
+  });
+
+  it("does not animate a saved case that opens with its evidence", () => {
+    setup();
+    expect(document.querySelector(".animate-li-arrive")).toBeNull();
+  });
+});
+
+describe("LineInvestigation — no history", () => {
+  it("says what was read, draws no bore and offers no empty evidence list", () => {
+    setup(states.syntheticNoHistory());
+    expect(screen.getByText("No history was found for this line.")).toBeTruthy();
+    expect(screen.getByText(/read 4e1d0a2 and found no commit/)).toBeTruthy();
+    expect(screen.queryByRole("list", { name: "History, newest first" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /All evidence/ })).toBeNull();
+    expect(document.querySelector("li[data-clause]")).toBeNull();
+  });
+});

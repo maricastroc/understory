@@ -23,6 +23,7 @@ export function LiveCodeSpecimen({
   targetDatumY,
   onDatumY,
   token,
+  awaitingSha = false,
 }: {
   repo: string;
   path: string;
@@ -36,6 +37,7 @@ export function LiveCodeSpecimen({
   targetDatumY?: number;
   onDatumY?: (y: number) => void;
   token?: string;
+  awaitingSha?: boolean;
 }) {
   const responsive = useSpecimenLayout();
   const active = layout ?? responsive;
@@ -87,7 +89,7 @@ export function LiveCodeSpecimen({
       datum={datum}
       question={question}
       blame={blame.spans}
-      blameStatus={blame.status}
+      blameStatus={awaitingSha && !sha ? "loading" : blame.status}
       now={now}
       layout={active}
       expanded={expanded}

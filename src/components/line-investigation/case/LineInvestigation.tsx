@@ -1,7 +1,7 @@
 "use client";
 
 import type { DigResult } from "@git-investigator/core/types";
-import { useEffect, useMemo, useReducer, useRef } from "react";
+import { type ReactNode, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { evidenceEntries } from "../copy/evidence-entries";
 import { EvidenceDrawer } from "../drawer/EvidenceDrawer";
 import { lineInvestigationFonts } from "../fonts";
@@ -15,6 +15,7 @@ import { readKeyPreference, writeKeyPreference } from "./key-preference";
 import { TitleRow } from "./TitleRow";
 import { Toolbar } from "./Toolbar";
 import { useCaseKeyboard } from "./use-case-keyboard";
+import type { CasePhase } from "./types";
 import { useFocusReturn } from "./use-focus-return";
 
 export function LineInvestigation({
@@ -25,6 +26,8 @@ export function LineInvestigation({
   renderSpecimen,
   onDrill,
   onFollowUp,
+  phase,
+  failure,
 }: {
   result: DigResult;
   pending: boolean;
@@ -33,6 +36,8 @@ export function LineInvestigation({
   renderSpecimen: SpecimenSlot;
   onDrill?: (a: ViewArtifact) => void;
   onFollowUp?: () => void;
+  phase?: CasePhase;
+  failure?: ReactNode;
 }) {
   const view = useMemo(
     () => buildInvestigationView(result, { now, pending }),
@@ -44,6 +49,7 @@ export function LineInvestigation({
     initialCaseState(readKeyPreference()),
   );
   const firstKey = useRef(true);
+  const [collectedHere] = useState(() => phase === "collecting");
 
   useCaseKeyboard(state, dispatch, order);
   useFocusReturn(drawerOpen(state));
@@ -68,6 +74,7 @@ export function LineInvestigation({
         onToggleVerdict={() => dispatch({ type: "toggle-verdict" })}
         onCloseVerdict={() => dispatch({ type: "close-verdict" })}
         onFollowUp={onFollowUp}
+        phase={phase}
       />
       <Instrument
         view={view}
@@ -76,14 +83,19 @@ export function LineInvestigation({
         layout={layout}
         now={now}
         renderSpecimen={renderSpecimen}
+        phase={phase}
+        failure={failure}
+        arrive={collectedHere && !phase}
       />
-      <Toolbar
-        count={entries.length}
-        keyOpen={state.keyOpen}
-        answer={view.clauses.length && !view.clauses[0].silent ? view.answer : null}
-        onOpenList={() => dispatch({ type: "open-list" })}
-        onToggleKey={() => dispatch({ type: "toggle-key" })}
-      />
+      {!phase && (
+        <Toolbar
+          count={entries.length}
+          keyOpen={state.keyOpen}
+          answer={view.clauses.length && !view.clauses[0].silent ? view.answer : null}
+          onOpenList={() => dispatch({ type: "open-list" })}
+          onToggleKey={() => dispatch({ type: "toggle-key" })}
+        />
+      )}
       {drawerOpen(state) && (
         <EvidenceDrawer
           entries={entries}

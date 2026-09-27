@@ -34,6 +34,7 @@ export function BoreLabels({
   onHover,
   onInspect,
   onToggleGroup,
+  arrival = null,
 }: {
   layout: BoreLayout;
   byId: Map<string, ViewArtifact>;
@@ -48,6 +49,7 @@ export function BoreLabels({
   onHover: (id: string | null) => void;
   onInspect: (id: string) => void;
   onToggleGroup: (id: string) => void;
+  arrival?: Map<string, number> | null;
 }) {
   const glyphById = new Map(layout.glyphs.map((g) => [g.id, g]));
   const items: LabelItem[] = [];
@@ -80,12 +82,15 @@ export function BoreLabels({
 
   const left = BORE.labelX + shift;
   const coreX = BORE.coreX + shift;
-  const labelStyle = (top: number) => ({
+  const labelStyle = (top: number, key: string) => ({
     top,
     left,
     width: width ?? undefined,
     right: width ? undefined : 0,
+    animationDelay: arrival?.has(key) ? `${arrival.get(key)}ms` : undefined,
   });
+  const labelClass = (key: string) =>
+    `pointer-events-auto absolute ${arrival?.has(key) ? "animate-li-arrive" : ""}`;
 
   const letterVariant = (a: ViewArtifact, dim: boolean): LetterVariant =>
     dim ? "dimmed" : a.role === "cited" ? "cited" : "supporting";
@@ -136,8 +141,8 @@ export function BoreLabels({
             return (
               <li
                 key={item.key}
-                className="pointer-events-auto absolute"
-                style={labelStyle(item.top)}
+                className={labelClass(item.key)}
+                style={labelStyle(item.top, item.key)}
               >
                 <button
                   type="button"
@@ -179,8 +184,8 @@ export function BoreLabels({
             return (
               <li
                 key={item.key}
-                className="pointer-events-auto absolute"
-                style={labelStyle(item.top)}
+                className={labelClass(item.key)}
+                style={labelStyle(item.top, item.key)}
               >
                 <button
                   type="button"
@@ -209,8 +214,8 @@ export function BoreLabels({
           return (
             <li
               key={item.key}
-              className="pointer-events-auto absolute"
-              style={labelStyle(item.top)}
+              className={labelClass(item.key)}
+              style={labelStyle(item.top, item.key)}
             >
               <button
                 type="button"
