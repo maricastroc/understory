@@ -8,6 +8,7 @@ import {
   syntheticMeta,
   syntheticOverview,
 } from "@/components/composer/fixtures/synthetic-overview";
+import { SYNTHETIC_MAP_STATES } from "@/components/composer/fixtures/synthetic-histories";
 import type { TrailSlot } from "@/components/composer/types/trail-slot";
 import {
   syntheticCases,
@@ -31,6 +32,7 @@ export function ComposerPreview({ state }: { state: string }) {
   const lineItems = useMemo(() => lineRailItems(syntheticCases, { activeId: null, now: NOW }), []);
   const prItems = useMemo(() => prRailItems(syntheticPrCases, null), []);
   const overview = state === "loading" ? null : syntheticOverview;
+  const map = useMemo(() => (SYNTHETIC_MAP_STATES[state] ?? SYNTHETIC_MAP_STATES.cold)(), [state]);
 
   const slots: TrailSlot[] = [
     {
@@ -101,6 +103,7 @@ export function ComposerPreview({ state }: { state: string }) {
             onQuery={setQuery}
             results={[]}
             searching={false}
+            map={map}
             onOpen={setOpened}
           />
           {opened && (

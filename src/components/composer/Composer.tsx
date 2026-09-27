@@ -10,12 +10,14 @@ import { PANEL } from "./composer-classes";
 import type { ComposerPrefill } from "./composer-prefill";
 import { ComposerTitle } from "./ComposerTitle";
 import { FileStage } from "./FileStage";
+import { useHistoryMap } from "./history/use-history-map";
 import { useOverview } from "./history/use-overview";
 import { RepoStage } from "./RepoStage";
 import type { ComposerStage } from "./types/composer-stage";
 import type { TrailSlot } from "./types/trail-slot";
 import { useFileSearch } from "./use-file-search";
 import { useFileViewer } from "./use-file-viewer";
+import { useTyping } from "./use-typing";
 import type { Repo } from "./use-repo";
 
 export function Composer({
@@ -29,6 +31,8 @@ export function Composer({
   prefill = null,
   cases,
   demoRepo = null,
+  active = true,
+  investigating = false,
 }: {
   repo: Repo;
   repoPath: string;
@@ -40,6 +44,8 @@ export function Composer({
   prefill?: ComposerPrefill | null;
   cases: CasePaths;
   demoRepo?: string | null;
+  active?: boolean;
+  investigating?: boolean;
 }) {
   const tokenValue = token.trim() || undefined;
   const viewer = useFileViewer(repoPath);
@@ -53,6 +59,14 @@ export function Composer({
     tokenValue,
   );
   const [pickingRepo, setPickingRepo] = useState(false);
+  const typing = useTyping(query);
+  const map = useHistoryMap({
+    repoPath,
+    overview,
+    token: tokenValue,
+    active: active && repo.ready,
+    busy: typing || viewer.loading || investigating,
+  });
   const [question, setQuestion] = useState("Why is this line the way it is?");
   const [noCapture, setNoCapture] = useState(
     () => typeof window !== "undefined" && localStorage.getItem("gi:no-capture") === "1",
@@ -88,6 +102,7 @@ export function Composer({
   function openFile(path: string) {
     setQuery("");
     search.setQuery("");
+    map.mapFile(path);
     void viewer.open(path, tokenValue);
   }
 
@@ -191,6 +206,7 @@ export function Composer({
           onQuery={editQuery}
           results={q.length >= 2 ? search.results : []}
           searching={search.searching}
+          map={map}
           onOpen={openFile}
         />
       )}

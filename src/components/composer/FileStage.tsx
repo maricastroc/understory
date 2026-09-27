@@ -3,6 +3,7 @@
 import type { RepoMeta, TreeOverview } from "@git-investigator/core/types";
 import { useMemo } from "react";
 import { HistoryMap } from "./history/HistoryMap";
+import type { HistoryMapControl } from "./history/use-history-map";
 import { MapSearch } from "./MapSearch";
 import { RepoMetaRow } from "./RepoMetaRow";
 
@@ -15,6 +16,7 @@ export function FileStage({
   onQuery,
   results,
   searching,
+  map,
   onOpen,
 }: {
   meta: RepoMeta | null;
@@ -25,6 +27,7 @@ export function FileStage({
   onQuery: (v: string) => void;
   results: string[];
   searching: boolean;
+  map: HistoryMapControl;
   onOpen: (path: string) => void;
 }) {
   const q = query.trim().toLowerCase();
@@ -56,7 +59,13 @@ export function FileStage({
         {meta && <RepoMetaRow meta={meta} overview={overview} />}
       </div>
       {overview ? (
-        <HistoryMap overview={overview} caseCounts={caseCounts} matches={matches} onOpen={onOpen} />
+        <HistoryMap
+          overview={overview}
+          caseCounts={caseCounts}
+          matches={matches}
+          map={map}
+          onOpen={onOpen}
+        />
       ) : overviewError ? (
         <p role="alert" className="border-t border-li-ink pt-3 text-[12.5px] text-li-neutral-800">
           The file list could not be read: {overviewError}. Search still works.

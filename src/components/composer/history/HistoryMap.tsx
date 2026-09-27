@@ -9,16 +9,20 @@ import { MapHeader } from "./MapHeader";
 import { MapLegend } from "./MapLegend";
 import { layoutMap } from "./map-layout";
 import { mappedLine, scopeLine } from "./scope-copy";
+import { shareLine } from "./share-copy";
+import type { HistoryMapControl } from "./use-history-map";
 
 export function HistoryMap({
   overview,
   caseCounts,
   matches,
+  map,
   onOpen,
 }: {
   overview: TreeOverview;
   caseCounts: ReadonlyMap<string, number>;
   matches: ReadonlySet<string> | null;
+  map: HistoryMapControl;
   onOpen: (path: string) => void;
 }) {
   const titleId = useId();
@@ -29,17 +33,24 @@ export function HistoryMap({
     [overview.files, width, caseCounts],
   );
   const total = overview.files.length;
+  const histories = useMemo(
+    () =>
+      [...map.states.values()].flatMap((s) =>
+        s.status === "mapped" && s.history ? [s.history] : [],
+      ),
+    [map.states],
+  );
 
   return (
     <section aria-labelledby={titleId} className="flex flex-col gap-3.5">
       <MapHeader
         titleId={titleId}
         scope={scopeLine(overview)}
-        mapped={mappedLine(0, total, 0)}
-        moreLabel={overview.mappable && total ? `Map ${total} more` : null}
-        onMapMore={null}
+        mapped={mappedLine(map.mapped, total, map.mapping)}
+        moreLabel={map.mapMore ? `Map ${map.remaining} more` : null}
+        onMapMore={map.mapMore}
       />
-      <MapLegend note={overview.prData === "none" ? "PR data unavailable for this repo" : null} />
+      <MapLegend note={shareLine(histories, overview.prData)} />
       <div ref={boxRef} className="w-full">
         <div
           ref={scrollRef}
@@ -53,6 +64,7 @@ export function HistoryMap({
             head={overview.head}
             recentCommits={overview.recentCommits}
             matches={matches}
+            states={map.states}
             onOpen={onOpen}
           />
         </div>

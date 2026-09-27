@@ -8,6 +8,7 @@ export function MapCoreItem({
   opacity,
   focused,
   label,
+  reach,
   onOpen,
   onFocus,
   onBlur,
@@ -16,6 +17,7 @@ export function MapCoreItem({
   opacity: number;
   focused: boolean;
   label: string;
+  reach: number;
   onOpen: () => void;
   onFocus: () => void;
   onBlur: () => void;
@@ -56,7 +58,7 @@ export function MapCoreItem({
         onMouseEnter={onFocus}
         onMouseLeave={onBlur}
         className="pointer-events-auto absolute cursor-pointer"
-        style={{ left: core.x - MAP.hit / 2, top, width: MAP.hit, height: MAP.stub + 12 }}
+        style={{ left: core.x - MAP.hit / 2, top, width: MAP.hit, height: reach }}
       />
     </li>
   );

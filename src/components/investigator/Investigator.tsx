@@ -278,6 +278,8 @@ export function Investigator() {
               prefill={prefill}
               cases={cases}
               demoRepo={DEFAULT_REPO}
+              active={browsing}
+              investigating={loading}
             />
           </div>
 
