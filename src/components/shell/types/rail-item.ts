@@ -8,4 +8,5 @@ export type RailItem = {
   status: RailStatus;
   child: boolean;
   current: boolean;
+  parentId?: string;
 };

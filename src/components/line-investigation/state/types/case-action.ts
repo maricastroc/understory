@@ -11,4 +11,8 @@ export type CaseAction =
   | { type: "close-verdict" }
   | { type: "toggle-key" }
   | { type: "toggle-code" }
-  | { type: "escape" };
+  | { type: "escape"; tooltip?: boolean }
+  | { type: "select-region"; id: string }
+  | { type: "hover-region"; id: string | null }
+  | { type: "move-region"; order: string[]; delta: 1 | -1 }
+  | { type: "clear-all" };

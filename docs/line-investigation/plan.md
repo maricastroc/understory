@@ -318,6 +318,27 @@ atual preservado.
 | Breakpoints | 1360 / 1100 / 820 | Todos os `max-[…]` passaram de `N−1` para `N`: no Tailwind v4 `max-[N]` é `width < N`, e `max-[1359px]` deixava o rail cheio exatamente em 1359. Shell e instrumento trocam juntos em cada borda (teste Playwright em 1360/1359/1100/1099/820/819). |
 | Núcleo do bore < 820 | x = 24 | x = 48 (§12). |
 
-## 15. Estado
+## 15. Pacote completo `design_handoff_git_investigator` — fechamento da etapa 01
 
-Etapas 0–12 implementadas e comitadas. A etapa 13 ficou fora desta entrega.
+O handoff passou a ser o pacote `design_handoff_git_investigator` (01 Line → 02 PR → 03 Landing).
+O README 01 e o `Line Investigation v4.dc.html` são os mesmos já implementados (a única diferença
+de pixel é anti-aliasing de 1 px). O README raiz acrescenta regras que valem para todas as telas.
+
+| Tema | Pacote | Implementação e motivo |
+|---|---|---|
+| Composer / onboarding | "restyle with the new tokens and the new header; keep its behaviour" | D6 revista: Composer, RepoBar, FileFinder, CodeViewer, GoToLine, RepoOverview e Onboarding usam os tokens `li-*`, painéis retos e botões steel. Rótulos, textos e fluxo não mudam. |
+| Laranja | "no orange" em qualquer tela | Seleção de linha no Composer usa a linguagem do datum (fundo `datum-row` + barra âmbar); passo atual do onboarding usa o chip âmbar; foco e seleção de texto globais passam a steel. Landing e `/pr` ficam para 03 e 02. |
+| Realce de código | — | O Composer usa o mesmo `highlightLines` + `CodeText` do specimen, em vez de texto sem realce. |
+| Erro | sem vermelho na paleta | `ErrorState` fica neutro (papel, divisor, ações secundárias); a mensagem e as dicas não mudam. |
+| Rail direito no modo navegação | "do not reintroduce the right metadata rail" | Removido: duplicava o `RepoOverview` e dizia que "a cadeia de proveniência aparece aqui", o que deixou de ser verdade com o bore. Continua só no `CaseView` de drill-down (D2). |
+
+Pendências conhecidas da etapa 01: cláusula silenciosa por cláusula e headline (etapa 13, fora
+da entrega); critérios medidos com a fixture sintética (D1), porque o demo semeado não tem PR,
+review nem issue; com a fixture rica, "All evidence" fica ~30 px abaixo da dobra em 1440×900,
+como no próprio protótipo; veredito "Resolved" com claims misattributed (decisão pendente);
+refinamentos visuais do §13; `CaseView` de drill-down ainda com os tokens antigos (D2).
+
+## 16. Estado
+
+Etapas 0–12 implementadas e comitadas; fechamento da etapa 01 do pacote novo implementado. A
+etapa 13 ficou fora desta entrega.

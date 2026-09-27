@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { liButton } from "../line-investigation/parts/button-class";
 
 export function GoToLine({ max, onGo }: { max: number; onGo: (line: number) => void }) {
   const [value, setValue] = useState("");
@@ -20,12 +21,12 @@ export function GoToLine({ max, onGo }: { max: number; onGo: (line: number) => v
         onKeyDown={(e) => e.key === "Enter" && submit()}
         placeholder="line"
         aria-label={`Go to line, 1 to ${max}`}
-        className="h-6 w-16 rounded border border-line-2 bg-surface px-2 font-mono text-[11px] text-ink placeholder:text-ink-3 focus:border-accent/50 focus:ring-2 focus:ring-accent/15 focus:outline-none"
+        className="h-6 w-16 border border-li-divider bg-li-neutral-100 px-2 font-li-mono text-[11px] text-li-ink placeholder:text-li-text-muted focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-steel"
       />
       <button
         type="button"
         onClick={submit}
-        className="h-6 cursor-pointer rounded border border-line-2 bg-surface px-2 font-mono text-[11px] text-ink-2 transition-colors hover:bg-inset"
+        className={liButton("secondary", "h-6 px-2 py-0 font-li-mono text-[11px]")}
       >
         go
       </button>

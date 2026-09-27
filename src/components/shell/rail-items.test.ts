@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { RailItem } from "./types";
 import { syntheticCases, syntheticPrCases } from "../line-investigation/fixtures/synthetic-cases";
 import { SYNTHETIC_NOW } from "../line-investigation/fixtures/synthetic-retry-cap";
 import { syntheticWithoutStageFourData } from "../line-investigation/fixtures/synthetic-states";
@@ -80,5 +81,22 @@ describe("prRailItems and filter", () => {
     expect(filterRail(lines, prs, "all")).toHaveLength(6);
     expect(filterRail(lines, prs, "lines")).toHaveLength(5);
     expect(filterRail(lines, prs, "prs")).toHaveLength(1);
+  });
+
+  it("nests a drill-down opened from a pull request under that pull request", () => {
+    const child: RailItem = {
+      id: "GI-3001",
+      kind: "line",
+      title: "Why was this pull request opened?",
+      subline: "#1020",
+      status: "resolved",
+      child: false,
+      current: false,
+      parentId: prs[0].id,
+    };
+    const all = filterRail([...lines, child], prs, "all");
+    const at = all.findIndex((i) => i.id === prs[0].id);
+    expect(all[at + 1]).toMatchObject({ id: "GI-3001", child: true });
+    expect(filterRail([...lines, child], prs, "lines").at(-1)).toMatchObject({ child: false });
   });
 });

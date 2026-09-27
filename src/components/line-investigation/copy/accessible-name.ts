@@ -24,9 +24,11 @@ export function gapName(gap: ViewGap, after: ViewArtifact): string {
   const text =
     gap.missing === "pull_request"
       ? `no pull request, review or issue before ${target}`
-      : gap.missing === "review"
-        ? `no review on ${target}`
-        : `no linked issue on ${target}`;
+      : gap.missing === "reason"
+        ? `no recorded reason for ${target}`
+        : gap.missing === "review"
+          ? `no review on ${target}`
+          : `no linked issue on ${target}`;
   const prefix = !gap.verified ? "Not verified" : gap.missing === "issue" ? null : "Not recorded";
   return prefix ? `${prefix}: ${text}` : text.charAt(0).toUpperCase() + text.slice(1);
 }

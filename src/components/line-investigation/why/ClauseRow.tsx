@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useLayoutEffect, useRef, useState } from "react";
+import { type KeyboardEvent, type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { tallyText } from "../copy/clause-copy";
 import type { ViewClause } from "../model/types";
 import { ClauseLetters } from "./ClauseLetters";
@@ -18,6 +18,8 @@ export function ClauseRow({
   onPick,
   onKeyDown,
   buttonRef,
+  refs,
+  tally,
 }: {
   clause: ViewClause;
   description: string;
@@ -32,7 +34,10 @@ export function ClauseRow({
   onPick: () => void;
   onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
   buttonRef: (el: HTMLButtonElement | null) => void;
+  refs?: ReactNode;
+  tally?: { cells: ReactNode; label: string };
 }) {
+  const refsNode = refs ?? <ClauseLetters clause={clause} />;
   const descId = `clause-desc-${clause.id}`;
   const sizer = useRef<HTMLSpanElement>(null);
   const full = useRef<HTMLSpanElement>(null);
@@ -73,9 +78,9 @@ export function ClauseRow({
         <span className="pointer-events-none relative min-w-0">
           <span ref={sizer} aria-hidden className="invisible block">
             <span className="line-clamp-3 text-base leading-[1.42]">
-              {clause.text} <ClauseLetters clause={clause} />
+              {clause.text} {refsNode}
             </span>
-            {compact && <Tally clause={clause} compact />}
+            {compact && <Tally clause={clause} compact custom={tally} />}
           </span>
           {expanded ? (
             <span
@@ -84,15 +89,15 @@ export function ClauseRow({
                 overflowing ? `${surface || "bg-li-paper"} pb-1 shadow-li-md` : ""
               }`}
             >
-              {clause.text} <ClauseLetters clause={clause} />
-              {compact && <Tally clause={clause} compact />}
+              {clause.text} {refsNode}
+              {compact && <Tally clause={clause} compact custom={tally} />}
             </span>
           ) : (
             <span className="absolute inset-x-0 top-0 flex min-w-0 items-baseline gap-1.5">
               <span className={`truncate text-[17px] leading-[1.42] font-medium ${ink}`}>
                 {clause.text}
               </span>
-              <ClauseLetters clause={clause} />
+              {refsNode}
             </span>
           )}
         </span>
@@ -102,7 +107,7 @@ export function ClauseRow({
               expanded ? "opacity-100" : "opacity-0"
             }`}
           >
-            <Tally clause={clause} compact={false} />
+            <Tally clause={clause} compact={false} custom={tally} />
           </span>
         )}
       </button>
@@ -113,17 +118,25 @@ export function ClauseRow({
   );
 }
 
-function Tally({ clause, compact }: { clause: ViewClause; compact: boolean }) {
+function Tally({
+  clause,
+  compact,
+  custom,
+}: {
+  clause: ViewClause;
+  compact: boolean;
+  custom?: { cells: ReactNode; label: string };
+}) {
   return (
     <span
       aria-hidden
       className={`flex gap-0.75 ${compact ? "mt-1 flex-row items-center gap-2" : "flex-col items-end pt-0.75"}`}
     >
-      <TallyCells clause={clause} />
+      {custom ? custom.cells : <TallyCells clause={clause} />}
       <span
         className={`text-[11.5px] whitespace-nowrap ${clause.silent ? "text-li-gap-ink" : "text-li-neutral-800"}`}
       >
-        {tallyText(clause)}
+        {custom ? custom.label : tallyText(clause)}
       </span>
     </span>
   );

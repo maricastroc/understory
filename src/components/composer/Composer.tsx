@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { InvestigateInput } from "@git-investigator/core/types";
 import { Alert } from "../icons";
 import { CodeViewer } from "./CodeViewer";
+import { PANEL } from "./composer-classes";
 import type { ComposerPrefill } from "./composer-prefill";
 import { FileFinder } from "./FileFinder";
 import { RepoBar } from "./RepoBar";
@@ -93,11 +94,11 @@ export function Composer({
     viewer.file?.path !== q;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-panel">
-        <div className="border-b border-line px-3.5 py-3">
-          <h1 className="text-[15px] font-semibold tracking-tight">Start an investigation</h1>
-          <p className="mt-0.5 text-[12.5px] text-ink-2">
+    <div className="flex flex-col gap-4 font-li-body text-li-ink">
+      <div className={`overflow-hidden ${PANEL}`}>
+        <div className="border-b border-li-divider bg-li-paper px-3.5 py-3">
+          <h1 className="text-base font-semibold">Start an investigation</h1>
+          <p className="mt-0.5 text-[12.5px] text-li-text-subtle">
             Paste a GitHub repo (or a local path), find a file by name or symbol, then click the
             line you&apos;re curious about.
           </p>
@@ -130,17 +131,14 @@ export function Composer({
       )}
 
       {(search.error || viewer.error) && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-3 text-[12.5px] text-crit"
-        >
+        <div role="alert" className={`flex items-start gap-2 p-3 text-[12.5px] ${PANEL}`}>
           <Alert className="mt-0.5 size-4 shrink-0" />
           <span>{search.error || viewer.error}</span>
         </div>
       )}
 
       {viewer.loading && (
-        <div className="rounded-[10px] border border-line bg-surface p-5 text-[13px] text-ink-3">
+        <div role="status" className={`p-5 text-[13px] text-li-text-subtle ${PANEL}`}>
           Opening file…
         </div>
       )}

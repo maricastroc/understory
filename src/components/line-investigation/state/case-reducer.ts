@@ -10,6 +10,8 @@ export function initialCaseState(keyOpen = false): CaseState {
     verdictOpen: false,
     keyOpen,
     codeExpanded: false,
+    selectedRegion: null,
+    hoverRegion: null,
   };
 }
 
@@ -47,9 +49,26 @@ export function caseReducer(state: CaseState, action: CaseAction): CaseState {
     case "escape":
       if (state.inspected || state.drawerList)
         return { ...state, inspected: null, drawerList: false };
+      if (action.tooltip && state.hoverArtifact) return { ...state, hoverArtifact: null };
       if (state.verdictOpen) return { ...state, verdictOpen: false };
-      if (state.pinnedClause) return { ...state, pinnedClause: null };
+      if (state.pinnedClause || state.selectedRegion)
+        return { ...state, pinnedClause: null, selectedRegion: null };
       return state;
+    case "select-region":
+      return {
+        ...state,
+        selectedRegion: state.selectedRegion === action.id ? null : action.id,
+      };
+    case "hover-region":
+      return state.hoverRegion === action.id ? state : { ...state, hoverRegion: action.id };
+    case "move-region": {
+      if (!state.selectedRegion) return state;
+      const at = action.order.indexOf(state.selectedRegion);
+      const next = Math.min(action.order.length - 1, Math.max(0, at + action.delta));
+      return at < 0 || next === at ? state : { ...state, selectedRegion: action.order[next] };
+    }
+    case "clear-all":
+      return { ...state, pinnedClause: null, selectedRegion: null };
   }
 }
 

@@ -90,6 +90,31 @@
     0 12px 32px -8px rgba(24, 27, 36, 0.11);
 }
 
+.legacy-tokens {
+  --color-bg: var(--color-li-paper);
+  --color-surface: var(--color-li-neutral-100);
+  --color-surface-2: var(--color-li-paper);
+  --color-inset: var(--color-li-neutral-200);
+  --color-line: var(--color-li-divider);
+  --color-line-2: var(--color-li-neutral-300);
+  --color-ink: var(--color-li-ink);
+  --color-ink-body: var(--color-li-ink);
+  --color-ink-2: var(--color-li-text-subtle);
+  --color-ink-3: var(--color-li-text-muted);
+  --color-accent: var(--color-li-steel-700);
+  --color-accent-press: var(--color-li-steel-800);
+  --color-accent-tint: var(--color-li-steel-100);
+  --color-good: var(--color-li-evidence-ink);
+  --color-good-tint: var(--color-li-evidence-tint);
+  --color-warn: var(--color-li-neutral-800);
+  --color-warn-tint: var(--color-li-neutral-200);
+  --color-crit: var(--color-li-ink);
+  --color-crit-tint: var(--color-li-neutral-200);
+  --font-geist-sans: var(--font-barlow);
+  --font-geist-mono: var(--font-plex-mono);
+  font-family: var(--font-li-body);
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -147,12 +172,12 @@
     height: 100%;
   }
   :focus-visible {
-    outline: 1.5px solid var(--color-accent);
+    outline: 1.5px solid var(--color-li-steel-700);
     outline-offset: 2px;
     border-radius: 3px;
   }
   ::selection {
-    background: var(--color-accent-tint);
+    background: var(--color-li-steel-100);
   }
   * {
     scrollbar-width: thin;

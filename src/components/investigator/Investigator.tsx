@@ -21,6 +21,7 @@ import { useLanguage } from "../use-language";
 import { CaseFailure } from "./CaseFailure";
 import { CaseView } from "./CaseView";
 import { draftResult } from "./draft-result";
+import { parseDrillRef } from "./drill-link";
 import type { FollowUpParent } from "./follow-up-parent";
 import { LoadingCard } from "./LoadingCard";
 import { Onboarding } from "./Onboarding";
@@ -70,7 +71,20 @@ export function Investigator() {
     const deepRepo = params.get("repo");
     const deepFile = params.get("file");
     const deepLine = params.get("line");
-    if (deepRepo && deepFile && deepLine) {
+    const drillRef = parseDrillRef(params.get("drill"));
+    const drillParent = params.get("parent");
+    if (deepRepo && drillRef && drillParent) {
+      setRepoPath(deepRepo);
+      window.history.replaceState(null, "", "/app");
+      void drillInto(
+        drillParent,
+        params.get("title") ?? "",
+        drillRef,
+        deepRepo,
+        undefined,
+        language,
+      );
+    } else if (deepRepo && deepFile && deepLine) {
       setRepoPath(deepRepo);
       void repo.open(deepRepo);
       void investigate(
@@ -102,7 +116,6 @@ export function Investigator() {
   const lineCase = view === "case" && !busy && !draftCase && !!current?.result.evidence.location;
   const railResult =
     view === "case" && !busy && !lineCase && !draftCase ? (current?.result ?? null) : null;
-  const railMeta = browsing && repo.ready ? repo.meta : null;
   const activeCaseId = view === "case" ? activeId : null;
 
   const lineItems = useMemo(
@@ -116,6 +129,12 @@ export function Investigator() {
     setMenuOpen(false);
     if (item.kind === "pr") router.push(`/pr?pr=${encodeURIComponent(item.id)}`);
     else selectCase(item.id);
+  }
+
+  function openParent(id: string) {
+    if (history.some((e) => e.caseId === id)) selectCase(id);
+    else if (prHistory.entries.some((e) => e.key === id))
+      router.push(`/pr?pr=${encodeURIComponent(id)}`);
   }
 
   function removeRailItem(item: RailItem) {
@@ -294,24 +313,26 @@ export function Investigator() {
           ) : null}
 
           {!busy && !lineCase && !draftCase && view === "case" && current && (
-            <CaseView
-              entry={current}
-              onBack={backToCode}
-              onDrill={drill(current)}
-              onOpenParent={selectCase}
-            />
+            <div className="legacy-tokens">
+              <CaseView
+                entry={current}
+                onBack={backToCode}
+                onDrill={drill(current)}
+                onOpenParent={openParent}
+              />
+            </div>
           )}
 
-          {(railResult || railMeta) && (
-            <div className="mt-5 flex flex-col gap-3.5 xl:hidden">
-              <RailContent result={railResult} repoMeta={railMeta} />
+          {railResult && (
+            <div className="legacy-tokens mt-5 flex flex-col gap-3.5 xl:hidden">
+              <RailContent result={railResult} />
             </div>
           )}
         </div>
 
-        {!lineCase && !draftCase && (
-          <div className="sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
-            <RightRail result={railResult} repoMeta={railMeta} />
+        {railResult && (
+          <div className="legacy-tokens sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
+            <RightRail result={railResult} />
           </div>
         )}
       </div>

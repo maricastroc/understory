@@ -2,10 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { DiffView } from "@/components/diff/DiffView";
 import { useExplainDiff } from "@/components/diff/use-explain-diff";
 import { PrComposer } from "@/components/pr/PrComposer";
-import { PrRail, PrRailContent } from "@/components/pr/PrRail";
 import { entryKey } from "@/components/pr/pr-entry";
 import { usePrHistory } from "@/components/pr/use-pr-history";
 import { useAuth } from "@/components/investigator/use-auth";
@@ -19,6 +17,9 @@ import { railFooterInfo } from "@/components/shell/rail-footer-info";
 import { filterRail, lineRailItems, prRailItems } from "@/components/shell/rail-items";
 import type { RailFilter, RailItem, RepoSummary } from "@/components/shell/types";
 import { useLanguage } from "@/components/use-language";
+import { toArtifactRef } from "@/components/format";
+import type { ViewArtifact } from "@/components/line-investigation/model/types";
+import { PrInvestigation } from "@/components/pr-investigation/case/PrInvestigation";
 
 const EXAMPLE = "chalk/chalk#664";
 
@@ -35,6 +36,7 @@ export default function PrPage() {
   const [lineCases, setLineCases] = useState<Entry[]>([]);
   const [persisted, setPersisted] = useState(false);
   const [now] = useState(() => Date.now());
+  const [seenError, setSeenError] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -111,8 +113,30 @@ export default function PrPage() {
 
   function openRailItem(item: RailItem) {
     setMenuOpen(false);
+    setSeenError(error);
     if (item.kind === "line") router.push(`/app?case=${encodeURIComponent(item.id)}`);
     else select(item.id);
+  }
+
+  function newInvestigation() {
+    setSeenError(error);
+    setPr("");
+    select(null);
+  }
+
+  const showError = !!error && error !== seenError;
+  const showCase = !!activeResult && !loading && !showError;
+  const canDrill = !!activeResult && (activeResult.repo.remoteUrl ?? "").includes("github.com");
+
+  function drill(a: ViewArtifact) {
+    if (!activeResult || !activeKey) return;
+    const params = new URLSearchParams({
+      drill: JSON.stringify(toArtifactRef(a.source)),
+      repo: activeResult.repo.path,
+      parent: activeKey,
+      title: activeResult.pr.title,
+    });
+    router.push(`/app?${params.toString()}`);
   }
 
   function removeRailItem(item: RailItem) {
@@ -146,6 +170,7 @@ export default function PrPage() {
           onSelectCase={openRailItem}
           fileSearch={null}
           crossLink="line"
+          onNewInvestigation={newInvestigation}
           user={user}
           onMenuClick={() => setMenuOpen(true)}
         />
@@ -169,34 +194,30 @@ export default function PrPage() {
         />
       )}
     >
-      <div className="flex">
-        <div className="mx-auto max-w-270 min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      {showCase && activeResult ? (
+        <div className="min-w-0 px-8 pt-6 pb-20 max-[820px]:px-4">
+          <PrInvestigation
+            key={activeKey ?? "pr"}
+            result={activeResult}
+            now={now}
+            onDrill={canDrill ? drill : undefined}
+          />
+        </div>
+      ) : (
+        <div className="mx-auto max-w-270 min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
           <PrComposer
             pr={pr}
             setPr={setPr}
             token={token}
             setToken={setToken}
             loading={loading}
-            error={error}
+            error={showError ? error : null}
             onRun={() => runPr()}
             onExample={tryExample}
             signedIn={!!user}
           />
-
-          {activeResult && !loading && (
-            <div className="mt-5">
-              <DiffView result={activeResult} />
-              <div className="mt-5 flex flex-col gap-3.5 xl:hidden">
-                <PrRailContent result={activeResult} />
-              </div>
-            </div>
-          )}
         </div>
-
-        <div className="sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
-          <PrRail result={activeResult} />
-        </div>
-      </div>
+      )}
     </AppShell>
   );
 }

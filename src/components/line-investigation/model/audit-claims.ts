@@ -1,5 +1,5 @@
 import { locateQuote, verifyQuote } from "@git-investigator/core/quote";
-import type { Artifact, VerifiedNarrative } from "@git-investigator/core/types";
+import type { Artifact, CitationCheck, VerifiedNarrative } from "@git-investigator/core/types";
 import { clauseId } from "./clause-id";
 import type { ClaimAudit, ViewQuote } from "./types";
 
@@ -12,19 +12,25 @@ export function auditClaims(
   const audits = new Map<number, ClaimAudit>();
   const quotes = new Map<string, ViewQuote[]>();
 
+  for (const c of checks) if (c.claim !== undefined) audits.set(c.claim, c.status);
+  quotesFromChecks(checks, byId, (c) => (c.claim !== undefined ? clauseId(c.claim) : null), quotes);
+
+  return { audited, audits, quotes };
+}
+
+export function quotesFromChecks(
+  checks: CitationCheck[],
+  byId: Map<string, Artifact>,
+  clauseOf: (check: CitationCheck) => string | null,
+  into: Map<string, ViewQuote[]> = new Map(),
+): Map<string, ViewQuote[]> {
   for (const c of checks) {
-    if (c.claim !== undefined) audits.set(c.claim, c.status);
     if (c.status !== "supported" || !c.quote) continue;
     const body = byId.get(c.citation)?.body;
     if (body === undefined || !verifyQuote(body, c.quote)) continue;
-    const list = quotes.get(c.citation) ?? [];
-    list.push({
-      clauseId: c.claim !== undefined ? clauseId(c.claim) : null,
-      text: c.quote,
-      range: locateQuote(body, c.quote),
-    });
-    quotes.set(c.citation, list);
+    const list = into.get(c.citation) ?? [];
+    list.push({ clauseId: clauseOf(c), text: c.quote, range: locateQuote(body, c.quote) });
+    into.set(c.citation, list);
   }
-
-  return { audited, audits, quotes };
+  return into;
 }
