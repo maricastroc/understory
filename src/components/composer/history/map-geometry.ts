@@ -1,0 +1,16 @@
+export const MAP = {
+  datumY: 132,
+  firstX: 74,
+  step: 64,
+  minStep: 40,
+  dirGap: 22,
+  rightPad: 64,
+  stub: 24,
+  axisX: 40,
+  labelRise: 22,
+  hit: 28,
+  cardWidth: 280,
+  cardGap: 22,
+  cardTop: 18,
+  cardRoom: 220,
+} as const;

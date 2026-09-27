@@ -1,4 +1,4 @@
-const HATCH = "repeating-linear-gradient(135deg, var(--color-li-gap) 0 1px, transparent 1px 4px)";
+import { HATCH_WIDE } from "../parts/hatch";
 
 export function Legend({ variant = "line" }: { variant?: "line" | "pr" }) {
   return (
@@ -31,7 +31,7 @@ export function Legend({ variant = "line" }: { variant?: "line" | "pr" }) {
       <li className="flex items-center gap-1.25">
         <span
           className="size-2.75 border border-dashed border-li-gap"
-          style={{ background: HATCH }}
+          style={{ background: HATCH_WIDE }}
         />
         not recorded
       </li>

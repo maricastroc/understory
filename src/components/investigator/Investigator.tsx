@@ -24,9 +24,9 @@ import { draftResult } from "./draft-result";
 import { parseDrillRef } from "./drill-link";
 import type { FollowUpParent } from "./follow-up-parent";
 import { LoadingCard } from "./LoadingCard";
-import { Onboarding } from "./Onboarding";
 import { useAuth } from "./use-auth";
-import { type Entry, useInvestigation } from "./use-investigation";
+import { casePaths } from "./case-paths";
+import { DEFAULT_REPO, type Entry, useInvestigation } from "./use-investigation";
 
 export function Investigator() {
   const user = useAuth();
@@ -124,6 +124,7 @@ export function Investigator() {
   );
   const prItems = useMemo(() => prRailItems(prHistory.entries, null), [prHistory.entries]);
   const railItems = filterRail(lineItems, prItems, filter);
+  const cases = useMemo(() => casePaths(history, repoPath), [history, repoPath]);
 
   function openRailItem(item: RailItem) {
     setMenuOpen(false);
@@ -246,7 +247,7 @@ export function Investigator() {
       <div className="flex">
         <div
           className={
-            lineCase || draftCase
+            lineCase || draftCase || browsing
               ? "min-w-0 flex-1 px-8 pt-6 pb-20 max-[820px]:px-4"
               : "mx-auto max-w-270 min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8"
           }
@@ -258,7 +259,6 @@ export function Investigator() {
           )}
 
           <div className={browsing ? "" : "hidden"}>
-            {history.length === 0 && <Onboarding repoReady={repo.ready} signedIn={!!user} />}
             <Composer
               key={resetKey}
               repo={repo}
@@ -276,6 +276,8 @@ export function Investigator() {
               }}
               signedIn={!!user}
               prefill={prefill}
+              cases={cases}
+              demoRepo={DEFAULT_REPO}
             />
           </div>
 
