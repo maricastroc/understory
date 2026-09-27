@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ArtifactRef, DigResult, InvestigateInput } from "@git-investigator/core/types";
-import type { CaseItem } from "../sidebar/case-item";
 import type { AuthUser } from "./use-auth";
+import type { CaseParent } from "./case-parent";
+import type { SavedCase } from "./saved-case";
+import { fetchSavedCases } from "./saved-cases";
 
 const DEFAULT_REPO = process.env.NEXT_PUBLIC_DEFAULT_REPO || ".demo/payments-service";
 const FIRST_CASE = 2049;
@@ -46,14 +48,6 @@ async function readNdjson(
   if (tail) onMessage(JSON.parse(tail) as StreamMessage);
 }
 
-type SavedInvestigation = {
-  caseId: string;
-  question: string;
-  repoPath: string;
-  location: string;
-  result: DigResult;
-};
-
 const caseNumber = (caseId: string) => Number.parseInt(caseId.replace(/^GI-/, ""), 10) || 0;
 
 export function useInvestigation(user: AuthUser | null) {
@@ -65,6 +59,10 @@ export function useInvestigation(user: AuthUser | null) {
 
   const [history, setHistory] = useState<Entry[]>([]);
 
+  const [loaded, setLoaded] = useState(false);
+
+  const [persisted, setPersisted] = useState(false);
+
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const [view, setView] = useState<View>("browse");
@@ -75,22 +73,24 @@ export function useInvestigation(user: AuthUser | null) {
 
   useEffect(() => {
     let alive = true;
-    fetch("/api/investigations")
-      .then((r) => r.json())
-      .then((d: { investigations?: SavedInvestigation[] }) => {
-        if (!alive) return;
-        const saved = d.investigations ?? [];
-        setHistory(
-          saved.map((s) => ({
-            caseId: s.caseId,
-            form: { repoPath: s.repoPath, location: s.location, question: s.question },
-            result: s.result,
-          })),
-        );
-        const maxNum = saved.reduce((m, s) => Math.max(m, caseNumber(s.caseId)), 0);
-        counter.current = Math.max(FIRST_CASE, maxNum + 1);
-      })
-      .catch(() => {});
+    fetchSavedCases().then(({ cases, persisted: synced }) => {
+      if (!alive) return;
+      const questions = new Map(cases.map((c) => [c.caseId, c.question]));
+      setHistory(
+        cases.map((s) => ({
+          caseId: s.caseId,
+          form: { repoPath: s.repoPath, location: s.location, question: s.question },
+          result: s.result,
+          ...(s.parentCaseId
+            ? { parentCaseId: s.parentCaseId, parentQuestion: questions.get(s.parentCaseId) }
+            : {}),
+        })),
+      );
+      setPersisted(synced);
+      setLoaded(true);
+      const maxNum = cases.reduce((m, s) => Math.max(m, caseNumber(s.caseId)), 0);
+      counter.current = Math.max(FIRST_CASE, maxNum + 1);
+    });
     return () => {
       alive = false;
     };
@@ -101,7 +101,7 @@ export function useInvestigation(user: AuthUser | null) {
   async function submit(
     reqBody: object,
     buildEntry: (caseId: string, data: DigResult) => Entry,
-    buildSave: (caseId: string, data: DigResult) => SavedInvestigation,
+    buildSave: (caseId: string, data: DigResult) => SavedCase,
     token?: string,
   ) {
     if (loading) return;
@@ -191,16 +191,22 @@ export function useInvestigation(user: AuthUser | null) {
     }
   }
 
-  async function investigate(input: Form, token?: string, language?: string) {
+  async function investigate(input: Form, token?: string, language?: string, parent?: CaseParent) {
     await submit(
       { ...input, ...(language ? { language } : {}) },
-      (caseId, data) => ({ caseId, form: input, result: data }),
+      (caseId, data) => ({
+        caseId,
+        form: input,
+        result: data,
+        ...(parent ? { parentCaseId: parent.caseId, parentQuestion: parent.question } : {}),
+      }),
       (caseId, data) => ({
         caseId,
         question: input.question,
         repoPath: input.repoPath,
         location: input.location,
         result: data,
+        ...(parent ? { parentCaseId: parent.caseId } : {}),
       }),
       token,
     );
@@ -230,6 +236,7 @@ export function useInvestigation(user: AuthUser | null) {
         repoPath,
         location: label,
         result: data,
+        parentCaseId,
       }),
       token,
     );
@@ -269,32 +276,6 @@ export function useInvestigation(user: AuthUser | null) {
     }
   }
 
-  const items: CaseItem[] = history.map((e) => {
-    const ev = e.result.evidence;
-
-    const base = (p: string) => p.split("/").filter(Boolean).pop() ?? p;
-
-    const location = ev.location
-      ? `${base(ev.location.file)}:${ev.location.startLine}${
-          ev.location.endLine !== ev.location.startLine ? `-${ev.location.endLine}` : ""
-        }`
-      : (ev.anchor?.ref ?? ev.anchor?.id ?? "—");
-
-    return {
-      caseId: e.caseId,
-      question: e.form.question || "(no question asked)",
-      repoName: ev.repo.name ?? base(ev.repo.path),
-      location,
-      recorded: e.result.narrative?.recorded ?? false,
-      answerable: e.result.narrative?.answerable !== false,
-      hasNarrative: !!e.result.narrative,
-      level: e.result.narrative?.confidence.level ?? "low",
-      score: e.result.narrative?.confidence.score ?? 0,
-      child: !!e.parentCaseId,
-      pending: e.pending ?? false,
-    };
-  });
-
   const browsing = view === "browse" && !loading;
 
   return {
@@ -302,7 +283,9 @@ export function useInvestigation(user: AuthUser | null) {
     setRepoPath,
     loading,
     error,
-    items,
+    history,
+    loaded,
+    persisted,
     activeId,
     view,
     resetKey,

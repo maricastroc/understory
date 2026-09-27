@@ -1,49 +1,42 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { Languages } from "./icons";
-import type { Language } from "./use-language";
-
-const LABELS: Record<Language, string> = { en: "EN", pt: "PT" };
+import type { Language } from "../use-language";
 
 const noop = () => () => {};
 
-export function LangToggle({
+export function LanguageSwitch({
   language,
   onChange,
-  className = "h-9",
 }: {
   language: Language;
   onChange: (l: Language) => void;
-  className?: string;
 }) {
   const mounted = useSyncExternalStore(
     noop,
     () => true,
     () => false,
   );
-
   return (
     <div
       role="group"
       aria-label="Language of the analysis"
       title="Language the analysis is written in"
-      className={`inline-flex shrink-0 items-center gap-0.5 rounded-md border border-line-2 bg-surface px-1 ${className}`}
+      className="grid shrink-0 grid-cols-2 overflow-hidden rounded border border-li-divider text-xs"
     >
-      <Languages className="ml-0.5 size-3.5 shrink-0 text-ink-3" />
       {(["en", "pt"] as const).map((l) => {
         const active = mounted && language === l;
         return (
           <button
             key={l}
             type="button"
-            onClick={() => onChange(l)}
             aria-pressed={active}
-            className={`rounded px-1.5 py-1 text-[12px] font-semibold transition-colors ${
-              active ? "bg-accent text-white" : "text-ink-2 hover:text-ink"
+            onClick={() => onChange(l)}
+            className={`cursor-pointer px-2 py-1.25 font-medium focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel ${
+              active ? "bg-li-ink text-li-paper" : "text-li-text-subtle hover:bg-li-neutral-200"
             }`}
           >
-            {LABELS[l]}
+            {l.toUpperCase()}
           </button>
         );
       })}

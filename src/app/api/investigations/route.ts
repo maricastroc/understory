@@ -1,44 +1,56 @@
 import { Prisma } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import { currentUser } from "@/lib/auth/current-user";
 import { dbEnabled, prisma } from "@/lib/db";
+import { isMissingColumn, saveSchema } from "@/lib/investigation-save";
 
 export const runtime = "nodejs";
 
-const saveSchema = z.object({
-  caseId: z.string().min(1).max(64),
-  question: z.string().max(2000),
-  repoPath: z.string().min(1).max(2000),
-  location: z.string().min(1).max(2000),
-  result: z.record(z.string(), z.unknown()),
-});
+const BASE_SELECT = {
+  caseId: true,
+  question: true,
+  repoPath: true,
+  location: true,
+  result: true,
+  createdAt: true,
+} as const;
 
-export function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const user = currentUser(req);
-  if (!user || !dbEnabled || !prisma) return NextResponse.json({ investigations: [] });
+  if (!user || !dbEnabled || !prisma) {
+    return NextResponse.json({ investigations: [], persisted: false });
+  }
+  const db = prisma;
+  const where = { userLogin: user.login };
+  const orderBy = { createdAt: "desc" as const };
 
-  return prisma.investigation
-    .findMany({
-      where: { userLogin: user.login },
-      orderBy: { createdAt: "desc" },
-      select: {
-        caseId: true,
-        question: true,
-        repoPath: true,
-        location: true,
-        result: true,
-        createdAt: true,
-      },
-    })
-    .then((investigations) => NextResponse.json({ investigations }))
-    .catch(() => NextResponse.json({ investigations: [] }));
+  try {
+    const investigations = await db.investigation.findMany({
+      where,
+      orderBy,
+      select: { ...BASE_SELECT, parentCaseId: true },
+    });
+    return NextResponse.json({ investigations, persisted: true });
+  } catch (e) {
+    if (!isMissingColumn(e)) return NextResponse.json({ investigations: [], persisted: true });
+    try {
+      const investigations = await db.investigation.findMany({
+        where,
+        orderBy,
+        select: BASE_SELECT,
+      });
+      return NextResponse.json({ investigations, persisted: true });
+    } catch {
+      return NextResponse.json({ investigations: [], persisted: true });
+    }
+  }
 }
 
 export async function POST(req: NextRequest) {
   const user = currentUser(req);
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   if (!dbEnabled || !prisma) return NextResponse.json({ persisted: false });
+  const db = prisma;
 
   let parsed;
   try {
@@ -49,14 +61,34 @@ export async function POST(req: NextRequest) {
 
   const { caseId, question, repoPath, location } = parsed;
   const result = parsed.result as Prisma.InputJsonValue;
-  try {
-    await prisma.investigation.upsert({
+  const parentCaseId = parsed.parentCaseId ?? null;
+  const save = (withParent: boolean) => {
+    const fields = {
+      question,
+      repoPath,
+      location,
+      result,
+      ...(withParent ? { parentCaseId } : {}),
+    };
+    return db.investigation.upsert({
       where: { userLogin_caseId: { userLogin: user.login, caseId } },
-      create: { userLogin: user.login, caseId, question, repoPath, location, result },
-      update: { question, repoPath, location, result },
+      create: { userLogin: user.login, caseId, ...fields },
+      update: fields,
     });
+  };
+
+  try {
+    await save(true);
     return NextResponse.json({ persisted: true });
-  } catch {
+  } catch (e) {
+    if (isMissingColumn(e)) {
+      try {
+        await save(false);
+        return NextResponse.json({ persisted: true, parentSaved: false });
+      } catch {
+        return NextResponse.json({ error: "Could not save investigation" }, { status: 500 });
+      }
+    }
     return NextResponse.json({ error: "Could not save investigation" }, { status: 500 });
   }
 }

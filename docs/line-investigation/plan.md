@@ -275,7 +275,35 @@ Playwright (`npm run test:e2e`, usa o Chrome instalado localmente).
 Preview só de desenvolvimento em `/dev/line?state=…` (mesma tela, dentro do shell real, com a
 fixture sintética e suas variantes).
 
-## 13. Estado
+## 13. Etapa 10 — shell, rail de casos e pai/filho
 
-Etapas 0–9 implementadas; 0–5 comitadas. A tela nova está integrada ao `/app` para casos com
-`location`. Checkpoint de revisão antes da etapa 10 (shell).
+| Tema | Handoff | Implementação e motivo |
+|---|---|---|
+| Header | marca, repo, busca, Explain a PR, New investigation, avatar | Igual, com 56 px. Acrescenta o seletor EN/PT (idioma da narrativa já existia) e "Sign in with GitHub" para convidado quando o OAuth está ativo. Share continua oculto (A12). |
+| Seletor de repo | troca de repo | Mostra o repo do caso aberto (nome, branch · sha7 do caso, não HEAD) ou o do Composer. O popover oferece "New investigation here" e "Open repository ↗"; não substitui o `RepoBar` do Composer. Caminho local vira o nome da pasta; largura máxima 384 px. |
+| Busca | "Search files, symbols or cases" | Casos sempre; arquivos só com repo aberto (mesmo `/api/files` do Composer). Sem índice de símbolos: o placeholder diz "Search cases" quando não há repo. ⌘K foca; Esc fecha sem chegar ao caso. Oculta abaixo de 1280 px (abaixo disso espremia até ~40 px). |
+| Rail | Cases, All/Lines/PRs, linhas com glyph | `<aside>` nomeado "Cases" com `<nav>` "Case list" (axe `region`). Casos de linha e PRs na mesma lista; filho logo abaixo do pai com cotovelo; filho órfão fica no topo. O ✕ de remover sobrepõe o fim do título no hover (a largura do título é a do v4); em tela de toque o espaço fica reservado. |
+| Subtítulo de linha | `charge.ts:9 · 5 of 6 links` | "N of M links" só quando todos os gaps foram verificados; senão "N links"; sem sufixo quando não há gaps. |
+| Subtítulo de filho ancorado | `from C · review·dmitri-k` | Letra do artefato na vista do pai (a nossa ordem de letras é a do bore). |
+| Subtítulo de PR | `#944 · 3 of 8 regions` | Regiões explicadas (`recorded` e `grounded`) de regiões detalhadas, a mesma conta de "Regions explained" do `/pr`. |
+| Rodapé | "Cases saved across devices" | Convidado: "Sign in to save line cases". Logado: "Line cases saved across devices" só quando o servidor persiste (`GET /api/investigations` devolve `persisted`); senão "Line cases aren't saved on this server". PRs continuam só no navegador. |
+| Fonte | Barlow no app todo | Barlow só no header e no rail; corpos do Composer e do `/pr` não mudam (D6). |
+| `/pr` | — | Mesmo shell; o rail lista PRs do navegador e casos de linha salvos (abrem em `/app?case=`). Corpo e `PrRail` inalterados; rail direito com altura total. |
+| Mobile (< 768) | drawer | Botão de menu abre o rail num diálogo com foco preso, Esc e ✕ no cabeçalho do rail; foco volta ao botão. |
+| Drawer de evidência | top 56 px | Top 56 px (header novo). |
+| Pai/filho | `parentCaseId` | Coluna `parentCaseId` (migração `20260927160000_investigation_parent_case`). "Ask a follow-up" grava o pai quando a nova pergunta é no mesmo arquivo; drill-down grava o pai. A API tolera banco sem a coluna (P2022): salva sem o pai e devolve `parentSaved: false`. **A migração precisa ser aplicada antes do deploy.** |
+| `?case=ID` | — | Abre o caso salvo depois de carregar a lista; id desconhecido é ignorado. |
+
+Mantidos para o passe de refinamento visual (sem problema funcional ou de acessibilidade):
+
+- Trace e tick da régua se sobrepõem no lane x≈482.
+- Linhas vazias intencionais no topo do painel de código quando há poucas linhas acima do datum.
+- Linha de código longa cortada no painel de 460 px.
+
+Decisão de produto pendente: veredito "Resolved" com claims misattributed (§12). Comportamento
+atual preservado.
+
+## 14. Estado
+
+Etapas 0–10 implementadas; 0–9 comitadas. Checkpoint de revisão depois da etapa 10, antes das
+etapas 11–13.

@@ -45,7 +45,7 @@ export function EvidenceDrawer({
       role="dialog"
       aria-modal="false"
       aria-labelledby={headingId}
-      className="fixed top-13 right-0 bottom-0 z-30 flex w-95 flex-col border-l border-li-divider bg-li-paper font-li-body shadow-li-lg max-[1099px]:w-1/2 max-[819px]:inset-x-0 max-[819px]:top-auto max-[819px]:h-[85vh] max-[819px]:w-full max-[819px]:border-t max-[819px]:border-l-0"
+      className="fixed top-14 right-0 bottom-0 z-30 flex w-95 flex-col border-l border-li-divider bg-li-paper font-li-body shadow-li-lg max-[1099px]:w-1/2 max-[819px]:inset-x-0 max-[819px]:top-auto max-[819px]:h-[85vh] max-[819px]:w-full max-[819px]:border-t max-[819px]:border-l-0"
     >
       {entry ? (
         <>
