@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { RepoMeta } from "@git-investigator/core/types";
+import { readJson } from "@/lib/read-json";
 
 export type Repo = ReturnType<typeof useRepo>;
 
@@ -25,7 +26,7 @@ export function useRepo() {
         },
         body: JSON.stringify({ repo }),
       });
-      const data = await res.json();
+      const data = await readJson<RepoMeta & { error?: string }>(res);
       if (!res.ok) {
         setError(data.error || "Could not open repository");
         return;

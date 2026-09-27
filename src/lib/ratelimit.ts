@@ -27,7 +27,15 @@ function clientIp(req: Request): string {
 export async function rateLimit(req: Request, tier: RateTier): Promise<NextResponse | null> {
   if (!limiters) return null;
 
-  const { success, limit, remaining, reset } = await limiters[tier].limit(clientIp(req));
+  let result: Awaited<ReturnType<Ratelimit["limit"]>>;
+  try {
+    result = await limiters[tier].limit(clientIp(req));
+  } catch (e) {
+    console.error("[ratelimit] Upstash unavailable, failing open:", e);
+    return null;
+  }
+
+  const { success, limit, remaining, reset } = result;
   if (success) return null;
 
   const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
