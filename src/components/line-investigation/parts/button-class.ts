@@ -4,6 +4,8 @@ const BASE =
 const VARIANT = {
   primary:
     "relative border-li-steel-700 bg-li-steel-700 px-3 py-1.75 text-li-paper hover:bg-li-steel-800",
+  brand:
+    "relative border-li-brand bg-li-brand px-3 py-1.75 text-white hover:border-li-brand-press hover:bg-li-brand-press",
   secondary: "border-li-divider px-3 py-1.75 text-li-ink hover:bg-li-neutral-200",
   ghost: "border-transparent px-1 py-1.75 text-li-steel-700 hover:bg-li-steel-100",
   icon: "size-7 border-transparent text-li-ink hover:bg-li-neutral-200",

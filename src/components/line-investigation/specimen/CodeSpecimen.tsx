@@ -32,6 +32,7 @@ export function CodeSpecimen({
   onToggleExpanded,
   targetDatumY,
   onDatumY,
+  static: still = false,
 }: {
   path: string;
   lines: string[];
@@ -45,6 +46,7 @@ export function CodeSpecimen({
   onToggleExpanded: () => void;
   targetDatumY?: number;
   onDatumY?: (y: number) => void;
+  static?: boolean;
 }) {
   const listId = useId();
   const [scrollRef, scrolls] = useHorizontalOverflow();
@@ -88,7 +90,9 @@ export function CodeSpecimen({
           ? hiddenLabel(win.hiddenAfter)
           : null;
   const showFooter =
-    footerLabel !== null && (expanded ? canCollapse : !!(win.hiddenAfter || win.hiddenBefore));
+    footerLabel !== null &&
+    !(still && layout.mode === "strip") &&
+    (expanded ? canCollapse : !!(win.hiddenAfter || win.hiddenBefore));
 
   const rows: number[] = [];
   for (let n = win.start; n <= win.end; n++) rows.push(n);
@@ -118,6 +122,7 @@ export function CodeSpecimen({
             controls={listId}
             placement="top"
             onToggle={onToggleExpanded}
+            static={still}
           />
         )}
         <ol id={listId} className="w-max min-w-full">
@@ -145,6 +150,7 @@ export function CodeSpecimen({
           controls={listId}
           placement="bottom"
           onToggle={onToggleExpanded}
+          static={still}
         />
       )}
     </section>

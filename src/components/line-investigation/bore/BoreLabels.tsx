@@ -7,6 +7,7 @@ import type { BoreLayout } from "../layout/types";
 import type { ViewArtifact, ViewClause, ViewGap } from "../model/types";
 import { EvidenceLetter } from "../parts/EvidenceLetter";
 import type { LetterVariant } from "../parts/letter-variant";
+import { StaticArtifactLabel, StaticGapLabel } from "./StaticLabels";
 
 type LabelItem =
   | { key: string; top: number; type: "artifact"; artifact: ViewArtifact }
@@ -35,6 +36,7 @@ export function BoreLabels({
   onInspect,
   onToggleGroup,
   arrival = null,
+  static: still = false,
 }: {
   layout: BoreLayout;
   byId: Map<string, ViewArtifact>;
@@ -50,6 +52,7 @@ export function BoreLabels({
   onInspect: (id: string) => void;
   onToggleGroup: (id: string) => void;
   arrival?: Map<string, number> | null;
+  static?: boolean;
 }) {
   const glyphById = new Map(layout.glyphs.map((g) => [g.id, g]));
   const items: LabelItem[] = [];
@@ -90,7 +93,7 @@ export function BoreLabels({
     animationDelay: arrival?.has(key) ? `${arrival.get(key)}ms` : undefined,
   });
   const labelClass = (key: string) =>
-    `pointer-events-auto absolute ${arrival?.has(key) ? "animate-li-arrive" : ""}`;
+    `${still ? "" : "pointer-events-auto"} absolute ${arrival?.has(key) ? "animate-li-arrive" : ""}`;
 
   const letterVariant = (a: ViewArtifact, dim: boolean): LetterVariant =>
     dim ? "dimmed" : a.role === "cited" ? "cited" : "supporting";
@@ -138,6 +141,17 @@ export function BoreLabels({
             const selected = inspected === gap.id;
             const show = revealed.has(gap.id) || hovered === gap.id || selected;
             const dim = active !== null && !active.has(gap.afterId);
+            if (still) {
+              return (
+                <li
+                  key={item.key}
+                  className={labelClass(item.key)}
+                  style={labelStyle(item.top, item.key)}
+                >
+                  <StaticGapLabel gap={gap} after={after} dim={dim} show={show} />
+                </li>
+              );
+            }
             return (
               <li
                 key={item.key}
@@ -181,6 +195,23 @@ export function BoreLabels({
             const first = item.members[0];
             const last = item.members[item.members.length - 1];
             const dim = active !== null && !item.members.some((m) => active.has(m.id));
+            if (still) {
+              return (
+                <li
+                  key={item.key}
+                  className={`${labelClass(item.key)} flex items-center gap-2 py-0.5 pl-0.5 font-li-mono text-[11px]`}
+                  style={labelStyle(item.top, item.key)}
+                >
+                  <EvidenceLetter
+                    letter={`×${item.members.length}`}
+                    variant={dim ? "dimmed" : "supporting"}
+                  />
+                  <span className={dim ? "text-li-text-muted" : ""}>
+                    {first.letter}–{last.letter} · {item.members.length} {kindName(first.kind)}s
+                  </span>
+                </li>
+              );
+            }
             return (
               <li
                 key={item.key}
@@ -211,6 +242,17 @@ export function BoreLabels({
           const isHovered = hovered === a.id;
           const show = revealed.has(a.id) || isHovered || selected;
           const dim = active !== null && !active.has(a.id);
+          if (still) {
+            return (
+              <li
+                key={item.key}
+                className={labelClass(item.key)}
+                style={labelStyle(item.top, item.key)}
+              >
+                <StaticArtifactLabel artifact={a} clauses={clauses} dim={dim} show={show} />
+              </li>
+            );
+          }
           return (
             <li
               key={item.key}

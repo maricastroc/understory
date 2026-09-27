@@ -1,45 +1,74 @@
-import Link from "next/link";
-import { buttonClass } from "@/components/Button";
-import { ChevronRight, Shield } from "@/components/icons";
-import { steps } from "./content";
+"use client";
+
+import type { ReactNode } from "react";
+import { LANDING_PATH, landingLines, landingView } from "./demo/landing-fixture";
+import { CONTAINER, H2, SECTION } from "./parts/landing-classes";
+import { HeadlineSpecimen } from "./specimens/HeadlineSpecimen";
+import { LineSpecimen } from "./specimens/LineSpecimen";
+import { TrailSpecimen } from "./specimens/TrailSpecimen";
+
+function Step({
+  n,
+  title,
+  body,
+  children,
+}: {
+  n: string;
+  title: string;
+  body: string;
+  children: ReactNode;
+}) {
+  return (
+    <li className="flex flex-col gap-3.5">
+      <div className="flex h-24 flex-col justify-center">{children}</div>
+      <h3 className="flex items-baseline gap-2.5">
+        <span className="font-li-mono text-xs text-li-datum-ink">{n}</span>
+        <span className="text-base font-semibold text-li-ink">{title}</span>
+      </h3>
+      <p className="text-sm leading-normal text-li-neutral-800">{body}</p>
+    </li>
+  );
+}
 
 export function Method() {
+  const line = landingView.location?.startLine ?? 9;
   return (
-    <section id="how" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-      <p className="font-mono text-[12px] text-accent-press">{`// the method`}</p>
-      <h2 className="mt-3 max-w-[22ch] text-[24px] font-semibold tracking-[-0.015em] text-balance sm:text-[27px]">
-        From a line you don&apos;t understand to the decision behind it.
-      </h2>
-      <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-3">
-        {steps.map((s) => (
-          <div key={s.n}>
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-[13px] font-semibold text-accent-press">{s.n}</span>
-              <span className="h-px flex-1 bg-line" />
-            </div>
-            <h3 className="mt-4 text-[16px] font-semibold">{s.title}</h3>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-ink-2">{s.body}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-16 flex flex-col items-start gap-4 rounded-[14px] border border-line bg-surface-2 px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <div>
-          <div className="flex items-center gap-2 text-good">
-            <Shield className="size-4" />
-            <span className="font-mono text-[11.5px] tracking-[0.06em] uppercase">open a case</span>
-          </div>
-          <h3 className="mt-2 text-[18px] font-semibold tracking-tight">
-            Interrogate your own code.
-          </h3>
-          <p className="mt-1 text-[13.5px] text-ink-2">
-            Point it at a repository and a line — see what the history really says.
-          </p>
-        </div>
-        <Link href="/app" className={buttonClass({ size: "lg" })}>
-          Explain a line
-          <ChevronRight className="size-4" />
-        </Link>
+    <section id="method" aria-labelledby="method-title" className={`${SECTION} scroll-mt-15`}>
+      <div className={`${CONTAINER} flex flex-col gap-9 py-18`}>
+        <h2 id="method-title" className={`${H2} max-w-140`}>
+          From a line you don&apos;t understand to the decision behind it.
+        </h2>
+        <ol className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-8">
+          <Step
+            n="01"
+            title="Point at a line"
+            body="Open a GitHub repo, find a file by name or symbol, and select the exact line in question."
+          >
+            <LineSpecimen
+              lines={landingLines}
+              path={LANDING_PATH}
+              line={line}
+              question={landingView.question}
+            />
+          </Step>
+          <Step
+            n="02"
+            title="Follow the trail down"
+            body="Blame finds the commit; the pull request, reviews and issues behind it carry the reasoning, placed at their real depth in time."
+          >
+            <TrailSpecimen />
+          </Step>
+          <Step
+            n="03"
+            title="Read the reconstruction"
+            body="A reconstructed why, each clause tied to a source you can open, or an honest “the record is silent.”"
+          >
+            <HeadlineSpecimen
+              clause={landingView.clauses[0]}
+              silence="Why it retries at all: not recorded"
+            />
+          </Step>
+        </ol>
       </div>
     </section>
   );

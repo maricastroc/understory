@@ -1,113 +1,41 @@
-import Link from "next/link";
-import { buttonClass } from "@/components/Button";
-import { ConfidenceRing } from "@/components/ConfidenceRing";
-import { Check, ChevronRight, Commit, Issue, PullRequest } from "@/components/icons";
-import { codeLines, sampleConfidence } from "./content";
-
-const grounded = [
-  { icon: <Commit className="size-3" />, id: "commit:c038fb3" },
-  { icon: <PullRequest className="size-3" />, id: "pr:812" },
-  { icon: <Issue className="size-3" />, id: "issue:1187" },
-];
+import { liButton } from "../line-investigation/parts/button-class";
+import { HeroDemo } from "./demo/HeroDemo";
+import { CONTAINER } from "./parts/landing-classes";
+import { PrimaryLink } from "./parts/PrimaryLink";
 
 export function Hero() {
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-16 pb-20 sm:px-6 lg:pt-20">
-      <p className="font-mono text-[12.5px] text-ink-3">
-        <span className="text-accent-press">git blame</span> tells you{" "}
-        <span className="text-ink">who</span> and <span className="text-ink">when</span>. This tells
-        you <span className="text-ink">why</span>.
-      </p>
-
-      <h1 className="mt-5 max-w-[18ch] font-mono text-[34px] leading-[1.06] font-semibold tracking-[-0.03em] sm:text-[56px]">
-        Why is this <span className="text-accent">line</span> here?
-        <span
-          aria-hidden
-          className="ml-2 inline-block h-[0.82em] w-[0.5ch] translate-y-[0.06em] animate-pulse bg-accent align-baseline motion-reduce:animate-none"
-        />
-      </h1>
-
-      <p className="mt-6 max-w-[58ch] font-sans text-[15px] leading-relaxed text-ink-2 sm:text-[16px]">
-        Git Investigator reconstructs the reasoning behind a line of code — tracing the commits, pull
-        requests, and issues that shaped it — and cites every source you can click. When the history
-        doesn&apos;t explain it, it tells you, instead of inventing a reason.
-      </p>
-
-      <div className="mt-8 flex flex-wrap items-center gap-3">
-        <Link href="/app" className={buttonClass({ size: "lg" })}>
-          Explain a line
-          <ChevronRight className="size-4" />
-        </Link>
-        <a href="#how" className={buttonClass({ variant: "secondary", size: "lg" })}>
-          How it works
-        </a>
-      </div>
-
-      <div className="mt-14 grid grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-stretch">
-        <div className="overflow-hidden rounded-t-xl border border-line bg-surface shadow-[0_10px_40px_rgba(20,22,30,0.06)] lg:rounded-l-xl lg:rounded-tr-none lg:border-r-0">
-          <div className="flex items-center gap-2 border-b border-line bg-surface-2 px-4 py-2.5 font-mono text-[12px] text-ink-3">
-            <span className="text-ink-2">payments-service</span>
-            <span>/</span>
-            <span className="truncate text-ink-2">src/billing/charge.ts</span>
-            <span className="ml-auto shrink-0 rounded bg-inset px-2 py-0.5 text-[11px]">
-              git blame
-            </span>
-          </div>
-          <div className="overflow-x-auto py-2 font-mono text-[12.5px] leading-[1.7]">
-            {codeLines.map((l) => (
-              <div key={l.n} className={`flex items-center px-1 ${l.hot ? "bg-accent-tint" : ""}`}>
-                <span
-                  className={`w-10 shrink-0 pr-3 text-right select-none ${l.hot ? "text-accent-press" : "text-ink-3"}`}
-                >
-                  {l.n}
-                </span>
-                <code className="pr-4 whitespace-pre text-ink">{l.text || " "}</code>
-                {l.hot && (
-                  <span className="ml-auto flex shrink-0 items-center gap-1 pr-3 text-[11px] font-semibold whitespace-nowrap text-accent-press">
-                    ◀ why exactly 3?
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col rounded-b-xl border border-line bg-surface p-5 shadow-[0_10px_40px_rgba(20,22,30,0.06)] lg:rounded-r-xl lg:rounded-bl-none">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex h-5.5 items-center gap-1.5 rounded-full bg-good-tint px-2.5 text-[11.5px] font-semibold text-good">
-              <span className="size-1.5 rounded-full bg-good" />
-              Resolved
-            </span>
-            <span className="font-mono text-[11px] text-ink-3">GI-2049</span>
-            <div className="ml-auto">
-              <ConfidenceRing confidence={sampleConfidence} size={64} />
-            </div>
-          </div>
-
-          <p className="mt-4 text-[13.5px] leading-relaxed text-ink-body">
-            Capped at three after an unbounded loop double-billed customers during a Stripe outage —
-            three attempts stay inside the 10-second webhook window.
-          </p>
-
-          <div className="mt-auto border-t border-line pt-3">
-            <div className="mb-2 font-mono text-[10.5px] tracking-[0.06em] text-ink-3 uppercase">
-              grounded in
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {grounded.map((g) => (
-                <span
-                  key={g.id}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-line bg-inset px-2 py-1 font-mono text-[11px] text-ink-2"
-                >
-                  <Check className="size-3 text-good" />
-                  {g.icon}
-                  {g.id}
-                </span>
-              ))}
-            </div>
-          </div>
+    <section
+      aria-labelledby="hero-title"
+      className={`${CONTAINER} flex flex-col gap-18 pt-28 pb-24 max-[640px]:gap-12 max-[640px]:pt-14 max-[640px]:pb-16`}
+    >
+      <div className="flex max-w-200 flex-col items-start">
+        <p className="font-li-mono text-[13px] text-li-neutral-700">
+          <span className="text-li-ink">git blame</span> tells you{" "}
+          <span className="text-li-ink">who</span> and <span className="text-li-ink">when</span>.
+          This tells you <span className="font-medium text-li-ink">why</span>.
+        </p>
+        <h1
+          id="hero-title"
+          className="mt-5 font-li-display text-[clamp(56px,9vw,112px)] leading-[0.92] font-semibold tracking-[-0.015em] text-li-ink"
+        >
+          Why is this line{" "}
+          <span className="underline decoration-li-datum decoration-[0.06em] underline-offset-[0.1em]">
+            here?
+          </span>
+        </h1>
+        <p className="mt-7 max-w-155 text-lg leading-[1.55] text-pretty text-li-neutral-800 max-[640px]:text-base">
+          Git Investigator reconstructs the reasoning behind a line of code — tracing commits, pull
+          requests, and issues back to the decision that introduced it.
+        </p>
+        <div className="mt-9 flex flex-wrap gap-2">
+          <PrimaryLink href="/app">Explain a line →</PrimaryLink>
+          <a href="#method" className={liButton("secondary")}>
+            How it works
+          </a>
         </div>
       </div>
+      <HeroDemo />
     </section>
   );
 }
