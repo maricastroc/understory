@@ -47,6 +47,8 @@
   --color-li-steel-700: #416180;
   --color-li-steel-800: #2c455d;
   --color-li-steel-900: #1d2d3d;
+  --color-li-brand: #b45309;
+  --color-li-brand-press: #8f4008;
   --color-li-datum: oklch(0.78 0.13 80);
   --color-li-datum-row: oklch(0.93 0.06 85);
   --color-li-datum-strong: oklch(0.8 0.13 80);

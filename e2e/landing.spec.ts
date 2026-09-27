@@ -91,14 +91,13 @@ test("clause 2 is active on load with a green trace to E and D; hover moves it",
   await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "false");
 });
 
-test("no orange, no ring, no percentage; primary actions are steel with blueprint corners", async ({
-  page,
-}) => {
+test("orange only on the primary calls to action; no ring, no percentage", async ({ page }) => {
   await open(page);
   const found = await page.evaluate(() => {
     const orange = ["rgb(180, 83, 9)", "rgb(143, 64, 8)", "rgb(250, 234, 208)"];
     const hits: string[] = [];
     for (const el of document.querySelectorAll<HTMLElement | SVGElement>("body *")) {
+      if (el.closest('a[href="/app"].bg-li-brand')) continue;
       const s = getComputedStyle(el);
       for (const v of [s.color, s.backgroundColor, s.borderTopColor, s.fill, s.stroke]) {
         if (orange.includes(v)) hits.push(`${el.tagName} ${v}`);
@@ -111,8 +110,12 @@ test("no orange, no ring, no percentage; primary actions are steel with blueprin
   const primaries = page.getByRole("link", { name: /^Explain a line/ });
   await expect(primaries).toHaveCount(3);
   for (const link of await primaries.all()) {
-    await expect(link).toHaveCSS("background-color", "rgb(65, 97, 128)");
+    await expect(link).toHaveCSS("background-color", "rgb(180, 83, 9)");
+    await expect(link).toHaveCSS("color", "rgb(255, 255, 255)");
     expect(await link.locator("span[aria-hidden]").count()).toBe(4);
+  }
+  for (const link of await page.getByRole("link", { name: /^Explain a PR/ }).all()) {
+    await expect(link).not.toHaveCSS("background-color", "rgb(180, 83, 9)");
   }
 });
 
