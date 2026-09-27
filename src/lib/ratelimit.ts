@@ -6,13 +6,19 @@ const configured = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_
 
 const redis = configured ? Redis.fromEnv() : null;
 
+const NAMESPACE = "git-investigator:ratelimit";
+
 const limiters = redis
   ? {
-      ai: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60 s"), prefix: "gi:ai" }),
+      ai: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(15, "60 s"),
+        prefix: `${NAMESPACE}:ai`,
+      }),
       browse: new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(40, "60 s"),
-        prefix: "gi:browse",
+        prefix: `${NAMESPACE}:browse`,
       }),
     }
   : null;

@@ -4,8 +4,11 @@ const REQ = new Request("http://localhost/api/dig", {
   headers: { "x-forwarded-for": "9.9.9.9" },
 });
 
+const prefixes: string[] = [];
+
 async function load(opts?: { over?: boolean; down?: boolean }) {
   vi.resetModules();
+  prefixes.length = 0;
   if (opts) {
     const { over = false, down = false } = opts;
     process.env.UPSTASH_REDIS_REST_URL = "https://example.upstash.io";
@@ -13,6 +16,9 @@ async function load(opts?: { over?: boolean; down?: boolean }) {
     vi.doMock("@upstash/redis", () => ({ Redis: { fromEnv: () => ({}) } }));
     vi.doMock("@upstash/ratelimit", () => ({
       Ratelimit: class {
+        constructor(config: { prefix?: string }) {
+          prefixes.push(config.prefix ?? "");
+        }
         static slidingWindow() {
           return {};
         }
@@ -55,6 +61,15 @@ describe("rateLimit", () => {
     expect(await rateLimit(REQ, "browse")).toBeNull();
     expect(error).toHaveBeenCalled();
     error.mockRestore();
+  });
+
+  it("keeps every limiter key under the git-investigator:ratelimit namespace", async () => {
+    await load({});
+    expect(prefixes).toEqual([
+      "git-investigator:ratelimit:ai",
+      "git-investigator:ratelimit:browse",
+    ]);
+    for (const p of prefixes) expect(p.startsWith("git-investigator:ratelimit:")).toBe(true);
   });
 
   it("passes through when under the limit", async () => {
