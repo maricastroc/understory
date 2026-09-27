@@ -16,4 +16,7 @@ export type { EntailmentStatus, CitationCheck, Entailment } from "./entailment";
 export type { VerifiedNarrative } from "./verified-narrative";
 export type { DigResult } from "./dig-result";
 export type { InvestigateInput } from "./investigate-input";
+export type { PrLookup } from "./pr-lookup";
+export type { BlameSpan } from "./blame-span";
+export type { QuoteRange } from "./quote-range";
 export type { RepoMeta } from "./repo-meta";

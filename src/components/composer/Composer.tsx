@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { InvestigateInput } from "@git-investigator/core/types";
 import { Alert } from "../icons";
 import { CodeViewer } from "./CodeViewer";
+import type { ComposerPrefill } from "./composer-prefill";
 import { FileFinder } from "./FileFinder";
 import { RepoBar } from "./RepoBar";
 import { RepoOverview } from "./RepoOverview";
@@ -19,6 +20,7 @@ export function Composer({
   setToken,
   onInvestigate,
   signedIn = false,
+  prefill = null,
 }: {
   repo: Repo;
   repoPath: string;
@@ -27,6 +29,7 @@ export function Composer({
   setToken: (s: string) => void;
   onInvestigate: (input: InvestigateInput) => void;
   signedIn?: boolean;
+  prefill?: ComposerPrefill | null;
 }) {
   const viewer = useFileViewer(repoPath);
   const search = useFileSearch(repoPath, repo.ready, viewer.file?.path, token.trim() || undefined);
@@ -38,6 +41,15 @@ export function Composer({
     setNoCapture(v);
     localStorage.setItem("gi:no-capture", v ? "1" : "0");
   }
+
+  const handledPrefill = useRef<number | null>(null);
+  useEffect(() => {
+    if (!prefill || !repo.ready || handledPrefill.current === prefill.nonce) return;
+    handledPrefill.current = prefill.nonce;
+    search.clear();
+    search.setQuery(prefill.path);
+    void viewer.open(prefill.path, token.trim() || undefined, prefill.line);
+  }, [prefill, repo.ready, search, viewer, token]);
 
   function editRepo(v: string) {
     setRepoPath(v);
@@ -146,6 +158,7 @@ export function Composer({
           noCapture={noCapture}
           setNoCapture={updateNoCapture}
           onRun={run}
+          focusLine={prefill?.path === viewer.file.path ? prefill.line : undefined}
         />
       )}
     </div>

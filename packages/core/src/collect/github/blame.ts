@@ -1,3 +1,4 @@
+import type { BlameSpan, PrLookup } from "../../types";
 import { graphql, rest } from "./client";
 import { type Comment, COMMENTS } from "./comments";
 
@@ -24,6 +25,7 @@ export type AssociatedPr = {
   body: string;
   url: string;
   createdAt: string;
+  mergedAt?: string | null;
   comments?: { nodes: Comment[] };
   reviews: { nodes: PrReview[] };
   closingIssuesReferences: { nodes: PrIssue[] };
@@ -38,9 +40,10 @@ export type BlameCommit = {
   url: string;
   author: { name: string | null; email: string | null } | null;
   associatedPullRequests: { nodes: AssociatedPr[] };
+  prLookup?: PrLookup;
 };
 
-type LeanCommit = Omit<BlameCommit, "associatedPullRequests">;
+type LeanCommit = Omit<BlameCommit, "associatedPullRequests" | "prLookup">;
 type LeanRange = { startingLine: number; endingLine: number; commit: LeanCommit };
 
 const MAX_ENRICH = 10;
@@ -52,6 +55,7 @@ const PR_FIELDS = `associatedPullRequests(first: 1) {
     body
     url
     createdAt
+    mergedAt
     ${COMMENTS}
     reviews(first: 5) { nodes { author { login } state body submittedAt ${COMMENTS} } }
     closingIssuesReferences(first: 5) { nodes { number title body url createdAt state stateReason ${COMMENTS} } }
@@ -63,6 +67,7 @@ query Blame($owner:String!, $repo:String!, $ref:String!, $path:String!) {
   repository(owner:$owner, name:$repo) {
     object(expression:$ref) {
       ... on Commit {
+        oid
         blame(path:$path) {
           ranges {
             startingLine
@@ -87,8 +92,8 @@ export async function enrichCommits(
   owner: string,
   repo: string,
   oids: string[],
-): Promise<Map<string, AssociatedPr[]>> {
-  const out = new Map<string, AssociatedPr[]>();
+): Promise<Map<string, AssociatedPr[] | null>> {
+  const out = new Map<string, AssociatedPr[] | null>();
   if (oids.length === 0) return out;
 
   const varDecls = oids.map((_, i) => `$oid${i}:String!`).join(", ");
@@ -108,24 +113,68 @@ ${fields}
   }>(query, vars);
 
   oids.forEach((oid, i) => {
-    out.set(oid, data.repository?.[`c${i}`]?.associatedPullRequests?.nodes ?? []);
+    const found = data.repository?.[`c${i}`];
+    out.set(oid, found ? (found.associatedPullRequests?.nodes ?? []) : null);
   });
   return out;
 }
 
-export async function blameLines(
+export function attachEnrichment(
+  commits: LeanCommit[],
+  targets: ReadonlySet<string>,
+  enrichment: Map<string, AssociatedPr[] | null> | null,
+): BlameCommit[] {
+  return commits.map((c) => {
+    if (!targets.has(c.oid)) {
+      return { ...c, associatedPullRequests: { nodes: [] }, prLookup: "skipped" };
+    }
+    const prs = enrichment?.get(c.oid);
+    if (!prs) return { ...c, associatedPullRequests: { nodes: [] }, prLookup: "failed" };
+    return {
+      ...c,
+      associatedPullRequests: { nodes: prs },
+      prLookup: prs.length > 0 ? "found" : "none",
+    };
+  });
+}
+
+async function enrichAll(
   owner: string,
   repo: string,
-  branch: string,
+  commits: LeanCommit[],
+  targets: LeanCommit[],
+): Promise<BlameCommit[]> {
+  const enrichment = await enrichCommits(
+    owner,
+    repo,
+    targets.map((c) => c.oid),
+  ).catch(() => null);
+  return attachEnrichment(commits, new Set(targets.map((c) => c.oid)), enrichment);
+}
+
+async function blameFile(
+  owner: string,
+  repo: string,
+  ref: string,
+  path: string,
+): Promise<{ oid: string | null; ranges: LeanRange[] }> {
+  const data = await graphql<{
+    repository: { object: { oid?: string; blame: { ranges: LeanRange[] } } | null } | null;
+  }>(LEAN_BLAME_QUERY, { owner, repo, ref, path });
+  const object = data.repository?.object;
+  return { oid: object?.oid ?? null, ranges: object?.blame?.ranges ?? [] };
+}
+
+export async function blameLinesAt(
+  owner: string,
+  repo: string,
+  ref: string,
   path: string,
   start: number,
   end: number,
-): Promise<BlameCommit[]> {
-  const data = await graphql<{
-    repository: { object: { blame: { ranges: LeanRange[] } } | null } | null;
-  }>(LEAN_BLAME_QUERY, { owner, repo, ref: branch, path });
+): Promise<{ oid: string | null; commits: BlameCommit[] }> {
+  const { oid, ranges } = await blameFile(owner, repo, ref, path);
 
-  const ranges = data.repository?.object?.blame?.ranges ?? [];
   const byOid = new Map<string, LeanCommit>();
   for (const r of ranges) {
     if (r.endingLine >= start && r.startingLine <= end && !byOid.has(r.commit.oid)) {
@@ -136,16 +185,52 @@ export async function blameLines(
     a.committedDate.localeCompare(b.committedDate),
   );
 
-  const enrichment = await enrichCommits(
-    owner,
-    repo,
-    commits.slice(0, MAX_ENRICH).map((c) => c.oid),
-  ).catch(() => new Map<string, AssociatedPr[]>());
+  return { oid, commits: await enrichAll(owner, repo, commits, commits.slice(0, MAX_ENRICH)) };
+}
 
-  return commits.map((c) => ({
-    ...c,
-    associatedPullRequests: { nodes: enrichment.get(c.oid) ?? [] },
-  }));
+export async function blameLines(
+  owner: string,
+  repo: string,
+  branch: string,
+  path: string,
+  start: number,
+  end: number,
+): Promise<BlameCommit[]> {
+  return (await blameLinesAt(owner, repo, branch, path, start, end)).commits;
+}
+
+export function spansFromGitHubRanges(
+  ranges: Array<{
+    startingLine: number;
+    endingLine: number;
+    commit: Pick<LeanCommit, "oid" | "abbreviatedOid" | "committedDate" | "author">;
+  }>,
+  start: number,
+  end: number,
+): BlameSpan[] {
+  return ranges
+    .filter((r) => r.endingLine >= start && r.startingLine <= end)
+    .map((r) => ({
+      startLine: Math.max(r.startingLine, start),
+      endLine: Math.min(r.endingLine, end),
+      sha: r.commit.oid,
+      shortSha: r.commit.abbreviatedOid,
+      date: r.commit.committedDate,
+      ...(r.commit.author?.name ? { author: r.commit.author.name } : {}),
+    }))
+    .sort((a, b) => a.startLine - b.startLine);
+}
+
+export async function blameWindowGitHub(
+  owner: string,
+  repo: string,
+  ref: string,
+  path: string,
+  start: number,
+  end: number,
+): Promise<BlameSpan[]> {
+  const { ranges } = await blameFile(owner, repo, ref, path);
+  return spansFromGitHubRanges(ranges, start, end);
 }
 
 type RestCommit = {
@@ -176,14 +261,5 @@ export async function fileHistoryGitHub(
   }));
   commits.sort((a, b) => a.committedDate.localeCompare(b.committedDate));
 
-  const enrichment = await enrichCommits(
-    owner,
-    repo,
-    commits.slice(-MAX_ENRICH).map((c) => c.oid),
-  ).catch(() => new Map<string, AssociatedPr[]>());
-
-  return commits.map((c) => ({
-    ...c,
-    associatedPullRequests: { nodes: enrichment.get(c.oid) ?? [] },
-  }));
+  return enrichAll(owner, repo, commits, commits.slice(-MAX_ENRICH));
 }

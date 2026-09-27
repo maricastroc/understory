@@ -1,4 +1,4 @@
-export { parseGitLabRepo, getProjectMeta, gitlabHosts } from "./repo";
+export { parseGitLabRepo, getProjectMeta, gitlabHosts, getBranchHeadGitLab } from "./repo";
 export type { GitLabProjectMeta } from "./repo";
 export {
   defaultFilesGitLab,
@@ -6,7 +6,12 @@ export {
   getFileContentGitLab,
   getFileSizeGitLab,
 } from "./browse";
-export { blameLinesGitLab, fileHistoryGitLab } from "./blame";
+export {
+  blameLinesGitLab,
+  blameWindowGitLab,
+  fileHistoryGitLab,
+  spansFromGitLabRanges,
+} from "./blame";
 export type { GitLabCommit } from "./blame";
 export {
   glCommitArtifact,

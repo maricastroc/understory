@@ -1,7 +1,9 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import type { Artifact, CodeLocation, Person, RepoRef } from "../types";
+import type { Artifact, BlameSpan, CodeLocation, Person, RepoRef } from "../types";
+import { parseBlamePorcelain } from "./blame-porcelain";
 import { rankShallow } from "./rank";
+import { isCommitSha } from "./sha";
 
 const exec = promisify(execFile);
 
@@ -76,13 +78,28 @@ function parseRecord(record: string): GitCommit {
   };
 }
 
-export async function lineHistory(repoPath: string, loc: CodeLocation): Promise<GitCommit[]> {
+export async function headSha(repoPath: string): Promise<string | null> {
+  try {
+    const sha = (await git(repoPath, ["rev-parse", "HEAD"])).trim();
+    return isCommitSha(sha) ? sha : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function lineHistory(
+  repoPath: string,
+  loc: CodeLocation,
+  rev?: string,
+): Promise<GitCommit[]> {
+  if (rev !== undefined && !isCommitSha(rev)) throw new Error(`Not a commit sha: ${rev}`);
   const out = await git(repoPath, [
     "log",
     `-L${loc.startLine},${loc.endLine}:${loc.file}`,
     "-s",
     "--reverse",
     `--format=${COMMIT_FORMAT}`,
+    ...(rev ? [rev] : []),
   ]);
   return out
     .split(RS)
@@ -145,4 +162,32 @@ export async function searchFiles(repoPath: string, query: string, limit = 25): 
 
 export async function readFileAtHead(repoPath: string, filePath: string): Promise<string> {
   return git(repoPath, ["show", `HEAD:${filePath}`]);
+}
+
+export async function readFileAtRef(
+  repoPath: string,
+  ref: string,
+  filePath: string,
+): Promise<string> {
+  if (!isCommitSha(ref)) throw new Error(`Not a commit sha: ${ref}`);
+  return git(repoPath, ["show", `${ref}:${filePath}`]);
+}
+
+export async function blameWindowLocal(
+  repoPath: string,
+  ref: string,
+  filePath: string,
+  start: number,
+  end: number,
+): Promise<BlameSpan[]> {
+  if (!isCommitSha(ref)) throw new Error(`Not a commit sha: ${ref}`);
+  const out = await git(repoPath, [
+    "blame",
+    "--porcelain",
+    `-L${start},${end}`,
+    ref,
+    "--",
+    filePath,
+  ]);
+  return parseBlamePorcelain(out);
 }

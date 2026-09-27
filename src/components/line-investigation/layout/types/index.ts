@@ -1,0 +1,11 @@
+export type { BoreItem } from "./bore-item";
+export type { BoreGapInput } from "./bore-gap-input";
+export type { BoreOptions } from "./bore-options";
+export type { GlyphPlacement } from "./glyph-placement";
+export type { GapPlacement } from "./gap-placement";
+export type { LabelPlacement } from "./label-placement";
+export type { LeaderPath } from "./leader-path";
+export type { AxisBreak } from "./axis-break";
+export type { DepthTick } from "./depth-tick";
+export type { BoreLayout } from "./bore-layout";
+export type { TimeCluster } from "./time-cluster";

@@ -37,7 +37,7 @@ export function useFileViewer(repoPath: string) {
     setSelectedEnd(enclosing.end);
   }
 
-  async function open(path: string, token?: string) {
+  async function open(path: string, token?: string, select?: number) {
     setLoading(true);
     setError(null);
     setFile(null);
@@ -52,10 +52,14 @@ export function useFileViewer(repoPath: string) {
         setError(data.error || "Could not open file");
         return;
       }
-      setFile({
-        path,
-        lines: (data.content as string).replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n"),
-      });
+      const lines = (data.content as string).replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n");
+      setFile({ path, lines });
+      if (select && select >= 1 && select <= lines.length) {
+        anchor.current = select;
+        setSelectedStart(select);
+        setSelectedEnd(select);
+        setEnclosing(enclosingSymbol(lines, select, path));
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {

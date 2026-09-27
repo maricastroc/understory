@@ -6,10 +6,16 @@ import { foldComments } from "./comments";
 export function expandCommit(bc: BlameCommit): Artifact[] {
   const out: Artifact[] = [];
   const commit = commitArtifact(bc);
+  if (bc.prLookup) commit.meta = { ...commit.meta, prLookup: bc.prLookup };
   out.push(commit);
   for (const pr of bc.associatedPullRequests.nodes) {
     const prCard = prArtifact(pr, commit.id);
     prCard.body = foldComments(prCard.body, pr.comments?.nodes ?? []);
+    prCard.meta = {
+      ...prCard.meta,
+      reviewLookup: pr.reviews.nodes.length > 0 ? "found" : "none",
+      issueLookup: pr.closingIssuesReferences.nodes.length > 0 ? "found" : "none",
+    };
     out.push(prCard);
     for (const iss of pr.closingIssuesReferences.nodes) {
       const issCard = issueArtifact(iss, prCard.id);

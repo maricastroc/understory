@@ -1,4 +1,5 @@
 import type { SymbolSpan } from "@git-investigator/core/collect/symbol";
+import { useEffect } from "react";
 import { Button } from "../Button";
 import { Braces, FileIcon, Pencil } from "../icons";
 import { GoToLine } from "./GoToLine";
@@ -26,6 +27,7 @@ export function CodeViewer({
   noCapture,
   setNoCapture,
   onRun,
+  focusLine,
 }: {
   file: OpenFile;
   selectedStart: number | null;
@@ -38,11 +40,16 @@ export function CodeViewer({
   noCapture: boolean;
   setNoCapture: (v: boolean) => void;
   onRun: () => void;
+  focusLine?: number;
 }) {
   const { scrollRef, startIndex, endIndex, totalHeight, onScroll, scrollToIndex } = useVirtualRows(
     file.lines.length,
     ROW_H,
   );
+  useEffect(() => {
+    if (focusLine) scrollToIndex(focusLine - 1);
+  }, [focusLine, scrollToIndex]);
+
   const goToLine = (n: number) => {
     onSelect(n, false);
     scrollToIndex(n - 1);
