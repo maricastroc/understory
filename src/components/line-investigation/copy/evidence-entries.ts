@@ -1,7 +1,9 @@
 import type { InvestigationView } from "../model/types";
 import type { EvidenceEntry } from "./types";
 
-export function evidenceEntries(view: InvestigationView): EvidenceEntry[] {
+export function evidenceEntries(
+  view: Pick<InvestigationView, "artifacts" | "gaps">,
+): EvidenceEntry[] {
   const out: EvidenceEntry[] = [];
   for (const artifact of view.artifacts) {
     out.push({ id: artifact.id, type: "artifact", artifact });

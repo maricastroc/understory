@@ -1,3 +1,4 @@
+import { hunkFor } from "./hunk";
 import type { BlamedTarget, BlameTarget, ChangeCluster, FileChange, LineRange } from "./types";
 
 export type SelectOptions = {
@@ -58,7 +59,8 @@ export function selectBlameTargets(files: FileChange[], opts: SelectOptions = {}
         truncated = true;
         break;
       }
-      targets.push({ path, range });
+      const hunk = f.changes ? hunkFor(f.changes, range) : undefined;
+      targets.push({ path, range, ...(hunk ? { hunk } : {}) });
     }
   }
 

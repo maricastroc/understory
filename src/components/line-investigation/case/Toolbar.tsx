@@ -8,12 +8,14 @@ export function Toolbar({
   answer,
   onOpenList,
   onToggleKey,
+  legend = "line",
 }: {
   count: number;
   keyOpen: boolean;
   answer: string | null;
   onOpenList: () => void;
   onToggleKey: () => void;
+  legend?: "line" | "pr";
 }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
@@ -46,7 +48,7 @@ export function Toolbar({
           >
             Key
           </button>
-          {keyOpen && <Legend />}
+          {keyOpen && <Legend variant={legend} />}
         </>
       )}
       {answer && (

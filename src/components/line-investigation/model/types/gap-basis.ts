@@ -1,1 +1,1 @@
-export type GapBasis = "searched" | "skipped" | "failed" | "unknown";
+export type GapBasis = "searched" | "skipped" | "failed" | "unknown" | "silent";

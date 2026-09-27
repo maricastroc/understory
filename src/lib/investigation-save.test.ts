@@ -16,9 +16,11 @@ describe("saveSchema", () => {
     expect(saveSchema.parse({ ...base, parentCaseId: null }).parentCaseId).toBeNull();
   });
 
-  it("rejects an empty or oversized parent id", () => {
+  it("rejects an empty or oversized parent id and accepts a pull request key", () => {
     expect(() => saveSchema.parse({ ...base, parentCaseId: "" })).toThrow();
-    expect(() => saveSchema.parse({ ...base, parentCaseId: "x".repeat(65) })).toThrow();
+    expect(() => saveSchema.parse({ ...base, parentCaseId: "x".repeat(201) })).toThrow();
+    const key = "a-long-organisation-name/a-rather-long-repository-name-for-payments#944";
+    expect(saveSchema.parse({ ...base, parentCaseId: key }).parentCaseId).toBe(key);
   });
 });
 

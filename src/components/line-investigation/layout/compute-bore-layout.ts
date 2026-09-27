@@ -1,7 +1,7 @@
-import { clusterTimes, pxPerDay } from "./cluster-times";
-import { BORE, DAY, HALF, LEADER_X } from "./geometry";
+import { BORE, HALF, LEADER_X } from "./geometry";
 import { groupCrowded } from "./group-crowded";
 import { placeLabels } from "./place-labels";
+import { timeAxis } from "./time-axis";
 import type {
   AxisBreak,
   BoreGapInput,
@@ -11,7 +11,6 @@ import type {
   DepthTick,
   GapPlacement,
   GlyphPlacement,
-  TimeCluster,
 } from "./types";
 
 const KIND_RANK = { commit: 0, pull_request: 1, review: 2, issue: 3 } as const;
@@ -19,39 +18,6 @@ const KIND_RANK = { commit: 0, pull_request: 1, review: 2, issue: 3 } as const;
 function byDepth(a: BoreItem, b: BoreItem): number {
   if (a.time !== b.time) return b.time - a.time;
   return KIND_RANK[a.kind] - KIND_RANK[b.kind] || a.id.localeCompare(b.id);
-}
-
-function layoutClusters(times: number[], opts: BoreOptions) {
-  const spans = clusterTimes(times);
-  const breaks: AxisBreak[] = [];
-  const clusters: TimeCluster[] = [];
-  const newest = spans[0].newest;
-  breaks.push({
-    kind: "first",
-    top: opts.datumY,
-    height: BORE.firstSegment,
-    days: (opts.now - newest) / DAY,
-    strokes: opts.now - newest >= BORE.clusterDays * DAY,
-  });
-  let cursor = opts.datumY + BORE.firstSegment;
-  spans.forEach((s, i) => {
-    if (i > 0) {
-      breaks.push({
-        kind: "gap",
-        top: cursor,
-        height: BORE.breakHeight,
-        days: (spans[i - 1].oldest - s.newest) / DAY,
-        strokes: true,
-      });
-      cursor += BORE.breakHeight;
-    }
-    const spanDays = (s.newest - s.oldest) / DAY;
-    const k = pxPerDay(spanDays);
-    const top = cursor + BORE.clusterPad;
-    clusters.push({ newest: s.newest, oldest: s.oldest, top, pxPerDay: k });
-    cursor = top + spanDays * k + BORE.clusterPad;
-  });
-  return { breaks, clusters };
 }
 
 function resolveGapCollisions(
@@ -97,12 +63,7 @@ export function computeBoreLayout(
 
   const ordered = [...items].sort(byDepth);
   const times = ordered.flatMap((i) => (i.endTime !== null ? [i.time, i.endTime] : [i.time]));
-  const { breaks, clusters } = layoutClusters(times, opts);
-  const clusterOf = (t: number) => clusters.findIndex((c) => t <= c.newest && t >= c.oldest);
-  const yOf = (t: number) => {
-    const c = clusters[clusterOf(t)];
-    return c.top + ((c.newest - t) / DAY) * c.pxPerDay;
-  };
+  const { breaks, ticks, clusterOf, yOf } = timeAxis(times, opts);
 
   const placed = groupCrowded(ordered, clusterOf, opts.expandedGroups ?? new Set());
   const glyphs: GlyphPlacement[] = placed.map((item) => {
@@ -133,12 +94,6 @@ export function computeBoreLayout(
       cluster: clusterOf(item.time),
     };
   });
-
-  const ticks: DepthTick[] = clusters.map((c, i) => ({
-    y: c.top,
-    days: (opts.now - c.newest) / DAY,
-    cluster: i,
-  }));
 
   const hostOf = new Map(glyphs.flatMap((g) => g.members.map((m) => [m, g] as const)));
   const gaps: GapPlacement[] = gapInputs.flatMap((g) => {

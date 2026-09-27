@@ -7,4 +7,6 @@ export type CaseState = {
   verdictOpen: boolean;
   keyOpen: boolean;
   codeExpanded: boolean;
+  selectedRegion: string | null;
+  hoverRegion: string | null;
 };

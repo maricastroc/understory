@@ -19,6 +19,7 @@ import { withoutTitle } from "./drawer-body";
 import { MiniCore } from "./MiniCore";
 import { QuoteBlock } from "./QuoteBlock";
 import { sourceLinkLabel } from "./source-link";
+import type { DrawerExtensions } from "./types";
 
 const TONE = {
   evidence: "text-li-evidence-ink",
@@ -36,6 +37,7 @@ export function DrawerEntry({
   onStep,
   onClose,
   onDrill,
+  extensions = {},
 }: {
   entry: EvidenceEntry;
   artifacts: ViewArtifact[];
@@ -46,7 +48,9 @@ export function DrawerEntry({
   onStep: (delta: 1 | -1) => void;
   onClose: () => void;
   onDrill?: (a: ViewArtifact) => void;
+  extensions?: DrawerExtensions;
 }) {
+  const links = extensions.appearsIn?.(entry) ?? null;
   const a = entry.type === "artifact" ? entry.artifact : entry.after;
   const fraction = maxDays > 0 && a.daysBeforeNow !== null ? a.daysBeforeNow / maxDays : 0;
   const gap = entry.type === "gap" ? entry.gap : null;
@@ -139,7 +143,13 @@ export function DrawerEntry({
                 body={shown.body}
                 range={shown.range}
                 tone="verified"
-                caption={clause ? `for clause ${clause.index + 1}` : undefined}
+                caption={
+                  extensions.quoteCaption
+                    ? extensions.quoteCaption(q.clauseId)
+                    : clause
+                      ? `for clause ${clause.index + 1}`
+                      : undefined
+                }
               />
             );
           })
@@ -152,8 +162,25 @@ export function DrawerEntry({
         )}
         <div className="flex flex-col gap-1.5 text-[12.5px]">
           <div className={`font-semibold ${TONE[status.tone]}`}>{status.text}</div>
-          {!gap && <div className="text-li-neutral-800">{citesText(a, clauses)}</div>}
+          {!gap && !links && <div className="text-li-neutral-800">{citesText(a, clauses)}</div>}
         </div>
+        {links && links.length > 0 && (
+          <div className="flex flex-col gap-1.5 border-t border-li-divider pt-3">
+            <div className="text-xs font-semibold text-li-ink">Appears in</div>
+            <div className="flex flex-wrap gap-1.5">
+              {links.map((link) => (
+                <button
+                  key={link.key}
+                  type="button"
+                  onClick={link.onPick}
+                  className="cursor-pointer rounded-[3px] border border-li-divider px-2 py-0.5 font-li-mono text-[11px] text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+                >
+                  {link.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {context.length > 0 && (
           <div className="flex flex-col gap-1.25 border-t border-li-divider pt-3 text-[12.5px] text-li-neutral-800">
             <div className="text-xs font-semibold text-li-ink">Context</div>

@@ -2,55 +2,22 @@ import { useId } from "react";
 import { BORE } from "../layout/geometry";
 import type { BoreLayout } from "../layout/types";
 import type { ViewGap } from "../model/types";
+import { ArtifactGlyph } from "./ArtifactGlyph";
+import { AxisBreakMark } from "./AxisBreakMark";
 import { markCenter } from "./bore-marks";
 import type { BoreMark, TraceModel } from "./types";
 
 const FADE = "transition-opacity duration-150 motion-reduce:transition-none";
 
 function Glyph({ mark }: { mark: BoreMark }) {
-  const x = BORE.coreX;
-  const fill = mark.cited ? "fill-li-evidence" : "fill-li-paper";
-  if (mark.kind === "commit") {
-    return (
-      <circle cx={x} cy={mark.y} r={7} strokeWidth={1.5} className={`${fill} stroke-li-ink`} />
-    );
-  }
-  if (mark.kind === "issue") {
-    return (
-      <rect
-        x={x - 6}
-        y={mark.y - 6}
-        width={12}
-        height={12}
-        strokeWidth={1.5}
-        transform={`rotate(45 ${x} ${mark.y})`}
-        className={`${fill} stroke-li-ink`}
-      />
-    );
-  }
-  if (mark.kind === "pull_request") {
-    return (
-      <rect
-        x={x - 6}
-        y={mark.top}
-        width={12}
-        height={mark.bottom - mark.top}
-        className={
-          mark.cited
-            ? "fill-li-evidence-tint stroke-li-evidence-edge"
-            : "fill-li-paper stroke-li-ink"
-        }
-      />
-    );
-  }
   return (
-    <line
-      x1={x + 6}
-      x2={x + 17}
-      y1={mark.y}
-      y2={mark.y}
-      strokeWidth={1.5}
-      className="stroke-li-ink"
+    <ArtifactGlyph
+      kind={mark.kind}
+      x={mark.kind === "review" ? BORE.coreX + 6 : BORE.coreX}
+      y={mark.y}
+      top={mark.top}
+      bottom={mark.bottom}
+      cited={mark.cited}
     />
   );
 }
@@ -118,31 +85,7 @@ export function BoreGraphics({
       {layout.breaks
         .filter((b) => b.strokes)
         .map((b) => (
-          <g key={`break-${b.top}`}>
-            <rect
-              x={BORE.coreX - 4}
-              y={b.top + 14}
-              width={8}
-              height={10}
-              className="fill-li-paper"
-            />
-            <line
-              x1={BORE.coreX - 8}
-              y1={b.top + 22}
-              x2={BORE.coreX + 8}
-              y2={b.top + 14}
-              strokeWidth={1.5}
-              className="stroke-li-ink"
-            />
-            <line
-              x1={BORE.coreX - 8}
-              y1={b.top + 28}
-              x2={BORE.coreX + 8}
-              y2={b.top + 20}
-              strokeWidth={1.5}
-              className="stroke-li-ink"
-            />
-          </g>
+          <AxisBreakMark key={`break-${b.top}`} x={BORE.coreX} top={b.top} />
         ))}
       {layout.gaps.map((g) => {
         const gap = gaps.get(g.id);
