@@ -6,13 +6,19 @@ const configured = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_
 
 const redis = configured ? Redis.fromEnv() : null;
 
+const NAMESPACE = "git-investigator:ratelimit";
+
 const limiters = redis
   ? {
-      ai: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60 s"), prefix: "gi:ai" }),
+      ai: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(15, "60 s"),
+        prefix: `${NAMESPACE}:ai`,
+      }),
       browse: new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(40, "60 s"),
-        prefix: "gi:browse",
+        prefix: `${NAMESPACE}:browse`,
       }),
     }
   : null;
@@ -27,7 +33,15 @@ function clientIp(req: Request): string {
 export async function rateLimit(req: Request, tier: RateTier): Promise<NextResponse | null> {
   if (!limiters) return null;
 
-  const { success, limit, remaining, reset } = await limiters[tier].limit(clientIp(req));
+  let result: Awaited<ReturnType<Ratelimit["limit"]>>;
+  try {
+    result = await limiters[tier].limit(clientIp(req));
+  } catch (e) {
+    console.error("[ratelimit] Upstash unavailable, failing open:", e);
+    return null;
+  }
+
+  const { success, limit, remaining, reset } = result;
   if (success) return null;
 
   const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
