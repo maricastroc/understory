@@ -15,7 +15,7 @@ export const BORE = {
   gapOffset: 6,
   gapSeparation: 6,
   labelAnchor: 8,
-  labelPitch: 56,
+  labelPitch: 60,
   leaderMin: 20,
   leaderMax: 40,
   leaderStep: 6,
