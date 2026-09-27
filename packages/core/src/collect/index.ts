@@ -1,14 +1,15 @@
 import type { Artifact, ArtifactRef, CodeLocation, Coverage, Evidence, RepoRef } from "../types";
 import type { BlameCommit } from "./github";
 import { detectContradictions } from "./contradictions";
-import { commitToArtifact, isGitRepo, lineHistory, resolveRepo } from "./git";
+import { commitToArtifact, headSha, isGitRepo, lineHistory, resolveRepo } from "./git";
 import { enrichLocalCommits } from "./local-enrich";
 import { resolveToken } from "./token-context";
 import {
-  blameLines,
+  blameLinesAt,
   commitContextArtifacts,
   expandCommit,
   fileHistoryGitHub,
+  getBranchHeadGitHub,
   getFileSizeGitHub,
   getRepoMeta,
   issueContextArtifacts,
@@ -21,6 +22,7 @@ import {
   blameLinesGitLab,
   commitContextArtifactsGitLab,
   fileHistoryGitLab,
+  getBranchHeadGitLab,
   getFileSizeGitLab,
   getProjectMeta,
   glCommitArtifact,
@@ -72,15 +74,25 @@ async function collectLocal(
     throw new Error(`Not a git repository: ${repoPath}`);
   }
   const repo = await resolveRepo(repoPath);
-  const commits = await lineHistory(repoPath, location);
+  const sha = await headSha(repoPath);
+  const commits = await lineHistory(repoPath, location, sha ?? undefined);
 
   const gh = parseGitHubRepo(repo.remoteUrl ?? "");
   const artifacts =
     gh && resolveToken()
       ? await enrichLocalCommits(gh.owner, gh.repo, commits, repo)
-      : commits.map((c) => commitToArtifact(c, repo));
+      : commits.map((c) => {
+          const a = commitToArtifact(c, repo);
+          return { ...a, meta: { ...a.meta, prLookup: "skipped" } };
+        });
 
-  return { question, repo, location, artifacts, coverage: { granularity: "line" } };
+  return {
+    question,
+    repo: sha ? { ...repo, sha } : repo,
+    location,
+    artifacts,
+    coverage: { granularity: "line" },
+  };
 }
 
 const LARGE_FILE_BYTES = 1_000_000;
@@ -103,16 +115,22 @@ async function collectFromGitHub(
   let commits: BlameCommit[];
   let note: string | undefined;
   let granularity: Coverage["granularity"] = "line";
+  let sha: string | undefined;
+
+  const fileHistory = async () => {
+    sha = await getBranchHeadGitHub(owner, repo, meta.branch).catch(() => undefined);
+    return fileHistoryGitHub(owner, repo, sha ?? meta.branch, location.file);
+  };
 
   const size = await getFileSizeGitHub(owner, repo, meta.branch, location.file).catch(() => 0);
   if (size > LARGE_FILE_BYTES) {
-    commits = await fileHistoryGitHub(owner, repo, meta.branch, location.file);
+    commits = await fileHistory();
     granularity = "file";
     note =
       "This file is too large for GitHub's blame API, so line-level history isn't available here — showing recent commits that touched the file instead. A local checkout gives full line-level history.";
   } else {
     try {
-      commits = await blameLines(
+      const blamed = await blameLinesAt(
         owner,
         repo,
         meta.branch,
@@ -120,8 +138,10 @@ async function collectFromGitHub(
         location.startLine,
         location.endLine,
       );
+      commits = blamed.commits;
+      sha = blamed.oid ?? undefined;
     } catch {
-      commits = await fileHistoryGitHub(owner, repo, meta.branch, location.file);
+      commits = await fileHistory();
       granularity = "file";
       note =
         "GitHub's blame API couldn't resolve line-level history for this file — showing recent commits that touched it instead.";
@@ -142,7 +162,14 @@ async function collectFromGitHub(
   }
 
   artifacts.sort((a, b) => a.date.localeCompare(b.date));
-  return { question, repo: repoRef, location, artifacts, note, coverage: { granularity } };
+  return {
+    question,
+    repo: sha ? { ...repoRef, sha } : repoRef,
+    location,
+    artifacts,
+    note,
+    coverage: { granularity },
+  };
 }
 
 async function collectAroundArtifact(
@@ -207,9 +234,12 @@ async function collectFromGitLab(
   let note: string | undefined;
   let granularity: Coverage["granularity"] = "line";
 
-  const size = await getFileSizeGitLab(host, project, meta.branch, location.file).catch(() => 0);
+  const sha = await getBranchHeadGitLab(host, project, meta.branch).catch(() => undefined);
+  const ref = sha ?? meta.branch;
+
+  const size = await getFileSizeGitLab(host, project, ref, location.file).catch(() => 0);
   if (size > LARGE_FILE_BYTES) {
-    commits = await fileHistoryGitLab(host, project, meta.branch, location.file);
+    commits = await fileHistoryGitLab(host, project, ref, location.file);
     granularity = "file";
     note =
       "This file is too large for GitLab's blame API, so line-level history isn't available here — showing recent commits that touched the file instead. A local checkout gives full line-level history.";
@@ -218,13 +248,13 @@ async function collectFromGitLab(
       commits = await blameLinesGitLab(
         host,
         project,
-        meta.branch,
+        ref,
         location.file,
         location.startLine,
         location.endLine,
       );
     } catch {
-      commits = await fileHistoryGitLab(host, project, meta.branch, location.file);
+      commits = await fileHistoryGitLab(host, project, ref, location.file);
       granularity = "file";
       note =
         "GitLab's blame API couldn't resolve line-level history for this file — showing recent commits that touched it instead.";
@@ -260,6 +290,7 @@ async function collectFromGitLab(
 
   for (const c of commits) {
     const commit = glCommitArtifact(c);
+    if (c.prLookup) commit.meta = { ...commit.meta, prLookup: c.prLookup };
     add(commit);
     for (const mr of c.mergeRequests) {
       const prCard = glMrArtifact(mr, commit.id);
@@ -274,7 +305,14 @@ async function collectFromGitLab(
   }
 
   artifacts.sort((a, b) => a.date.localeCompare(b.date));
-  return { question, repo: repoRef, location, artifacts, note, coverage: { granularity } };
+  return {
+    question,
+    repo: sha ? { ...repoRef, sha } : repoRef,
+    location,
+    artifacts,
+    note,
+    coverage: { granularity },
+  };
 }
 
 async function collectAroundGitLabArtifact(

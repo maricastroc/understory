@@ -3,4 +3,5 @@ export type RepoRef = {
   name?: string;
   remoteUrl?: string;
   branch?: string;
+  sha?: string;
 };

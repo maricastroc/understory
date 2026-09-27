@@ -148,3 +148,57 @@ describe("expandCommit — folds discussion into bodies", () => {
     expect(issue.body).toContain("seen in prod during the outage");
   });
 });
+
+describe("expandCommit — lookup and review metadata", () => {
+  it("records the PR lookup status on the commit only when it is known", () => {
+    expect(expandCommit(bc())[0].meta).not.toHaveProperty("prLookup");
+    expect(expandCommit(bc({ prLookup: "none" }))[0].meta).toMatchObject({ prLookup: "none" });
+  });
+
+  it("records merge date, review and issue lookups on the PR, and state on the review", () => {
+    const withPr = bc({
+      prLookup: "found",
+      associatedPullRequests: { nodes: [{ ...pr(42, 7), mergedAt: "2024-01-05T00:00:00Z" }] },
+    });
+    const arts = expandCommit(withPr);
+    expect(arts.find((a) => a.id === "pr:42")?.meta).toEqual({
+      mergedAt: "2024-01-05T00:00:00Z",
+      reviewLookup: "found",
+      issueLookup: "found",
+    });
+    expect(arts.find((a) => a.id === "review:42-0")?.meta).toEqual({ state: "COMMENTED" });
+  });
+
+  it("reports a PR with no reviews and no closing issue as searched-and-empty", () => {
+    const bare = {
+      ...pr(43, 0),
+      reviews: { nodes: [] },
+      closingIssuesReferences: { nodes: [] },
+    };
+    const arts = expandCommit(bc({ associatedPullRequests: { nodes: [bare] } }));
+    expect(arts.find((a) => a.id === "pr:43")?.meta).toEqual({
+      reviewLookup: "none",
+      issueLookup: "none",
+    });
+  });
+
+  it("keeps a textless review as found even though it produces no artifact", () => {
+    const silent = {
+      ...pr(44, 0),
+      reviews: {
+        nodes: [
+          {
+            author: { login: "eve" },
+            state: "APPROVED",
+            body: " ",
+            submittedAt: "2024-01-02T00:00:00Z",
+          },
+        ],
+      },
+      closingIssuesReferences: { nodes: [] },
+    };
+    const arts = expandCommit(bc({ associatedPullRequests: { nodes: [silent] } }));
+    expect(arts.some((a) => a.kind === "review")).toBe(false);
+    expect(arts.find((a) => a.id === "pr:44")?.meta).toMatchObject({ reviewLookup: "found" });
+  });
+});

@@ -18,6 +18,7 @@ export type GlMr = {
   web_url: string;
   created_at: string;
   state?: string;
+  merged_at?: string | null;
 };
 
 export type GlIssue = {
@@ -63,6 +64,7 @@ export function glMrArtifact(mr: GlMr, parentId?: string): Artifact {
     date: mr.created_at,
     ref: `!${mr.iid}`,
     parentId,
+    ...(mr.merged_at ? { meta: { mergedAt: mr.merged_at } } : {}),
   };
 }
 

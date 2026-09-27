@@ -86,3 +86,43 @@ describe("buildLocalArtifacts", () => {
     expect(arts.every((a) => a.kind === "commit")).toBe(true);
   });
 });
+
+describe("buildLocalArtifacts — PR lookup status", () => {
+  const older = commit("aaaaaaa0000", "introduce retry", "2023-01-15T00:00:00Z");
+  const newer = commit("bbbbbbb1111", "bound retries", "2023-02-10T00:00:00Z");
+  const lookup = (arts: ReturnType<typeof buildLocalArtifacts>, id: string) =>
+    arts.find((a) => a.id === id)?.meta?.prLookup;
+
+  it("marks commits outside the enrichment window as skipped", () => {
+    const arts = buildLocalArtifacts(
+      [older, newer],
+      repo,
+      new Map([["bbbbbbb1111", [pr]]]),
+      new Set(["bbbbbbb1111"]),
+    );
+    expect(lookup(arts, "commit:aaaaaaa")).toBe("skipped");
+    expect(lookup(arts, "commit:bbbbbbb")).toBe("found");
+  });
+
+  it("marks a searched commit without PRs as none", () => {
+    const arts = buildLocalArtifacts(
+      [older],
+      repo,
+      new Map([["aaaaaaa0000", []]]),
+      new Set(["aaaaaaa0000"]),
+    );
+    expect(lookup(arts, "commit:aaaaaaa")).toBe("none");
+  });
+
+  it("marks every searched commit as failed when the lookup failed", () => {
+    const arts = buildLocalArtifacts(
+      [older, newer],
+      repo,
+      new Map(),
+      new Set(["aaaaaaa0000", "bbbbbbb1111"]),
+      true,
+    );
+    expect(lookup(arts, "commit:aaaaaaa")).toBe("failed");
+    expect(lookup(arts, "commit:bbbbbbb")).toBe("failed");
+  });
+});

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isGitRepo, readFileAtHead } from "@git-investigator/core/collect/git";
+import { isGitRepo, readFileAtHead, readFileAtRef } from "@git-investigator/core/collect/git";
 import {
   getFileContentGitHub,
   getRepoMeta,
@@ -13,6 +13,7 @@ import {
 import { sessionToken } from "@/lib/auth/current-user";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
+import { isCommitSha } from "@git-investigator/core/collect/sha";
 import { runWithTokens } from "@git-investigator/core/collect/token-context";
 import { githubTokenForRepo } from "@/lib/github-app";
 import { rateLimit } from "@/lib/ratelimit";
@@ -30,8 +31,12 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const repo = searchParams.get("repo") ?? "";
   const filePath = searchParams.get("path") ?? "";
+  const ref = searchParams.get("ref")?.trim() || null;
   if (!repo || !filePath) {
     return NextResponse.json({ error: "repo and path are required" }, { status: 400 });
+  }
+  if (ref && !isCommitSha(ref)) {
+    return NextResponse.json({ error: "ref must be a commit sha" }, { status: 400 });
   }
 
   const delegated = await maybeDelegate(req, repo);
@@ -46,24 +51,26 @@ export async function GET(req: Request) {
       try {
         const gh = parseGitHubRepo(repo);
         if (gh) {
-          const meta = await getRepoMeta(gh.owner, gh.repo);
-          const content = await getFileContentGitHub(gh.owner, gh.repo, meta.branch, filePath);
-          return NextResponse.json({ path: filePath, content });
+          const at = ref ?? (await getRepoMeta(gh.owner, gh.repo)).branch;
+          const content = await getFileContentGitHub(gh.owner, gh.repo, at, filePath);
+          return NextResponse.json({ path: filePath, content, ...(ref ? { ref } : {}) });
         }
 
         const gl = parseGitLabRepo(repo);
         if (gl) {
-          const meta = await getProjectMeta(gl.host, gl.project);
-          const content = await getFileContentGitLab(gl.host, gl.project, meta.branch, filePath);
-          return NextResponse.json({ path: filePath, content });
+          const at = ref ?? (await getProjectMeta(gl.host, gl.project)).branch;
+          const content = await getFileContentGitLab(gl.host, gl.project, at, filePath);
+          return NextResponse.json({ path: filePath, content, ...(ref ? { ref } : {}) });
         }
 
         const { path } = await resolveRepoInput(repo);
         if (!(await isGitRepo(path))) {
           return NextResponse.json({ error: `Not a git repository: ${repo}` }, { status: 400 });
         }
-        const content = await readFileAtHead(path, filePath);
-        return NextResponse.json({ path: filePath, content });
+        const content = ref
+          ? await readFileAtRef(path, ref, filePath)
+          : await readFileAtHead(path, filePath);
+        return NextResponse.json({ path: filePath, content, ...(ref ? { ref } : {}) });
       } catch (e) {
         return NextResponse.json(
           { error: e instanceof Error ? e.message : `Could not read ${filePath}` },

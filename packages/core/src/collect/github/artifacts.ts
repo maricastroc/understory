@@ -16,6 +16,7 @@ export type PrNode = {
   body: string;
   url: string;
   createdAt: string;
+  mergedAt?: string | null;
 };
 
 export type IssueNode = {
@@ -61,6 +62,7 @@ export function prArtifact(pr: PrNode, parentId?: string): Artifact {
     date: pr.createdAt,
     ref: `#${pr.number}`,
     parentId,
+    ...(pr.mergedAt ? { meta: { mergedAt: pr.mergedAt } } : {}),
   };
 }
 
@@ -99,5 +101,6 @@ export function reviewArtifact(
     author: { name: who },
     ref: `#${prNumber}`,
     parentId,
+    ...(rv.state ? { meta: { state: rv.state } } : {}),
   };
 }

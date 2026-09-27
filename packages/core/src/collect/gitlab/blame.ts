@@ -1,7 +1,8 @@
+import type { BlameSpan, PrLookup } from "../../types";
 import type { GlCommit, GlMr } from "./artifacts";
 import { encodePath, glRest, projectId } from "./client";
 
-export type GitLabCommit = GlCommit & { mergeRequests: GlMr[] };
+export type GitLabCommit = GlCommit & { mergeRequests: GlMr[]; prLookup?: PrLookup };
 
 const MAX_ENRICH = 10;
 
@@ -32,18 +33,64 @@ function toCommit(c: RawCommit, host: string, project: string): GlCommit {
   };
 }
 
-async function mrsForCommit(host: string, project: string, sha: string): Promise<GlMr[]> {
+async function mrsForCommit(host: string, project: string, sha: string): Promise<GlMr[] | null> {
   return glRest<GlMr[]>(
     host,
     `/projects/${projectId(project)}/repository/commits/${sha}/merge_requests`,
-  ).catch(() => []);
+  ).catch(() => null);
 }
 
 async function enrich(host: string, project: string, commits: GlCommit[]): Promise<GitLabCommit[]> {
   const targets = commits.slice(0, MAX_ENRICH);
   const mrs = await Promise.all(targets.map((c) => mrsForCommit(host, project, c.id)));
   const byId = new Map(targets.map((c, i) => [c.id, mrs[i]]));
-  return commits.map((c) => ({ ...c, mergeRequests: byId.get(c.id) ?? [] }));
+  return commits.map((c): GitLabCommit => {
+    if (!byId.has(c.id)) return { ...c, mergeRequests: [], prLookup: "skipped" };
+    const found = byId.get(c.id);
+    if (!found) return { ...c, mergeRequests: [], prLookup: "failed" };
+    return { ...c, mergeRequests: found, prLookup: found.length > 0 ? "found" : "none" };
+  });
+}
+
+export function spansFromGitLabRanges(
+  ranges: Array<{
+    commit: Pick<RawCommit, "id" | "short_id" | "committed_date" | "author_name">;
+    lines: string[];
+  }>,
+  start: number,
+): BlameSpan[] {
+  const spans: BlameSpan[] = [];
+  let line = start;
+  for (const r of ranges) {
+    const count = r.lines.length;
+    if (count === 0) continue;
+    spans.push({
+      startLine: line,
+      endLine: line + count - 1,
+      sha: r.commit.id,
+      shortSha: r.commit.short_id ?? r.commit.id.slice(0, 8),
+      date: r.commit.committed_date,
+      ...(r.commit.author_name ? { author: r.commit.author_name } : {}),
+    });
+    line += count;
+  }
+  return spans;
+}
+
+export async function blameWindowGitLab(
+  host: string,
+  project: string,
+  ref: string,
+  filePath: string,
+  start: number,
+  end: number,
+): Promise<BlameSpan[]> {
+  const ranges = await glRest<BlameRange[]>(
+    host,
+    `/projects/${projectId(project)}/repository/files/${encodePath(filePath)}/blame` +
+      `?ref=${encodeURIComponent(ref)}&range[start]=${start}&range[end]=${end}`,
+  );
+  return spansFromGitLabRanges(ranges, start);
 }
 
 export async function blameLinesGitLab(
