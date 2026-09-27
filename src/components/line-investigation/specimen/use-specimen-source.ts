@@ -11,14 +11,22 @@ function toLines(content: string): string[] {
   return content.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n");
 }
 
-export function useSpecimenSource(repo: string, path: string, sha: string | null): SpecimenSource {
+export function useSpecimenSource(
+  repo: string,
+  path: string,
+  sha: string | null,
+  token?: string,
+): SpecimenSource {
   const params = new URLSearchParams({ repo, path, ...(sha ? { ref: sha } : {}) });
   const key = params.toString();
   const [settled, setSettled] = useState<Settled | null>(null);
 
   useEffect(() => {
     const ctrl = new AbortController();
-    fetch(`/api/file?${key}`, { signal: ctrl.signal })
+    fetch(`/api/file?${key}`, {
+      signal: ctrl.signal,
+      headers: token ? { "x-github-token": token } : undefined,
+    })
       .then(async (res) => {
         const data = (await res.json()) as { content?: string; error?: string };
         if (!res.ok || typeof data.content !== "string") {
@@ -42,7 +50,7 @@ export function useSpecimenSource(repo: string, path: string, sha: string | null
         });
       });
     return () => ctrl.abort();
-  }, [key]);
+  }, [key, token]);
 
   if (!settled || settled.key !== key) return LOADING;
   if (settled.status === "ready") return { status: "ready", lines: settled.lines, error: null };

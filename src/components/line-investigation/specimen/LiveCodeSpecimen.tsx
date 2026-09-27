@@ -22,6 +22,7 @@ export function LiveCodeSpecimen({
   layout,
   targetDatumY,
   onDatumY,
+  token,
 }: {
   repo: string;
   path: string;
@@ -34,10 +35,11 @@ export function LiveCodeSpecimen({
   layout?: SpecimenLayout;
   targetDatumY?: number;
   onDatumY?: (y: number) => void;
+  token?: string;
 }) {
   const responsive = useSpecimenLayout();
   const active = layout ?? responsive;
-  const source = useSpecimenSource(repo, path, sha);
+  const source = useSpecimenSource(repo, path, sha, token);
   const lines = source.lines;
 
   const request = useMemo(() => {
@@ -54,7 +56,7 @@ export function LiveCodeSpecimen({
     return blameRequestRange({ start: win.start, end: win.end }, datum);
   }, [lines, datum, path, active.mode, active.context, targetDatumY, expanded]);
 
-  const blame = useWindowBlame(repo, path, sha, request);
+  const blame = useWindowBlame(repo, path, sha, request, token);
 
   if (source.status !== "ready") {
     return (

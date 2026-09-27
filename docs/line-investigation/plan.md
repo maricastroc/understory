@@ -246,6 +246,36 @@ Testes: Vitest em dois projetos (`node` para `*.test.ts`, `dom`/jsdom para `*.te
 vitest-axe no jsdom sem a regra de contraste (jsdom não calcula cor) e axe completo no Chrome via
 Playwright (`npm run test:e2e`, usa o Chrome instalado localmente).
 
-## 12. Estado
+## 12. Etapas 6–9 — decisões de implementação
 
-Etapas 0–5 implementadas. Checkpoint de revisão visual antes da etapa 6 (Bore).
+| Tema | Handoff | Implementação e motivo |
+|---|---|---|
+| Headline da cláusula | headline curto | Texto real da cláusula truncado em uma linha (D10); nome acessível é o texto completo. |
+| Altura reservada (A3) | medir fora da tela | Cópia invisível do texto (até 3 linhas) reserva a altura em CSS; acima de 3 linhas o texto expandido sobrepõe com sombra. |
+| Espaçamento de labels | 56 px aprovado | 60 px: label revelado (id + título em 2 linhas) mede ~58 px e colidia com o seguinte. |
+| Grupo colapsado (> 4 do mesmo tipo) | expande no hover | Expande no clique e quando a cláusula em foco cita um membro; hover reorganizava o layout sob o cursor. |
+| Label fora do `activeSet` | opacity 0.25 | Glyph e leader a 0.25; texto e letra em `text-muted` (D8, contraste). |
+| Banda de PR não citada | só o estilo citado | Papel + contorno de tinta, como commit/issue de apoio. |
+| PR aberto por muito tempo | — | A banda atravessa quebras (ex.: express #5167, 2,75 anos). Fiel aos dados. |
+| Marcação de cláusula por artefato | só no hover do label | Igual: inspecionar (drawer) não marca cláusulas. |
+| Modo faixa (< 1100) | bore abaixo do datum | Bore começa abaixo da faixa de código; a régua continua sob a linha investigada, largura total; o rótulo "±0 · line N today" some. Núcleo em x = 48 (o handoff pede 40/24, mas ticks e rótulos de quebra precisam de ~44 px à esquerda). Trace começa no bore, não cruza o código. Tally vai para baixo do texto. |
+| Título | uma linha com reticências | Quebra título/localização em telas estreitas; abaixo de 820 px o h1 tem até 2 linhas (com 1 linha sobrava "Why exa…"). |
+| Botões primário e ghost | aço `#5980a6` | `steel-700` (5,78:1); o aço dá 3,71:1 com texto claro (D8). |
+| Drawer | top 56 px | Top 52 px (altura do header atual; o header de 56 px é da etapa 10). 50 % entre 820–1099 px, bottom sheet 85vh abaixo de 820 px. |
+| Gap não verificado | não desenhado | Letra "?", contorno neutro tracejado, 24 px, sem hachura, texto "not verified"; o drawer explica o motivo (skipped / failed / unknown). |
+| Gap de review/issue | "before 7be210e" | "on pr:N" (o gap é do PR, não de um commit). |
+| Contexto no drawer | linhas livres | Só linhas deriváveis de arestas e lookups ("Closes issue:X", "Merged 15 Mar 2023", "No pull request references this commit"). |
+| Share | — | Oculto (A12). |
+| Copy the why | — | Mantido na barra inferior (plano §4). |
+| Ask a follow-up | Composer pré-preenchido | Volta ao Composer com repo, arquivo e linha selecionados e rolados; exige `prefill` no Composer, `select` no `use-file-viewer` e `focusLine` no `CodeViewer`. |
+| Rail direito | não reintroduzir | Removido para casos de linha; casos ancorados mantêm `CaseView` e rail (D2). |
+| Veredito com claims misattributed | — | Continua "Resolved" (critério atual: `recorded` + `grounded`); a confiança cai e o popover mostra a contagem. Decisão pendente. |
+| Rótulo acima da janela de código | símbolo do trecho | Símbolo mais próximo da janela (fim do trecho escondido). |
+
+Preview só de desenvolvimento em `/dev/line?state=…` (mesma tela, dentro do shell real, com a
+fixture sintética e suas variantes).
+
+## 13. Estado
+
+Etapas 0–9 implementadas; 0–5 comitadas. A tela nova está integrada ao `/app` para casos com
+`location`. Checkpoint de revisão antes da etapa 10 (shell).

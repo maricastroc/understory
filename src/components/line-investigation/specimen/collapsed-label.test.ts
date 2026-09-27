@@ -18,6 +18,12 @@ describe("symbolInRange", () => {
     expect(symbolInRange(syntheticChargeLines, { start: 10, end: 12 }, "charge.ts")).toBeNull();
   });
 
+  it("can name the symbol nearest the end of a range above the window", () => {
+    const lines = ["function first() {", "}", "function second() {", "}", "x"];
+    expect(symbolInRange(lines, { start: 1, end: 4 }, "a.ts", "end")).toBe("second()");
+    expect(symbolInRange(lines, { start: 1, end: 4 }, "a.ts")).toBe("first()");
+  });
+
   it("returns null when nothing is declared there", () => {
     expect(symbolInRange(syntheticChargeLines, { start: 1, end: 6 }, "charge.ts")).toBeNull();
   });

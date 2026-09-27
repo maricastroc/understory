@@ -15,8 +15,10 @@ import { useAuth } from "./use-auth";
 import { CaseView } from "./CaseView";
 import { LoadingCard } from "./LoadingCard";
 import { Onboarding } from "./Onboarding";
-import { useInvestigation } from "./use-investigation";
+import { type Entry, useInvestigation } from "./use-investigation";
+import type { ComposerPrefill } from "../composer/composer-prefill";
 import { AppHeader } from "../shell/AppHeader";
+import { LiveLineInvestigation } from "../line-investigation/case/LiveLineInvestigation";
 
 export function Investigator() {
   const user = useAuth();
@@ -45,6 +47,7 @@ export function Investigator() {
   const [caseFilter, setCaseFilter] = useState("");
   const [token, setToken] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [prefill, setPrefill] = useState<ComposerPrefill | null>(null);
 
   useEffect(() => {
     const deepRepo = params.get("repo");
@@ -68,6 +71,18 @@ export function Investigator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function followUp(entry: Entry) {
+    const loc = entry.result.evidence.location;
+    if (!loc) return;
+    const target = entry.form.repoPath;
+    if (target !== repoPath || !repo.ready) {
+      setRepoPath(target);
+      void repo.open(target, token.trim() || undefined);
+    }
+    setPrefill({ path: loc.file, line: loc.startLine, nonce: Date.now() });
+    backToCode();
+  }
+
   function handleNewInvestigation() {
     setRepoPath("");
     setToken("");
@@ -84,7 +99,8 @@ export function Investigator() {
       )
     : items;
 
-  const railResult = view === "case" && !loading ? (current?.result ?? null) : null;
+  const lineCase = view === "case" && !loading && !!current?.result.evidence.location;
+  const railResult = view === "case" && !loading && !lineCase ? (current?.result ?? null) : null;
   const railMeta = browsing && repo.ready ? repo.meta : null;
 
   const activeCaseId = view === "case" ? activeId : null;
@@ -152,7 +168,9 @@ export function Investigator() {
         </HistoryDrawer>
 
         <main className="min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-270 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+          <div
+            className={`mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 ${lineCase ? "max-w-none pb-20" : "max-w-270"}`}
+          >
             {error && browsing && (
               <div className="mb-4">
                 <ErrorState message={error} signedIn={!!user} />
@@ -170,12 +188,34 @@ export function Investigator() {
                 setToken={setToken}
                 onInvestigate={(input) => investigate(input, token.trim() || undefined, language)}
                 signedIn={!!user}
+                prefill={prefill}
               />
             </div>
 
             {loading && <LoadingCard />}
 
-            {!loading && view === "case" && current && (
+            {lineCase && current && (
+              <LiveLineInvestigation
+                key={current.caseId}
+                result={current.result}
+                repoPath={current.form.repoPath}
+                pending={current.pending ?? false}
+                token={token.trim() || undefined}
+                onDrill={(anchor) =>
+                  drillInto(
+                    current.caseId,
+                    current.form.question || "Why is this line the way it is?",
+                    anchor,
+                    current.form.repoPath,
+                    token.trim() || undefined,
+                    language,
+                  )
+                }
+                onFollowUp={() => followUp(current)}
+              />
+            )}
+
+            {!loading && !lineCase && view === "case" && current && (
               <CaseView
                 entry={current}
                 onBack={backToCode}
@@ -201,7 +241,7 @@ export function Investigator() {
           </div>
         </main>
 
-        <RightRail result={railResult} repoMeta={railMeta} />
+        {!lineCase && <RightRail result={railResult} repoMeta={railMeta} />}
       </div>
     </div>
   );

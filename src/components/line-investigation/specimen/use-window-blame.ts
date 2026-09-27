@@ -13,6 +13,7 @@ export function useWindowBlame(
   path: string,
   sha: string | null,
   range: LineRange | null,
+  token?: string,
 ): WindowBlame {
   const source = sha ? new URLSearchParams({ repo, path, ref: sha }).toString() : null;
   const rangeQuery = range ? `start=${range.start}&end=${range.end}` : null;
@@ -21,7 +22,10 @@ export function useWindowBlame(
   useEffect(() => {
     if (!source || !rangeQuery) return;
     const ctrl = new AbortController();
-    fetch(`/api/blame?${source}&${rangeQuery}`, { signal: ctrl.signal })
+    fetch(`/api/blame?${source}&${rangeQuery}`, {
+      signal: ctrl.signal,
+      headers: token ? { "x-github-token": token } : undefined,
+    })
       .then(async (res) => {
         const data = (await res.json()) as { spans?: BlameSpan[] };
         const ok = res.ok && Array.isArray(data.spans);
@@ -42,7 +46,7 @@ export function useWindowBlame(
         }));
       });
     return () => ctrl.abort();
-  }, [source, rangeQuery]);
+  }, [source, rangeQuery, token]);
 
   if (!source) return UNPINNED;
   const same = settled?.source === source ? settled : null;

@@ -73,7 +73,8 @@ export function CodeSpecimen({
     onDatumY?.(win.datumY);
   }, [win.datumY, onDatumY]);
 
-  const hiddenLabel = (range: LineRange) => rangeLabel(range, symbolInRange(lines, range, path));
+  const hiddenLabel = (range: LineRange, from: "start" | "end" = "start") =>
+    rangeLabel(range, symbolInRange(lines, range, path, from));
   const footerLabel =
     layout.mode === "strip"
       ? expanded
@@ -104,7 +105,7 @@ export function CodeSpecimen({
         )}
         {win.beforeRow && win.hiddenBefore && (
           <RangeToggle
-            label={hiddenLabel(win.hiddenBefore)}
+            label={hiddenLabel(win.hiddenBefore, "end")}
             expanded={false}
             controls={listId}
             placement="top"

@@ -1,0 +1,103 @@
+"use client";
+
+import type { DigResult } from "@git-investigator/core/types";
+import { useEffect, useMemo, useReducer, useRef } from "react";
+import { evidenceEntries } from "../copy/evidence-entries";
+import { EvidenceDrawer } from "../drawer/EvidenceDrawer";
+import { lineInvestigationFonts } from "../fonts";
+import { Instrument } from "../instrument/Instrument";
+import type { SpecimenSlot } from "../instrument/types";
+import { buildInvestigationView } from "../model/build-investigation-view";
+import type { ViewArtifact } from "../model/types";
+import type { SpecimenLayout } from "../specimen/types";
+import { caseReducer, drawerOpen, effectiveClause, initialCaseState } from "../state/case-reducer";
+import { readKeyPreference, writeKeyPreference } from "./key-preference";
+import { TitleRow } from "./TitleRow";
+import { Toolbar } from "./Toolbar";
+import { useCaseKeyboard } from "./use-case-keyboard";
+import { useFocusReturn } from "./use-focus-return";
+
+export function LineInvestigation({
+  result,
+  pending,
+  now,
+  layout,
+  renderSpecimen,
+  onDrill,
+  onFollowUp,
+}: {
+  result: DigResult;
+  pending: boolean;
+  now: number;
+  layout: SpecimenLayout;
+  renderSpecimen: SpecimenSlot;
+  onDrill?: (a: ViewArtifact) => void;
+  onFollowUp?: () => void;
+}) {
+  const view = useMemo(
+    () => buildInvestigationView(result, { now, pending }),
+    [result, now, pending],
+  );
+  const entries = useMemo(() => evidenceEntries(view), [view]);
+  const order = useMemo(() => entries.map((e) => e.id), [entries]);
+  const [state, dispatch] = useReducer(caseReducer, undefined, () =>
+    initialCaseState(readKeyPreference()),
+  );
+  const firstKey = useRef(true);
+
+  useCaseKeyboard(state, dispatch, order);
+  useFocusReturn(drawerOpen(state));
+
+  useEffect(() => {
+    if (firstKey.current) {
+      firstKey.current = false;
+      return;
+    }
+    writeKeyPreference(state.keyOpen);
+  }, [state.keyOpen]);
+
+  const effective = effectiveClause(state);
+  const clause = view.clauses.find((c) => c.id === effective);
+  const active = clause ? new Set(clause.citations) : null;
+
+  return (
+    <div className={`${lineInvestigationFonts} flex flex-col gap-5.5 font-li-body text-li-ink`}>
+      <TitleRow
+        view={view}
+        verdictOpen={state.verdictOpen}
+        onToggleVerdict={() => dispatch({ type: "toggle-verdict" })}
+        onCloseVerdict={() => dispatch({ type: "close-verdict" })}
+        onFollowUp={onFollowUp}
+      />
+      <Instrument
+        view={view}
+        state={state}
+        dispatch={dispatch}
+        layout={layout}
+        now={now}
+        renderSpecimen={renderSpecimen}
+      />
+      <Toolbar
+        count={entries.length}
+        keyOpen={state.keyOpen}
+        answer={view.clauses.length && !view.clauses[0].silent ? view.answer : null}
+        onOpenList={() => dispatch({ type: "open-list" })}
+        onToggleKey={() => dispatch({ type: "toggle-key" })}
+      />
+      {drawerOpen(state) && (
+        <EvidenceDrawer
+          entries={entries}
+          artifacts={view.artifacts}
+          clauses={view.clauses}
+          inspected={state.inspected}
+          active={active}
+          onInspect={(id) => dispatch({ type: "inspect", id })}
+          onList={() => dispatch({ type: "open-list" })}
+          onClose={() => dispatch({ type: "close-drawer" })}
+          onStep={(delta) => dispatch({ type: "step", order, delta })}
+          onDrill={onDrill}
+        />
+      )}
+    </div>
+  );
+}
