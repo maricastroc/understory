@@ -1,11 +1,13 @@
 import type { RepoMeta } from "@git-investigator/core/types";
 import { fmtCount, fmtDate } from "../format";
 import { Branch, Clock, ExternalLink, Fork, Issue, Lock, Repo, Search, Star } from "../icons";
+import { liButton } from "../line-investigation/parts/button-class";
+import { CHIP, PANEL } from "./composer-classes";
 
 function Stat({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className="text-ink-3">{icon}</span>
+      <span className="text-li-text-muted">{icon}</span>
       {children}
     </span>
   );
@@ -22,24 +24,22 @@ export function RepoOverview({ meta }: { meta: RepoMeta }) {
   const topics = meta.topics ?? [];
 
   return (
-    <div className="rounded-[10px] border border-line bg-surface p-4 shadow-card">
+    <div className={`p-4 font-li-body text-li-ink ${PANEL}`}>
       <div className="flex items-start gap-2.5">
-        <span className="grid size-8 shrink-0 place-items-center rounded-md bg-accent-tint text-accent-press">
+        <span className="grid size-8 shrink-0 place-items-center bg-li-steel-100 text-li-steel-700">
           {meta.private ? <Lock className="size-4" /> : <Repo className="size-4" />}
         </span>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="truncate font-mono text-[15px] font-semibold text-ink">
+            <span className="truncate font-li-mono text-[15px] font-semibold text-li-ink">
               {meta.name}
             </span>
-            <span className="rounded-full bg-inset px-2 py-0.5 text-[11px] font-medium text-ink-3">
-              {kindLabel[meta.kind]}
-            </span>
+            <span className={CHIP}>{kindLabel[meta.kind]}</span>
           </div>
 
           {meta.description && (
-            <p className="mt-1 max-w-[68ch] text-[13px] leading-relaxed text-ink-2">
+            <p className="mt-1 max-w-[68ch] text-[13px] leading-relaxed text-li-text-subtle">
               {meta.description}
             </p>
           )}
@@ -50,19 +50,21 @@ export function RepoOverview({ meta }: { meta: RepoMeta }) {
             href={meta.htmlUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-1.5 text-[12.5px] font-medium text-ink-2 hover:text-accent-press"
+            className={liButton("ghost", "text-[12.5px]")}
           >
             Open <ExternalLink className="size-3.5" />
           </a>
         )}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-ink-2">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-li-text-subtle">
         <Stat icon={<Branch className="size-3.5" />}>
-          <span className="font-medium text-ink">{meta.branch ?? "—"}</span>
+          <span className="font-li-mono font-medium text-li-ink">{meta.branch ?? "—"}</span>
         </Stat>
         {meta.language && (
-          <Stat icon={<span className="size-2 rounded-full bg-accent" />}>{meta.language}</Stat>
+          <Stat icon={<span className="block size-2 rounded-full bg-li-neutral-500" />}>
+            {meta.language}
+          </Stat>
         )}
         {meta.stars != null && (
           <Stat icon={<Star className="size-3.5" />}>
@@ -87,17 +89,14 @@ export function RepoOverview({ meta }: { meta: RepoMeta }) {
       {topics.length > 0 && (
         <div className="mt-2.5 flex flex-wrap gap-1.5">
           {topics.slice(0, 8).map((t) => (
-            <span
-              key={t}
-              className="rounded-full bg-inset px-2 py-0.5 font-mono text-[11px] text-ink-3"
-            >
+            <span key={t} className={CHIP}>
               {t}
             </span>
           ))}
         </div>
       )}
 
-      <div className="mt-3.5 flex items-center gap-1.5 border-t border-line pt-3 text-[12px] text-ink-3">
+      <div className="mt-3.5 flex items-center gap-1.5 border-t border-li-divider pt-3 text-xs text-li-text-subtle">
         <Search className="size-3.5 shrink-0" />
         {isGitHub
           ? "Find a file above and click a line to trace its history."

@@ -147,12 +147,12 @@
     height: 100%;
   }
   :focus-visible {
-    outline: 1.5px solid var(--color-accent);
+    outline: 1.5px solid var(--color-li-steel-700);
     outline-offset: 2px;
     border-radius: 3px;
   }
   ::selection {
-    background: var(--color-accent-tint);
+    background: var(--color-li-steel-100);
   }
   * {
     scrollbar-width: thin;

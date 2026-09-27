@@ -1,8 +1,8 @@
 "use client";
 
-import { buttonClass } from "./Button";
 import { Alert, Github } from "./icons";
 import { authEnabled } from "./investigator/use-auth";
+import { liButton } from "./line-investigation/parts/button-class";
 
 type Category = "private" | "rate" | "network" | "generic";
 
@@ -43,17 +43,17 @@ export function ErrorState({
     <div
       id={id}
       role="alert"
-      className={`flex items-start gap-2.5 bg-crit-tint text-crit ${
+      className={`flex items-start gap-2.5 bg-li-neutral-100 font-li-body text-li-ink ${
         flush
-          ? "border-b border-line px-3.5 py-2.5"
-          : "rounded-[10px] border border-crit/25 p-3.5"
+          ? "border-b border-li-divider px-3.5 py-2.5"
+          : "border border-li-divider p-3.5 shadow-li-sm"
       }`}
     >
       <Alert className="mt-0.5 size-4 shrink-0" />
       <div className="min-w-0 flex-1">
         <p className="text-[13px]">{message}</p>
         {(hint || suggestSignIn) && (
-          <p className="mt-1 text-[12.5px] text-crit/85">
+          <p className="mt-1 text-[12.5px] text-li-text-subtle">
             {hint}
             {suggestSignIn && " Signing in with GitHub is the easiest fix — no token needed."}
           </p>
@@ -61,7 +61,10 @@ export function ErrorState({
         {(suggestSignIn || onRetry) && (
           <div className="mt-2.5 flex flex-wrap items-center gap-2">
             {suggestSignIn && (
-              <a href="/api/auth/login" className={buttonClass({ size: "xs" })}>
+              <a
+                href="/api/auth/login"
+                className={liButton("secondary", "px-2.5 py-1 text-[12.5px]")}
+              >
                 <Github className="size-3.5" />
                 Sign in with GitHub
               </a>
@@ -70,7 +73,7 @@ export function ErrorState({
               <button
                 type="button"
                 onClick={onRetry}
-                className={buttonClass({ variant: "secondary", size: "xs" })}
+                className={liButton("secondary", "px-2.5 py-1 text-[12.5px]")}
               >
                 Try again
               </button>

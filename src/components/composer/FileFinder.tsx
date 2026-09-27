@@ -1,4 +1,5 @@
 import { Close, FileIcon, Search } from "../icons";
+import { FIELD_LABEL, ICON_BUTTON, SPINNER } from "./composer-classes";
 import { Highlight } from "./Highlight";
 
 export function FileFinder({
@@ -23,11 +24,9 @@ export function FileFinder({
 
   return (
     <>
-      <div className="flex items-center gap-3 px-3.5 py-2.5 transition-colors focus-within:bg-inset/40">
-        <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
-          Find
-        </span>
-        <Search className="size-4 shrink-0 text-ink-2" />
+      <div className="flex items-center gap-3 px-3.5 py-2.5 transition-colors focus-within:bg-li-neutral-200/60 motion-reduce:transition-none">
+        <span className={FIELD_LABEL}>Find</span>
+        <Search className="size-4 shrink-0 text-li-text-muted" />
         <input
           aria-label="Search files or symbols"
           value={query}
@@ -36,17 +35,15 @@ export function FileFinder({
           placeholder={
             enabled ? "Search files or symbols…  e.g. chargeCustomer" : "Open a repository first"
           }
-          className="min-w-0 flex-1 bg-transparent text-[13px] text-ink placeholder:text-ink-3 disabled:cursor-not-allowed"
+          className="min-w-0 flex-1 bg-transparent text-[13px] text-li-ink outline-none placeholder:text-li-text-muted disabled:cursor-not-allowed"
         />
-        {searching && (
-          <span className="size-4 shrink-0 animate-spin rounded-full border border-line-2 border-t-accent" />
-        )}
+        {searching && <span aria-hidden className={`size-4 ${SPINNER}`} />}
         {!searching && q !== "" && (
           <button
             type="button"
             aria-label="Clear search"
             onClick={() => setQuery("")}
-            className="grid size-6 shrink-0 cursor-pointer place-items-center rounded-md text-ink-3 transition-colors hover:bg-inset hover:text-ink-2"
+            className={ICON_BUTTON}
           >
             <Close className="size-3.5" />
           </button>
@@ -54,9 +51,9 @@ export function FileFinder({
       </div>
 
       {results.length > 0 && (
-        <div className="border-t border-line">
+        <div className="border-t border-li-divider bg-li-paper">
           {isDefault && (
-            <div className="px-3.5 pt-2.5 pb-1 text-[10.5px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
+            <div className="px-3.5 pt-2.5 pb-1 font-li-mono text-[10.5px] tracking-[0.06em] text-li-text-subtle uppercase">
               Suggested files
             </div>
           )}
@@ -65,10 +62,10 @@ export function FileFinder({
               <li key={f}>
                 <button
                   onClick={() => onOpenFile(f)}
-                  className="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left transition-colors hover:bg-inset"
+                  className="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel motion-reduce:transition-none"
                 >
-                  <FileIcon className="size-3.5 shrink-0 text-ink-3" />
-                  <span className="truncate font-mono text-[12.5px] text-ink">
+                  <FileIcon className="size-3.5 shrink-0 text-li-text-muted" />
+                  <span className="truncate font-li-mono text-[12.5px] text-li-ink">
                     <Highlight text={f} q={isDefault ? "" : q} />
                   </span>
                 </button>
@@ -79,7 +76,7 @@ export function FileFinder({
       )}
 
       {showEmpty && (
-        <div className="border-t border-line px-3.5 py-3 text-[12.5px] text-ink-3">
+        <div className="border-t border-li-divider bg-li-paper px-3.5 py-3 text-[12.5px] text-li-text-subtle">
           No files match &ldquo;{q}&rdquo;.
         </div>
       )}

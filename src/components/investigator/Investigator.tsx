@@ -102,7 +102,6 @@ export function Investigator() {
   const lineCase = view === "case" && !busy && !draftCase && !!current?.result.evidence.location;
   const railResult =
     view === "case" && !busy && !lineCase && !draftCase ? (current?.result ?? null) : null;
-  const railMeta = browsing && repo.ready ? repo.meta : null;
   const activeCaseId = view === "case" ? activeId : null;
 
   const lineItems = useMemo(
@@ -302,16 +301,16 @@ export function Investigator() {
             />
           )}
 
-          {(railResult || railMeta) && (
+          {railResult && (
             <div className="mt-5 flex flex-col gap-3.5 xl:hidden">
-              <RailContent result={railResult} repoMeta={railMeta} />
+              <RailContent result={railResult} />
             </div>
           )}
         </div>
 
-        {!lineCase && !draftCase && (
+        {railResult && (
           <div className="sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
-            <RightRail result={railResult} repoMeta={railMeta} />
+            <RightRail result={railResult} />
           </div>
         )}
       </div>
