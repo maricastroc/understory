@@ -10,6 +10,7 @@ import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithTokens } from "@git-investigator/core/collect/token-context";
 import { githubAppConfigured, installUrl, installationTokenForRepo } from "@/lib/github-app";
 import { narrate } from "@git-investigator/core/investigate";
+import { ensureHistoryStore } from "@/lib/history-store";
 import { rateLimit } from "@/lib/ratelimit";
 import type { ArtifactRef, Evidence } from "@git-investigator/core/types";
 
@@ -24,6 +25,8 @@ export async function POST(req: Request) {
 
   const limited = await rateLimit(req, "ai");
   if (limited) return limited;
+
+  ensureHistoryStore();
 
   let body: {
     repoPath?: string;
@@ -125,7 +128,11 @@ export async function POST(req: Request) {
         const { narrative, error } = await narrate(evidence, { language });
         send({ phase: "final", narrative, error });
       } catch (e) {
-        send({ phase: "final", narrative: null, error: e instanceof Error ? e.message : String(e) });
+        send({
+          phase: "final",
+          narrative: null,
+          error: e instanceof Error ? e.message : String(e),
+        });
       } finally {
         controller.close();
       }

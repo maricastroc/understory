@@ -1,28 +1,45 @@
-import { rankByHistory, rankShallow } from "../rank";
+import { RECENT_COMMITS, rankByHistory, rankShallow } from "../rank";
+import type { TreeEntry } from "../../types";
 import { rest, restRaw } from "./client";
 
-const treeCache = new Map<string, string[]>();
+type GitHubTree = { entries: TreeEntry[]; truncated: boolean };
+
+const treeCache = new Map<string, GitHubTree>();
 const churnCache = new Map<string, Map<string, number>>();
 
-async function getTree(owner: string, repo: string, branch: string): Promise<string[]> {
+export async function treeEntriesGitHub(
+  owner: string,
+  repo: string,
+  branch: string,
+): Promise<GitHubTree> {
   const key = `${owner}/${repo}@${branch}`;
 
   const hit = treeCache.get(key);
 
   if (hit) return hit;
 
-  const d = await rest<{ tree?: Array<{ type: string; path: string }> }>(
-    `/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
-  );
+  const d = await rest<{
+    tree?: Array<{ type: string; path: string; sha: string; size?: number }>;
+    truncated?: boolean;
+  }>(`/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`);
 
-  const files = (d.tree ?? []).filter((t) => t.type === "blob").map((t) => t.path);
+  const tree: GitHubTree = {
+    entries: (d.tree ?? [])
+      .filter((t) => t.type === "blob")
+      .map((t) => ({ path: t.path, sha: t.sha, size: t.size ?? null })),
+    truncated: d.truncated === true,
+  };
 
-  treeCache.set(key, files);
+  treeCache.set(key, tree);
 
-  return files;
+  return tree;
 }
 
-async function recentChurn(
+async function getTree(owner: string, repo: string, branch: string): Promise<string[]> {
+  return (await treeEntriesGitHub(owner, repo, branch)).entries.map((e) => e.path);
+}
+
+export async function recentChurnGitHub(
   owner: string,
   repo: string,
   branch: string,
@@ -39,7 +56,7 @@ async function recentChurn(
   );
   const shas = commits
     .filter((c) => (c.parents?.length ?? 1) <= 1)
-    .slice(0, 12)
+    .slice(0, RECENT_COMMITS)
     .map((c) => c.sha);
 
   const details = await Promise.all(
@@ -72,7 +89,7 @@ export async function defaultFilesGitHub(
   }
 
   try {
-    const churn = await recentChurn(owner, repo, branch);
+    const churn = await recentChurnGitHub(owner, repo, branch);
 
     const present = new Set(tree);
 

@@ -8,6 +8,7 @@ import { parseBlameQuery } from "@/lib/blame-query";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { githubTokenForRepo } from "@/lib/github-app";
+import { ensureHistoryStore } from "@/lib/history-store";
 import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
@@ -19,6 +20,8 @@ export async function GET(req: Request) {
 
   const limited = await rateLimit(req, "browse");
   if (limited) return limited;
+
+  ensureHistoryStore();
 
   const parsed = parseBlameQuery(new URL(req.url).searchParams);
   if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 });
