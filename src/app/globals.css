@@ -27,6 +27,53 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@theme {
+  --color-li-paper: #f2f2f3;
+  --color-li-ink: #1d1f20;
+  --color-li-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+  --color-li-neutral-100: #f5f5f8;
+  --color-li-neutral-200: #e7e7ea;
+  --color-li-neutral-300: #d4d4d7;
+  --color-li-neutral-400: #b7b7ba;
+  --color-li-neutral-500: #98989b;
+  --color-li-neutral-600: #7a7a7d;
+  --color-li-neutral-700: #5d5d60;
+  --color-li-neutral-800: #424244;
+  --color-li-text-muted: #666669;
+  --color-li-text-subtle: #5d5d60;
+  --color-li-steel: #5980a6;
+  --color-li-steel-100: #eef6ff;
+  --color-li-steel-600: #597ea3;
+  --color-li-steel-700: #416180;
+  --color-li-steel-800: #2c455d;
+  --color-li-steel-900: #1d2d3d;
+  --color-li-datum: oklch(0.78 0.13 80);
+  --color-li-datum-row: oklch(0.93 0.06 85);
+  --color-li-datum-strong: oklch(0.8 0.13 80);
+  --color-li-datum-bar: oklch(0.72 0.14 72);
+  --color-li-datum-weak: oklch(0.88 0.09 82);
+  --color-li-datum-ink: oklch(0.42 0.1 70);
+  --color-li-datum-tint: oklch(0.95 0.05 85);
+  --color-li-evidence: oklch(0.58 0.1 160);
+  --color-li-evidence-edge: oklch(0.42 0.08 160);
+  --color-li-evidence-ink: oklch(0.4 0.08 160);
+  --color-li-evidence-tint: oklch(0.94 0.035 160);
+  --color-li-evidence-quote: oklch(0.92 0.05 160);
+  --color-li-evidence-pinned: oklch(0.96 0.02 160);
+  --color-li-gap: oklch(0.62 0.1 40);
+  --color-li-gap-ink: oklch(0.48 0.09 40);
+  --color-li-gap-tint: oklch(0.94 0.03 40);
+  --color-li-unverified: #98989b;
+  --shadow-li-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
+  --shadow-li-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
+  --shadow-li-lg: 0 12px 32px color-mix(in srgb, #2b2b2d 22%, transparent);
+}
+
+@theme inline {
+  --font-li-body: var(--font-barlow), system-ui, sans-serif;
+  --font-li-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
 @utility tnum {
   font-variant-numeric: tabular-nums;
 }
