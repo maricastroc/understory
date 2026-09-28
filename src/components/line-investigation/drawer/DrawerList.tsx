@@ -37,7 +37,7 @@ export function DrawerList({
               <button
                 type="button"
                 onClick={() => onInspect(entry.id)}
-                className="grid w-full cursor-pointer grid-cols-[22px_minmax(0,1fr)] gap-2.5 border-b border-li-divider px-4 py-3 text-left hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel"
+                className="grid w-full cursor-pointer grid-cols-[22px_minmax(0,1fr)] gap-2.5 border-b border-li-divider px-4 py-3 text-left hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus"
               >
                 <EvidenceLetter
                   letter={gapLetter(gap)}
@@ -66,7 +66,7 @@ export function DrawerList({
             <button
               type="button"
               onClick={() => onInspect(entry.id)}
-              className="grid w-full cursor-pointer grid-cols-[22px_minmax(0,1fr)] gap-2.5 border-b border-li-divider px-4 py-3 text-left hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel"
+              className="grid w-full cursor-pointer grid-cols-[22px_minmax(0,1fr)] gap-2.5 border-b border-li-divider px-4 py-3 text-left hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus"
             >
               <EvidenceLetter
                 letter={a.letter}

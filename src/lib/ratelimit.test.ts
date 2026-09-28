@@ -68,6 +68,7 @@ describe("rateLimit", () => {
     expect(prefixes).toEqual([
       "git-investigator:ratelimit:ai",
       "git-investigator:ratelimit:browse",
+      "git-investigator:ratelimit:map",
     ]);
     for (const p of prefixes) expect(p.startsWith("git-investigator:ratelimit:")).toBe(true);
   });

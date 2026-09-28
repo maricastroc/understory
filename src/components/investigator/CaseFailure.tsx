@@ -16,7 +16,7 @@ export function CaseFailure({
     <>
       <ErrorState message={message} signedIn={signedIn} onRetry={onRetry} />
       <div>
-        <button type="button" onClick={onBack} className={liButton("ghost", "text-[12.5px]")}>
+        <button type="button" onClick={onBack} className={liButton("ghost", "", "sm")}>
           Back to code
         </button>
       </div>

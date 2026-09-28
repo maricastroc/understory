@@ -166,7 +166,7 @@ export function BoreLabels({
                   onFocus={() => onHover(gap.id)}
                   onBlur={() => onHover(null)}
                   onClick={() => onInspect(gap.id)}
-                  className={`grid w-full cursor-pointer grid-cols-[20px_minmax(0,1fr)] gap-2 rounded-[3px] py-0.5 pr-1.5 pl-0.5 text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel motion-reduce:transition-none ${surface(selected, hovered === gap.id)}`}
+                  className={`grid w-full cursor-pointer grid-cols-[20px_minmax(0,1fr)] gap-2 rounded-[3px] py-0.5 pr-1.5 pl-0.5 text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none ${surface(selected, hovered === gap.id)}`}
                 >
                   <EvidenceLetter
                     letter={gapLetter(gap)}
@@ -223,7 +223,7 @@ export function BoreLabels({
                   aria-expanded={false}
                   aria-label={`${item.members.length} ${kindName(first.kind)}s, ${first.letter} to ${last.letter}, collapsed. Show them.`}
                   onClick={() => onToggleGroup(item.key)}
-                  className="grid w-full cursor-pointer grid-cols-[auto_minmax(0,1fr)] gap-2 rounded-[3px] py-0.5 pr-1.5 pl-0.5 text-left hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+                  className="grid w-full cursor-pointer grid-cols-[auto_minmax(0,1fr)] gap-2 rounded-[3px] py-0.5 pr-1.5 pl-0.5 text-left hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
                 >
                   <EvidenceLetter
                     letter={`×${item.members.length}`}
@@ -267,7 +267,7 @@ export function BoreLabels({
                 onFocus={() => onHover(a.id)}
                 onBlur={() => onHover(null)}
                 onClick={() => onInspect(a.id)}
-                className={`grid w-full cursor-pointer grid-cols-[20px_minmax(0,1fr)] gap-2 rounded-[3px] py-0.5 pr-1.5 pl-0.5 text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel motion-reduce:transition-none ${surface(selected, isHovered)}`}
+                className={`grid w-full cursor-pointer grid-cols-[20px_minmax(0,1fr)] gap-2 rounded-[3px] py-0.5 pr-1.5 pl-0.5 text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none ${surface(selected, isHovered)}`}
               >
                 <EvidenceLetter letter={a.letter} variant={letterVariant(a, dim)} />
                 <span className="pointer-events-none flex min-w-0 flex-col gap-0.5">

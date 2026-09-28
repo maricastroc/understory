@@ -74,7 +74,7 @@ export function PrComposer({
           type="button"
           onClick={onRun}
           disabled={loading || !pr.trim()}
-          className={liButton("primary", "h-7 px-2.5 text-[12.5px]")}
+          className={liButton("primary", "", "sm")}
         >
           <BlueprintCorners />
           <Search className="size-3.5" />
@@ -164,7 +164,7 @@ export function PrComposer({
         <button
           type="button"
           onClick={onExample}
-          className="flex w-full cursor-pointer items-center gap-1.5 bg-li-paper px-3.5 py-2 text-left text-xs text-li-text-subtle transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel motion-reduce:transition-none"
+          className="flex w-full cursor-pointer items-center gap-1.5 bg-li-paper px-3.5 py-2 text-left text-xs text-li-text-subtle transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none"
         >
           Try an example → <span className="font-li-mono text-li-ink">{EXAMPLE}</span>
         </button>

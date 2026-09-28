@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { liButton } from "../line-investigation/parts/button-class";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
+import { FIELD_SMALL, SECTION_LABEL } from "./composer-classes";
 
 export function PrEntry() {
   const router = useRouter();
@@ -12,11 +13,8 @@ export function PrEntry() {
   const pr = value.trim();
 
   return (
-    <section aria-labelledby={`${inputId}-title`} className="flex flex-col gap-2.5">
-      <h3
-        id={`${inputId}-title`}
-        className="flex items-center gap-2 border-b-2 border-li-ink pb-2 font-li-mono text-[11px] tracking-[0.08em] text-li-ink uppercase"
-      >
+    <section aria-labelledby={`${inputId}-title`} className="flex flex-col gap-3">
+      <h3 id={`${inputId}-title`} className={SECTION_LABEL}>
         <DomainIcon kind="pull_request" size={14} />
         Or a pull request
       </h3>
@@ -38,13 +36,9 @@ export function PrEntry() {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="owner/repo#123"
-          className="h-9 min-w-0 flex-1 border border-li-neutral-400 bg-transparent px-2.5 font-li-mono text-[12.5px] text-li-ink outline-none placeholder:text-li-text-muted focus:border-li-steel"
+          className={`${FIELD_SMALL} flex-1`}
         />
-        <button
-          type="submit"
-          disabled={!pr}
-          className={liButton("secondary", "h-9 px-3 text-[13px]")}
-        >
+        <button type="submit" disabled={!pr} className={liButton("secondary", "", "field")}>
           Explain →
         </button>
       </form>

@@ -2,8 +2,13 @@ import type { RepoMeta, TreeOverview } from "@git-investigator/core/types";
 import type { ReactNode } from "react";
 import { fmtDate } from "../format";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
-import { repoDisplayName } from "../shell/repo-display-name";
 import type { HistoryMapControl } from "./history/use-history-map";
+
+const SOURCE: Record<RepoMeta["kind"], string> = {
+  github: "GitHub",
+  remote: "Cloned from URL",
+  local: "Local clone",
+};
 
 const CELL: Record<string, string> = {
   mapped: "border-li-ink bg-li-ink",
@@ -17,80 +22,65 @@ function Segment({
   label,
   children,
   sub,
-  grow = false,
 }: {
   label: string;
   children: ReactNode;
   sub?: ReactNode;
-  grow?: boolean;
 }) {
   return (
-    <div
-      className={`flex min-w-0 flex-col gap-1 border-l border-li-divider px-4 py-3 first:border-l-0 first:pl-0 max-[1100px]:border-l-0 max-[1100px]:pl-0 ${
-        grow ? "max-w-100 shrink" : "shrink-0"
-      }`}
-    >
-      <dt className="font-li-mono text-[10.5px] tracking-[0.08em] text-li-text-subtle uppercase">
-        {label}
-      </dt>
-      <dd className="flex min-w-0 items-center gap-2 text-[15px] leading-tight font-medium text-li-ink">
+    <div className="flex min-w-0 flex-col gap-1.5 border-l border-li-divider px-5 py-3.5 first:border-l-0 first:pl-0 max-[1100px]:border-l-0 max-[1100px]:pl-0">
+      <dt className="li-eyebrow text-li-text-subtle">{label}</dt>
+      <dd className="flex min-w-0 items-center gap-2 font-li-mono text-[13.5px] leading-tight text-li-ink tnum">
         {children}
       </dd>
-      {sub && <dd className="text-[11.5px] text-li-text-subtle">{sub}</dd>}
+      {sub && <dd className="truncate text-[12px] text-li-text-subtle">{sub}</dd>}
     </div>
   );
 }
 
 export function RepoDetails({
-  repoPath,
   meta,
   overview,
   map,
 }: {
-  repoPath: string;
   meta: RepoMeta | null;
   overview: TreeOverview | null;
   map: HistoryMapControl;
 }) {
-  const name = repoDisplayName(meta?.name ?? repoPath);
   const head = overview?.head ?? null;
   const shown = overview?.files ?? [];
   const status = (path: string) => map.states.get(path)?.status ?? "stub";
 
   return (
     <div className="border-t border-li-divider">
-      <dl className="flex items-stretch max-[1100px]:grid max-[1100px]:grid-cols-3 max-[1100px]:gap-x-6 max-[640px]:grid-cols-2">
+      <dl className="grid grid-cols-[repeat(6,minmax(0,max-content))] items-stretch max-[1100px]:grid-cols-3 max-[1100px]:gap-x-6 max-[640px]:grid-cols-2">
         <Segment
-          grow
-          label="repository"
-          sub={meta?.kind === "github" ? "GitHub" : meta?.kind === "remote" ? "cloned" : "local"}
+          label="source"
+          sub={meta?.private ? "private" : meta?.kind === "local" ? "on this machine" : undefined}
         >
-          <DomainIcon kind="repository" />
           {meta?.htmlUrl ? (
             <a
               href={meta.htmlUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="truncate underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+              className="li-link truncate font-li-body text-[14px]"
             >
-              {name}{" "}
-              <span aria-hidden className="text-li-text-subtle">
-                ↗
-              </span>
+              {SOURCE[meta.kind]}
+              <span aria-hidden> ↗</span>
             </a>
           ) : (
-            <span className="truncate">{name}</span>
+            <span className="font-li-body text-[14px]">{SOURCE[meta?.kind ?? "local"]}</span>
           )}
         </Segment>
         {meta?.branch && (
           <Segment label="branch">
-            <span className="font-li-mono text-[14px]">{meta.branch}</span>
+            <span className="truncate">{meta.branch}</span>
           </Segment>
         )}
         {head && (
           <Segment label="head" sub={overview?.shallow ? "shallow clone" : fmtDate(head.date)}>
-            <DomainIcon kind="commit" />
-            <span className="font-li-mono text-[14px]">{head.sha.slice(0, 7)}</span>
+            <DomainIcon kind="commit" size={14} />
+            {head.sha.slice(0, 7)}
           </Segment>
         )}
         {overview && (
@@ -98,10 +88,8 @@ export function RepoDetails({
             label="files"
             sub={overview.truncated ? "partial file list" : "in the tree at HEAD"}
           >
-            <span className="font-li-mono text-[14px]">
-              {overview.truncated ? "≥" : ""}
-              {overview.total.toLocaleString("en-US")}
-            </span>
+            {overview.truncated ? "≥" : ""}
+            {overview.total.toLocaleString("en-US")}
           </Segment>
         )}
         {overview && shown.length > 0 && (
@@ -115,7 +103,7 @@ export function RepoDetails({
                   : "not available here"
             }
           >
-            <span className="font-li-mono text-[14px]">
+            <span>
               {map.mapped}
               <span className="text-li-text-subtle"> / {shown.length}</span>
             </span>
@@ -133,8 +121,10 @@ export function RepoDetails({
               overview.prData === "github" ? "looked up per commit" : "no GitHub remote or token"
             }
           >
-            <DomainIcon kind="pull_request" />
-            <span>{overview.prData === "github" ? "GitHub" : "unavailable"}</span>
+            <DomainIcon kind="pull_request" size={14} muted={overview.prData !== "github"} />
+            <span className={overview.prData === "github" ? "" : "text-li-text-subtle"}>
+              {overview.prData === "github" ? "GitHub" : "unavailable"}
+            </span>
           </Segment>
         )}
       </dl>

@@ -164,7 +164,7 @@ export function PrInstrument({
         <button
           type="button"
           onClick={() => setShowAll(true)}
-          className="w-fit cursor-pointer border border-li-ink px-1.5 font-li-mono text-[10.5px] text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+          className="w-fit cursor-pointer border border-li-ink px-1.5 font-li-mono text-[10.5px] text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
         >
           +{hidden} regions
         </button>

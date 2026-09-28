@@ -31,7 +31,7 @@ export function RegionStrip({
               onMouseLeave={() => onHover(null)}
               onFocus={() => onHover(r.id)}
               onBlur={() => onHover(null)}
-              className={`cursor-pointer p-0.5 focus-visible:outline-2 focus-visible:outline-li-steel ${
+              className={`cursor-pointer p-0.5 focus-visible:outline-2 focus-visible:outline-li-focus ${
                 active && !active.has(r.id) ? "opacity-45" : ""
               }`}
             >

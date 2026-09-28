@@ -1,10 +1,11 @@
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
+import { SECTION_LABEL } from "./composer-classes";
 import type { RecentRepo } from "./types/recent-repo";
 
 const ROW =
-  "group grid w-full cursor-pointer grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-3 border-b border-li-divider py-3 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel";
+  "group grid w-full cursor-pointer grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-3 border-b border-li-divider py-3 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus";
 const ACTION =
-  "text-[13px] text-li-steel-700 underline-offset-2 group-hover:text-li-steel-900 group-hover:underline";
+  "text-[13px] whitespace-nowrap text-li-ink underline decoration-li-neutral-400 underline-offset-3 transition-colors group-hover:decoration-li-ink";
 
 export function RepoShortcuts({
   recent,
@@ -21,9 +22,7 @@ export function RepoShortcuts({
   if (!recent.length && !demoRepo) return null;
   return (
     <section aria-label="Repositories" className="flex flex-col">
-      <h3 className="border-b-2 border-li-ink pb-2 font-li-mono text-[11px] tracking-[0.08em] text-li-ink uppercase">
-        {recent.length ? "Investigated before" : "Try it on"}
-      </h3>
+      <h3 className={SECTION_LABEL}>{recent.length ? "Investigated before" : "Try it on"}</h3>
       <ul>
         {recent.map((r) => (
           <li key={r.path}>

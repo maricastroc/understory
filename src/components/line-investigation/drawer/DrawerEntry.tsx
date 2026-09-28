@@ -173,7 +173,7 @@ export function DrawerEntry({
                   key={link.key}
                   type="button"
                   onClick={link.onPick}
-                  className="cursor-pointer rounded-[3px] border border-li-divider px-2 py-0.5 font-li-mono text-[11px] text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+                  className="cursor-pointer rounded-[3px] border border-li-divider px-2 py-0.5 font-li-mono text-[11px] text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
                 >
                   {link.label}
                 </button>

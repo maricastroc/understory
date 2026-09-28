@@ -103,7 +103,7 @@ export function WhyZone({
           <button
             type="button"
             onClick={onClear}
-            className="ml-auto cursor-pointer rounded-[3px] border border-li-divider px-2 py-0.5 text-[11.5px] text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+            className="ml-auto cursor-pointer rounded-[3px] border border-li-divider px-2 py-0.5 text-[11.5px] text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
           >
             Clear · Esc
           </button>

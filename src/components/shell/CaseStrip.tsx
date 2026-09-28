@@ -20,7 +20,7 @@ export function CaseStrip({
         aria-expanded={expanded}
         aria-haspopup="dialog"
         onClick={onOpen}
-        className="flex w-11 cursor-pointer flex-col items-center gap-2.5 overflow-hidden rounded py-2 transition-colors hover:bg-li-neutral-200/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel motion-reduce:transition-none"
+        className="flex w-11 cursor-pointer flex-col items-center gap-2.5 overflow-hidden py-2 transition-colors hover:bg-li-neutral-200/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none"
       >
         <span aria-hidden className="flex flex-col items-center gap-0.5">
           <span className="flex flex-col gap-0.75">
@@ -34,7 +34,7 @@ export function CaseStrip({
           {items.map((item) => (
             <span
               key={`${item.kind}-${item.id}`}
-              className={`flex size-7 justify-center rounded ${
+              className={`flex size-7 justify-center ${
                 item.current ? "bg-li-datum-tint" : ""
               } ${item.child ? "pl-1.5" : ""}`}
             >

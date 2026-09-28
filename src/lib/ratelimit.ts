@@ -23,7 +23,7 @@ const limiters = redis
       map: new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(30, "60 s"),
-        prefix: "gi:map-rl",
+        prefix: `${NAMESPACE}:map`,
       }),
     }
   : null;

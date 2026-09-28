@@ -212,9 +212,13 @@ test("the path focus ring hugs the step it belongs to", async ({ page }) => {
   const step = trail.getByRole("button", { name: /^01 repository/ });
   await step.focus();
   const box = (await step.boundingBox())!;
-  const column = (await step.locator("xpath=ancestor::li").boundingBox())!;
-  expect(box.width).toBeLessThan(column.width * 0.75);
-  expect(box.height).toBeLessThan(48);
+  const content = await step.evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    return range.getBoundingClientRect().width;
+  });
+  expect(box.width).toBeLessThanOrEqual(content + 1);
+  expect(box.height).toBeLessThan(32);
   expect(await step.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe("solid");
   expect(await axeViolations(page)).toEqual([]);
 });

@@ -33,18 +33,14 @@ export function Toolbar({
     <div className="flex flex-wrap items-center gap-2">
       {count > 0 && (
         <>
-          <button
-            type="button"
-            onClick={onOpenList}
-            className={liButton("secondary", "px-2.5 py-1 text-[12.5px]")}
-          >
+          <button type="button" onClick={onOpenList} className={liButton("secondary", "", "sm")}>
             All evidence · {count}
           </button>
           <button
             type="button"
             aria-expanded={keyOpen}
             onClick={onToggleKey}
-            className={liButton("ghost", "text-[12.5px]")}
+            className={liButton("ghost", "", "sm")}
           >
             Key
           </button>
@@ -52,7 +48,7 @@ export function Toolbar({
         </>
       )}
       {answer && (
-        <button type="button" onClick={copy} className={liButton("ghost", "ml-auto text-[12.5px]")}>
+        <button type="button" onClick={copy} className={liButton("ghost", "ml-auto", "sm")}>
           <span aria-live="polite">{copied ? "Copied" : "Copy the why"}</span>
         </button>
       )}

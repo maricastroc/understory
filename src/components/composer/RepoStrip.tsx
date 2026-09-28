@@ -25,18 +25,18 @@ export function RepoStrip({
 
   return (
     <section aria-label="Repository" className="border-y border-li-divider">
-      <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 py-2.5 text-[14px]">
+      <div className="flex min-h-10 min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 py-2 text-[14px]">
         <DomainIcon kind="repository" />
         <span className="font-medium text-li-ink">{name}</span>
         {meta?.branch && (
-          <span className="font-li-mono text-[13px] text-li-neutral-800">/ {meta.branch}</span>
+          <span className="font-li-mono text-[12.5px] text-li-neutral-800">/ {meta.branch}</span>
         )}
         {head && (
           <>
             <span aria-hidden className="text-li-text-muted">
               ·
             </span>
-            <span className="font-li-mono text-[13px] text-li-neutral-800">
+            <span className="font-li-mono text-[12.5px] text-li-neutral-800">
               HEAD {head.sha.slice(0, 7)}
             </span>
           </>
@@ -46,14 +46,16 @@ export function RepoStrip({
           aria-expanded={open}
           aria-controls={detailsId}
           onClick={() => setOpen((v) => !v)}
-          className="ml-auto flex cursor-pointer items-center gap-1 text-[12.5px] text-li-steel-700 underline-offset-2 hover:text-li-steel-900 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+          className="-mr-2 ml-auto flex h-7 cursor-pointer items-center gap-1.5 px-2 text-[12.5px] text-li-neutral-800 transition-colors hover:bg-li-neutral-200 hover:text-li-ink focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus aria-expanded:text-li-ink"
         >
           {open ? "Hide details" : "Details"}
-          <span aria-hidden>{open ? "▴" : "▾"}</span>
+          <span aria-hidden className="text-[10px]">
+            {open ? "▴" : "▾"}
+          </span>
         </button>
       </div>
       <div id={detailsId} hidden={!open}>
-        {open && <RepoDetails repoPath={repoPath} meta={meta} overview={overview} map={map} />}
+        {open && <RepoDetails meta={meta} overview={overview} map={map} />}
       </div>
     </section>
   );

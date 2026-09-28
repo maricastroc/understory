@@ -4,7 +4,7 @@ export function BrandMark() {
   return (
     <Link
       href="/"
-      className="flex shrink-0 items-center gap-2.5 text-li-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+      className="flex shrink-0 items-center gap-2.5 text-li-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
     >
       <span aria-hidden className="relative size-5">
         <span className="absolute inset-x-0 top-1.25 h-0.5 bg-li-datum" />

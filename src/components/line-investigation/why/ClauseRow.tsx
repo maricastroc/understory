@@ -6,7 +6,7 @@ import { ClauseTally } from "./ClauseTally";
 import { ClauseText } from "./ClauseText";
 
 const FOCUS =
-  "cursor-pointer rounded-[3px] text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel motion-reduce:transition-none";
+  "cursor-pointer rounded-[3px] text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none";
 
 export function ClauseRow({
   clause,

@@ -22,7 +22,7 @@ export function MapHeader({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-2 border-t-2 border-li-ink pt-3">
+    <div className="flex flex-col gap-2 border-t border-li-rule pt-3">
       <div className="flex flex-wrap items-baseline gap-x-3.5 gap-y-1 text-[13.5px] text-li-neutral-800">
         <h2 id={titleId} className="text-[15px] font-semibold text-li-ink">
           History of current lines
@@ -34,11 +34,11 @@ export function MapHeader({
           aria-expanded={open}
           aria-controls={aboutId}
           onClick={() => setOpen((v) => !v)}
-          className="group -my-1 grid size-6 cursor-pointer place-items-center self-center focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-li-steel"
+          className="group -my-1 grid size-6 cursor-pointer place-items-center self-center focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-li-focus"
         >
           <span
             aria-hidden
-            className={`grid size-4 place-items-center rounded-full border font-li-mono text-[10px] leading-none font-semibold transition-colors motion-reduce:transition-none ${
+            className={`grid size-4 place-items-center rounded-full border font-li-mono text-[10px] leading-none font-medium transition-colors motion-reduce:transition-none ${
               open
                 ? "border-li-ink bg-li-ink text-li-paper"
                 : "border-li-neutral-500 text-li-neutral-800 group-hover:border-li-ink group-hover:text-li-ink"
@@ -55,7 +55,7 @@ export function MapHeader({
             type="button"
             onClick={onMapMore ?? undefined}
             disabled={!onMapMore}
-            className={liButton("ghost", `px-2 py-0.75 text-[12.5px] ${mapped ? "" : "ml-auto"}`)}
+            className={liButton("ghost", mapped ? "" : "ml-auto", "sm")}
           >
             {moreLabel}
           </button>

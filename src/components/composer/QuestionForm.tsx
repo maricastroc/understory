@@ -3,6 +3,7 @@
 import type { SymbolSpan } from "@git-investigator/core/collect/symbol";
 import { useId } from "react";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
+import { SECTION_RULE } from "./composer-classes";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { liButton } from "../line-investigation/parts/button-class";
 import { symbolNoun } from "./symbol-noun";
@@ -42,7 +43,7 @@ export function QuestionForm({
     >
       <label
         htmlFor={id}
-        className="flex items-center gap-2 border-t-2 border-li-ink pt-3 font-li-mono text-[11px] tracking-[0.08em] text-li-ink uppercase"
+        className={`flex items-center gap-2 li-eyebrow text-li-ink ${SECTION_RULE}`}
       >
         <DomainIcon kind="question" size={14} />
         Your question about this {subject}
@@ -59,22 +60,14 @@ export function QuestionForm({
           }
         }}
         placeholder={`Why is this ${subject} written this way?`}
-        className="resize-none border border-li-ink bg-li-neutral-100 px-3 py-2.5 text-[15px] leading-snug text-li-ink outline-none placeholder:text-li-text-muted focus:border-li-steel focus:shadow-[0_0_0_1px_var(--color-li-steel)]"
+        className="resize-none border border-li-ink bg-li-neutral-100 px-3 py-2.5 text-[15px] leading-snug text-li-ink transition-[border-color,box-shadow] duration-150 outline-none placeholder:text-li-text-muted focus:border-li-ink focus:shadow-[inset_0_0_0_1px_var(--color-li-ink)] motion-reduce:transition-none"
       />
-      <button
-        type="submit"
-        disabled={!ready}
-        className={liButton("primary", "h-11 w-full px-4 text-[15px]")}
-      >
+      <button type="submit" disabled={!ready} className={liButton("primary", "w-full", "lg")}>
         <BlueprintCorners />
         {runLabel} →
       </button>
       {canExpand && enclosing && (
-        <button
-          type="button"
-          onClick={onExpand}
-          className="w-fit cursor-pointer text-left text-[12.5px] text-li-steel-700 underline-offset-2 hover:text-li-steel-900 hover:underline"
-        >
+        <button type="button" onClick={onExpand} className="w-fit li-link text-left text-[12.5px]">
           Widen to the whole {symbolNoun(enclosing.kind)}
           {enclosing.name && (
             <code className="ml-1 font-li-mono font-medium text-li-ink">{enclosing.name}</code>
@@ -90,7 +83,7 @@ export function QuestionForm({
           type="checkbox"
           checked={noCapture}
           onChange={(e) => setNoCapture(e.target.checked)}
-          className="mt-0.5 size-3.5 shrink-0 cursor-pointer accent-li-steel-700"
+          className="mt-0.5 size-3.5 shrink-0 cursor-pointer accent-li-ink"
         />
         <span>
           Don&apos;t log this question

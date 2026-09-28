@@ -40,19 +40,19 @@ export function CaseRail({
   const headingId = useId();
   return (
     <aside aria-labelledby={headingId} className="flex h-full flex-col bg-li-paper font-li-body">
-      <div className="flex items-center gap-2 px-4 pt-4.5 pb-2.5">
-        <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
+      <div className="flex h-12 items-center gap-2 px-4">
+        <h2 id={headingId} className="li-eyebrow text-li-ink">
           Investigations
         </h2>
         {items.length > 0 && (
-          <span className="font-li-mono text-[11px] text-li-text-subtle">{items.length}</span>
+          <span className="font-li-mono text-[11px] text-li-text-subtle tnum">{items.length}</span>
         )}
         {onNew && (
           <button
             type="button"
             onClick={onNew}
             aria-label="New investigation"
-            className="-mr-1 ml-auto grid size-7 cursor-pointer place-items-center text-[17px] leading-none text-li-ink transition-colors hover:text-li-brand focus-visible:outline-2 focus-visible:outline-li-steel motion-reduce:transition-none"
+            className="-mr-1.5 ml-auto grid size-7 cursor-pointer place-items-center text-[18px] leading-none font-light text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus active:bg-li-neutral-300 motion-reduce:transition-none"
           >
             +
           </button>
@@ -62,7 +62,7 @@ export function CaseRail({
             type="button"
             onClick={onClose}
             aria-label="Close investigations"
-            className={`-my-1 -mr-1.5 grid size-7 cursor-pointer place-items-center text-li-ink hover:text-li-text-subtle focus-visible:outline-2 focus-visible:outline-li-steel ${onNew ? "ml-1" : "ml-auto"}`}
+            className={`-mr-1.5 grid size-7 cursor-pointer place-items-center text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus motion-reduce:transition-none ${onNew ? "ml-1" : "ml-auto"}`}
           >
             ✕
           </button>
@@ -117,7 +117,7 @@ export function CaseRail({
             </div>
           </div>
         ) : (
-          <ul className="flex flex-col gap-0.5">
+          <ul className="flex flex-col gap-px">
             {items.map((item) => (
               <CaseRailRow
                 key={`${item.kind}-${item.id}`}

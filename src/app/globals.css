@@ -49,6 +49,8 @@
   --color-li-steel-900: #1d2d3d;
   --color-li-brand: #b45309;
   --color-li-brand-press: #8f4008;
+  --color-li-focus: #b45309;
+  --color-li-rule: #1d1f20;
   --color-li-datum: oklch(0.78 0.13 80);
   --color-li-datum-row: oklch(0.93 0.06 85);
   --color-li-datum-strong: oklch(0.8 0.13 80);
@@ -75,6 +77,27 @@
   --font-li-body: var(--font-barlow), system-ui, sans-serif;
   --font-li-mono: var(--font-plex-mono), ui-monospace, monospace;
   --font-li-display: var(--font-barlow-condensed), var(--font-barlow), system-ui, sans-serif;
+}
+
+@utility li-eyebrow {
+  font-family: var(--font-li-mono);
+  font-size: 11px;
+  line-height: 1.35;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@utility li-link {
+  cursor: pointer;
+  color: var(--color-li-ink);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--color-li-neutral-400);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms;
+  &:hover {
+    text-decoration-color: var(--color-li-ink);
+  }
 }
 
 @utility tnum {
@@ -175,9 +198,8 @@
     height: 100%;
   }
   :focus-visible {
-    outline: 1.5px solid var(--color-li-steel-700);
+    outline: 2px solid var(--color-li-focus);
     outline-offset: 2px;
-    border-radius: 3px;
   }
   ::selection {
     background: var(--color-li-steel-100);

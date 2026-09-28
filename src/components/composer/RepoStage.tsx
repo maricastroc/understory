@@ -4,7 +4,7 @@ import { useId } from "react";
 import { ErrorState } from "../ErrorState";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
 import { liButton } from "../line-investigation/parts/button-class";
-import { SPINNER } from "./composer-classes";
+import { FIELD_FRAME, SPINNER } from "./composer-classes";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { PrEntry } from "./PrEntry";
 import { RepoShortcuts } from "./RepoShortcuts";
@@ -47,7 +47,7 @@ export function RepoStage({
   const needsAccess = !!error && PRIVATE.test(error);
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_300px] gap-x-12 gap-y-10 max-[1100px]:grid-cols-1">
+    <div className="grid grid-cols-[minmax(0,1fr)_280px] gap-x-14 gap-y-10 max-[1100px]:grid-cols-1">
       <section aria-label="Open a repository" className="flex max-w-190 flex-col gap-3">
         <form
           onSubmit={(e) => {
@@ -59,7 +59,7 @@ export function RepoStage({
           <label htmlFor={inputId} className="sr-only">
             Repository
           </label>
-          <div className="flex min-w-0 flex-1 items-center border border-li-ink bg-li-neutral-100 focus-within:border-li-steel focus-within:shadow-[0_0_0_1px_var(--color-li-steel)]">
+          <div className={`flex h-14 min-w-0 flex-1 items-center ${FIELD_FRAME}`}>
             <span aria-hidden className="pl-4">
               <DomainIcon kind="repository" size={18} />
             </span>
@@ -74,7 +74,7 @@ export function RepoStage({
               placeholder="github.com/owner/repo or ./path/to/a/clone"
               spellCheck={false}
               autoComplete="off"
-              className="h-14 min-w-0 flex-1 bg-transparent px-3 font-li-mono text-[16px] text-li-ink outline-none placeholder:text-li-text-muted disabled:text-li-text-subtle"
+              className="h-full min-w-0 flex-1 bg-transparent px-3 font-li-mono text-[16px] text-li-ink outline-none placeholder:text-li-text-muted disabled:text-li-text-subtle"
             />
           </div>
           <button
@@ -83,7 +83,8 @@ export function RepoStage({
             aria-busy={connecting || undefined}
             className={liButton(
               needsAccess ? "secondary" : "primary",
-              `h-14 min-w-28 px-6 text-[15px] ${connecting ? "disabled:cursor-progress disabled:opacity-100" : ""}`,
+              `min-w-28 ${connecting ? "disabled:cursor-progress disabled:opacity-100" : ""}`,
+              "xl",
             )}
           >
             {!needsAccess && <BlueprintCorners />}
@@ -118,7 +119,7 @@ export function RepoStage({
           <ErrorState message={error} onRetry={onOpen} signedIn={signedIn} />
         )}
         {!connecting && !error && (
-          <div className="mt-6">
+          <div className="mt-8">
             <RepoShortcuts
               recent={recent}
               demoRepo={demoRepo}
@@ -131,7 +132,7 @@ export function RepoStage({
 
       <aside
         aria-label="Pull request investigation"
-        className="border-l border-li-divider pl-8 max-[1100px]:border-t max-[1100px]:border-l-0 max-[1100px]:pt-6 max-[1100px]:pl-0"
+        className="pt-1 max-[1100px]:border-t max-[1100px]:border-li-divider max-[1100px]:pt-6"
       >
         <PrEntry />
       </aside>
