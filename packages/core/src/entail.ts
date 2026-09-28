@@ -1,5 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
+import { type Auditor, runAudit } from "./auditor";
+import { canonicalCitations } from "./citation-id";
 import type { Model } from "./llm";
 import { verifyQuote } from "./quote";
 import type {
@@ -16,6 +18,11 @@ const MAX_CHECKS = 6;
 const JUDGE_BODY_CAP = 1_600;
 
 const EMPTY: Entailment = { checked: false, checks: [], supported: 0, misattributed: 0 };
+
+const UNVERIFIED_QUOTE = "the cited quote was not found in the source";
+
+const withUnverifiedNote = (reason: string): string =>
+  reason ? `${reason} (${UNVERIFIED_QUOTE})` : UNVERIFIED_QUOTE;
 
 const claimSchema = z.object({
   status: z
@@ -104,13 +111,7 @@ export function finalizeCheck(
   }
   const verified = verifyQuote(body, raw.quote);
   if (raw.status === "supported" && !verified) {
-    const note = "the cited quote was not found in the source";
-    return {
-      citation,
-      status: "unsupported",
-      quote: null,
-      reason: raw.reason ? `${raw.reason} (${note})` : note,
-    };
+    return { citation, status: "weak", quote: null, reason: withUnverifiedNote(raw.reason) };
   }
   return { citation, status: raw.status, quote: verified, reason: raw.reason };
 }
@@ -145,7 +146,12 @@ export async function judgeCitation(
 export function finalizeClaim(
   sources: Artifact[],
   raw: z.infer<typeof claimSchema>,
-): { status: EntailmentStatus; quote: string | null; quoteSourceId: string | null; reason: string } {
+): {
+  status: EntailmentStatus;
+  quote: string | null;
+  quoteSourceId: string | null;
+  reason: string;
+} {
   if (raw.status === "unsupported") {
     return { status: "unsupported", quote: null, quoteSourceId: null, reason: raw.reason };
   }
@@ -160,12 +166,11 @@ export function finalizeClaim(
     }
   }
   if (raw.status === "supported" && !quote) {
-    const note = "the cited quote was not found in the source";
     return {
-      status: "unsupported",
+      status: "weak",
       quote: null,
       quoteSourceId: null,
-      reason: raw.reason ? `${raw.reason} (${note})` : note,
+      reason: withUnverifiedNote(raw.reason),
     };
   }
   return { status: raw.status, quote, quoteSourceId, reason: raw.reason };
@@ -213,13 +218,14 @@ export async function entailClaims(
   question: string,
   claims: Claim[],
   byId: Map<string, Artifact>,
-  model: Model,
+  auditor: Auditor,
 ): Promise<Entailment> {
+  const known = new Set(byId.keys());
   const tasks: ClaimTask[] = claims
     .map((c, index) => ({
       index,
       text: c.text,
-      sources: Array.from(new Set(c.citations))
+      sources: Array.from(new Set(canonicalCitations(c.citations, known)))
         .map((id) => byId.get(id))
         .filter((a): a is Artifact => Boolean(a)),
     }))
@@ -229,19 +235,24 @@ export async function entailClaims(
 
   const settled = await Promise.allSettled(
     tasks.map((t) =>
-      judgeClaim(question, t.text, t.sources, model).then((raw) => ({
-        t,
-        verdict: finalizeClaim(t.sources, raw),
-      })),
+      runAudit(auditor, (model) => judgeClaim(question, t.text, t.sources, model)).then(
+        ({ value, fellBack }) => ({ t, fellBack, verdict: finalizeClaim(t.sources, value) }),
+      ),
     ),
   );
 
   const checks: CitationCheck[] = [];
   let supported = 0;
   let misattributed = 0;
+  let failed = 0;
+  let fallbacks = 0;
   for (const s of settled) {
-    if (s.status !== "fulfilled") continue;
-    const { t, verdict } = s.value;
+    if (s.status !== "fulfilled") {
+      failed++;
+      continue;
+    }
+    const { t, verdict, fellBack } = s.value;
+    if (fellBack) fallbacks++;
     if (verdict.status === "supported") supported++;
     else if (verdict.status === "unsupported") misattributed++;
     for (const src of t.sources) {
@@ -254,16 +265,16 @@ export async function entailClaims(
       });
     }
   }
-  if (checks.length === 0) return EMPTY;
+  if (checks.length === 0) return { ...EMPTY, failed, fallbacks };
 
-  return { checked: true, checks, supported, misattributed };
+  return { checked: true, checks, supported, misattributed, failed, fallbacks };
 }
 
 export async function checkEntailment(
   ev: Evidence,
   n: Narrative,
-  model: Model,
+  auditor: Auditor,
 ): Promise<Entailment> {
   if (!n.answerable || !n.recorded) return EMPTY;
-  return entailClaims(ev.question, n.claims, new Map(ev.artifacts.map((a) => [a.id, a])), model);
+  return entailClaims(ev.question, n.claims, new Map(ev.artifacts.map((a) => [a.id, a])), auditor);
 }

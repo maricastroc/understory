@@ -13,4 +13,6 @@ export type Entailment = {
   checks: CitationCheck[];
   supported: number;
   misattributed: number;
+  failed?: number;
+  fallbacks?: number;
 };

@@ -1,3 +1,4 @@
+import { canonicalCitations } from "../citation-id";
 import type { Entailment } from "../types";
 import { scoreConfidence } from "../verify";
 import { clusterRef } from "./synthesize";
@@ -47,7 +48,7 @@ function verifyFinding(
   realIds: Set<string>,
   entailment?: Entailment,
 ): VerifiedDiffFinding {
-  const cited = unique(raw.citations);
+  const cited = unique(canonicalCitations(raw.citations, realIds));
   const citations = cited.filter((id) => realIds.has(id));
   const unknownCitations = cited.filter((id) => !realIds.has(id));
   const grounded = unknownCitations.length === 0;
@@ -83,7 +84,7 @@ function verifyFinding(
     }),
     artifacts: cluster.artifacts,
     contradictions: cluster.contradictions,
-    ...(entailment?.checked ? { entailment } : {}),
+    ...(audited || (entailment?.failed ?? 0) > 0 ? { entailment } : {}),
   };
 }
 
@@ -104,10 +105,10 @@ export function verifyDiff(
       : silentFinding(ref, cluster);
   });
 
-  const summaryClaims = narrative.summaryClaims.map((c) => ({
-    ...c,
-    grounded: c.citations.some((id) => realIds.has(id)),
-  }));
+  const summaryClaims = narrative.summaryClaims.map((c) => {
+    const citations = canonicalCitations(c.citations, realIds);
+    return { ...c, citations, grounded: citations.some((id) => realIds.has(id)) };
+  });
   const summary = summaryClaims.map((c) => c.text).join(" ");
 
   return {
@@ -118,7 +119,9 @@ export function verifyDiff(
     summaryClaims,
     findings,
     note: col.note,
-    ...(summaryEntailment?.checked ? { summaryEntailment } : {}),
+    ...(summaryEntailment?.checked || (summaryEntailment?.failed ?? 0) > 0
+      ? { summaryEntailment }
+      : {}),
   };
 }
 

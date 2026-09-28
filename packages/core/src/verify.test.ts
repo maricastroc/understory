@@ -623,3 +623,78 @@ describe("verify — the owning change explains itself (provenance HIGH)", () =>
     expect(v.confidence.level).toBe("low");
   });
 });
+
+describe("verify — bare commit shas from the model", () => {
+  it("grounds a bare sha that names exactly one collected commit and returns it canonical", () => {
+    const v = verify(
+      ev(["commit:c319fe2", "pr:2237"]),
+      narr({
+        claims: [claim("the polyfill shipped in 4.15.4", ["c319fe2"])],
+        citations: ["c319fe2"],
+        recorded: true,
+      }),
+    );
+    expect(v.grounded).toBe(true);
+    expect(v.unknownCitations).toEqual([]);
+    expect(v.citations).toEqual(["commit:c319fe2"]);
+    expect(v.claims[0]).toMatchObject({ citations: ["commit:c319fe2"], grounded: true });
+  });
+
+  it("still treats a bare sha that matches no collected commit as a fabrication", () => {
+    const v = verify(
+      ev(["commit:c319fe2"]),
+      narr({ claims: [claim("invented", ["deadbee"])], citations: ["deadbee"], recorded: true }),
+    );
+    expect(v.grounded).toBe(false);
+    expect(v.unknownCitations).toEqual(["deadbee"]);
+    expect(v.confidence.level).toBe("low");
+    expect(v.confidence.score).toBe(0.2);
+  });
+
+  it("still treats an ambiguous bare sha as a fabrication", () => {
+    const v = verify(
+      ev(["commit:abc1234aa", "commit:abc1234bb"]),
+      narr({ claims: [claim("which one?", ["abc1234"])], citations: ["abc1234"], recorded: true }),
+    );
+    expect(v.grounded).toBe(false);
+    expect(v.unknownCitations).toEqual(["abc1234"]);
+  });
+
+  it("lets a claim that cites the owning commit by bare sha reach the provenance HIGH", () => {
+    const owner: Artifact = { ...art("commit:0a1b2c3"), date: "2024-06-01T00:00:00Z" };
+    const v = verify(
+      { ...ev([]), artifacts: [owner, art("commit:other")] },
+      narr({
+        claims: [claim("the owning commit states the rationale", ["0a1b2c3"])],
+        citations: ["0a1b2c3"],
+        recorded: true,
+      }),
+      {
+        checked: true,
+        supported: 1,
+        misattributed: 0,
+        checks: [
+          { citation: "commit:0a1b2c3", claim: 0, status: "supported", quote: "proof", reason: "" },
+        ],
+      },
+    );
+    expect(v.confidence.level).toBe("high");
+    expect(v.confidence.score).toBe(0.85);
+  });
+});
+
+describe("verify — auditor failures stay visible", () => {
+  it("keeps an entailment whose every check failed, so the failure is not dropped", () => {
+    const v = verify(ev(["c1"]), narr({ citations: ["c1"], recorded: true }), {
+      checked: false,
+      checks: [],
+      supported: 0,
+      misattributed: 0,
+      failed: 1,
+      fallbacks: 0,
+    });
+    expect(v.entailment).toMatchObject({ checked: false, failed: 1 });
+    expect(v.confidence.level).toBe("medium");
+    expect(v.confidence.score).toBe(0.5);
+  });
+});
