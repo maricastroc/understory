@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { Search } from "../icons";
+import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { Highlight } from "./Highlight";
 import { SPINNER } from "./composer-classes";
 
@@ -13,6 +13,7 @@ export function MapSearch({
   note,
   onOpen,
   onSubmit,
+  empty = false,
 }: {
   query: string;
   onQuery: (v: string) => void;
@@ -21,15 +22,16 @@ export function MapSearch({
   note: string;
   onOpen: (path: string) => void;
   onSubmit: () => void;
+  empty?: boolean;
 }) {
   const listId = useId();
   const q = query.trim();
   const open = q.length >= 2 && results.length > 0;
 
   return (
-    <div className="relative w-110 max-w-full shrink-0">
-      <div className="flex h-10.5 items-center gap-2.5 border border-li-neutral-500 bg-li-neutral-100 px-3.5 transition-colors focus-within:border-li-steel motion-reduce:transition-none">
-        <Search className="size-4 shrink-0 text-li-neutral-700" />
+    <div className="relative w-full max-w-160">
+      <div className="flex h-12 items-center gap-3 border border-li-ink bg-li-neutral-100 px-4 transition-colors focus-within:border-li-steel focus-within:shadow-[0_0_0_1px_var(--color-li-steel)] motion-reduce:transition-none">
+        <DomainIcon kind="file" />
         <input
           aria-label="Find a file or symbol"
           aria-controls={open ? listId : undefined}
@@ -43,7 +45,7 @@ export function MapSearch({
             if (e.key === "Escape") onQuery("");
           }}
           placeholder="Find a file or symbol, e.g. chargeCustomer"
-          className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-li-ink outline-none placeholder:text-li-text-muted"
+          className="h-full min-w-0 flex-1 bg-transparent text-[16px] text-li-ink outline-none placeholder:text-li-text-muted"
         />
         {searching ? (
           <span aria-hidden className={`size-3.5 ${SPINNER}`} />
@@ -51,6 +53,15 @@ export function MapSearch({
           <span className="shrink-0 font-li-mono text-[11px] text-li-neutral-700">{note}</span>
         )}
       </div>
+      {empty && !open && (
+        <p
+          role="status"
+          className="absolute inset-x-0 top-full z-20 border border-t-0 border-li-divider bg-li-paper px-3.5 py-2.5 text-[12.5px] text-li-neutral-800 shadow-li-md"
+        >
+          Nothing matches <span className="font-li-mono">&ldquo;{q}&rdquo;</span>. Try part of a
+          file name, or a word from the code.
+        </p>
+      )}
       {open && (
         <ul
           id={listId}

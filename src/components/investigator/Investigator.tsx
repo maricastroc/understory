@@ -15,7 +15,7 @@ import { CaseRail } from "../shell/CaseRail";
 import { CaseStrip } from "../shell/CaseStrip";
 import { railFooterInfo } from "../shell/rail-footer-info";
 import { repoDisplayName } from "../shell/repo-display-name";
-import { filterRail, lineRailItems, prRailItems } from "../shell/rail-items";
+import { filterRail, lineRailItems, prRailItems, railFiltersUseful } from "../shell/rail-items";
 import type { RailFilter, RailItem, RepoSummary } from "../shell/types";
 import { useLanguage } from "../use-language";
 import { CaseFailure } from "./CaseFailure";
@@ -26,6 +26,7 @@ import type { FollowUpParent } from "./follow-up-parent";
 import { LoadingCard } from "./LoadingCard";
 import { useAuth } from "./use-auth";
 import { casePaths } from "./case-paths";
+import { recentRepos } from "./recent-repos";
 import { DEFAULT_REPO, type Entry, useInvestigation } from "./use-investigation";
 
 export function Investigator() {
@@ -125,6 +126,7 @@ export function Investigator() {
   const prItems = useMemo(() => prRailItems(prHistory.entries, null), [prHistory.entries]);
   const railItems = filterRail(lineItems, prItems, filter);
   const cases = useMemo(() => casePaths(history, repoPath), [history, repoPath]);
+  const recent = useMemo(() => recentRepos(history), [history]);
 
   function openRailItem(item: RailItem) {
     setMenuOpen(false);
@@ -227,6 +229,7 @@ export function Investigator() {
           onOpenFile={openFile}
           crossLink="pr"
           onNewInvestigation={handleNewInvestigation}
+          showNew={!browsing}
           user={user}
           onMenuClick={() => setMenuOpen(true)}
         />
@@ -235,6 +238,11 @@ export function Investigator() {
       rail={(onClose) => (
         <CaseRail
           items={railItems}
+          showFilters={railFiltersUseful(lineItems, prItems)}
+          onNew={() => {
+            onClose?.();
+            handleNewInvestigation();
+          }}
           filter={filter}
           onFilter={setFilter}
           onSelect={openRailItem}
@@ -277,6 +285,7 @@ export function Investigator() {
               signedIn={!!user}
               prefill={prefill}
               cases={cases}
+              recent={recent}
               demoRepo={DEFAULT_REPO}
               active={browsing}
               investigating={loading}

@@ -2,7 +2,7 @@ import type { FileHistory } from "@git-investigator/core/types";
 import { describe, expect, it } from "vitest";
 import { coreHistory, depthScale, markTone, markWidth } from "./depth";
 import { MAP } from "./map-geometry";
-import { historyFacts, historyShares, shareLine } from "./share-copy";
+import { historyFacts, historyShares, prAbsence, shareLine } from "./share-copy";
 
 const head = { sha: "h".repeat(40), date: "2026-09-25T00:00:00Z" };
 
@@ -29,20 +29,101 @@ describe("depth", () => {
     const h = history([["2025-09-25T00:00:00Z", 10, "found"]]);
     const scale = depthScale([h], head);
     const view = coreHistory(h, head, scale);
-    expect(Math.round(scale.maxYears * 10) / 10).toBe(1);
-    expect(Math.round(view.bottom)).toBe(Math.round(MAP.datumY + scale.pxPerYear * (365 / 365.25)));
+    expect(view.oldestDays).toBe(365);
+    expect(view.bottom).toBe(MAP.datumY + scale.depth);
+    expect(scale.ticks.map((t) => t.label)).toEqual(["−3m", "−6m", "−9m", "−12m"]);
   });
 
-  it("keeps 78 px per year for young repos and compresses deep ones", () => {
-    expect(depthScale([history([["2024-09-25T00:00:00Z", 1, "found"]])], head).pxPerYear).toBe(78);
+  it("stays linear: equal time spans get equal depth, labelled in the unit the history needs", () => {
+    const young = depthScale([history([["2026-06-25T00:00:00Z", 1, "found"]])], head);
+    expect(young.ticks.map((t) => t.label)).toEqual(["−1m", "−2m", "−3m"]);
+    expect(young.ticks[1].offset - young.ticks[0].offset).toBeCloseTo(young.ticks[0].offset, 6);
+    const mid = depthScale([history([["2023-09-25T00:00:00Z", 1, "found"]])], head);
+    expect(mid.ticks.map((t) => t.label)).toEqual(["−1y", "−2y", "−3y"]);
     const deep = depthScale([history([["2006-09-25T00:00:00Z", 1, "found"]])], head);
-    expect(deep.pxPerYear).toBe(24);
-    expect(deep.ticks.slice(0, 3)).toEqual([2, 4, 6]);
+    expect(deep.ticks.map((t) => t.label)).toEqual(["−5y", "−10y", "−15y", "−20y"]);
+    const days = depthScale([history([["2026-09-21T00:00:00Z", 1, "found"]])], head);
+    expect(days.ticks.map((t) => t.label)).toEqual(["−1d", "−2d", "−3d", "−4d"]);
+    const weeks = depthScale([history([["2026-08-20T00:00:00Z", 1, "found"]])], head);
+    expect(weeks.ticks.map((t) => t.label)).toEqual(["−2w", "−4w"]);
+  });
+
+  it("sizes the depth by the commits there are to draw, not by how old they are", () => {
+    const sparse = [
+      history([
+        ["2026-06-25T00:00:00Z", 1, "found"],
+        ["2026-09-01T00:00:00Z", 1, "found"],
+        ["2026-09-20T00:00:00Z", 1, "found"],
+      ]),
+      history([["2026-08-25T00:00:00Z", 1, "found"]]),
+    ];
+    expect(depthScale(sparse, head).depth).toBe(120);
+    const busy = history(
+      Array.from({ length: 30 }, (_, i) => [`20${10 + (i % 16)}-03-01T00:00:00Z`, 1, "found"]),
+    );
+    expect(depthScale([busy], head).depth).toBe(360);
+    const ten = Array.from({ length: 10 }, (_, i) =>
+      history(
+        Array.from({ length: 8 }, (_, j) => [
+          `20${16 + ((i + j) % 10)}-05-01T00:00:00Z`,
+          1,
+          "found",
+        ]),
+      ),
+    );
+    const tenScale = depthScale(ten, head);
+    expect(tenScale.depth).toBe(192);
+    expect(tenScale.breakAt).toBeNull();
+  });
+
+  it("keeps close ages apart without inventing a break", () => {
+    const close = [
+      history([["2026-09-22T00:00:00Z", 1, "found"]]),
+      history([["2026-09-23T00:00:00Z", 1, "found"]]),
+    ];
+    const scale = depthScale(close, head);
+    expect(scale.breakAt).toBeNull();
+    const [a, b] = close.map((h) => coreHistory(h, head, scale).bottom - MAP.datumY);
+    expect(a).toBe(120);
+    expect(b).toBe(80);
+  });
+
+  it("breaks the axis explicitly for one much older file, and only that core crosses the break", () => {
+    const outlier = history([
+      ["2014-01-01T00:00:00Z", 1, "found"],
+      ["2026-09-01T00:00:00Z", 1, "found"],
+    ]);
+    const others = [
+      history([["2026-07-01T00:00:00Z", 1, "found"]]),
+      history([["2026-09-22T00:00:00Z", 1, "found"]]),
+    ];
+    const scale = depthScale([outlier, ...others], head);
+    expect(scale.breakAt).not.toBeNull();
+    expect(scale.depth).toBe(168);
+    const views = [outlier, ...others].map((h) => coreHistory(h, head, scale));
+    expect(views[0].breakY).toBe(MAP.datumY + scale.breakAt!);
+    expect(views[0].bottom).toBe(MAP.datumY + scale.depth);
+    expect(views[1].breakY).toBeNull();
+    expect(views[2].breakY).toBeNull();
+    expect(views[1].bottom - MAP.datumY).toBeCloseTo(100, 0);
+    const labels = scale.ticks.map((t) => t.label);
+    expect(labels[labels.length - 1]).toBe("−12y");
+    expect(labels.slice(0, -1).every((l) => l.endsWith("m") || l.endsWith("w"))).toBe(true);
+    const mixed = depthScale(
+      [
+        history([["2022-09-25T00:00:00Z", 1, "found"]]),
+        history([["2026-07-25T00:00:00Z", 1, "found"]]),
+        history([["2026-09-22T00:00:00Z", 1, "found"]]),
+      ],
+      head,
+    );
+    expect(mixed.breakAt).not.toBeNull();
+    expect(mixed.ticks[mixed.ticks.length - 1].label).toBe("−4y");
   });
 
   it("sizes marks by the share of current lines and never turns unknown into none", () => {
-    expect(markWidth(1, 100)).toBe(6);
-    expect(markWidth(100, 100)).toBe(36);
+    expect(markWidth(1, 100)).toBe(8);
+    expect(markWidth(100, 100)).toBe(40);
     expect(markTone("found")).toBe("found");
     expect(markTone("none")).toBe("none");
     expect(markTone("skipped")).toBe("unknown");
@@ -63,10 +144,18 @@ describe("share copy", () => {
     );
     expect(shareLine([a, { ...a, path: "b.ts" }], "github")).toMatch(/in 2 mapped files/);
     expect(shareLine([], "github")).toBeNull();
-    expect(shareLine([a], "none")).toBe("PR data unavailable for this repo");
-    expect(shareLine([history([["2020-01-01T00:00:00Z", 3, "skipped"]])], "github")).toBe(
-      "PR lookups unavailable for the 1 mapped file",
+    expect(shareLine([a], "none")).toBeNull();
+    const skipped = history([["2020-01-01T00:00:00Z", 3, "skipped"]]);
+    expect(shareLine([skipped], "github")).toBeNull();
+  });
+
+  it("keeps the absence of PR data out of the legend and says it where it is asked for", () => {
+    expect(prAbsence([a], "none")).toMatch(/^PR data is unavailable for this repo/);
+    expect(prAbsence([history([["2020-01-01T00:00:00Z", 3, "skipped"]])], "github")).toBe(
+      "PR lookups were unavailable for the 1 mapped file.",
     );
+    expect(prAbsence([a], "github")).toBeNull();
+    expect(prAbsence([], "github")).toBeNull();
   });
 
   it("states depth as the oldest surviving line and qualifies a cut history as a lower bound", () => {

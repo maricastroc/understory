@@ -14,7 +14,12 @@ import { AppShell } from "@/components/shell/AppShell";
 import { CaseRail } from "@/components/shell/CaseRail";
 import { CaseStrip } from "@/components/shell/CaseStrip";
 import { railFooterInfo } from "@/components/shell/rail-footer-info";
-import { filterRail, lineRailItems, prRailItems } from "@/components/shell/rail-items";
+import {
+  filterRail,
+  lineRailItems,
+  prRailItems,
+  railFiltersUseful,
+} from "@/components/shell/rail-items";
 import type { RailFilter, RailItem, RepoSummary } from "@/components/shell/types";
 import { useLanguage } from "@/components/use-language";
 import { toArtifactRef } from "@/components/format";
@@ -185,6 +190,8 @@ export default function PrPage() {
       rail={(onClose) => (
         <CaseRail
           items={filterRail(lineItems, prItems, filter)}
+          showFilters={railFiltersUseful(lineItems, prItems)}
+          onNew={() => router.push("/app")}
           filter={filter}
           onFilter={setFilter}
           onSelect={openRailItem}

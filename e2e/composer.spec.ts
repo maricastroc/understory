@@ -4,6 +4,7 @@ import { expect, type Page, test } from "@playwright/test";
 const AXE = path.join(process.cwd(), "node_modules/axe-core/axe.min.js");
 
 async function axeViolations(page: Page) {
+  await page.waitForTimeout(400);
   await page.addScriptTag({ path: AXE });
   return page.evaluate(async () => {
     const axe = (
@@ -22,7 +23,7 @@ function watchRequests(page: Page) {
   const map: Array<{ mode: string; files: number }> = [];
   page.on("request", (r) => {
     const p = new URL(r.url()).pathname;
-    if (/^\/api\/(blame|dig)/.test(p)) blame.push(p);
+    if (/^\/api\/dig/.test(p)) blame.push(p);
     if (p === "/api/history-map") {
       const body = JSON.parse(r.postData() ?? "{}");
       map.push({ mode: body.mode, files: body.files?.length ?? 0 });
@@ -41,14 +42,17 @@ test("the demo opens on the file stage: map of current lines, then a file, a lin
   await expect(page.getByRole("heading", { name: "History of current lines" })).toBeVisible({
     timeout: 60_000,
   });
-  const trail = page.getByRole("navigation", { name: "Investigation setup" });
-  await expect(trail.getByRole("button", { name: "file" })).toHaveAttribute("aria-current", "step");
-  await expect(page.getByText(/^2 of 2 files: /)).toBeVisible();
-  await expect(page.getByText("PR data unavailable for this repo")).toBeVisible();
+  const trail = page.getByRole("navigation", { name: "Investigation path" });
+  await expect(trail.locator('[aria-current="step"]')).toContainText("02 file, current step");
+  await expect(trail.getByRole("button")).toHaveCount(1);
+  await expect(page.getByText("Changed in the last 12 commits")).toBeVisible();
+  await expect(page.getByText(/PR data (is )?unavailable/)).toBeHidden();
   expect(await axeViolations(page)).toEqual([]);
 
   await page.getByRole("button", { name: /^src\/billing\/charge\.ts, / }).click();
-  await expect(trail.getByRole("button", { name: "src/billing/charge.ts" })).toBeVisible();
+  await expect(
+    trail.getByRole("button", { name: /^02 file: src\/billing\/charge\.ts/ }),
+  ).toBeVisible();
   const go = page.getByLabel(/^Go to line/);
   await go.fill("8");
   await go.press("Enter");
@@ -56,7 +60,11 @@ test("the demo opens on the file stage: map of current lines, then a file, a lin
     "aria-pressed",
     "true",
   );
-  await expect(trail.getByRole("button", { name: "line 8" })).toBeVisible();
+  await expect(trail.getByRole("button", { name: /^03 line: line 8/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Ask about line 8" })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Context" })).toContainText(
+    "Last changed by",
+  );
   await expect(page.getByRole("button", { name: /Investigate this line/ })).toBeVisible();
   expect(await axeViolations(page)).toEqual([]);
   expect(calls.blame).toEqual([]);
@@ -68,42 +76,59 @@ test("the demo maps its files by itself after a second of idle; no remote means 
   const calls = watchRequests(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/app");
-  await expect(page.getByText("2 of 2 mapped")).toBeVisible({ timeout: 60_000 });
+  const files = page.getByRole("list", { name: "Files shown" });
+  await expect(
+    files.getByRole("button", { name: /^src\/billing\/refund\.ts, oldest surviving line/ }),
+  ).toBeVisible({ timeout: 60_000 });
   expect(calls.map[0]).toEqual({ mode: "cached", files: 2 });
   expect(calls.map.filter((c) => c.mode === "map").every((c) => c.files <= 3)).toBe(true);
-  const files = page.getByRole("list", { name: "Files shown" });
   await expect(
     files.getByRole("button", { name: /^src\/billing\/charge\.ts, oldest surviving line/ }),
   ).toBeVisible();
-  const marks = await page.evaluate(() => ({
-    neutral: document.querySelectorAll("svg rect.fill-li-paper.stroke-li-neutral-500").length,
-    hatch: document.querySelectorAll("svg rect.stroke-li-gap").length,
-    found: document.querySelectorAll("svg rect.fill-li-evidence-tint").length,
-  }));
+  const marks = await page.evaluate(() => {
+    const canvas = document.querySelector('ul[aria-label="Files shown"]')!.parentElement!;
+    return {
+      neutral: canvas.querySelectorAll("svg rect.fill-li-paper.stroke-li-neutral-500").length,
+      hatch: canvas.querySelectorAll("svg rect.stroke-li-gap").length,
+      found: canvas.querySelectorAll("svg rect.fill-li-evidence-tint").length,
+    };
+  });
   expect(marks.neutral).toBeGreaterThan(0);
   expect(marks.hatch).toBe(0);
   expect(marks.found).toBe(0);
-  await expect(page.getByText("PR data unavailable for this repo")).toBeVisible();
+  await expect(page.getByText(/PR data (is )?unavailable/)).toBeHidden();
+  await page.getByRole("button", { name: "About this map" }).click();
+  await expect(page.getByText(/^PR data is unavailable for this repo/)).toBeVisible();
+  await expect(page.getByText(/Not a sample of the whole repository\.$/)).toBeVisible();
+  const inspector = page.getByRole("complementary", { name: "File inspector" });
+  await expect(inspector).toContainText("Hover or focus a file to inspect its history.");
+  await expect(inspector.getByRole("button")).toHaveCount(0);
+  await files.getByRole("button", { name: /^src\/billing\/charge\.ts/ }).focus();
+  await expect(inspector.getByRole("button", { name: "Open charge.ts →" })).toBeVisible();
+  await expect(inspector).toContainText("Oldest line");
+  expect(await axeViolations(page)).toEqual([]);
+  await page.keyboard.press("Escape");
+  await expect(inspector).toContainText("Hover or focus a file to inspect its history.");
   expect(calls.blame).toEqual([]);
   expect(await axeViolations(page)).toEqual([]);
 });
 
-test("the repository slot leads back to the repository stage", async ({ page }) => {
+test("the first node of the path leads back to the repository stage", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/app");
   await expect(page.getByRole("heading", { name: "History of current lines" })).toBeVisible({
     timeout: 60_000,
   });
   await page
-    .getByRole("navigation", { name: "Investigation setup" })
-    .getByRole("button")
-    .first()
+    .getByRole("navigation", { name: "Investigation path" })
+    .getByRole("button", { name: /^01 repository/ })
     .click();
-  await expect(page.getByRole("textbox", { name: "Repository" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Explain a pull request instead/ })).toHaveAttribute(
-    "href",
-    "/pr",
-  );
+  await expect(page.getByRole("heading", { level: 2, name: "Open a repository" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Repository" })).toBeFocused();
+  await expect(page.getByRole("button", { name: /Open the demo/ })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: /Pull request URL/ })).toBeVisible();
+  await expect(page.getByText(/Sign in with GitHub/)).toHaveCount(0);
+  await page.waitForTimeout(400);
   expect(await axeViolations(page)).toEqual([]);
 });
 
@@ -160,3 +185,36 @@ for (const width of [1440, 1024, 390]) {
     expect(await axeViolations(page)).toEqual([]);
   });
 }
+
+test("one much older file breaks the depth axis explicitly and the legend says so", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/dev/composer?state=outlier");
+  await expect(page.getByRole("list", { name: "Legend" })).toContainText(
+    "depth compressed past the break",
+  );
+  await expect(
+    page.getByRole("button", {
+      name: /^src\/webhooks\/legacy\.ts, oldest surviving line 14 years/,
+    }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "About this map" }).click();
+  await expect(page.getByText(/below the zigzag break it is compressed/)).toBeVisible();
+  expect(await axeViolations(page)).toEqual([]);
+});
+
+test("the path focus ring hugs the step it belongs to", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/dev/composer?state=cold");
+  const trail = page.getByRole("navigation", { name: "Investigation path" });
+  await expect(trail.getByRole("button")).toHaveCount(1);
+  const step = trail.getByRole("button", { name: /^01 repository/ });
+  await step.focus();
+  const box = (await step.boundingBox())!;
+  const column = (await step.locator("xpath=ancestor::li").boundingBox())!;
+  expect(box.width).toBeLessThan(column.width * 0.75);
+  expect(box.height).toBeLessThan(48);
+  expect(await step.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe("solid");
+  expect(await axeViolations(page)).toEqual([]);
+});

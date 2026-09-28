@@ -119,6 +119,19 @@ function control(
 }
 
 const ALL = syntheticOverview.files.map((f) => f.path);
+const LEGACY = "src/webhooks/legacy.ts";
+
+function scaled(path: string, factor: number, oldest: number | null = null): CoreState {
+  const h = syntheticHistory(path);
+  const marks = h.marks.map((m, i) => ({
+    ...m,
+    at:
+      oldest !== null && i === h.marks.length - 1
+        ? at(oldest)
+        : new Date(HEAD - (HEAD - Date.parse(m.at)) * factor).toISOString(),
+  }));
+  return { status: "mapped", history: { ...h, marks } };
+}
 
 export const SYNTHETIC_MAP_STATES: Record<string, () => HistoryMapControl> = {
   cold: () => control([], []),
@@ -130,6 +143,12 @@ export const SYNTHETIC_MAP_STATES: Record<string, () => HistoryMapControl> = {
       ALL.filter((p) => ![...CACHED, ...AUTO, "src/billing/ledger.ts"].includes(p)),
     ),
   warm: () => control(ALL, []),
+  outlier: () =>
+    control(
+      [],
+      [],
+      ALL.map((p) => [p, p === LEGACY ? scaled(p, 0.1, 14) : scaled(p, 0.1)]),
+    ),
   unknown: () =>
     control(
       CACHED,

@@ -22,6 +22,7 @@ export function AppHeader({
   onOpenFile,
   crossLink,
   onNewInvestigation,
+  showNew = true,
   user,
   onMenuClick,
 }: {
@@ -33,6 +34,7 @@ export function AppHeader({
   onOpenFile?: (path: string) => void;
   crossLink: "pr" | "line";
   onNewInvestigation?: () => void;
+  showNew?: boolean;
   user: AuthUser | null;
   onMenuClick: () => void;
 }) {
@@ -51,7 +53,7 @@ export function AppHeader({
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4.5 border-b border-li-divider bg-li-paper px-5 font-li-body text-li-ink max-[820px]:gap-3 max-[820px]:px-4">
       <button
         type="button"
-        aria-label="Open cases"
+        aria-label="Open investigations"
         onClick={onMenuClick}
         className="-ml-1 grid size-8 shrink-0 cursor-pointer place-items-center rounded text-li-ink hover:bg-li-neutral-200 min-[820px]:hidden"
       >
@@ -81,16 +83,17 @@ export function AppHeader({
             Explain a line
           </Link>
         )}
-        {onNewInvestigation ? (
-          <button type="button" onClick={onNewInvestigation} className={liButton("primary")}>
-            {newLabel}
-          </button>
-        ) : (
-          <Link href="/app" className={liButton("primary")}>
-            {newLabel}
-          </Link>
-        )}
-        <AccountButton user={user} />
+        {showNew &&
+          (onNewInvestigation ? (
+            <button type="button" onClick={onNewInvestigation} className={liButton("primary")}>
+              {newLabel}
+            </button>
+          ) : (
+            <Link href="/app" className={liButton("primary")}>
+              {newLabel}
+            </Link>
+          ))}
+        <AccountButton user={user} signIn="ghost" />
       </div>
     </header>
   );

@@ -1,21 +1,33 @@
 import { describe, expect, it } from "vitest";
 import { syntheticOverview } from "../fixtures/synthetic-overview";
 import { headLabel } from "./head-label";
-import { mappedLine, scopeLine, whyShown } from "./scope-copy";
+import { mappedLine, scopeAbout, scopeWhy, whyShown } from "./scope-copy";
 
 describe("scope copy", () => {
-  it("says which files are shown, why, and that they are not a sample", () => {
-    expect(scopeLine(syntheticOverview)).toBe(
-      "14 of 1,284 files: 12 changed in the last 12 commits, 2 with your cases. Not a sample of the whole repository.",
+  it("says why the files are shown, with counts only where they add information", () => {
+    expect(scopeWhy(syntheticOverview, false)).toBe(
+      "12 changed in the last 12 commits · 2 with your cases",
+    );
+    const recent = syntheticOverview.files.slice(2, 4);
+    expect(scopeWhy({ ...syntheticOverview, files: recent }, false)).toBe(
+      "Changed in the last 12 commits",
+    );
+    expect(scopeWhy({ ...syntheticOverview, files: recent }, true)).toBe(
+      "2 changed in the last 12 commits",
     );
   });
 
-  it("marks a truncated tree total as a lower bound and counts path picks", () => {
+  it("keeps the tree total and the not-a-sample caveat for the about note", () => {
+    expect(scopeAbout(syntheticOverview)).toBe(
+      "14 of 1,284 files at HEAD, chosen for the reasons above. Not a sample of the whole repository.",
+    );
     const files = syntheticOverview.files.map((f, i) =>
       i === 3 ? { ...f, reason: "path" as const } : f,
     );
-    expect(scopeLine({ ...syntheticOverview, files, truncated: true })).toBe(
-      "14 of ≥1,284 files: 11 changed in the last 12 commits, 2 with your cases, 1 picked by path. Not a sample of the whole repository.",
+    const truncated = { ...syntheticOverview, files, truncated: true };
+    expect(scopeAbout(truncated)).toMatch(/^14 of ≥1,284 files at HEAD/);
+    expect(scopeWhy(truncated, true)).toBe(
+      "11 changed in the last 12 commits · 2 with your cases · 1 picked by path",
     );
   });
 

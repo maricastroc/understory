@@ -6,18 +6,28 @@ function tally(files: TreeOverview["files"], reason: ShownReason): number {
   return files.filter((f) => f.reason === reason).length;
 }
 
-export function scopeLine(overview: TreeOverview): string {
+export function scopeWhy(overview: TreeOverview, counted: boolean): string {
   const files = overview.files;
-  const total = `${overview.truncated ? "≥" : ""}${count(overview.total)}`;
-  const parts: string[] = [];
   const recent = tally(files, "recent");
   const cases = tally(files, "case");
   const path = tally(files, "path");
-  if (recent) parts.push(`${recent} changed in the last ${overview.recentCommits} commits`);
+  const commits = `the last ${overview.recentCommits} commits`;
+  const reasons = [recent, cases, path].filter(Boolean).length;
+  if (!counted && reasons === 1) {
+    if (recent) return `Changed in ${commits}`;
+    if (cases) return "Where you have cases";
+    return "Picked by path";
+  }
+  const parts: string[] = [];
+  if (recent) parts.push(`${recent} changed in ${commits}`);
   if (cases) parts.push(`${cases} with your cases`);
   if (path) parts.push(`${path} picked by path`);
-  const why = parts.length ? `: ${parts.join(", ")}` : "";
-  return `${files.length} of ${total} files${why}. Not a sample of the whole repository.`;
+  return parts.join(" · ");
+}
+
+export function scopeAbout(overview: TreeOverview): string {
+  const total = `${overview.truncated ? "≥" : ""}${count(overview.total)}`;
+  return `${overview.files.length} of ${total} files at HEAD, chosen for the reasons above. Not a sample of the whole repository.`;
 }
 
 export function whyShown(reason: ShownReason, recentCommits: number): string {

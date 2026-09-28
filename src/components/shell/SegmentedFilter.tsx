@@ -26,7 +26,7 @@ export function SegmentedFilter<T extends string>({
             aria-checked={checked}
             onClick={() => onChange(o.value)}
             className={`cursor-pointer py-1 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel ${
-              checked ? "bg-li-ink text-li-paper" : "text-li-ink hover:bg-li-neutral-200"
+              checked ? "bg-li-ink text-li-paper" : "text-li-ink underline-offset-2 hover:underline"
             }`}
           >
             {o.label}

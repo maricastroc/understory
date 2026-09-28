@@ -11,7 +11,7 @@ export function CaseStrip({
   onOpen: () => void;
 }) {
   const current = items.find((item) => item.current);
-  const label = `Show cases, ${items.length}${current ? `. Open case: ${current.title}` : ""}`;
+  const label = `Show investigations, ${items.length}${current ? `. Open: ${current.title}` : ""}`;
   return (
     <div className="flex h-full justify-center bg-li-paper py-3 font-li-body">
       <button
@@ -20,7 +20,7 @@ export function CaseStrip({
         aria-expanded={expanded}
         aria-haspopup="dialog"
         onClick={onOpen}
-        className="flex w-11 cursor-pointer flex-col items-center gap-2.5 overflow-hidden rounded py-2 hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel"
+        className="flex w-11 cursor-pointer flex-col items-center gap-2.5 overflow-hidden rounded py-2 transition-colors hover:bg-li-neutral-200/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel motion-reduce:transition-none"
       >
         <span aria-hidden className="flex flex-col items-center gap-0.5">
           <span className="flex flex-col gap-0.75">

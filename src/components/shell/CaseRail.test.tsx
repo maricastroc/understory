@@ -76,9 +76,19 @@ describe("CaseRail", () => {
     const { container, rerender } = render(<Harness />);
     expect((await axe(container)).violations).toEqual([]);
     rerender(
-      <CaseRail items={[]} filter="all" onFilter={() => {}} onSelect={() => {}} footer={footer} />,
+      <CaseRail
+        items={[]}
+        filter="all"
+        onFilter={() => {}}
+        onSelect={() => {}}
+        footer={footer}
+        showFilters={false}
+        onNew={() => {}}
+      />,
     );
-    expect(screen.getByText(/No cases yet/)).toBeTruthy();
+    expect(screen.getByText("No investigations yet.")).toBeTruthy();
+    expect(screen.queryByRole("radiogroup")).toBeNull();
+    expect(screen.getByRole("button", { name: "New investigation" })).toBeTruthy();
     expect(screen.getByText("Sign in to save line cases")).toBeTruthy();
   });
 });

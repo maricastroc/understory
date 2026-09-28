@@ -1,1 +1,6 @@
-export type DepthScale = { pxPerYear: number; maxYears: number; ticks: number[] };
+export type DepthScale = {
+  depth: number;
+  offset: (days: number) => number;
+  ticks: Array<{ offset: number; label: string }>;
+  breakAt: number | null;
+};
