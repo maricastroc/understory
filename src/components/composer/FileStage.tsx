@@ -4,6 +4,7 @@ import type { TreeOverview } from "@git-investigator/core/types";
 import { useMemo } from "react";
 import { HistoryMap } from "./history/HistoryMap";
 import type { HistoryMapControl } from "./history/use-history-map";
+import { SECTION_RULE } from "./composer-classes";
 import { MapSearch } from "./MapSearch";
 
 export function FileStage({
@@ -44,7 +45,7 @@ export function FileStage({
   };
 
   return (
-    <section aria-label="Choose a file" className="flex flex-col gap-3.5">
+    <section aria-label="Choose a file" className="flex flex-col gap-10">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
         <MapSearch
           query={query}
@@ -68,11 +69,11 @@ export function FileStage({
           onOpen={onOpen}
         />
       ) : overviewError ? (
-        <p role="alert" className="border-t border-li-ink pt-3 text-[12.5px] text-li-neutral-800">
+        <p role="alert" className={`text-[13px] text-li-neutral-800 ${SECTION_RULE}`}>
           The file list could not be read: {overviewError}. Search still works.
         </p>
       ) : (
-        <p role="status" className="border-t border-li-ink pt-3 text-[12.5px] text-li-neutral-700">
+        <p role="status" className={`text-[13px] text-li-text-subtle ${SECTION_RULE}`}>
           Reading the file tree…
         </p>
       )}

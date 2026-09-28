@@ -97,7 +97,7 @@ export function SectionOverlay({
               onMouseLeave={() => onHoverRegion(null)}
               onFocus={() => onHoverRegion(primaryRegion(c))}
               onBlur={() => onHoverRegion(null)}
-              className={`absolute cursor-pointer border p-0 font-li-mono text-[10.5px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel ${FADE} ${
+              className={`absolute cursor-pointer border p-0 font-li-mono text-[10.5px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus ${FADE} ${
                 isSelected
                   ? "border-li-ink bg-li-ink text-li-paper"
                   : `${silent ? "border-dashed border-li-gap text-li-gap-ink" : "border-li-ink text-li-ink"} ${
@@ -165,7 +165,7 @@ export function SectionOverlay({
                     onFocus={() => onHoverArtifact(t.id)}
                     onBlur={() => onHoverArtifact(null)}
                     onClick={() => onInspect(t.id)}
-                    className="absolute cursor-pointer rounded-xs border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-li-steel"
+                    className="absolute cursor-pointer rounded-xs border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-li-focus"
                     style={{ left: t.left, top: t.top, width: t.width, height: t.height }}
                   />
                 </li>

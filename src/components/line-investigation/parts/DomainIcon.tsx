@@ -2,12 +2,19 @@ import type { DomainKind } from "./domain-kind";
 
 const INK = "stroke-current";
 
-function Shape({ kind }: { kind: DomainKind }) {
+function Shape({ kind, muted }: { kind: DomainKind; muted: boolean }) {
   switch (kind) {
     case "repository":
       return (
         <>
-          <line x1="2.5" x2="13.5" y1="4" y2="4" strokeWidth="1.5" className="stroke-li-datum" />
+          <line
+            x1="2.5"
+            x2="13.5"
+            y1="4"
+            y2="4"
+            strokeWidth="1.5"
+            className={muted ? INK : "stroke-li-datum"}
+          />
           <line x1="3.5" x2="12.5" y1="7.5" y2="7.5" strokeWidth="1.5" className={INK} />
           <line x1="2.5" x2="10.5" y1="11" y2="11" strokeWidth="1.5" className={INK} />
           <line x1="4.5" x2="13.5" y1="14" y2="14" strokeWidth="1.5" className={INK} />
@@ -59,7 +66,9 @@ function Shape({ kind }: { kind: DomainKind }) {
             width="6"
             height="8"
             strokeWidth="1"
-            className="fill-li-evidence-tint stroke-li-evidence-edge"
+            className={
+              muted ? `fill-li-paper ${INK}` : "fill-li-evidence-tint stroke-li-evidence-edge"
+            }
           />
         </>
       );
@@ -93,10 +102,12 @@ function Shape({ kind }: { kind: DomainKind }) {
 export function DomainIcon({
   kind,
   size = 16,
+  muted = false,
   className = "",
 }: {
   kind: DomainKind;
   size?: number;
+  muted?: boolean;
   className?: string;
 }) {
   return (
@@ -105,9 +116,9 @@ export function DomainIcon({
       width={size}
       height={size}
       viewBox="0 0 16 16"
-      className={`shrink-0 overflow-visible text-li-ink ${className}`}
+      className={`shrink-0 overflow-visible ${muted ? "text-li-neutral-600" : "text-li-ink"} ${className}`}
     >
-      <Shape kind={kind} />
+      <Shape kind={kind} muted={muted} />
     </svg>
   );
 }

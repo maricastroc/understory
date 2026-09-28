@@ -55,7 +55,7 @@ export function AppHeader({
         type="button"
         aria-label="Open investigations"
         onClick={onMenuClick}
-        className="-ml-1 grid size-8 shrink-0 cursor-pointer place-items-center rounded text-li-ink hover:bg-li-neutral-200 min-[820px]:hidden"
+        className="-ml-1 grid size-8 shrink-0 cursor-pointer place-items-center text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus min-[820px]:hidden"
       >
         <Menu className="size-5" />
       </button>

@@ -136,7 +136,7 @@ export function HeaderSearch({
 
   return (
     <div ref={box} className="relative ml-3 max-w-115 min-w-0 flex-1 max-[1280px]:hidden">
-      <label className="flex items-center gap-2 rounded border border-li-divider px-2.5 py-1.5 text-[13px] text-li-text-subtle focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-li-steel">
+      <label className="flex h-8 items-center gap-2 border border-li-divider px-2.5 text-[13px] text-li-text-subtle transition-[border-color,box-shadow] duration-150 focus-within:border-li-ink focus-within:shadow-[inset_0_0_0_1px_var(--color-li-ink)] motion-reduce:transition-none">
         <Search className="size-3.5 shrink-0" />
         <span className="sr-only">{placeholder}</span>
         <input
@@ -157,7 +157,7 @@ export function HeaderSearch({
           onKeyDown={onKeyDown}
           className="min-w-0 flex-1 bg-transparent text-li-ink outline-none placeholder:text-li-text-subtle"
         />
-        <kbd className="shrink-0 rounded-[3px] border border-li-divider px-1.25 font-li-mono text-[11px] text-li-text-subtle">
+        <kbd className="shrink-0 border border-li-divider px-1.25 font-li-mono text-[10.5px] leading-4 text-li-text-subtle">
           ⌘K
         </kbd>
       </label>

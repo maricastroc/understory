@@ -215,11 +215,9 @@ export function Composer({
   });
 
   return (
-    <div className="flex flex-col gap-7 font-li-body text-li-ink">
-      <div className="flex flex-col gap-4">
-        <h1 className="font-li-mono text-[11px] tracking-[0.08em] text-li-text-subtle uppercase">
-          New investigation
-        </h1>
+    <div className="mx-auto flex w-full max-w-280 flex-col gap-8 font-li-body text-li-ink">
+      <div className="flex flex-col gap-3.5">
+        <h1 className="li-eyebrow text-li-text-subtle">New investigation</h1>
         <InvestigationPath steps={steps} />
       </div>
 
@@ -280,10 +278,7 @@ export function Composer({
       )}
 
       {stage === "code" && viewer.loading && (
-        <p
-          role="status"
-          className="border-t border-li-divider pt-3 text-[13px] text-li-text-subtle"
-        >
+        <p role="status" className="text-[13px] text-li-text-subtle">
           Opening the file…
         </p>
       )}

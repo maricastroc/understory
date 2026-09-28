@@ -29,7 +29,7 @@ export function RepoSelector({
         aria-controls={popId}
         aria-haspopup="dialog"
         onClick={() => setOpen((v) => !v)}
-        className="flex max-w-full min-w-0 cursor-pointer items-center gap-2 rounded border border-li-divider px-2.5 py-1.25 font-li-mono text-xs text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+        className="flex h-8 max-w-full min-w-0 cursor-pointer items-center gap-2 border border-li-divider px-2.5 font-li-mono text-xs text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus aria-expanded:bg-li-neutral-200 motion-reduce:transition-none"
       >
         <span
           aria-hidden
@@ -51,7 +51,7 @@ export function RepoSelector({
           ref={panel}
           role="dialog"
           aria-label="Repository"
-          className="absolute top-9 left-0 z-40 flex w-72 flex-col gap-2.5 border border-li-divider bg-li-paper p-3.5 font-li-body shadow-li-lg"
+          className="absolute top-10 left-0 z-40 flex w-72 flex-col gap-2.5 border border-li-divider bg-li-paper p-3.5 font-li-body shadow-li-lg"
         >
           <div className="flex flex-col gap-0.5">
             <span className="font-li-mono text-xs break-all text-li-ink">{repo.name}</span>
@@ -67,7 +67,7 @@ export function RepoSelector({
                   setOpen(false);
                   onNewInRepo();
                 }}
-                className={liButton("secondary", "px-2.5 py-1 text-[12.5px]")}
+                className={liButton("secondary", "", "sm")}
               >
                 New investigation here
               </button>
@@ -77,7 +77,7 @@ export function RepoSelector({
                 href={repo.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={liButton("ghost", "text-[12.5px]")}
+                className={liButton("ghost", "", "sm")}
               >
                 Open repository ↗
               </a>

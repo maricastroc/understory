@@ -13,7 +13,7 @@ const LABEL: Record<PathStep["state"], string> = {
 };
 
 const VALUE: Record<PathStep["state"], string> = {
-  done: "text-li-ink",
+  done: "text-li-neutral-800",
   current: "text-li-datum-ink",
   next: "text-li-text-subtle",
 };
@@ -40,7 +40,7 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
           const clickable = !!step.onPick && step.state === "done";
           const text = (
             <>
-              <span className="flex items-baseline gap-1.5">
+              <span className="flex shrink-0 items-baseline gap-1.5">
                 <span
                   className={`font-li-mono text-[12px] ${
                     step.state === "next" ? "text-li-text-muted" : "text-li-datum-ink"
@@ -61,7 +61,7 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
               {step.value && (
                 <span
                   key={step.value}
-                  className={`mt-1 block max-w-full animate-li-arrive truncate font-li-mono text-[12.5px] ${VALUE[step.state]}`}
+                  className={`min-w-0 animate-li-arrive truncate font-li-mono text-[12.5px] ${VALUE[step.state]}`}
                 >
                   {step.value}
                 </span>
@@ -76,13 +76,13 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
                 />
                 {next ? <Thread from={step.state} to={next.state} /> : <span className="flex-1" />}
               </span>
-              <div className="mt-2 min-h-11 pr-3">
+              <div className="mt-2 min-h-6 pr-4">
                 {clickable ? (
                   <button
                     type="button"
                     onClick={step.onPick ?? undefined}
                     aria-label={`${number} ${step.label}${step.value ? `: ${step.value}` : ""}, go back to this step`}
-                    className="group flex max-w-full min-w-0 cursor-pointer flex-col items-start text-left focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-li-steel"
+                    className="group flex max-w-full min-w-0 cursor-pointer items-baseline gap-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-li-focus"
                   >
                     {text}
                   </button>
@@ -90,7 +90,7 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
                   <div
                     aria-current={step.state === "current" ? "step" : undefined}
                     aria-disabled={step.state === "next" ? true : undefined}
-                    className="flex max-w-full min-w-0 flex-col items-start"
+                    className="flex max-w-full min-w-0"
                   >
                     <span className="sr-only">
                       {number} {step.label}
@@ -98,7 +98,7 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
                       {step.state === "current" ? ", current step" : ""}
                       {step.state === "next" ? ", not yet" : ""}
                     </span>
-                    <span aria-hidden className="flex max-w-full min-w-0 flex-col items-start">
+                    <span aria-hidden className="flex max-w-full min-w-0 items-baseline gap-2.5">
                       {text}
                     </span>
                   </div>

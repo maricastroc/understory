@@ -54,7 +54,7 @@ export function MapCoreItem({
           aria-label={label}
           onClick={onOpen}
           {...events}
-          className={`pointer-events-auto absolute flex cursor-pointer items-center justify-center gap-1.5 border px-2 font-li-mono text-[12.5px] whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel motion-reduce:transition-none ${
+          className={`pointer-events-auto absolute flex cursor-pointer items-center justify-center gap-1.5 border px-2 font-li-mono text-[12.5px] whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none ${
             focused
               ? "border-li-ink bg-li-ink text-li-paper"
               : muted
@@ -78,7 +78,7 @@ export function MapCoreItem({
             aria-label={label}
             onClick={onOpen}
             {...events}
-            className={`pointer-events-auto absolute origin-bottom-left -rotate-40 cursor-pointer px-0.5 font-li-mono text-[12px] leading-3.5 whitespace-nowrap underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-li-steel ${
+            className={`pointer-events-auto absolute origin-bottom-left -rotate-40 cursor-pointer px-0.5 font-li-mono text-[12px] leading-3.5 whitespace-nowrap underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-li-focus ${
               focused ? "font-semibold text-li-ink" : muted ? "text-li-text-muted" : "text-li-ink"
             }`}
             style={{ left: core.x - 2, top: top - MAP.labelRise }}

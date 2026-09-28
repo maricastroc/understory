@@ -3,7 +3,9 @@ import { initials } from "./initials";
 import type { RailFooterInfo } from "./types";
 
 export function railFooterInfo(user: AuthUser | null, persisted: boolean): RailFooterInfo {
-  if (!user) return { name: "Guest", initials: "?", subline: "Sign in to save line cases" };
+  if (!user) {
+    return { name: "Guest", initials: "?", subline: "Sign in to save line cases", guest: true };
+  }
   return {
     name: user.name,
     initials: initials(user.name),

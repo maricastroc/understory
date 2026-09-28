@@ -25,7 +25,7 @@ export function AccountButton({
     if (!authEnabled) return null;
     if (signIn === "ghost") {
       return (
-        <a href="/api/auth/login" className={liButton("ghost")}>
+        <a href="/api/auth/login" className={liButton("ghost", "max-[640px]:px-1.5")}>
           Sign in
         </a>
       );
@@ -47,7 +47,7 @@ export function AccountButton({
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="ml-1.5 grid size-7.5 cursor-pointer place-items-center rounded-full bg-li-steel-800 text-xs font-semibold text-li-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+        className="ml-1 grid size-8 cursor-pointer place-items-center rounded-full bg-li-ink text-xs font-semibold text-li-paper transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
       >
         {initials(user.name)}
       </button>
@@ -67,7 +67,7 @@ export function AccountButton({
             <button
               type="submit"
               role="menuitem"
-              className="w-full cursor-pointer px-3.5 py-2.5 text-left text-[13px] text-li-ink hover:bg-li-neutral-200"
+              className="w-full cursor-pointer px-3.5 py-2.5 text-left text-[13px] text-li-ink hover:bg-li-neutral-200 focus-visible:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus"
             >
               Sign out
             </button>

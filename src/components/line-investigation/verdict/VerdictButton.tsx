@@ -2,7 +2,7 @@ import { VERDICT_LABEL } from "../copy/verdict-copy";
 import type { Verdict } from "../model/types";
 
 export const CHIP_BASE =
-  "inline-flex cursor-pointer items-center gap-1.5 rounded-[3px] py-1.25 pr-2.5 pl-2 text-[13px] font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel";
+  "inline-flex cursor-pointer items-center gap-1.5 rounded-[3px] py-1.25 pr-2.5 pl-2 text-[13px] font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus";
 
 const CHIP: Record<Verdict, string> = {
   resolved: "bg-li-evidence-tint text-li-evidence-ink hover:bg-li-evidence-quote",

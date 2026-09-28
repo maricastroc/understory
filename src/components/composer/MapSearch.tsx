@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { Highlight } from "./Highlight";
-import { SPINNER } from "./composer-classes";
+import { FIELD_FRAME, SPINNER } from "./composer-classes";
 
 export function MapSearch({
   query,
@@ -30,7 +30,7 @@ export function MapSearch({
 
   return (
     <div className="relative w-full max-w-160">
-      <div className="flex h-12 items-center gap-3 border border-li-ink bg-li-neutral-100 px-4 transition-colors focus-within:border-li-steel focus-within:shadow-[0_0_0_1px_var(--color-li-steel)] motion-reduce:transition-none">
+      <div className={`flex h-12 items-center gap-3 px-4 ${FIELD_FRAME}`}>
         <DomainIcon kind="file" />
         <input
           aria-label="Find a file or symbol"
@@ -50,7 +50,7 @@ export function MapSearch({
         {searching ? (
           <span aria-hidden className={`size-3.5 ${SPINNER}`} />
         ) : (
-          <span className="shrink-0 font-li-mono text-[11px] text-li-neutral-700">{note}</span>
+          <span className="shrink-0 font-li-mono text-[11px] text-li-text-subtle tnum">{note}</span>
         )}
       </div>
       {empty && !open && (
@@ -73,7 +73,7 @@ export function MapSearch({
               <button
                 type="button"
                 onClick={() => onOpen(path)}
-                className="block w-full cursor-pointer truncate px-3.5 py-1.5 text-left font-li-mono text-[12.5px] text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel"
+                className="block w-full cursor-pointer truncate px-3.5 py-1.5 text-left font-li-mono text-[12.5px] text-li-ink hover:bg-li-neutral-200 focus-visible:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus active:bg-li-neutral-300"
               >
                 <Highlight text={path} q={q} />
               </button>

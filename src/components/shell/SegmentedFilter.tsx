@@ -1,3 +1,5 @@
+import { SEGMENT_GROUP, segmentClass } from "./segment-class";
+
 export function SegmentedFilter<T extends string>({
   label,
   options,
@@ -13,7 +15,7 @@ export function SegmentedFilter<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="mx-4 mb-3 grid overflow-hidden rounded border border-li-divider text-center text-xs"
+      className={`${SEGMENT_GROUP} mx-4 mb-3 h-7 text-center text-xs`}
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
     >
       {options.map((o) => {
@@ -25,9 +27,7 @@ export function SegmentedFilter<T extends string>({
             role="radio"
             aria-checked={checked}
             onClick={() => onChange(o.value)}
-            className={`cursor-pointer py-1 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel ${
-              checked ? "bg-li-ink text-li-paper" : "text-li-ink underline-offset-2 hover:underline"
-            }`}
+            className={segmentClass(checked)}
           >
             {o.label}
           </button>

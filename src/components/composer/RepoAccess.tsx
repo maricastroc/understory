@@ -4,6 +4,7 @@ import { useState } from "react";
 import { authEnabled } from "../investigator/use-auth";
 import { liButton } from "../line-investigation/parts/button-class";
 import { Github } from "../icons";
+import { FIELD_SMALL } from "./composer-classes";
 
 export function RepoAccess({
   signedIn,
@@ -32,7 +33,7 @@ export function RepoAccess({
       {!signedIn && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           {authEnabled && (
-            <a href="/api/auth/login" className={liButton("primary", "h-9 px-3.5")}>
+            <a href="/api/auth/login" className={liButton("primary", "", "field")}>
               <Github className="size-4" />
               Sign in with GitHub
             </a>
@@ -44,7 +45,7 @@ export function RepoAccess({
             <button
               type="button"
               onClick={() => setShowToken(true)}
-              className="cursor-pointer text-[12.5px] text-li-steel-700 underline underline-offset-2 hover:text-li-steel-900"
+              className="li-link text-[12.5px]"
             >
               use a personal access token
             </button>
@@ -60,13 +61,13 @@ export function RepoAccess({
             onChange={(e) => onTokenChange(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && onRetry()}
             placeholder="ghp_…, kept in this tab only"
-            className="h-9 w-80 max-w-full border border-li-neutral-400 bg-transparent px-2.5 font-li-mono text-[12.5px] text-li-ink outline-none placeholder:text-li-text-muted focus:border-li-steel"
+            className={`${FIELD_SMALL} w-80 max-w-full`}
           />
           <button
             type="button"
             onClick={onRetry}
             disabled={!token.trim()}
-            className={liButton("secondary", "h-9 px-3")}
+            className={liButton("secondary", "", "field")}
           >
             Retry
           </button>

@@ -110,7 +110,7 @@ export function CodeSpecimen({
         tabIndex={scrolls ? 0 : undefined}
         aria-label={scrolls ? "Code lines, scroll sideways for long lines" : undefined}
         role={scrolls ? "region" : undefined}
-        className="overflow-x-auto pt-2.5 pb-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel"
+        className="overflow-x-auto pt-2.5 pb-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus"
       >
         {win.padRows > 0 && (
           <div aria-hidden style={{ height: win.padRows * SPECIMEN.rowHeight }} />

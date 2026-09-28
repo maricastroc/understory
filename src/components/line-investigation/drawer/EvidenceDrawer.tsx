@@ -55,7 +55,7 @@ export function EvidenceDrawer({
           <button
             type="button"
             onClick={onList}
-            className="cursor-pointer border-b border-li-divider px-4 py-2 text-left text-xs text-li-steel-700 hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel"
+            className="cursor-pointer border-b border-li-divider px-4 py-2 text-left text-xs text-li-steel-700 hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus"
           >
             ← All evidence
           </button>

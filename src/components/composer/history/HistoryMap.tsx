@@ -65,7 +65,7 @@ export function HistoryMap({
       tabIndex={scrolls ? 0 : undefined}
       role={scrolls ? "region" : undefined}
       aria-label={scrolls ? "History map, scroll sideways for more files" : undefined}
-      className="min-w-0 overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-steel"
+      className="min-w-0 overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
     >
       <MapCanvas
         layout={layout}

@@ -44,7 +44,7 @@ export function RegionRow({
         onFocus={() => onHover(region.id)}
         onBlur={() => onHover(null)}
         onKeyDown={onKeyDown}
-        className={`grid h-10.5 w-full cursor-pointer grid-cols-[32px_minmax(0,1fr)_64px] items-center gap-2.5 px-3.5 text-left transition-[opacity,background-color] duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel motion-reduce:transition-none ${
+        className={`grid h-10.5 w-full cursor-pointer grid-cols-[32px_minmax(0,1fr)_64px] items-center gap-2.5 px-3.5 text-left transition-[opacity,background-color] duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none ${
           selected ? "bg-li-steel-100" : lit ? "bg-li-neutral-200" : "hover:bg-li-neutral-200"
         } ${dim ? "opacity-45" : ""}`}
       >

@@ -21,12 +21,12 @@ export function GoToLine({ max, onGo }: { max: number; onGo: (line: number) => v
         onKeyDown={(e) => e.key === "Enter" && submit()}
         placeholder="line"
         aria-label={`Go to line, 1 to ${max}`}
-        className="h-6 w-16 border border-li-divider bg-li-neutral-100 px-2 font-li-mono text-[11px] text-li-ink placeholder:text-li-text-muted focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-steel"
+        className="h-6 w-16 border border-li-neutral-500 bg-li-paper px-2 font-li-mono text-[11px] text-li-ink outline-none placeholder:text-li-text-muted focus:border-li-ink focus:shadow-[inset_0_0_0_1px_var(--color-li-ink)]"
       />
       <button
         type="button"
         onClick={submit}
-        className={liButton("secondary", "h-6 px-2 py-0 font-li-mono text-[11px]")}
+        className={liButton("secondary", "font-li-mono", "xs")}
       >
         go
       </button>

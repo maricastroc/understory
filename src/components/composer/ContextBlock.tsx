@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { DomainKind } from "../line-investigation/parts/domain-kind";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
+import { SECTION_RULE } from "./composer-classes";
 
 export function ContextBlock({
   label,
@@ -12,8 +13,8 @@ export function ContextBlock({
   children: ReactNode;
 }) {
   return (
-    <section aria-label={label} className="flex flex-col gap-2 border-t-2 border-li-ink pt-3">
-      <h3 className="flex items-center gap-2 font-li-mono text-[11px] tracking-[0.08em] text-li-ink uppercase">
+    <section aria-label={label} className={`flex flex-col gap-2 ${SECTION_RULE}`}>
+      <h3 className="flex items-center gap-2 li-eyebrow text-li-ink">
         <DomainIcon kind={icon} size={14} />
         {label}
       </h3>

@@ -89,16 +89,16 @@ export function CodeViewer({
                   onClick={(e) => onSelect(n, e.shiftKey)}
                   aria-pressed={inRange}
                   aria-label={`Line ${n}${inRange ? ", selected" : ""}. Shift-click or shift-enter to extend the range.`}
-                  className={`group flex h-full w-full cursor-pointer items-center border-l-[3px] text-left font-li-mono text-xs leading-[1.6] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel ${
+                  className={`group flex h-full w-full cursor-pointer items-center border-l-[3px] text-left font-li-mono text-xs leading-[1.6] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus ${
                     inRange
                       ? "border-li-datum bg-li-datum-row font-medium text-li-ink"
-                      : "border-transparent text-li-neutral-800 hover:border-li-datum-weak"
+                      : "border-transparent text-li-neutral-800 hover:border-li-datum-weak hover:bg-li-neutral-200/50"
                   }`}
                 >
                   <span
                     className={`w-14 shrink-0 pr-3 text-right ${
                       inRange
-                        ? "font-semibold text-li-ink"
+                        ? "font-medium text-li-ink"
                         : "text-li-text-muted group-hover:text-li-ink"
                     }`}
                   >
@@ -112,7 +112,7 @@ export function CodeViewer({
                     )}
                   </span>
                   {inRange && isEnd && (
-                    <span className="shrink-0 self-center pr-3 font-li-body text-[10.5px] font-semibold text-li-datum-ink">
+                    <span className="shrink-0 self-center pr-3 font-li-mono text-[10.5px] font-medium text-li-datum-ink">
                       {isSymbolSelected
                         ? symbolNoun(enclosing.kind)
                         : rangeSize > 1

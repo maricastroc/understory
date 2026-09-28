@@ -61,20 +61,13 @@ export function ErrorState({
         {(suggestSignIn || onRetry) && (
           <div className="mt-2.5 flex flex-wrap items-center gap-2">
             {suggestSignIn && (
-              <a
-                href="/api/auth/login"
-                className={liButton("secondary", "px-2.5 py-1 text-[12.5px]")}
-              >
+              <a href="/api/auth/login" className={liButton("secondary", "", "sm")}>
                 <Github className="size-3.5" />
                 Sign in with GitHub
               </a>
             )}
             {onRetry && (
-              <button
-                type="button"
-                onClick={onRetry}
-                className={liButton("secondary", "px-2.5 py-1 text-[12.5px]")}
-              >
+              <button type="button" onClick={onRetry} className={liButton("secondary", "", "sm")}>
                 Try again
               </button>
             )}
