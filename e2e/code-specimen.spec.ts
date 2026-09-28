@@ -8,6 +8,7 @@ async function open(page: Page, query = "") {
 }
 
 async function datumOffset(page: Page) {
+  await page.locator('[data-testid="preview-datum-rule"]').waitFor({ state: "attached" });
   return page.evaluate(() => {
     const section = document.querySelector<HTMLElement>("section[data-datum-y]")!;
     const datum = section.querySelectorAll("li[data-datum]");
