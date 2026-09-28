@@ -88,7 +88,7 @@ export async function POST(req: Request) {
     const link = !githubToken && githubAppConfigured() ? installUrl() : null;
     const hint =
       gh && link
-        ? ` If ${gh.owner}/${gh.repo} is private, install the Git Investigator GitHub App: ${link}`
+        ? ` If ${gh.owner}/${gh.repo} is private, install the Understory GitHub App: ${link}`
         : "";
     return NextResponse.json({ error: `${message}${hint}` }, { status: 400 });
   }
