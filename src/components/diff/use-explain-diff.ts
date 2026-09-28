@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { DiffResult } from "@git-investigator/core/diff/types";
+import { readJson } from "@/lib/read-json";
 
 export function useExplainDiff() {
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,7 @@ export function useExplainDiff() {
         },
         body: JSON.stringify({ pr, language }),
       });
-      const data = (await res.json()) as DiffResult & { error?: string };
+      const data = await readJson<DiffResult & { error?: string }>(res);
       if (!res.ok || !data.findings) {
         setError(data.error || `Request failed (${res.status})`);
         setResult(null);

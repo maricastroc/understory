@@ -4,24 +4,33 @@ const REQ = new Request("http://localhost/api/dig", {
   headers: { "x-forwarded-for": "9.9.9.9" },
 });
 
-async function load(opts?: { over: boolean }) {
+const prefixes: string[] = [];
+
+async function load(opts?: { over?: boolean; down?: boolean }) {
   vi.resetModules();
+  prefixes.length = 0;
   if (opts) {
-    const over = opts.over;
+    const { over = false, down = false } = opts;
     process.env.UPSTASH_REDIS_REST_URL = "https://example.upstash.io";
     process.env.UPSTASH_REDIS_REST_TOKEN = "token";
     vi.doMock("@upstash/redis", () => ({ Redis: { fromEnv: () => ({}) } }));
     vi.doMock("@upstash/ratelimit", () => ({
       Ratelimit: class {
+        constructor(config: { prefix?: string }) {
+          prefixes.push(config.prefix ?? "");
+        }
         static slidingWindow() {
           return {};
         }
-        limit = async () => ({
-          success: !over,
-          limit: 15,
-          remaining: over ? 0 : 14,
-          reset: Date.now() + 30_000,
-        });
+        limit = async () => {
+          if (down) throw new TypeError("fetch failed");
+          return {
+            success: !over,
+            limit: 15,
+            remaining: over ? 0 : 14,
+            reset: Date.now() + 30_000,
+          };
+        };
       },
     }));
   } else {
@@ -44,6 +53,23 @@ describe("rateLimit", () => {
     const rateLimit = await load();
     expect(await rateLimit(REQ, "ai")).toBeNull();
     expect(await rateLimit(REQ, "browse")).toBeNull();
+  });
+
+  it("fails open when Upstash is configured but unreachable", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const rateLimit = await load({ down: true });
+    expect(await rateLimit(REQ, "browse")).toBeNull();
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  it("keeps every limiter key under the git-investigator:ratelimit namespace", async () => {
+    await load({});
+    expect(prefixes).toEqual([
+      "git-investigator:ratelimit:ai",
+      "git-investigator:ratelimit:browse",
+    ]);
+    for (const p of prefixes) expect(p.startsWith("git-investigator:ratelimit:")).toBe(true);
   });
 
   it("passes through when under the limit", async () => {

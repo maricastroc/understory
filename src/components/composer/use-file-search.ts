@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { readJson } from "@/lib/read-json";
 
 export function useFileSearch(
   repoPath: string,
@@ -33,7 +34,7 @@ export function useFileSearch(
             `/api/files?repo=${encodeURIComponent(repoPath)}&q=${encodeURIComponent(q)}`,
             token ? { headers: { "x-github-token": token } } : undefined,
           );
-          const data = await res.json();
+          const data = await readJson<{ files?: string[]; error?: string }>(res);
           if (id !== seq.current) return;
           if (!res.ok) {
             setError(data.error || "Search failed");

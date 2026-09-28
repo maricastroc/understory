@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { type SymbolSpan, enclosingSymbol } from "@git-investigator/core/collect/symbol";
+import { readJson } from "@/lib/read-json";
 
 export type OpenFile = { path: string; lines: string[] };
 
@@ -47,7 +48,7 @@ export function useFileViewer(repoPath: string) {
         `/api/file?repo=${encodeURIComponent(repoPath)}&path=${encodeURIComponent(path)}`,
         token ? { headers: { "x-github-token": token } } : undefined,
       );
-      const data = await res.json();
+      const data = await readJson<{ content: string; error?: string }>(res);
       if (!res.ok) {
         setError(data.error || "Could not open file");
         return;
