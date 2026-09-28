@@ -3,7 +3,8 @@ export const RECENT_COMMITS = 12;
 const SOURCE = /\.(ts|tsx|js|jsx|mjs|py|go|rs|c|cc|cpp|h|hpp|java|rb|php|swift|kt|scala|cs|mm?)$/;
 const ENTRY = /^(index|main|app|mod|lib|server)\./;
 const NOISE = /\.(lock|map|svg|png|jpe?g|ico|gif|webp|woff2?|min\.js|d\.ts)$/;
-const TEST = /(^|[./-])(tests?|specs?|__tests__|__mocks__|e2e|fixtures?)([./-]|$)|\.(test|spec)\.[jt]sx?$/i;
+const TEST =
+  /(^|[./-])(tests?|specs?|__tests__|__mocks__|e2e|fixtures?)([./-]|$)|\.(test|spec)\.[jt]sx?$/i;
 
 export function isNoise(path: string): boolean {
   return NOISE.test(basename(path));

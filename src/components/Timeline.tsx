@@ -30,7 +30,7 @@ export function Timeline({
   const [expanded, setExpanded] = useState(false);
 
   const startIdx = collapsible && !expanded ? artifacts.length - COLLAPSED_COUNT : 0;
-  
+
   const visible = artifacts.slice(startIdx);
 
   return (

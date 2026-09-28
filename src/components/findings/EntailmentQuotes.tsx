@@ -23,10 +23,7 @@ export function EntailmentQuotes({
         {proven.map((c) => {
           const a = byId.get(c.citation);
           return (
-            <figure
-              key={c.citation}
-              className="rounded-md border border-line bg-inset px-3 py-2.5"
-            >
+            <figure key={c.citation} className="rounded-md border border-line bg-inset px-3 py-2.5">
               <figcaption className="mb-1.5 text-[11.5px] font-medium text-ink-3">
                 Exhibit {idToLetter.get(c.citation)} · {a?.ref ?? c.citation}
               </figcaption>

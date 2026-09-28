@@ -14,7 +14,9 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -63,7 +65,10 @@
       "properties": {
         "gitInvestigator.mode": {
           "type": "string",
-          "enum": ["local", "backend"],
+          "enum": [
+            "local",
+            "backend"
+          ],
           "enumDescriptions": [
             "Run the investigation in-process against the local git repo — no server needed.",
             "Send the request to a running backend at backendUrl (for remote GitHub/GitLab repos)."

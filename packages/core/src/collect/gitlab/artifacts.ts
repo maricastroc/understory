@@ -45,9 +45,7 @@ export function glCommitArtifact(c: GlCommit): Artifact {
     body: c.message?.trim() || c.title,
     url: c.web_url,
     date: c.committed_date,
-    author: c.author_name
-      ? { name: c.author_name, email: c.author_email ?? undefined }
-      : undefined,
+    author: c.author_name ? { name: c.author_name, email: c.author_email ?? undefined } : undefined,
     ref: c.short_id,
     meta: { sha: c.id },
   };

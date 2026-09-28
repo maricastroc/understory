@@ -3,9 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const graphql = vi.fn();
 vi.mock("./client", () => ({ graphql: (...args: unknown[]) => graphql(...args) }));
 
-const { prContextArtifacts, issueContextArtifacts, commitContextArtifacts } = await import(
-  "./context"
-);
+const { prContextArtifacts, issueContextArtifacts, commitContextArtifacts } =
+  await import("./context");
 
 beforeEach(() => graphql.mockReset());
 
@@ -61,7 +60,9 @@ const PR = {
         createdAt: "2024-01-20T00:00:00Z",
         state: "CLOSED",
         stateReason: "COMPLETED",
-        comments: { nodes: [{ author: { login: "sre" }, body: "root cause: ACK", createdAt: "x" }] },
+        comments: {
+          nodes: [{ author: { login: "sre" }, body: "root cause: ACK", createdAt: "x" }],
+        },
       },
     ],
   },
@@ -106,7 +107,9 @@ describe("issueContextArtifacts", () => {
           createdAt: "2024-01-20T00:00:00Z",
           state: "CLOSED",
           stateReason: "COMPLETED",
-          comments: { nodes: [{ author: { login: "sre" }, body: "linked to #12", createdAt: "x" }] },
+          comments: {
+            nodes: [{ author: { login: "sre" }, body: "linked to #12", createdAt: "x" }],
+          },
           timelineItems: {
             nodes: [
               {
