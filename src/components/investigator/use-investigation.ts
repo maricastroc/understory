@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ArtifactRef, DigResult, InvestigateInput } from "@git-investigator/core/types";
 import { readJson } from "@/lib/read-json";
-import type { CaseItem } from "../sidebar/case-item";
 import type { AuthUser } from "./use-auth";
 import type { CaseDraft } from "./case-draft";
 import type { CaseParent } from "./case-parent";
