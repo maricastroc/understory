@@ -3,3 +3,5 @@ node_modules
 .cache
 .demo
 package-lock.json
+apps/extension/dist
+apps/extension/out
