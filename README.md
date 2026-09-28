@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="public/logo.svg" alt="Understory" width="40">
+  <img src="public/understory-symbol.svg" alt="Understory" width="40">
   <br>
   Understory
   <br>
