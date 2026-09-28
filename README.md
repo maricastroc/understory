@@ -1,8 +1,8 @@
 <h1 align="center">
   <br>
-  <img src="public/logo.svg" alt="Git Investigator" width="40">
+  <img src="public/logo.svg" alt="Understory" width="40">
   <br>
-  Git Investigator
+  Understory
   <br>
 </h1>
 
@@ -86,7 +86,7 @@
 
 ## 📝 Project Description
 
-Git Investigator answers the question `git blame` can't: **why** is this code the way it is — whether you point at a single line or paste a whole pull request?
+Understory answers the question `git blame` can't: **why** is this code the way it is — whether you point at a single line or paste a whole pull request?
 
 You paste a GitHub repo (or a local path), find a file, and click the line you're curious about. The app blames that line down to the commits that touched it, then follows the trail outward — the pull requests those commits belonged to, the issues those PRs closed, the reviews left on them — assembling a single, chronological body of evidence.
 
@@ -242,7 +242,7 @@ npm run dig -- .demo/payments-service src/billing/charge.ts:8 --why "why cap ret
 
 ## 🏢 Private GitLab (self-hosted)
 
-Git Investigator also reads **GitLab** — including private, self-hosted instances. The only real constraint is physical: a GitLab behind a corporate firewall isn't reachable from a public host like Vercel, so whatever talks to GitLab has to run **inside the network**. That's this repository's Docker image, which talks to the GitLab REST API in-process; the access token never leaves that network. It can be deployed two ways:
+Understory also reads **GitLab** — including private, self-hosted instances. The only real constraint is physical: a GitLab behind a corporate firewall isn't reachable from a public host like Vercel, so whatever talks to GitLab has to run **inside the network**. That's this repository's Docker image, which talks to the GitLab REST API in-process; the access token never leaves that network. It can be deployed two ways:
 
 - **Single container (below):** the whole app runs inside the network — no collector, no tunnel.
 - **Split deploy:** the UI stays public (e.g. Vercel) and forwards only requests for hosts in `COLLECTOR_HOSTS` to the same container running inside the network as a *collector*, through an outbound tunnel. The public instance sets `COLLECTOR_URL`, `COLLECTOR_HOSTS` and `COLLECTOR_SECRET`; the container sets `COLLECTOR_INBOUND_SECRET` to the same secret and rejects requests without it. See the split-deploy block in `.env.example`.

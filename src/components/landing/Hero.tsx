@@ -25,7 +25,7 @@ export function Hero() {
           </span>
         </h1>
         <p className="mt-7 max-w-155 text-lg leading-[1.55] text-pretty text-li-neutral-800 max-[640px]:text-base">
-          Git Investigator reconstructs the reasoning behind a line of code — tracing commits, pull
+          Understory reconstructs the reasoning behind a line of code — tracing commits, pull
           requests, and issues back to the decision that introduced it.
         </p>
         <div className="mt-9 flex flex-wrap gap-2">

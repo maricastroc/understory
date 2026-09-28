@@ -25,12 +25,12 @@ async function setSecretInteractive(
   const trimmed = value.trim();
   if (!trimmed) {
     await store?.delete(key);
-    vscode.window.showInformationMessage(`Git Investigator: ${label} cleared.`);
+    vscode.window.showInformationMessage(`Understory: ${label} cleared.`);
     return;
   }
 
   await store?.store(key, trimmed);
-  vscode.window.showInformationMessage(`Git Investigator: ${label} saved.`);
+  vscode.window.showInformationMessage(`Understory: ${label} saved.`);
 }
 
 export async function getGroqKey(): Promise<string | undefined> {

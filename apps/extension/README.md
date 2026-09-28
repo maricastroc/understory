@@ -1,19 +1,19 @@
-# Git Investigator — VS Code extension
+# Understory — VS Code extension
 
 Investigate why a line of code is the way it is without leaving the editor. The extension embeds
 the same core as the web app (`packages/core`, bundled by esbuild) and has no runtime dependencies.
 
 ## Commands
 
-- **Git Investigator: Why is this line?** (`gitInvestigator.digCurrentLine`, also in the editor
+- **Understory: Why is this line?** (`gitInvestigator.digCurrentLine`, also in the editor
   context menu) — investigates the line under the cursor. In `local` mode it runs in-process
   against the local git repo; in `backend` mode it calls `{backendUrl}/api/dig`.
-- **Git Investigator: Full Investigation (in editor)** (`gitInvestigator.digCurrentLineFull`) —
+- **Understory: Full Investigation (in editor)** (`gitInvestigator.digCurrentLineFull`) —
   sends the workspace's GitHub/GitLab remote to `{webUrl}/api/dig`, so PRs, reviews and issues
   are collected from the provider, and lets you drill into any cited artifact from the panel.
-- **Git Investigator: Open Full Investigation on the Web** (`gitInvestigator.openOnWeb`) — opens
+- **Understory: Open Full Investigation on the Web** (`gitInvestigator.openOnWeb`) — opens
   `{webUrl}/app?repo=…&file=…&line=…`.
-- **Git Investigator: Set Groq API Key** / **Set GitHub Token** — stored in VS Code's
+- **Understory: Set Groq API Key** / **Set GitHub Token** — stored in VS Code's
   SecretStorage. Without a Groq key the panel shows the evidence only; a GitHub token enriches
   local history with the PRs, issues and reviews behind each commit and is sent along for private
   repositories.

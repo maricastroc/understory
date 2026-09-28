@@ -31,7 +31,7 @@ export async function investigate(target: InvestigationTarget): Promise<void> {
   const mode = getMode();
   panel.showLoading(target.location);
 
-  await withProgress(`Git Investigator — investigating ${target.location}…`, async (token) => {
+  await withProgress(`Understory — investigating ${target.location}…`, async (token) => {
     try {
       if (mode === "local") await runLocal(target, token);
       else await runBackend(target, target.workspacePath, getBackendUrl(), token);
@@ -59,19 +59,19 @@ export async function investigateRemote(target: InvestigationTarget): Promise<vo
     return;
   }
 
-  await withProgress(
-    `Git Investigator — full investigation of ${target.location}…`,
-    async (token) => {
-      try {
-        await runBackend(target, remote, getWebUrl(), token);
-      } catch (e) {
-        panel.showError(errorView(e, "backend"), target.location);
-      }
-    },
-  );
+  await withProgress(`Understory — full investigation of ${target.location}…`, async (token) => {
+    try {
+      await runBackend(target, remote, getWebUrl(), token);
+    } catch (e) {
+      panel.showError(errorView(e, "backend"), target.location);
+    }
+  });
 }
 
-async function runLocal(target: InvestigationTarget, token: vscode.CancellationToken): Promise<void> {
+async function runLocal(
+  target: InvestigationTarget,
+  token: vscode.CancellationToken,
+): Promise<void> {
   const [apiKey, githubToken] = await Promise.all([getGroqKey(), getGithubToken()]);
   const result = await runLocalDig(target, apiKey, githubToken);
   if (token.isCancellationRequested) return;
@@ -80,7 +80,7 @@ async function runLocal(target: InvestigationTarget, token: vscode.CancellationT
   if (!apiKey) {
     vscode.window
       .showInformationMessage(
-        "Git Investigator: no Groq API key set — showing evidence only. Set one to get written answers.",
+        "Understory: no Groq API key set — showing evidence only. Set one to get written answers.",
         "Set Groq API Key",
       )
       .then((pick) => {
@@ -89,7 +89,7 @@ async function runLocal(target: InvestigationTarget, token: vscode.CancellationT
   } else if (!githubToken && result.evidence.repo.remoteUrl?.includes("github.com")) {
     void nudgeOnce(
       "githubTokenLocalEnrich",
-      "Git Investigator: set a GitHub token to enrich local history with the PRs, issues, and reviews behind each commit.",
+      "Understory: set a GitHub token to enrich local history with the PRs, issues, and reviews behind each commit.",
       "Set GitHub Token",
       "gitInvestigator.setGithubToken",
     );
@@ -123,7 +123,7 @@ export async function drill(ref: ArtifactRef): Promise<void> {
   lastRun = () => drill(ref);
   panel.showLoading(label);
 
-  await withProgress(`Git Investigator — investigating ${label}…`, async (token) => {
+  await withProgress(`Understory — investigating ${label}…`, async (token) => {
     try {
       const controller = new AbortController();
       token.onCancellationRequested(() => controller.abort());
@@ -172,7 +172,7 @@ function errorView(e: unknown, mode: Mode): ErrorView {
       tone: "error",
       title: "Repository not accessible",
       message,
-      hint: "If this is a private repo, run “Git Investigator: Set GitHub Token” (a classic PAT with the `repo` scope), then try again.",
+      hint: "If this is a private repo, run “Understory: Set GitHub Token” (a classic PAT with the `repo` scope), then try again.",
     };
   }
   return { tone: "error", title: "Investigation failed", message };

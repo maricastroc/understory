@@ -43,16 +43,16 @@ export function gapBasis(gap: ViewGap): string {
 export function gapBody(gap: ViewGap, after: ViewArtifact): string {
   const id = displayId(after);
   if (!gap.verified) {
-    return `Nothing is shown before ${id}, but this was not verified. Git Investigator does not treat it as silence.`;
+    return `Nothing is shown before ${id}, but this was not verified. Understory does not treat it as silence.`;
   }
   if (gap.missing === "pull_request") {
-    return `Blame reaches ${id}, but no pull request, review or issue explains it. Git Investigator does not infer a reason here.`;
+    return `Blame reaches ${id}, but no pull request, review or issue explains it. Understory does not infer a reason here.`;
   }
   if (gap.missing === "reason") {
-    return `The history collected down to ${id} does not say why this code exists. Git Investigator does not infer a reason here.`;
+    return `The history collected down to ${id} does not say why this code exists. Understory does not infer a reason here.`;
   }
   if (gap.missing === "review") {
-    return `${id} was merged without a recorded review. Git Investigator does not infer what a review would have said.`;
+    return `${id} was merged without a recorded review. Understory does not infer what a review would have said.`;
   }
   return `${id} closes no issue by a closing keyword. An issue may still be mentioned elsewhere.`;
 }

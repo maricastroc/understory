@@ -12,7 +12,7 @@ export function BrandMark() {
         <span className="absolute top-3.5 left-1.5 size-1.75 rotate-45 bg-li-ink" />
       </span>
       <span className="text-base font-semibold tracking-[-0.01em] whitespace-nowrap">
-        Git Investigator
+        Understory
       </span>
     </Link>
   );

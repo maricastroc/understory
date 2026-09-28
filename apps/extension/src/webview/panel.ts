@@ -25,7 +25,7 @@ function ensurePanel(): vscode.WebviewPanel {
   }
   panel = vscode.window.createWebviewPanel(
     "gitInvestigator.result",
-    "Git Investigator",
+    "Understory",
     { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
     { enableScripts: true, retainContextWhenHidden: true },
   );
