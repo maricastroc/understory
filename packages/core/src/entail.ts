@@ -1,6 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import type { Model } from "./llm";
+import { verifyQuote } from "./quote";
 import type {
   Artifact,
   CitationCheck,
@@ -13,7 +14,8 @@ import type {
 
 const MAX_CHECKS = 6;
 const JUDGE_BODY_CAP = 1_600;
-const QUOTE_MIN = 8;
+
+export { verifyQuote };
 
 const EMPTY: Entailment = { checked: false, checks: [], supported: 0, misattributed: 0 };
 
@@ -92,14 +94,6 @@ const SYSTEM = [
 function clampBody(body: string, cap: number): string {
   if (body.length <= cap) return body;
   return `${body.slice(0, cap).trimEnd()}… [truncated]`;
-}
-
-const normalize = (s: string): string => s.replace(/\s+/g, " ").trim().toLowerCase();
-
-export function verifyQuote(body: string, quote: string): string | null {
-  const q = quote.trim();
-  if (q.length < QUOTE_MIN) return null;
-  return normalize(body).includes(normalize(q)) ? q : null;
 }
 
 export function finalizeCheck(

@@ -28,6 +28,18 @@ export type GitHubRepoMeta = {
   topics: string[];
 };
 
+export async function getBranchHeadGitHub(
+  owner: string,
+  repo: string,
+  branch: string,
+): Promise<string> {
+  const d = await rest<{ commit?: { sha?: string } }>(
+    `/repos/${owner}/${repo}/branches/${encodeURIComponent(branch)}`,
+  );
+  if (!d.commit?.sha) throw new Error(`Could not resolve the head of ${branch}`);
+  return d.commit.sha;
+}
+
 export async function getRepoMeta(owner: string, repo: string): Promise<GitHubRepoMeta> {
   const key = `${owner}/${repo}`;
 

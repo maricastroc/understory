@@ -1,0 +1,15 @@
+export const SPECIMEN = {
+  border: 1,
+  headerHeight: 36,
+  padTop: 10,
+  rowHeight: 26,
+  footerHeight: 30,
+  barMax: 40,
+  barMin: 2,
+  defaultDatumY: 281,
+  afterLines: 10,
+  symbolTail: 2,
+  inlineHidden: 2,
+  stripContext: 3,
+  compactContext: 2,
+} as const;

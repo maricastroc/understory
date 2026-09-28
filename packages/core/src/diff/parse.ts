@@ -1,4 +1,4 @@
-import type { FileChange, LineRange, ParsedDiff } from "./types";
+import type { ChangeLine, FileChange, LineRange, ParsedDiff } from "./types";
 
 function stripPrefix(p: string): string {
   return p.replace(/^[ab]\//, "");
@@ -24,10 +24,22 @@ export function coalesce(nums: number[]): LineRange[] {
   return ranges;
 }
 
-type Draft = Omit<FileChange, "removedRanges" | "addedRanges"> & { removed: number[]; added: number[] };
+type Draft = Omit<FileChange, "removedRanges" | "addedRanges" | "changes"> & {
+  removed: number[];
+  added: number[];
+  changes: ChangeLine[];
+};
 
 function newDraft(): Draft {
-  return { oldPath: null, newPath: null, status: "modified", binary: false, removed: [], added: [] };
+  return {
+    oldPath: null,
+    newPath: null,
+    status: "modified",
+    binary: false,
+    removed: [],
+    added: [],
+    changes: [],
+  };
 }
 
 export function parseUnifiedDiff(diff: string): ParsedDiff {
@@ -37,6 +49,12 @@ export function parseUnifiedDiff(diff: string): ParsedDiff {
   let inHunk = false;
   let oldNo = 0;
   let newNo = 0;
+  let block = 0;
+  let inBlock = false;
+  const breakBlock = () => {
+    if (inBlock) block++;
+    inBlock = false;
+  };
 
   const flush = () => {
     if (!cur) return;
@@ -47,6 +65,7 @@ export function parseUnifiedDiff(diff: string): ParsedDiff {
       binary: cur.binary,
       removedRanges: coalesce(cur.removed),
       addedRanges: coalesce(cur.added),
+      changes: cur.changes,
     });
     cur = null;
   };
@@ -56,6 +75,7 @@ export function parseUnifiedDiff(diff: string): ParsedDiff {
       flush();
       cur = newDraft();
       inHunk = false;
+      breakBlock();
       const m = line.match(/^diff --git (\S+) (\S+)$/);
       if (m) {
         cur.oldPath = stripPrefix(m[1]);
@@ -70,15 +90,21 @@ export function parseUnifiedDiff(diff: string): ParsedDiff {
       if (hunk) {
         oldNo = Number(hunk[1]);
         newNo = Number(hunk[2]);
+        breakBlock();
         continue;
       }
       if (line.startsWith("-")) {
         cur.removed.push(oldNo);
+        cur.changes.push({ kind: "del", old: oldNo, new: null, text: line.slice(1), block });
+        inBlock = true;
         oldNo++;
       } else if (line.startsWith("+")) {
         cur.added.push(newNo);
+        cur.changes.push({ kind: "add", old: null, new: newNo, text: line.slice(1), block });
+        inBlock = true;
         newNo++;
       } else if (line.startsWith(" ")) {
+        breakBlock();
         oldNo++;
         newNo++;
       } else if (line.startsWith("\\")) {

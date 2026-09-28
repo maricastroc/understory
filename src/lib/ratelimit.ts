@@ -20,10 +20,15 @@ const limiters = redis
         limiter: Ratelimit.slidingWindow(40, "60 s"),
         prefix: `${NAMESPACE}:browse`,
       }),
+      map: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(30, "60 s"),
+        prefix: "gi:map-rl",
+      }),
     }
   : null;
 
-export type RateTier = "ai" | "browse";
+export type RateTier = "ai" | "browse" | "map";
 
 function clientIp(req: Request): string {
   const fwd = req.headers.get("x-forwarded-for");

@@ -9,14 +9,15 @@ datasource db {
 }
 
 model Investigation {
-  id        String   @id @default(cuid())
-  userLogin String
-  caseId    String
-  question  String
-  repoPath  String
-  location  String
-  result    Json
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  userLogin    String
+  caseId       String
+  question     String
+  repoPath     String
+  location     String
+  result       Json
+  parentCaseId String?
+  createdAt    DateTime @default(now())
 
   @@unique([userLogin, caseId])
   @@index([userLogin, createdAt])

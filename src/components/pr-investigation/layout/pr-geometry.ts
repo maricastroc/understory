@@ -1,0 +1,43 @@
+import type { AxisScale } from "../../line-investigation/layout/cluster-times";
+
+export const PR_SCALE: AxisScale = {
+  clusterDays: 45,
+  minPxPerDay: 1.5,
+  maxPxPerDay: 6,
+  spanBudget: 40,
+  firstSegment: 24,
+  breakHeight: 40,
+  clusterPad: 6,
+};
+
+export const PR_SECTION = {
+  firstCoreOffset: 50,
+  rightPad: 40,
+  minStep: 56,
+  maxStep: 96,
+  groupedMinStep: 36,
+  maxCores: 12,
+  minCore: 24,
+  commitR: 6,
+  bandPad: 12,
+  bandMin: 24,
+  prMin: 12,
+  connectorGap: 6,
+  tick: 12,
+  issueGap: 38,
+  hatchGap: 8,
+  hatchWidth: 18,
+  hatchHeight: 48,
+  cap: 12,
+  hit: 24,
+  letterDx: 14,
+  bandLetterDx: -34,
+  letterStep: 16,
+  letterH: 14,
+  letterWidth: 22,
+  axisTail: 16,
+  tabWidth: 36,
+  tabHeight: 20,
+  tabGap: 6,
+  combGap: 10,
+} as const;

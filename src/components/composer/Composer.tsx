@@ -1,14 +1,29 @@
 "use client";
 
-import { useState } from "react";
 import type { InvestigateInput } from "@git-investigator/core/types";
+import { useEffect, useRef, useState } from "react";
 import { Alert } from "../icons";
+import type { CasePaths } from "../investigator/case-paths";
+import { repoDisplayName } from "../shell/repo-display-name";
+import { CodeContext } from "./CodeContext";
 import { CodeViewer } from "./CodeViewer";
-import { FileFinder } from "./FileFinder";
-import { RepoBar } from "./RepoBar";
-import { RepoOverview } from "./RepoOverview";
+import type { ComposerPrefill } from "./composer-prefill";
+import { FileStage } from "./FileStage";
+import { useHistoryMap } from "./history/use-history-map";
+import { useOverview } from "./history/use-overview";
+import { InvestigationPath } from "./InvestigationPath";
+import { QuestionForm } from "./QuestionForm";
+import { RepoStage } from "./RepoStage";
+import { RepoStrip } from "./RepoStrip";
+import { StageHeading } from "./StageHeading";
+import { stageCopy } from "./stage-copy";
+import { symbolNoun } from "./symbol-noun";
+import type { ComposerStage } from "./types/composer-stage";
+import type { PathStep } from "./types/path-step";
+import type { RecentRepo } from "./types/recent-repo";
 import { useFileSearch } from "./use-file-search";
 import { useFileViewer } from "./use-file-viewer";
+import { useTyping } from "./use-typing";
 import type { Repo } from "./use-repo";
 
 export function Composer({
@@ -19,6 +34,12 @@ export function Composer({
   setToken,
   onInvestigate,
   signedIn = false,
+  prefill = null,
+  cases,
+  recent = [],
+  demoRepo = null,
+  active = true,
+  investigating = false,
 }: {
   repo: Repo;
   repoPath: string;
@@ -27,9 +48,33 @@ export function Composer({
   setToken: (s: string) => void;
   onInvestigate: (input: InvestigateInput) => void;
   signedIn?: boolean;
+  prefill?: ComposerPrefill | null;
+  cases: CasePaths;
+  recent?: RecentRepo[];
+  demoRepo?: string | null;
+  active?: boolean;
+  investigating?: boolean;
 }) {
+  const tokenValue = token.trim() || undefined;
   const viewer = useFileViewer(repoPath);
-  const search = useFileSearch(repoPath, repo.ready, viewer.file?.path, token.trim() || undefined);
+  const [query, setQuery] = useState("");
+  const q = query.trim();
+  const search = useFileSearch(repoPath, repo.ready && q.length >= 2, undefined, tokenValue);
+  const { overview, error: overviewError } = useOverview(
+    repoPath,
+    repo.ready,
+    cases.ordered,
+    tokenValue,
+  );
+  const [pickingRepo, setPickingRepo] = useState(false);
+  const typing = useTyping(query);
+  const map = useHistoryMap({
+    repoPath,
+    overview,
+    token: tokenValue,
+    active: active && repo.ready,
+    busy: typing || viewer.loading || investigating,
+  });
   const [question, setQuestion] = useState("Why is this line the way it is?");
   const [noCapture, setNoCapture] = useState(
     () => typeof window !== "undefined" && localStorage.getItem("gi:no-capture") === "1",
@@ -39,31 +84,73 @@ export function Composer({
     localStorage.setItem("gi:no-capture", v ? "1" : "0");
   }
 
+  const handledPrefill = useRef<number | null>(null);
+  useEffect(() => {
+    if (!prefill || !repo.ready || handledPrefill.current === prefill.nonce) return;
+    handledPrefill.current = prefill.nonce;
+    setQuery("");
+    void viewer.open(prefill.path, tokenValue, prefill.line);
+  }, [prefill, repo.ready, viewer, tokenValue]);
+
+  const stage: ComposerStage =
+    !repo.ready || pickingRepo ? "repo" : viewer.file || viewer.loading ? "code" : "file";
+
   function editRepo(v: string) {
     setRepoPath(v);
     repo.reset();
-    search.clear();
+    setQuery("");
     viewer.reset();
   }
 
-  function openFile(path: string) {
-    search.clear();
-    search.setQuery(path);
-    void viewer.open(path, token.trim() || undefined);
+  function openRepo(path = repoPath) {
+    setPickingRepo(false);
+    void repo.open(path, tokenValue);
   }
 
-  function editFind(v: string) {
-    search.setQuery(v);
-    if (v.trim() === "" && viewer.file) viewer.reset();
+  function openFile(path: string) {
+    setQuery("");
+    search.setQuery("");
+    map.mapFile(path);
+    void viewer.open(path, tokenValue);
   }
+
+  function editQuery(v: string) {
+    setQuery(v);
+    search.setQuery(v);
+  }
+
+  const { file, selectedStart, selectedEnd, enclosing } = viewer;
+  const selection =
+    file && selectedStart !== null
+      ? { start: selectedStart, end: selectedEnd ?? selectedStart }
+      : null;
+  const isSymbolSelected =
+    !!enclosing &&
+    !!selection &&
+    selection.start === enclosing.start &&
+    selection.end === enclosing.end;
+  const canExpand =
+    !!enclosing &&
+    !!selection &&
+    (selection.start !== enclosing.start || selection.end !== enclosing.end);
+  const rangeSize = selection ? selection.end - selection.start + 1 : 0;
+  const subject =
+    isSymbolSelected && enclosing ? symbolNoun(enclosing.kind) : rangeSize > 1 ? "range" : "line";
+  const runLabel =
+    isSymbolSelected && enclosing?.name
+      ? `Investigate ${enclosing.name}`
+      : isSymbolSelected
+        ? `Investigate this ${subject}`
+        : rangeSize > 1
+          ? "Investigate these lines"
+          : "Investigate this line";
 
   function run() {
-    const { file, selectedStart, selectedEnd } = viewer;
-    if (!file || selectedStart === null) return;
+    if (!file || !selection) return;
     const span =
-      selectedEnd !== null && selectedEnd !== selectedStart
-        ? `${selectedStart}-${selectedEnd}`
-        : `${selectedStart}`;
+      selection.end !== selection.start
+        ? `${selection.start}-${selection.end}`
+        : `${selection.start}`;
     onInvestigate({
       repoPath,
       location: `${file.path}:${span}`,
@@ -72,81 +159,171 @@ export function Composer({
     });
   }
 
-  const q = search.query.trim();
-  const showEmpty =
-    repo.ready &&
-    q.length >= 2 &&
-    !search.searching &&
-    search.results.length === 0 &&
-    viewer.file?.path !== q;
+  const lineValue = selection
+    ? rangeSize > 1
+      ? `lines ${selection.start}–${selection.end}`
+      : `line ${selection.start}`
+    : null;
+  const steps: PathStep[] = [
+    {
+      key: "repo",
+      label: "repository",
+      value:
+        repo.ready && stage !== "repo"
+          ? repoDisplayName(repo.meta?.name ?? repoPath)
+          : repo.connecting
+            ? "opening…"
+            : null,
+      state: stage === "repo" ? "current" : "done",
+      onPick: () => setPickingRepo(true),
+    },
+    {
+      key: "file",
+      label: "file",
+      value: stage === "code" ? (file?.path ?? "opening…") : null,
+      state: stage === "file" ? "current" : stage === "code" ? "done" : "next",
+      onPick: repo.ready
+        ? () => {
+            setPickingRepo(false);
+            viewer.reset();
+          }
+        : null,
+    },
+    {
+      key: "line",
+      label: "line",
+      value: stage === "code" ? lineValue : null,
+      state: stage !== "code" ? "next" : selection ? "done" : "current",
+      onPick: stage === "code" ? () => viewer.clearSelection() : null,
+    },
+    {
+      key: "question",
+      label: "question",
+      value: null,
+      state: stage === "code" && selection ? "current" : "next",
+      onPick: null,
+    },
+  ];
+
+  const copy = stageCopy({
+    stage,
+    connecting: repo.connecting,
+    fileLoading: viewer.loading,
+    lineValue,
+    subject,
+    symbolName: isSymbolSelected ? (enclosing?.name ?? null) : null,
+  });
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-panel">
-        <div className="border-b border-line px-3.5 py-3">
-          <h1 className="text-[15px] font-semibold tracking-tight">Start an investigation</h1>
-          <p className="mt-0.5 text-[12.5px] text-ink-2">
-            Paste a GitHub repo (or a local path), find a file by name or symbol, then click the
-            line you&apos;re curious about.
-          </p>
-        </div>
-        <RepoBar
+    <div className="flex flex-col gap-7 font-li-body text-li-ink">
+      <div className="flex flex-col gap-4">
+        <h1 className="font-li-mono text-[11px] tracking-[0.08em] text-li-text-subtle uppercase">
+          New investigation
+        </h1>
+        <InvestigationPath steps={steps} />
+      </div>
+
+      {stage !== "repo" && (
+        <RepoStrip repoPath={repoPath} meta={repo.meta} overview={overview} map={map} />
+      )}
+
+      <StageHeading title={copy.title} lead={copy.lead} />
+
+      {stage === "repo" && (
+        <RepoStage
           repoPath={repoPath}
           onEdit={editRepo}
-          onOpen={() => repo.open(repoPath, token.trim() || undefined)}
+          onOpen={() => openRepo()}
           connecting={repo.connecting}
-          ready={repo.ready}
-          meta={repo.meta}
           error={repo.error}
           token={token}
           onTokenChange={setToken}
           signedIn={signedIn}
+          demoRepo={demoRepo}
+          autoFocus={pickingRepo}
+          recent={recent}
+          onOpenRecent={(path) => {
+            editRepo(path);
+            openRepo(path);
+          }}
+          onOpenDemo={() => {
+            if (!demoRepo) return;
+            editRepo(demoRepo);
+            openRepo(demoRepo);
+          }}
         />
-        <FileFinder
-          query={search.query}
-          setQuery={editFind}
-          results={search.results}
-          searching={search.searching}
-          enabled={repo.ready}
-          showEmpty={showEmpty}
-          onOpenFile={openFile}
-        />
-      </div>
-
-      {repo.ready && repo.meta && !viewer.file && !viewer.loading && (
-        <RepoOverview meta={repo.meta} />
       )}
 
-      {(search.error || viewer.error) && (
+      {stage === "file" && (
+        <FileStage
+          overview={overview}
+          overviewError={overviewError}
+          caseCounts={cases.counts}
+          query={query}
+          onQuery={editQuery}
+          results={q.length >= 2 ? search.results : []}
+          searching={search.searching}
+          settled={!typing}
+          map={map}
+          onOpen={openFile}
+        />
+      )}
+
+      {stage !== "repo" && (search.error || viewer.error) && (
         <div
           role="alert"
-          className="flex items-start gap-2 rounded-[10px] border border-crit/25 bg-crit-tint p-3 text-[12.5px] text-crit"
+          className="flex items-start gap-2 border-l-2 border-li-ink pl-4 text-[13px]"
         >
           <Alert className="mt-0.5 size-4 shrink-0" />
           <span>{search.error || viewer.error}</span>
         </div>
       )}
 
-      {viewer.loading && (
-        <div className="rounded-[10px] border border-line bg-surface p-5 text-[13px] text-ink-3">
-          Opening file…
-        </div>
+      {stage === "code" && viewer.loading && (
+        <p
+          role="status"
+          className="border-t border-li-divider pt-3 text-[13px] text-li-text-subtle"
+        >
+          Opening the file…
+        </p>
       )}
 
-      {viewer.file && (
-        <CodeViewer
-          file={viewer.file}
-          selectedStart={viewer.selectedStart}
-          selectedEnd={viewer.selectedEnd}
-          enclosing={viewer.enclosing}
-          onSelect={viewer.selectLine}
-          onExpand={viewer.expandToSymbol}
-          question={question}
-          setQuestion={setQuestion}
-          noCapture={noCapture}
-          setNoCapture={updateNoCapture}
-          onRun={run}
-        />
+      {stage === "code" && file && (
+        <div className="grid grid-cols-[minmax(0,1fr)_340px] items-start gap-8 max-[1280px]:grid-cols-1">
+          <CodeViewer
+            file={file}
+            selectedStart={selectedStart}
+            selectedEnd={selectedEnd}
+            enclosing={enclosing}
+            onSelect={viewer.selectLine}
+            focusLine={prefill?.path === file.path ? prefill.line : undefined}
+          />
+          <CodeContext
+            repoPath={repoPath}
+            path={file.path}
+            lineCount={file.lines.length}
+            head={overview?.head ?? null}
+            fileState={map.states.get(file.path)}
+            prData={overview?.prData ?? "none"}
+            selection={selection}
+            token={tokenValue}
+          >
+            {selection && (
+              <QuestionForm
+                subject={subject}
+                runLabel={runLabel}
+                question={question}
+                setQuestion={setQuestion}
+                onRun={run}
+                enclosing={enclosing}
+                canExpand={canExpand}
+                onExpand={viewer.expandToSymbol}
+                noCapture={noCapture}
+                setNoCapture={updateNoCapture}
+              />
+            )}
+          </CodeContext>
+        </div>
       )}
     </div>
   );

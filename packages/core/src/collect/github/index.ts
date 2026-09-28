@@ -1,4 +1,4 @@
-export { parseGitHubRepo, getRepoMeta } from "./repo";
+export { parseGitHubRepo, getRepoMeta, getBranchHeadGitHub } from "./repo";
 export type { GitHubRepoMeta } from "./repo";
 export {
   defaultFilesGitHub,
@@ -6,7 +6,15 @@ export {
   getFileContentGitHub,
   getFileSizeGitHub,
 } from "./browse";
-export { blameLines, enrichCommits, fileHistoryGitHub } from "./blame";
+export {
+  attachEnrichment,
+  blameLines,
+  blameLinesAt,
+  blameWindowGitHub,
+  enrichCommits,
+  fileHistoryGitHub,
+  spansFromGitHubRanges,
+} from "./blame";
 export type { PrReview, PrIssue, AssociatedPr, BlameCommit } from "./blame";
 export { commitArtifact, prArtifact, issueArtifact, reviewArtifact } from "./artifacts";
 export { expandCommit } from "./enrich";

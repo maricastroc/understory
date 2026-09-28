@@ -2,6 +2,17 @@ export type LineRange = { start: number; end: number };
 
 export type FileChangeStatus = "added" | "deleted" | "modified" | "renamed";
 
+export type HunkLine = {
+  kind: "del" | "add";
+  old: number | null;
+  new: number | null;
+  text: string;
+};
+
+export type ChangeLine = HunkLine & { block: number };
+
+export type TargetHunk = { lines: HunkLine[]; removed: number; added: number; omitted: number };
+
 export type FileChange = {
   oldPath: string | null;
   newPath: string | null;
@@ -9,11 +20,12 @@ export type FileChange = {
   removedRanges: LineRange[];
   addedRanges: LineRange[];
   binary: boolean;
+  changes?: ChangeLine[];
 };
 
 export type ParsedDiff = { files: FileChange[] };
 
-export type BlameTarget = { path: string; range: LineRange };
+export type BlameTarget = { path: string; range: LineRange; hunk?: TargetHunk };
 
 export type BlamedTarget = { target: BlameTarget; commitId: string };
 
@@ -33,6 +45,8 @@ export type PullRef = {
   url: string;
   baseSha: string;
   headSha: string;
+  createdAt?: string;
+  mergedAt?: string | null;
 };
 
 export type DiffTriage = {

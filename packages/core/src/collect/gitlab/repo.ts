@@ -56,6 +56,19 @@ export type GitLabProjectMeta = {
   topics: string[];
 };
 
+export async function getBranchHeadGitLab(
+  host: string,
+  project: string,
+  branch: string,
+): Promise<string> {
+  const d = await glRest<{ commit?: { id?: string } }>(
+    host,
+    `/projects/${projectId(project)}/repository/branches/${encodeURIComponent(branch)}`,
+  );
+  if (!d.commit?.id) throw new Error(`Could not resolve the head of ${branch}`);
+  return d.commit.id;
+}
+
 async function topLanguage(host: string, project: string): Promise<string | null> {
   try {
     const langs = await glRest<Record<string, number>>(

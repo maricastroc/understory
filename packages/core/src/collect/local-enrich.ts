@@ -1,10 +1,15 @@
-import type { Artifact, RepoRef } from "../types";
+import type { Artifact, PrLookup, RepoRef } from "../types";
 import type { GitCommit } from "./git";
 import { type AssociatedPr, type BlameCommit, enrichCommits, expandCommit } from "./github";
 
 const MAX_LOCAL_ENRICH = 10;
 
-function toBlameCommit(c: GitCommit, repo: RepoRef, prs: AssociatedPr[]): BlameCommit {
+function toBlameCommit(
+  c: GitCommit,
+  repo: RepoRef,
+  prs: AssociatedPr[],
+  prLookup: PrLookup,
+): BlameCommit {
   return {
     oid: c.sha,
     abbreviatedOid: c.shortSha,
@@ -14,18 +19,34 @@ function toBlameCommit(c: GitCommit, repo: RepoRef, prs: AssociatedPr[]): BlameC
     url: repo.remoteUrl ? `${repo.remoteUrl}/commit/${c.sha}` : "",
     author: { name: c.author.name ?? null, email: c.author.email ?? null },
     associatedPullRequests: { nodes: prs },
+    prLookup,
   };
+}
+
+function lookupFor(
+  sha: string,
+  enrichment: Map<string, AssociatedPr[] | null>,
+  attempted: ReadonlySet<string>,
+  failed: boolean,
+): { prs: AssociatedPr[]; prLookup: PrLookup } {
+  if (!attempted.has(sha)) return { prs: [], prLookup: "skipped" };
+  const prs = failed ? null : enrichment.get(sha);
+  if (!prs) return { prs: [], prLookup: "failed" };
+  return { prs, prLookup: prs.length > 0 ? "found" : "none" };
 }
 
 export function buildLocalArtifacts(
   commits: GitCommit[],
   repo: RepoRef,
-  enrichment: Map<string, AssociatedPr[]>,
+  enrichment: Map<string, AssociatedPr[] | null>,
+  attempted: ReadonlySet<string> = new Set(enrichment.keys()),
+  failed = false,
 ): Artifact[] {
   const artifacts: Artifact[] = [];
   const seen = new Set<string>();
   for (const c of commits) {
-    for (const a of expandCommit(toBlameCommit(c, repo, enrichment.get(c.sha) ?? []))) {
+    const { prs, prLookup } = lookupFor(c.sha, enrichment, attempted, failed);
+    for (const a of expandCommit(toBlameCommit(c, repo, prs, prLookup))) {
       if (!seen.has(a.id)) {
         seen.add(a.id);
         artifacts.push(a);
@@ -41,10 +62,13 @@ export async function enrichLocalCommits(
   commits: GitCommit[],
   repoRef: RepoRef,
 ): Promise<Artifact[]> {
-  const enrichment = await enrichCommits(
-    owner,
-    repo,
-    commits.slice(-MAX_LOCAL_ENRICH).map((c) => c.sha),
-  ).catch(() => new Map<string, AssociatedPr[]>());
-  return buildLocalArtifacts(commits, repoRef, enrichment);
+  const targets = commits.slice(-MAX_LOCAL_ENRICH).map((c) => c.sha);
+  const enrichment = await enrichCommits(owner, repo, targets).catch(() => null);
+  return buildLocalArtifacts(
+    commits,
+    repoRef,
+    enrichment ?? new Map(),
+    new Set(targets),
+    enrichment === null,
+  );
 }
