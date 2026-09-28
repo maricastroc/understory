@@ -8,7 +8,7 @@ import { parseGitLabRepo } from "@git-investigator/core/collect/gitlab";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithTokens } from "@git-investigator/core/collect/token-context";
-import { githubAppConfigured, installUrl, installationTokenForRepo } from "@/lib/github-app";
+import { githubAppConfigured, githubTokenForRepo, installUrl } from "@/lib/github-app";
 import { narrate } from "@git-investigator/core/investigate";
 import { ensureHistoryStore } from "@/lib/history-store";
 import { rateLimit } from "@/lib/ratelimit";
@@ -85,25 +85,7 @@ export async function POST(req: Request) {
   }
 
   const gh = parseGitHubRepo(repoPath);
-  let githubToken = token;
-  if (!githubToken && gh && githubAppConfigured()) {
-    try {
-      githubToken = (await installationTokenForRepo(gh.owner, gh.repo)) ?? undefined;
-    } catch {
-      githubToken = undefined;
-    }
-    if (!githubToken) {
-      const link = installUrl();
-      return NextResponse.json(
-        {
-          error: `The Git Investigator GitHub App isn't installed on ${gh.owner}${
-            link ? ` — install it: ${link}` : ""
-          }.`,
-        },
-        { status: 400 },
-      );
-    }
-  }
+  const githubToken = await githubTokenForRepo(token, repoPath);
 
   let evidence: Evidence;
   try {
@@ -113,10 +95,13 @@ export async function POST(req: Request) {
       collect({ repoPath: collectPath, ...collectArgs }),
     );
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : String(e) },
-      { status: 400 },
-    );
+    const message = e instanceof Error ? e.message : String(e);
+    const link = !githubToken && githubAppConfigured() ? installUrl() : null;
+    const hint =
+      gh && link
+        ? ` If ${gh.owner}/${gh.repo} is private, install the Git Investigator GitHub App: ${link}`
+        : "";
+    return NextResponse.json({ error: `${message}${hint}` }, { status: 400 });
   }
 
   const stream = new ReadableStream<Uint8Array>({
