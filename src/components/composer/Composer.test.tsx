@@ -9,6 +9,9 @@ import {
 } from "./fixtures/synthetic-overview";
 import type { Repo } from "./use-repo";
 
+const push = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
     <a href={href} {...rest}>
@@ -108,7 +111,7 @@ function setup(props: { active?: boolean; investigating?: boolean } = {}) {
   };
 }
 
-const trail = () => within(screen.getByRole("navigation", { name: "Investigation setup" }));
+const trail = () => within(screen.getByRole("navigation", { name: "Investigation path" }));
 const sleep = (ms: number) => act(() => new Promise((r) => setTimeout(r, ms)));
 
 describe("Composer — new investigation", () => {
@@ -169,24 +172,37 @@ describe("Composer — new investigation", () => {
     await screen.findByRole("heading", { name: "History of current lines" });
     fireEvent.click(screen.getByRole("button", { name: /^src\/lib\/log\.ts,/ }));
     await waitFor(() =>
-      expect(trail().getByRole("button", { name: "src/lib/log.ts" })).toBeTruthy(),
+      expect(trail().getByRole("button", { name: /^02 file: src\/lib\/log\.ts/ })).toBeTruthy(),
     );
     await waitFor(() =>
       expect(mapCalls.some((c) => c.mode === "map" && c.files.join() === "src/lib/log.ts")).toBe(
         true,
       ),
     );
-    expect(trail().getByRole("button", { name: "line" }).getAttribute("aria-current")).toBe("step");
+    expect(trail().queryByRole("button", { name: /^03 line/ })).toBeNull();
+    expect(
+      trail()
+        .getByText("03 line, current step")
+        .closest("[aria-current]")
+        ?.getAttribute("aria-current"),
+    ).toBe("step");
   });
 
   it("the repository slot goes back to the repository stage", async () => {
     mockFetch();
     setup();
-    fireEvent.click(trail().getByRole("button", { name: "acme/payments-service" }));
+    fireEvent.click(
+      trail().getByRole("button", { name: /^01 repository: acme\/payments-service/ }),
+    );
+    expect(screen.getByRole("heading", { level: 2, name: "Open a repository" })).toBeTruthy();
     expect(screen.getByRole("textbox", { name: "Repository" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Open demo/ })).toBeTruthy();
-    expect(
-      screen.getByRole("link", { name: /Explain a pull request instead/ }).getAttribute("href"),
-    ).toBe("/pr");
+    expect(screen.getByRole("button", { name: /Open the demo/ })).toBeTruthy();
+    expect(screen.getByRole("textbox", { name: /Pull request URL/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Sign in with GitHub/ })).toBeNull();
+    fireEvent.change(screen.getByRole("textbox", { name: /Pull request URL/ }), {
+      target: { value: "chalk/chalk#664" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Explain →" }));
+    expect(push).toHaveBeenCalledWith("/pr?pr=chalk%2Fchalk%23664");
   });
 });

@@ -19,7 +19,7 @@ describe("CaseStrip", () => {
     const { container } = render(<CaseStrip items={items} expanded={false} onOpen={onOpen} />);
     const button = screen.getByRole("button");
     expect(button.getAttribute("aria-label")).toBe(
-      "Show cases, 6. Open case: Why exactly 3 retries?",
+      "Show investigations, 6. Open: Why exactly 3 retries?",
     );
     expect(button.getAttribute("aria-expanded")).toBe("false");
     await user.click(button);
@@ -29,6 +29,6 @@ describe("CaseStrip", () => {
 
   it("works without an open case", () => {
     render(<CaseStrip items={[]} expanded onOpen={() => {}} />);
-    expect(screen.getByRole("button").getAttribute("aria-label")).toBe("Show cases, 0");
+    expect(screen.getByRole("button").getAttribute("aria-label")).toBe("Show investigations, 0");
   });
 });

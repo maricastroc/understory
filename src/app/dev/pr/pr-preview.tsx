@@ -15,7 +15,12 @@ import { AppShell } from "@/components/shell/AppShell";
 import { CaseRail } from "@/components/shell/CaseRail";
 import { CaseStrip } from "@/components/shell/CaseStrip";
 import { railFooterInfo } from "@/components/shell/rail-footer-info";
-import { filterRail, lineRailItems, prRailItems } from "@/components/shell/rail-items";
+import {
+  filterRail,
+  lineRailItems,
+  prRailItems,
+  railFiltersUseful,
+} from "@/components/shell/rail-items";
 import type { RailFilter } from "@/components/shell/types";
 
 const NOW = Date.parse(SYNTHETIC_PR_NOW);
@@ -71,6 +76,7 @@ export function PrPreview({ state, user }: { state: string; user: string | null 
       rail={(onClose) => (
         <CaseRail
           items={filterRail(lineItems, prItems, filter)}
+          showFilters={railFiltersUseful(lineItems, prItems)}
           filter={filter}
           onFilter={setFilter}
           onSelect={() => setMenuOpen(false)}

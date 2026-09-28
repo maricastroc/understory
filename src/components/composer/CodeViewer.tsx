@@ -1,21 +1,11 @@
 import type { SymbolSpan } from "@git-investigator/core/collect/symbol";
 import { useEffect, useMemo } from "react";
-import { Braces, FileIcon, Pencil } from "../icons";
-import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
-import { liButton } from "../line-investigation/parts/button-class";
 import { CodeText } from "../line-investigation/specimen/CodeText";
 import { highlightLines } from "../line-investigation/specimen/highlight-code";
-import { PANEL } from "./composer-classes";
 import { GoToLine } from "./GoToLine";
+import { symbolNoun } from "./symbol-noun";
 import type { OpenFile } from "./use-file-viewer";
 import { useVirtualRows } from "./use-virtual-rows";
-
-const NOUN: Record<string, string> = {
-  method: "function",
-  module: "module",
-  namespace: "namespace",
-};
-const symbolNoun = (kind: string): string => NOUN[kind] ?? kind;
 
 const ROW_H = 20;
 
@@ -25,12 +15,6 @@ export function CodeViewer({
   selectedEnd,
   enclosing,
   onSelect,
-  onExpand,
-  question,
-  setQuestion,
-  noCapture,
-  setNoCapture,
-  onRun,
   focusLine,
 }: {
   file: OpenFile;
@@ -38,12 +22,6 @@ export function CodeViewer({
   selectedEnd: number | null;
   enclosing: SymbolSpan | null;
   onSelect: (n: number, extend: boolean) => void;
-  onExpand: () => void;
-  question: string;
-  setQuestion: (v: string) => void;
-  noCapture: boolean;
-  setNoCapture: (v: boolean) => void;
-  onRun: () => void;
   focusLine?: number;
 }) {
   const { scrollRef, startIndex, endIndex, totalHeight, onScroll, scrollToIndex } = useVirtualRows(
@@ -62,41 +40,34 @@ export function CodeViewer({
 
   const hasSelection = selectedStart !== null && selectedEnd !== null;
   const rangeSize = hasSelection ? selectedEnd - selectedStart + 1 : 0;
-  const locLabel = hasSelection
-    ? `${file.path}:${selectedStart}${rangeSize > 1 ? `-${selectedEnd}` : ""}`
-    : file.path;
-
   const isSymbolSelected =
     !!enclosing && selectedStart === enclosing.start && selectedEnd === enclosing.end;
-  const canExpand =
-    !!enclosing && (selectedStart !== enclosing.start || selectedEnd !== enclosing.end);
-
-  const subject = isSymbolSelected ? symbolNoun(enclosing.kind) : rangeSize > 1 ? "lines" : "line";
-  const runLabel =
-    isSymbolSelected && enclosing.name
-      ? `Investigate ${enclosing.name}`
-      : isSymbolSelected
-        ? `Investigate this ${subject}`
-        : rangeSize > 1
-          ? "Investigate these lines"
-          : "Investigate this line";
+  const slash = file.path.lastIndexOf("/");
 
   return (
-    <div className={`overflow-hidden ${PANEL}`}>
-      <div className="flex items-center gap-2 border-b border-li-divider bg-li-paper px-3.5 py-2">
-        <FileIcon className="size-3.5 text-li-text-muted" />
-        <span className="font-li-mono text-xs text-li-ink">{file.path}</span>
-        <span className="ml-auto flex items-center gap-1.5 text-[11px] text-li-text-subtle">
-          {file.lines.length} lines · click a line ·
-          <kbd className="border border-li-divider bg-li-neutral-100 px-1 font-li-mono text-[10px] leading-[1.4] text-li-ink">
-            ⇧
-          </kbd>
-          shift-click for a range
+    <section
+      aria-label={`Code, ${file.path}`}
+      className="flex min-w-0 flex-col border border-li-divider bg-li-neutral-100"
+    >
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-li-divider px-3.5 py-2">
+        <span className="min-w-0 truncate font-li-mono text-xs text-li-ink">
+          <span className="text-li-text-subtle">{file.path.slice(0, slash + 1)}</span>
+          {file.path.slice(slash + 1)}
+        </span>
+        <span className="font-li-mono text-[11px] text-li-text-subtle">
+          {file.lines.length} lines
+        </span>
+        <span className="ml-auto text-[11px] text-li-text-subtle max-[640px]:hidden">
+          shift-click selects a range
         </span>
         <GoToLine max={file.lines.length} onGo={goToLine} />
       </div>
 
-      <div ref={scrollRef} onScroll={onScroll} className="max-h-110 overflow-auto">
+      <div
+        ref={scrollRef}
+        onScroll={onScroll}
+        className="max-h-[min(70vh,760px)] min-h-72 overflow-auto max-[1280px]:max-h-[58vh]"
+      >
         <ol className="relative select-none" style={{ height: totalHeight }}>
           {file.lines.slice(startIndex, endIndex).map((ln, k) => {
             const n = startIndex + k + 1;
@@ -121,17 +92,19 @@ export function CodeViewer({
                   className={`group flex h-full w-full cursor-pointer items-center border-l-[3px] text-left font-li-mono text-xs leading-[1.6] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-steel ${
                     inRange
                       ? "border-li-datum bg-li-datum-row font-medium text-li-ink"
-                      : "border-transparent text-li-neutral-800 hover:bg-li-neutral-200"
+                      : "border-transparent text-li-neutral-800 hover:border-li-datum-weak"
                   }`}
                 >
                   <span
                     className={`w-14 shrink-0 pr-3 text-right ${
-                      inRange ? "font-semibold text-li-ink" : "text-li-text-muted"
+                      inRange
+                        ? "font-semibold text-li-ink"
+                        : "text-li-text-muted group-hover:text-li-ink"
                     }`}
                   >
                     {n}
                   </span>
-                  <span className="flex-1">
+                  <span className="flex-1 pr-4">
                     {ln ? (
                       <CodeText segments={segments[n - 1] ?? []} token={null} datum={inRange} />
                     ) : (
@@ -153,79 +126,6 @@ export function CodeViewer({
           })}
         </ol>
       </div>
-
-      {hasSelection && (
-        <div className="flex flex-col gap-3 border-t border-li-divider bg-li-paper p-4">
-          {canExpand && (
-            <button
-              type="button"
-              onClick={onExpand}
-              className={liButton("secondary", "w-fit px-2.5 py-1.5 text-xs")}
-            >
-              <Braces className="size-3.5" />
-              Expand to the whole{" "}
-              {enclosing.name ? (
-                <>
-                  <code className="font-li-mono font-semibold">{enclosing.name}</code>{" "}
-                </>
-              ) : null}
-              {symbolNoun(enclosing.kind)}
-              <span className="text-li-text-subtle">
-                {" · "}
-                {enclosing.end - enclosing.start + 1} lines
-              </span>
-            </button>
-          )}
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <label
-              htmlFor="investigate-question"
-              className="text-[13.5px] font-semibold text-li-ink"
-            >
-              What do you want to know about this {subject}?
-            </label>
-            <span className="ml-auto inline-flex items-center gap-1.5 font-li-mono text-[11.5px] text-li-text-subtle">
-              <FileIcon className="size-3.5 text-li-text-muted" />
-              {locLabel}
-            </span>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Pencil className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-li-text-muted" />
-              <input
-                id="investigate-question"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onRun()}
-                placeholder={`Ask about this ${subject}…`}
-                className="h-11 w-full border border-li-divider bg-li-neutral-100 pr-3 pl-9 text-sm text-li-ink placeholder:text-li-text-muted focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-steel"
-              />
-            </div>
-            <button type="button" onClick={onRun} className={liButton("primary", "h-11 px-5")}>
-              <BlueprintCorners />
-              {runLabel}
-            </button>
-          </div>
-          <p className="text-[11.5px] text-li-text-subtle">
-            Edit the question before investigating — it steers how the history is reconstructed.
-          </p>
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[11px] text-li-text-subtle">
-              Questions are logged anonymously (the repo and file location, never your identity) to
-              improve investigations.
-            </p>
-            <label className="flex w-fit cursor-pointer items-center gap-1.5 text-[11px] text-li-text-subtle">
-              <input
-                type="checkbox"
-                aria-label="Don't log this question"
-                checked={noCapture}
-                onChange={(e) => setNoCapture(e.target.checked)}
-                className="size-3.5 cursor-pointer accent-li-steel-700"
-              />
-              Don&apos;t log this question
-            </label>
-          </div>
-        </div>
-      )}
-    </div>
+    </section>
   );
 }

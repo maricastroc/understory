@@ -58,7 +58,7 @@ export function RailDrawer({
         ref={panel}
         role="dialog"
         aria-modal="true"
-        aria-label="Cases"
+        aria-label="Investigations"
         className={`absolute inset-y-0 left-0 flex w-[min(17rem,85vw)] flex-col border-r border-li-divider bg-li-paper shadow-li-lg transition-transform duration-200 ease-out motion-reduce:transition-none ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}

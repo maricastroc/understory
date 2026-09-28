@@ -1,14 +1,12 @@
 "use client";
 
-import type { RepoMeta, TreeOverview } from "@git-investigator/core/types";
+import type { TreeOverview } from "@git-investigator/core/types";
 import { useMemo } from "react";
 import { HistoryMap } from "./history/HistoryMap";
 import type { HistoryMapControl } from "./history/use-history-map";
 import { MapSearch } from "./MapSearch";
-import { RepoMetaRow } from "./RepoMetaRow";
 
 export function FileStage({
-  meta,
   overview,
   overviewError,
   caseCounts,
@@ -16,10 +14,10 @@ export function FileStage({
   onQuery,
   results,
   searching,
+  settled = true,
   map,
   onOpen,
 }: {
-  meta: RepoMeta | null;
   overview: TreeOverview | null;
   overviewError: string | null;
   caseCounts: ReadonlyMap<string, number>;
@@ -27,6 +25,7 @@ export function FileStage({
   onQuery: (v: string) => void;
   results: string[];
   searching: boolean;
+  settled?: boolean;
   map: HistoryMapControl;
   onOpen: (path: string) => void;
 }) {
@@ -55,8 +54,10 @@ export function FileStage({
           note={note}
           onOpen={onOpen}
           onSubmit={submit}
+          empty={
+            settled && !searching && q.length >= 2 && results.length === 0 && matches?.size === 0
+          }
         />
-        {meta && <RepoMetaRow meta={meta} overview={overview} />}
       </div>
       {overview ? (
         <HistoryMap

@@ -111,9 +111,14 @@ export function prRailItems(entries: PrEntry[], activeKey: string | null): RailI
   });
 }
 
+export function railFiltersUseful(lines: RailItem[], prs: RailItem[]): boolean {
+  return lines.length > 0 && prs.length > 0;
+}
+
 export function filterRail(lines: RailItem[], prs: RailItem[], filter: RailFilter): RailItem[] {
-  if (filter === "lines") return lines;
-  if (filter === "prs") return prs;
+  const useful = railFiltersUseful(lines, prs);
+  if (useful && filter === "lines") return lines;
+  if (useful && filter === "prs") return prs;
   const prIds = new Set(prs.map((p) => p.id));
   const underPr = (item: RailItem) => !!item.parentId && prIds.has(item.parentId);
   return [

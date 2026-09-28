@@ -33,7 +33,7 @@ for (const user of ["synthetic", "guest"]) {
   test(`axe on the whole page in Chrome, contrast included: ${user}`, async ({ page }) => {
     await open(page, 1440, user);
     await page.mouse.move(0, 0);
-    await expect(page.getByRole("complementary", { name: "Cases" })).toBeVisible();
+    await expect(page.getByRole("complementary", { name: "Investigations" })).toBeVisible();
     expect(await axeViolations(page)).toEqual([]);
   });
 }
@@ -66,12 +66,12 @@ test("on a phone the cases open in a drawer that traps focus and closes on Escap
   page,
 }) => {
   await open(page, 390);
-  const drawer = page.getByRole("dialog", { name: "Cases" });
+  const drawer = page.getByRole("dialog", { name: "Investigations" });
   await expect(drawer).not.toBeInViewport();
-  const menu = page.getByRole("button", { name: "Open cases" });
+  const menu = page.getByRole("button", { name: "Open investigations" });
   await menu.click();
   await expect(drawer).toBeVisible();
-  await expect(drawer.getByRole("button", { name: "Close cases" })).toBeVisible();
+  await expect(drawer.getByRole("button", { name: "Close investigations" })).toBeVisible();
   for (let i = 0; i < 20; i++) await page.keyboard.press("Tab");
   expect(await drawer.evaluate((d) => d.contains(document.activeElement))).toBe(true);
   await page.keyboard.press("Escape");
@@ -105,8 +105,8 @@ for (const edge of EDGES) {
   test(`breakpoint ${edge.width}: shell and instrument switch together`, async ({ page }) => {
     await open(page, edge.width);
     expect(await inViewport(page, 'nav[aria-label="Case list"]')).toBe(edge.rail);
-    expect(await inViewport(page, 'button[aria-label^="Show cases, "]')).toBe(edge.strip);
-    expect(await inViewport(page, 'button[aria-label="Open cases"]')).toBe(edge.menu);
+    expect(await inViewport(page, 'button[aria-label^="Show investigations, "]')).toBe(edge.strip);
+    expect(await inViewport(page, 'button[aria-label="Open investigations"]')).toBe(edge.menu);
     const specimen = page.locator("section[data-datum-y]");
     await expect(specimen).toHaveAttribute("data-mode", edge.mode);
     if (edge.code) expect(Math.round((await specimen.boundingBox())!.width)).toBe(edge.code);
@@ -122,10 +122,10 @@ test("the collapsed strip opens the case list as an overlay and gives focus back
 }) => {
   await open(page, 1200);
   const strip = page.getByRole("button", {
-    name: /^Show cases, 6\. Open case: Why exactly 3 retries\?/,
+    name: /^Show investigations, 6\. Open: Why exactly 3 retries\?/,
   });
   await strip.click();
-  const overlay = page.getByRole("dialog", { name: "Cases" });
+  const overlay = page.getByRole("dialog", { name: "Investigations" });
   await expect(overlay).toBeInViewport();
   await expect(overlay.locator('button[aria-current="page"]')).toContainText(
     "Why exactly 3 retries?",

@@ -81,6 +81,7 @@ export function useFileViewer(repoPath: string) {
     selectedEnd,
     enclosing,
     selectLine,
+    clearSelection,
     expandToSymbol,
     open,
     reset,

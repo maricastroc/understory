@@ -10,17 +10,29 @@ const pct = (part: number, whole: number) => {
 };
 const files = (n: number) => `${n} mapped file${n === 1 ? "" : "s"}`;
 
-export function shareLine(histories: FileHistory[], prData: TreeOverview["prData"]): string | null {
-  if (prData === "none") return "PR data unavailable for this repo";
+function tallyLines(histories: FileHistory[]) {
   const mapped = histories.filter((h) => h.status === "mapped");
-  if (mapped.length === 0) return null;
   const lines = { found: 0, none: 0, unknown: 0 };
   for (const h of mapped) for (const m of h.marks) lines[markTone(m.prLookup)] += m.lines;
-  const checked = lines.found + lines.none;
-  const all = checked + lines.unknown;
-  if (checked === 0) return `PR lookups unavailable for the ${files(mapped.length)}`;
-  const unknown = lines.unknown ? ` · ${pct(lines.unknown, all)} not checked` : "";
-  return `${pct(lines.found, checked)} of lines in ${files(mapped.length)} have a PR${unknown}`;
+  return { mapped: mapped.length, ...lines, checked: lines.found + lines.none };
+}
+
+export function shareLine(histories: FileHistory[], prData: TreeOverview["prData"]): string | null {
+  if (prData === "none") return null;
+  const t = tallyLines(histories);
+  if (t.mapped === 0 || t.checked === 0) return null;
+  const unknown = t.unknown ? ` · ${pct(t.unknown, t.checked + t.unknown)} not checked` : "";
+  return `${pct(t.found, t.checked)} of lines in ${files(t.mapped)} have a PR${unknown}`;
+}
+
+export function prAbsence(histories: FileHistory[], prData: TreeOverview["prData"]): string | null {
+  if (prData === "none") {
+    return "PR data is unavailable for this repo (no GitHub remote or token), so every mark reads “not checked”.";
+  }
+  const t = tallyLines(histories);
+  if (t.mapped > 0 && t.checked === 0)
+    return `PR lookups were unavailable for the ${files(t.mapped)}.`;
+  return null;
 }
 
 export function historyFacts(view: CoreHistory): string {

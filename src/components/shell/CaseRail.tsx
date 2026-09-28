@@ -11,8 +11,8 @@ const FILTERS: Array<{ value: RailFilter; label: string }> = [
 ];
 
 const EMPTY: Record<RailFilter, string> = {
-  all: "No cases yet. Pick a line or paste a pull request to start one.",
-  lines: "No line cases yet.",
+  all: "No investigations yet.",
+  lines: "No line investigations yet.",
   prs: "No pull requests explained yet.",
 };
 
@@ -24,6 +24,8 @@ export function CaseRail({
   onRemove,
   footer,
   onClose,
+  onNew,
+  showFilters = true,
 }: {
   items: RailItem[];
   filter: RailFilter;
@@ -32,30 +34,88 @@ export function CaseRail({
   onRemove?: (item: RailItem) => void;
   footer: RailFooterInfo;
   onClose?: () => void;
+  onNew?: () => void;
+  showFilters?: boolean;
 }) {
   const headingId = useId();
   return (
     <aside aria-labelledby={headingId} className="flex h-full flex-col bg-li-paper font-li-body">
-      <div className="flex items-center px-4 pt-4.5 pb-2.5">
+      <div className="flex items-center gap-2 px-4 pt-4.5 pb-2.5">
         <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
-          Cases
+          Investigations
         </h2>
-        <span className="ml-auto font-li-mono text-[11px] text-li-text-subtle">{items.length}</span>
+        {items.length > 0 && (
+          <span className="font-li-mono text-[11px] text-li-text-subtle">{items.length}</span>
+        )}
+        {onNew && (
+          <button
+            type="button"
+            onClick={onNew}
+            aria-label="New investigation"
+            className="-mr-1 ml-auto grid size-7 cursor-pointer place-items-center text-[17px] leading-none text-li-ink transition-colors hover:text-li-brand focus-visible:outline-2 focus-visible:outline-li-steel motion-reduce:transition-none"
+          >
+            +
+          </button>
+        )}
         {onClose && (
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close cases"
-            className="-my-1 -mr-1.5 ml-2 grid size-7 cursor-pointer place-items-center rounded text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-li-steel"
+            aria-label="Close investigations"
+            className={`-my-1 -mr-1.5 grid size-7 cursor-pointer place-items-center text-li-ink hover:text-li-text-subtle focus-visible:outline-2 focus-visible:outline-li-steel ${onNew ? "ml-1" : "ml-auto"}`}
           >
             ✕
           </button>
         )}
       </div>
-      <SegmentedFilter label="Show cases" options={FILTERS} value={filter} onChange={onFilter} />
+      {showFilters && (
+        <SegmentedFilter
+          label="Show investigations"
+          options={FILTERS}
+          value={filter}
+          onChange={onFilter}
+        />
+      )}
       <nav aria-label="Case list" className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
         {items.length === 0 ? (
-          <p className="px-2 py-3 text-xs leading-relaxed text-li-text-subtle">{EMPTY[filter]}</p>
+          <div className="grid grid-cols-[24px_minmax(0,1fr)] gap-3 px-2 pt-3">
+            <svg
+              aria-hidden
+              width="24"
+              height="64"
+              viewBox="0 0 24 64"
+              className="overflow-visible"
+            >
+              <line x1="0" x2="24" y1="3" y2="3" strokeWidth="2" className="stroke-li-datum" />
+              <line
+                x1="12"
+                x2="12"
+                y1="3"
+                y2="50"
+                strokeWidth="2"
+                strokeDasharray="3 3"
+                className="stroke-li-neutral-500"
+              />
+              <circle
+                cx="12"
+                cy="56"
+                r="5"
+                strokeWidth="1.5"
+                strokeDasharray="2.5 2"
+                className="fill-li-paper stroke-li-neutral-500"
+              />
+            </svg>
+            <div className="flex flex-col gap-1.5 pt-0.5">
+              <p className="text-[14px] font-medium text-li-ink">
+                {EMPTY[showFilters ? filter : "all"]}
+              </p>
+              {!showFilters && (
+                <p className="text-[12.5px] leading-snug text-li-neutral-800">
+                  Each line or pull request you investigate stays here, with the trail it followed.
+                </p>
+              )}
+            </div>
+          </div>
         ) : (
           <ul className="flex flex-col gap-0.5">
             {items.map((item) => (

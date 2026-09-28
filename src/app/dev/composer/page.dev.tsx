@@ -6,5 +6,11 @@ export default async function ComposerPreviewPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const params = await searchParams;
-  return <ComposerPreview state={params.state ?? "cold"} />;
+  const files = Number(params.files);
+  return (
+    <ComposerPreview
+      state={params.state ?? "cold"}
+      files={Number.isInteger(files) && files > 0 ? files : null}
+    />
+  );
 }
