@@ -9,14 +9,18 @@ import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithTokens } from "@git-investigator/core/collect/token-context";
 import { githubAppConfigured, githubTokenForRepo, installUrl } from "@/lib/github-app";
 import { narrate } from "@git-investigator/core/investigate";
+import { getModel } from "@git-investigator/core/llm";
 import { ensureHistoryStore } from "@/lib/history-store";
-import { rateLimit } from "@/lib/ratelimit";
+import { consumeAiDailyLimit, rateLimit } from "@/lib/ratelimit";
 import type { ArtifactRef, Evidence } from "@git-investigator/core/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 const DEFAULT_LINE_QUESTION = "Why is this line the way it is? Reconstruct why it changed.";
+
+const AI_DAILY_LIMIT_REACHED =
+  "AI reconstruction is temporarily unavailable. The evidence and provenance chain below are still complete.";
 
 export async function POST(req: Request) {
   const authError = collectorAuthError(req);
@@ -99,7 +103,10 @@ export async function POST(req: Request) {
       const send = (obj: unknown) => controller.enqueue(enc.encode(`${JSON.stringify(obj)}\n`));
       try {
         send({ phase: "evidence", evidence });
-        const { narrative, error } = await narrate(evidence, { language });
+        const aiBlocked = getModel() !== null && !(await consumeAiDailyLimit());
+        const { narrative, error } = aiBlocked
+          ? { narrative: null, error: AI_DAILY_LIMIT_REACHED }
+          : await narrate(evidence, { language });
         send({ phase: "final", narrative, error });
       } catch (e) {
         send({

@@ -16,6 +16,7 @@ import type {
 
 const MAX_CHECKS = 6;
 const JUDGE_BODY_CAP = 1_600;
+const JUDGE_MAX_OUTPUT_TOKENS = 1_000;
 
 const EMPTY: Entailment = { checked: false, checks: [], supported: 0, misattributed: 0 };
 
@@ -131,6 +132,7 @@ export async function judgeClaim(
     system: CLAIM_SYSTEM,
     prompt,
     temperature: 0,
+    maxOutputTokens: JUDGE_MAX_OUTPUT_TOKENS,
   });
   return object;
 }

@@ -329,3 +329,17 @@ describe("entailClaims — hybrid auditor (20b, falling back to 120b on a techni
     expect(e.checks.map((c) => c.claim)).toEqual([0]);
   });
 });
+
+describe("entailClaims — output budget", () => {
+  it("caps each audit's output at 1,000 tokens", async () => {
+    const source = artifact("commit:c1", "Bound the charge retries to three attempts.");
+    const judge = scriptedJudge(() => ({ status: "weak", quote: "", reason: "thin" }));
+    await entailClaims(
+      "q",
+      [{ text: "Retries were bounded.", citations: ["commit:c1"] }],
+      new Map([[source.id, source]]),
+      { primary: judge, fallback: null },
+    );
+    expect(judge.doGenerateCalls[0].maxOutputTokens).toBe(1_000);
+  });
+});

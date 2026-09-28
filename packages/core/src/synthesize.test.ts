@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildSynthesisInput, toNarrative } from "./synthesize";
+import { buildSynthesisInput, synthesize, toNarrative } from "./synthesize";
+import { scriptedJudge } from "./testing/scripted-judge";
 import type { Artifact, Evidence } from "./types";
 
 const mk = (id: string, body: string): Artifact => ({
@@ -99,5 +100,18 @@ describe("toNarrative", () => {
     );
     expect(n.claims).toEqual([]);
     expect(n.answer).toBe("Outside this code's history.");
+  });
+});
+
+describe("synthesize — output budget", () => {
+  it("caps the model's output at 4,000 tokens", async () => {
+    const model = scriptedJudge(() => ({
+      answerable: true,
+      recorded: false,
+      claims: [],
+      answer: "The history does not explain it.",
+    }));
+    await synthesize(evidence([mk("commit:a", "fix")]), model);
+    expect(model.doGenerateCalls[0].maxOutputTokens).toBe(4_000);
   });
 });
