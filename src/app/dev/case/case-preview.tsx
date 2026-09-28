@@ -28,7 +28,6 @@ export function CasePreview() {
           cases={items}
           onSelectCase={() => {}}
           fileSearch={null}
-          crossLink="pr"
           onNewInvestigation={() => {}}
           user={null}
           onMenuClick={() => setMenuOpen(true)}
@@ -38,8 +37,6 @@ export function CasePreview() {
       rail={(onClose) => (
         <CaseRail
           items={items}
-          filter="all"
-          onFilter={() => {}}
           onSelect={() => {}}
           footer={railFooterInfo(null, false)}
           onClose={onClose}

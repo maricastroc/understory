@@ -1,5 +1,5 @@
-import { type AxisScale, clusterTimes, LINE_SCALE, pxPerDay } from "./cluster-times";
-import { DAY } from "./geometry";
+import { clusterTimes, pxPerDay } from "./cluster-times";
+import { BORE, DAY } from "./geometry";
 import type { AxisBreak, DepthTick, TimeCluster } from "./types";
 
 export type TimeAxis = {
@@ -11,39 +11,35 @@ export type TimeAxis = {
   yOf: (time: number) => number;
 };
 
-export function timeAxis(
-  times: number[],
-  opts: { now: number; datumY: number; scale?: AxisScale },
-): TimeAxis {
-  const scale = opts.scale ?? LINE_SCALE;
-  const spans = clusterTimes(times, scale.clusterDays);
+export function timeAxis(times: number[], opts: { now: number; datumY: number }): TimeAxis {
+  const spans = clusterTimes(times);
   const breaks: AxisBreak[] = [];
   const clusters: TimeCluster[] = [];
   const newest = spans[0].newest;
   breaks.push({
     kind: "first",
     top: opts.datumY,
-    height: scale.firstSegment,
+    height: BORE.firstSegment,
     days: (opts.now - newest) / DAY,
-    strokes: opts.now - newest >= scale.clusterDays * DAY,
+    strokes: opts.now - newest >= BORE.clusterDays * DAY,
   });
-  let cursor = opts.datumY + scale.firstSegment;
+  let cursor = opts.datumY + BORE.firstSegment;
   spans.forEach((s, i) => {
     if (i > 0) {
       breaks.push({
         kind: "gap",
         top: cursor,
-        height: scale.breakHeight,
+        height: BORE.breakHeight,
         days: (spans[i - 1].oldest - s.newest) / DAY,
         strokes: true,
       });
-      cursor += scale.breakHeight;
+      cursor += BORE.breakHeight;
     }
     const spanDays = (s.newest - s.oldest) / DAY;
-    const k = pxPerDay(spanDays, scale);
-    const top = cursor + scale.clusterPad;
+    const k = pxPerDay(spanDays);
+    const top = cursor + BORE.clusterPad;
     clusters.push({ newest: s.newest, oldest: s.oldest, top, pxPerDay: k });
-    cursor = top + spanDays * k + scale.clusterPad;
+    cursor = top + spanDays * k + BORE.clusterPad;
   });
   const ticks: DepthTick[] = clusters.map((c, i) => ({
     y: c.top,

@@ -1,5 +1,4 @@
-import type { ChecklistItem, InvestigationView, Verdict } from "../model/types";
-import type { PopoverRow } from "../verdict/popover-row";
+import type { ChecklistItem, Verdict } from "../model/types";
 
 export const VERDICT_LABEL: Record<Verdict, string> = {
   pending: "Reconstructing…",
@@ -62,21 +61,4 @@ export function checklistGlyph(item: ChecklistItem): string {
   if (item.tone === "silent") return "◌";
   if (item.tone === "caveat") return "!";
   return "·";
-}
-
-export function verdictRows(view: InvestigationView): PopoverRow[] {
-  return view.checklist.map((item, i) => ({
-    key: `${item.kind}-${i}`,
-    glyph: checklistGlyph(item),
-    tone: item.tone,
-    text: checklistText(item),
-  }));
-}
-
-export function verdictConfidence(view: InvestigationView): { value: string; note: string } | null {
-  if (!view.confidence) return null;
-  return {
-    value: `${view.confidence.score.toFixed(2)} · ${view.confidence.level}`,
-    note: "Computed from the checks above, never the model's self-assessment.",
-  };
 }

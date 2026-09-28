@@ -3,7 +3,7 @@
 import type { TreeOverview } from "@git-investigator/core/types";
 import { useId, useMemo, useState } from "react";
 import { useHorizontalOverflow } from "../../line-investigation/specimen/use-horizontal-overflow";
-import { useElementWidth } from "../../pr-investigation/case/use-element-width";
+import { useElementWidth } from "../../use-element-width";
 import { MapCanvas, useCoreViews } from "./MapCanvas";
 import { MapHeader } from "./MapHeader";
 import { legendKeys } from "./legend-keys";

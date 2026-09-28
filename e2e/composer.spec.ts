@@ -109,7 +109,6 @@ test("the first node of the path leads back to the repository stage", async ({ p
   await expect(page.getByRole("heading", { level: 2, name: "Open a repository" })).toBeVisible();
   await expect(page.getByRole("textbox", { name: "Repository" })).toBeFocused();
   await expect(page.getByRole("button", { name: /Open the demo/ })).toBeVisible();
-  await expect(page.getByRole("textbox", { name: /Pull request URL/ })).toBeVisible();
   await expect(page.getByText(/Sign in with GitHub/)).toHaveCount(0);
   await page.waitForTimeout(400);
   expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);

@@ -2,15 +2,12 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { axe } from "@/test/axe";
-import { syntheticCases, syntheticPrCases } from "../line-investigation/fixtures/synthetic-cases";
+import { syntheticCases } from "../line-investigation/fixtures/synthetic-cases";
 import { SYNTHETIC_NOW } from "../line-investigation/fixtures/synthetic-retry-cap";
 import { HeaderSearch } from "./HeaderSearch";
-import { lineRailItems, prRailItems } from "./rail-items";
+import { lineRailItems } from "./rail-items";
 
-const cases = [
-  ...lineRailItems(syntheticCases, { activeId: null, now: Date.parse(SYNTHETIC_NOW) }),
-  ...prRailItems(syntheticPrCases, null),
-];
+const cases = lineRailItems(syntheticCases, { activeId: null, now: Date.parse(SYNTHETIC_NOW) });
 
 describe("HeaderSearch", () => {
   it("searches only cases when no repository is open", () => {
@@ -25,15 +22,13 @@ describe("HeaderSearch", () => {
       <HeaderSearch cases={cases} onSelectCase={onSelectCase} files={null} />,
     );
     const box = screen.getByRole("combobox");
-    await user.type(box, "webhook");
+    await user.type(box, "ledger");
     const options = screen.getAllByRole("option");
     expect(options).toHaveLength(1);
-    expect(options[0].textContent).toContain("Drop legacy webhook path");
+    expect(options[0].textContent).toContain("Why does refund skip the ledger?");
     expect((await axe(container)).violations).toEqual([]);
     await user.keyboard("{Enter}");
-    expect(onSelectCase).toHaveBeenCalledWith(
-      expect.objectContaining({ id: expect.any(String), kind: "pr" }),
-    );
+    expect(onSelectCase).toHaveBeenCalledWith(expect.objectContaining({ id: "GI-2052" }));
     expect((box as HTMLInputElement).value).toBe("");
   });
 

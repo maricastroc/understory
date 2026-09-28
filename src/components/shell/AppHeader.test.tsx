@@ -18,7 +18,6 @@ function renderHeader(overrides: Partial<Parameters<typeof AppHeader>[0]> = {}) 
     cases: [],
     onSelectCase: vi.fn(),
     fileSearch: null,
-    crossLink: "pr",
     onNewInvestigation: vi.fn(),
     user: null,
     onMenuClick: vi.fn(),
@@ -39,13 +38,6 @@ describe("AppHeader", () => {
     );
     await user.click(screen.getByRole("button", { name: "New investigation here" }));
     expect(props.onNewInRepo).toHaveBeenCalledOnce();
-  });
-
-  it("links across to the other investigation kind", () => {
-    const { rerender, props } = renderHeader();
-    expect(screen.getByRole("link", { name: "Explain a PR" }).getAttribute("href")).toBe("/pr");
-    rerender(<AppHeader {...props} crossLink="line" />);
-    expect(screen.getByRole("link", { name: "Explain a line" }).getAttribute("href")).toBe("/app");
   });
 
   it("offers a new investigation and a signed-in account menu", async () => {

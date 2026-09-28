@@ -222,17 +222,6 @@ export async function blameLinesAt(
   return { oid, commits: enriched };
 }
 
-export async function blameLines(
-  owner: string,
-  repo: string,
-  branch: string,
-  path: string,
-  start: number,
-  end: number,
-): Promise<BlameCommit[]> {
-  return (await blameLinesAt(owner, repo, branch, path, start, end)).commits;
-}
-
 export function spansFromGitHubRanges(
   ranges: Array<{
     startingLine: number;

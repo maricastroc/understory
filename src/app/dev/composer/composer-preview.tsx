@@ -12,32 +12,21 @@ import { InvestigationPath } from "@/components/composer/InvestigationPath";
 import { RepoStrip } from "@/components/composer/RepoStrip";
 import { StageHeading } from "@/components/composer/StageHeading";
 import type { PathStep } from "@/components/composer/types/path-step";
-import {
-  syntheticCases,
-  syntheticPrCases,
-} from "@/components/line-investigation/fixtures/synthetic-cases";
+import { syntheticCases } from "@/components/line-investigation/fixtures/synthetic-cases";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { AppShell } from "@/components/shell/AppShell";
 import { CaseRail } from "@/components/shell/CaseRail";
 import { CaseStrip } from "@/components/shell/CaseStrip";
 import { railFooterInfo } from "@/components/shell/rail-footer-info";
-import {
-  filterRail,
-  lineRailItems,
-  prRailItems,
-  railFiltersUseful,
-} from "@/components/shell/rail-items";
-import type { RailFilter } from "@/components/shell/types";
+import { lineRailItems } from "@/components/shell/rail-items";
 
 const NOW = Date.parse("2026-09-27T12:00:00Z");
 
 export function ComposerPreview({ state, files }: { state: string; files: number | null }) {
-  const [filter, setFilter] = useState<RailFilter>("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [opened, setOpened] = useState<string | null>(null);
   const lineItems = useMemo(() => lineRailItems(syntheticCases, { activeId: null, now: NOW }), []);
-  const prItems = useMemo(() => prRailItems(syntheticPrCases, null), []);
   const overview = useMemo(
     () =>
       state === "loading"
@@ -95,28 +84,18 @@ export function ComposerPreview({ state, files }: { state: string; files: number
       header={
         <AppHeader
           repo={{ name: "payments-service", detail: "main", url: null, connected: true }}
-          cases={[...lineItems, ...prItems]}
+          cases={lineItems}
           onSelectCase={() => {}}
           fileSearch={null}
-          crossLink="pr"
           onNewInvestigation={() => {}}
           user={null}
           onMenuClick={() => setMenuOpen(true)}
         />
       }
-      strip={
-        <CaseStrip
-          items={filterRail(lineItems, prItems, filter)}
-          expanded={menuOpen}
-          onOpen={() => setMenuOpen(true)}
-        />
-      }
+      strip={<CaseStrip items={lineItems} expanded={menuOpen} onOpen={() => setMenuOpen(true)} />}
       rail={(onClose) => (
         <CaseRail
-          items={filterRail(lineItems, prItems, filter)}
-          showFilters={railFiltersUseful(lineItems, prItems)}
-          filter={filter}
-          onFilter={setFilter}
+          items={lineItems}
           onSelect={() => setMenuOpen(false)}
           onRemove={() => {}}
           footer={railFooterInfo(null, false)}

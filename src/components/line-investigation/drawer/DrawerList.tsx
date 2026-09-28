@@ -15,13 +15,11 @@ export function DrawerList({
   clauses,
   active,
   onInspect,
-  aside,
 }: {
   entries: EvidenceEntry[];
   clauses: ViewClause[];
   active: Set<string> | null;
   onInspect: (id: string) => void;
-  aside?: (entry: EvidenceEntry) => string | null;
 }) {
   return (
     <ul className="flex flex-col">
@@ -44,9 +42,8 @@ export function DrawerList({
                   variant={gap.verified ? "gap" : "unverified"}
                 />
                 <span className="flex flex-col gap-0.5">
-                  <span className="flex gap-2 font-li-mono text-[11px]">
-                    <span className={`font-medium ${text}`}>{gapId(gap, after)}</span>
-                    {aside && <span className="ml-auto text-li-text-subtle">{aside(entry)}</span>}
+                  <span className={`font-li-mono text-[11px] font-medium ${text}`}>
+                    {gapId(gap, after)}
                   </span>
                   <span className={`text-[13.5px] ${text}`}>{gapTitle(gap)}</span>
                   <span
@@ -76,7 +73,6 @@ export function DrawerList({
                 <span className="flex gap-2 font-li-mono text-[11px]">
                   <span className={`font-medium ${text}`}>{displayId(a)}</span>
                   <span className="text-li-text-subtle">{dateLine(a)}</span>
-                  {aside && <span className="ml-auto text-li-text-subtle">{aside(entry)}</span>}
                 </span>
                 <span className={`text-[13.5px] ${text}`}>{labelTitle(a)}</span>
                 <span
@@ -86,7 +82,7 @@ export function DrawerList({
                       : "text-li-text-subtle"
                   }`}
                 >
-                  {aside ? status.text : `${status.text} · ${clauseRefs(a.citedBy, clauses)}`}
+                  {status.text} · {clauseRefs(a.citedBy, clauses)}
                 </span>
               </span>
             </button>

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { tallyText } from "../copy/clause-copy";
 import type { ViewClause } from "../model/types";
 import { TallyCells } from "./TallyCells";
@@ -12,19 +11,17 @@ const LAYOUT = {
 export function ClauseTally({
   clause,
   layout,
-  custom,
 }: {
   clause: ViewClause;
   layout: keyof typeof LAYOUT;
-  custom?: { cells: ReactNode; label: string };
 }) {
   return (
     <span aria-hidden className={`flex gap-0.75 ${LAYOUT[layout]}`}>
-      {custom ? custom.cells : <TallyCells clause={clause} />}
+      <TallyCells clause={clause} />
       <span
         className={`text-[11.5px] whitespace-nowrap ${clause.silent ? "text-li-gap-ink" : "text-li-neutral-800"}`}
       >
-        {custom ? custom.label : tallyText(clause)}
+        {tallyText(clause)}
       </span>
     </span>
   );

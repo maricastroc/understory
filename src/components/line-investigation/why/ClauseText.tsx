@@ -1,23 +1,20 @@
-import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { ViewClause } from "../model/types";
+import { ClauseLetters } from "./ClauseLetters";
 import { ClauseTally } from "./ClauseTally";
 
 export function ClauseText({
   clause,
-  refs,
   expanded,
   compact,
   ink,
   surface,
-  tally,
 }: {
   clause: ViewClause;
-  refs: ReactNode;
   expanded: boolean;
   compact: boolean;
   ink: string;
   surface: string;
-  tally?: { cells: ReactNode; label: string };
 }) {
   const sizer = useRef<HTMLSpanElement>(null);
   const full = useRef<HTMLSpanElement>(null);
@@ -33,9 +30,9 @@ export function ClauseText({
     <span className="pointer-events-none relative min-w-0">
       <span ref={sizer} aria-hidden className="invisible block">
         <span className="line-clamp-3 text-base leading-[1.42]">
-          {clause.text} {refs}
+          {clause.text} <ClauseLetters clause={clause} />
         </span>
-        {compact && <ClauseTally clause={clause} layout="below" custom={tally} />}
+        {compact && <ClauseTally clause={clause} layout="below" />}
       </span>
       {expanded ? (
         <span
@@ -44,15 +41,15 @@ export function ClauseText({
             overflowing ? `${surface || "bg-li-paper"} pb-1 shadow-li-md` : ""
           }`}
         >
-          {clause.text} {refs}
-          {compact && <ClauseTally clause={clause} layout="below" custom={tally} />}
+          {clause.text} <ClauseLetters clause={clause} />
+          {compact && <ClauseTally clause={clause} layout="below" />}
         </span>
       ) : (
         <span className="absolute inset-x-0 top-0 flex min-w-0 items-baseline gap-1.5">
           <span className={`truncate text-[17px] leading-[1.42] font-medium ${ink}`}>
             {clause.text}
           </span>
-          {refs}
+          <ClauseLetters clause={clause} />
         </span>
       )}
     </span>

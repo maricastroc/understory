@@ -112,7 +112,7 @@ export function HeaderSearch({
 
   const renderOption = (o: SearchOption, i: number) => (
     <li
-      key={o.type === "case" ? `c-${o.item.kind}-${o.item.id}` : `f-${o.path}`}
+      key={o.type === "case" ? `c-${o.item.id}` : `f-${o.path}`}
       id={optionId(i)}
       role="option"
       aria-selected={i === active}

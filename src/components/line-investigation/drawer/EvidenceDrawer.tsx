@@ -4,7 +4,6 @@ import type { ViewArtifact, ViewClause } from "../model/types";
 import { liButton } from "../parts/button-class";
 import { DrawerEntry } from "./DrawerEntry";
 import { DrawerList } from "./DrawerList";
-import type { DrawerExtensions } from "./types";
 
 export function EvidenceDrawer({
   entries,
@@ -17,7 +16,6 @@ export function EvidenceDrawer({
   onClose,
   onStep,
   onDrill,
-  extensions = {},
 }: {
   entries: EvidenceEntry[];
   artifacts: ViewArtifact[];
@@ -29,7 +27,6 @@ export function EvidenceDrawer({
   onClose: () => void;
   onStep: (delta: 1 | -1) => void;
   onDrill?: (a: ViewArtifact) => void;
-  extensions?: DrawerExtensions;
 }) {
   const headingId = useId();
   const heading = useRef<HTMLHeadingElement | null>(null);
@@ -71,7 +68,6 @@ export function EvidenceDrawer({
             onStep={onStep}
             onClose={onClose}
             onDrill={onDrill}
-            extensions={extensions}
           />
         </>
       ) : (
@@ -86,7 +82,7 @@ export function EvidenceDrawer({
               All evidence
             </h2>
             <span className="text-xs text-li-text-subtle">
-              {extensions.countLabel ?? `${entries.length} entries, deepest last`}
+              {entries.length} entries, deepest last
             </span>
             <button
               type="button"
@@ -98,13 +94,7 @@ export function EvidenceDrawer({
             </button>
           </div>
           <div className="flex-1 overflow-auto">
-            <DrawerList
-              entries={entries}
-              clauses={clauses}
-              active={active}
-              onInspect={onInspect}
-              aside={extensions.aside}
-            />
+            <DrawerList entries={entries} clauses={clauses} active={active} onInspect={onInspect} />
           </div>
         </>
       )}

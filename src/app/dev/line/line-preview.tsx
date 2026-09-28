@@ -11,10 +11,7 @@ import {
   syntheticChargeBlame,
   syntheticChargeLines,
 } from "@/components/line-investigation/fixtures/synthetic-charge-file";
-import {
-  syntheticCases,
-  syntheticPrCases,
-} from "@/components/line-investigation/fixtures/synthetic-cases";
+import { syntheticCases } from "@/components/line-investigation/fixtures/synthetic-cases";
 import {
   SYNTHETIC_NOW,
   syntheticRetryCap,
@@ -28,13 +25,7 @@ import { AppShell } from "@/components/shell/AppShell";
 import { CaseRail } from "@/components/shell/CaseRail";
 import { CaseStrip } from "@/components/shell/CaseStrip";
 import { railFooterInfo } from "@/components/shell/rail-footer-info";
-import {
-  filterRail,
-  lineRailItems,
-  prRailItems,
-  railFiltersUseful,
-} from "@/components/shell/rail-items";
-import type { RailFilter } from "@/components/shell/types";
+import { lineRailItems } from "@/components/shell/rail-items";
 
 const NOW = Date.parse(SYNTHETIC_NOW);
 const ACTIVE = "GI-2049";
@@ -71,7 +62,6 @@ const STATES: Record<string, () => DigResult> = {
 
 export function LinePreview({ state, user }: { state: string; user: string | null }) {
   const layout = useSpecimenLayout();
-  const [filter, setFilter] = useState<RailFilter>("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const phase = PHASES[state];
   const pending = state === "pending" || !!phase;
@@ -90,7 +80,6 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
     () => lineRailItems(entries, { activeId: phase ? null : ACTIVE, now: NOW }),
     [entries, phase],
   );
-  const prItems = useMemo(() => prRailItems(syntheticPrCases, null), []);
 
   const renderSpecimen: SpecimenSlot = (slot) => (
     <CodeSpecimen
@@ -120,28 +109,18 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
             connected: true,
           }}
           onNewInRepo={() => {}}
-          cases={[...lineItems, ...prItems]}
+          cases={lineItems}
           onSelectCase={() => {}}
           fileSearch={null}
-          crossLink="pr"
           onNewInvestigation={() => {}}
           user={signedIn}
           onMenuClick={() => setMenuOpen(true)}
         />
       }
-      strip={
-        <CaseStrip
-          items={filterRail(lineItems, prItems, filter)}
-          expanded={menuOpen}
-          onOpen={() => setMenuOpen(true)}
-        />
-      }
+      strip={<CaseStrip items={lineItems} expanded={menuOpen} onOpen={() => setMenuOpen(true)} />}
       rail={(onClose) => (
         <CaseRail
-          items={filterRail(lineItems, prItems, filter)}
-          showFilters={railFiltersUseful(lineItems, prItems)}
-          filter={filter}
-          onFilter={setFilter}
+          items={lineItems}
           onSelect={() => setMenuOpen(false)}
           onRemove={() => {}}
           footer={railFooterInfo(signedIn, !!signedIn)}
