@@ -1,3 +1,4 @@
+import { canonicalCitations } from "./citation-id";
 import { cosmeticOrigin } from "./cosmetic";
 import { traceProvenance } from "./provenance";
 import type {
@@ -13,17 +14,17 @@ const unique = (xs: string[]): string[] => Array.from(new Set(xs));
 
 export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): VerifiedNarrative {
   const realIds = new Set(ev.artifacts.map((a) => a.id));
-  const cited = unique(n.citations);
+  const cited = unique(canonicalCitations(n.citations, realIds));
 
   const groundedCitations = cited.filter((id) => realIds.has(id));
   const unknownCitations = cited.filter((id) => !realIds.has(id));
 
   const grounded = unknownCitations.length === 0;
 
-  const claims = n.claims.map((c) => ({
-    ...c,
-    grounded: c.citations.some((id) => realIds.has(id)),
-  }));
+  const claims = n.claims.map((c) => {
+    const citations = canonicalCitations(c.citations, realIds);
+    return { ...c, citations, grounded: citations.some((id) => realIds.has(id)) };
+  });
   const ungroundedClaims = claims.filter((c) => !c.grounded).length;
   const groundedClaims = claims.length - ungroundedClaims;
 
@@ -51,7 +52,7 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
   );
   const ownerSelfExplains =
     ownerIds.size > 0 &&
-    n.claims.some(
+    claims.some(
       (c, i) =>
         c.citations.length > 0 &&
         c.citations.every((id) => ownerIds.has(id)) &&
@@ -61,6 +62,7 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
 
   return {
     ...n,
+    citations: cited,
     claims,
     grounded,
     unknownCitations,
@@ -81,7 +83,7 @@ export function verify(ev: Evidence, n: Narrative, entailment?: Entailment): Ver
       totalCollected: ev.artifacts.length,
       contradicting,
     }),
-    ...(audited ? { entailment } : {}),
+    ...(audited || (entailment?.failed ?? 0) > 0 ? { entailment } : {}),
   };
 }
 

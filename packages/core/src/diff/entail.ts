@@ -1,5 +1,6 @@
+import { type Auditor, runAudit } from "../auditor";
+import { canonicalCitations } from "../citation-id";
 import { entailClaims, judgeCitation } from "../entail";
-import type { Model } from "../llm";
 import type { Artifact, CitationCheck, Entailment } from "../types";
 import { clusterRef } from "./synthesize";
 import type { DiffCluster, DiffNarrative } from "./types";
@@ -18,12 +19,15 @@ export function diffEntailmentAffordable(clusters: DiffCluster[]): boolean {
 
 type Task = { ref: string; why: string; artifact: Artifact };
 
+type RegionAudit = { checks: CitationCheck[]; failed: number; fallbacks: number };
+
 export async function checkDiffEntailment(
   clusters: DiffCluster[],
   narrative: DiffNarrative,
-  model: Model,
+  auditor: Auditor,
 ): Promise<{ byRef: Map<string, Entailment>; summary: Entailment }> {
   const byRefFinding = new Map(narrative.findings.map((f) => [f.cluster.trim().toUpperCase(), f]));
+  const known = new Set(clusters.flatMap((c) => c.artifacts.map((a) => a.id)));
 
   const tasks: Task[] = [];
   clusters.forEach((cluster, i) => {
@@ -31,7 +35,7 @@ export async function checkDiffEntailment(
     const raw = byRefFinding.get(ref);
     if (!raw || !raw.recorded) return;
     const byId = new Map(cluster.artifacts.map((a) => [a.id, a]));
-    for (const id of new Set(raw.citations)) {
+    for (const id of new Set(canonicalCitations(raw.citations, known))) {
       const artifact = byId.get(id);
       if (artifact) tasks.push({ ref, why: raw.why, artifact });
     }
@@ -40,27 +44,44 @@ export async function checkDiffEntailment(
 
   const allById = new Map(clusters.flatMap((c) => c.artifacts).map((a) => [a.id, a]));
   const [settled, summary] = await Promise.all([
-    Promise.allSettled(chosen.map((t) => judgeCitation(DIFF_QUESTION, t.why, t.artifact, model))),
-    entailClaims(DIFF_QUESTION, narrative.summaryClaims, allById, model),
+    Promise.allSettled(
+      chosen.map((t) =>
+        runAudit(auditor, (model) => judgeCitation(DIFF_QUESTION, t.why, t.artifact, model)),
+      ),
+    ),
+    entailClaims(DIFF_QUESTION, narrative.summaryClaims, allById, auditor),
   ]);
 
-  const checksByRef = new Map<string, CitationCheck[]>();
+  const regions = new Map<string, RegionAudit>();
   settled.forEach((s, idx) => {
-    if (s.status !== "fulfilled") return;
     const ref = chosen[idx].ref;
-    const list = checksByRef.get(ref) ?? [];
-    list.push(s.value);
-    checksByRef.set(ref, list);
+    const region = regions.get(ref) ?? { checks: [], failed: 0, fallbacks: 0 };
+    if (s.status !== "fulfilled") region.failed++;
+    else {
+      region.checks.push(s.value.value);
+      if (s.value.fellBack) region.fallbacks++;
+    }
+    regions.set(ref, region);
   });
 
   const byRef = new Map<string, Entailment>();
-  for (const [ref, checks] of checksByRef) {
+  for (const [ref, { checks, failed, fallbacks }] of regions) {
     byRef.set(ref, {
-      checked: true,
+      checked: checks.length > 0,
       checks,
       supported: checks.filter((c) => c.status === "supported").length,
       misattributed: checks.filter((c) => c.status === "unsupported").length,
+      failed,
+      fallbacks,
     });
   }
   return { byRef, summary };
+}
+
+export function failedAuditChecks(
+  byRef: Map<string, Entailment> | undefined,
+  summary: Entailment | undefined,
+): number {
+  const regions = [...(byRef?.values() ?? [])].reduce((n, e) => n + (e.failed ?? 0), 0);
+  return regions + (summary?.failed ?? 0);
 }

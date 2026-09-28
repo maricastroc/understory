@@ -1,7 +1,8 @@
 import { collect, parseLocation } from "@git-investigator/core/collect";
 import { checkEntailment } from "@git-investigator/core/entail";
 import { cosmeticOrigin } from "@git-investigator/core/cosmetic";
-import { getAuditModel, getModel } from "@git-investigator/core/llm";
+import { getAuditor } from "@git-investigator/core/auditor";
+import { getModel } from "@git-investigator/core/llm";
 import { traceProvenance } from "@git-investigator/core/provenance";
 import { buildSynthesisInput, synthesize } from "@git-investigator/core/synthesize";
 import { verify } from "@git-investigator/core/verify";
@@ -271,10 +272,8 @@ async function main() {
     const model = getModel();
     if (!model) keyMissing();
     const narrative = await synthesize(evidence, model);
-    const auditModel = getAuditModel() ?? model;
-    const entailment = await checkEntailment(evidence, narrative, auditModel).catch(
-      () => undefined,
-    );
+    const auditor = getAuditor() ?? { primary: model, fallback: null };
+    const entailment = await checkEntailment(evidence, narrative, auditor).catch(() => undefined);
     verified = verify(evidence, narrative, entailment);
   }
 

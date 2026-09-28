@@ -1,6 +1,7 @@
+import { getAuditor } from "./auditor";
 import { type CollectInput, collect } from "./collect";
 import { checkEntailment } from "./entail";
-import { type LlmConfig, getAuditModel, getModel } from "./llm";
+import { type LlmConfig, getModel } from "./llm";
 import { synthesize } from "./synthesize";
 import type { DigResult, Entailment, Evidence, VerifiedNarrative } from "./types";
 import { verify } from "./verify";
@@ -22,7 +23,7 @@ export async function narrate(
 ): Promise<{ narrative: VerifiedNarrative | null; error?: string }> {
   const model = getModel(config);
   if (!model) return { narrative: null, error: NO_LLM };
-  const auditModel = getAuditModel(config) ?? model;
+  const auditor = getAuditor(config) ?? { primary: model, fallback: null };
 
   try {
     const narrative = await synthesize(evidence, model, config.language);
@@ -30,7 +31,7 @@ export async function narrate(
     let entailment: Entailment | undefined;
     if (doEntail) {
       try {
-        entailment = await checkEntailment(evidence, narrative, auditModel);
+        entailment = await checkEntailment(evidence, narrative, auditor);
       } catch {
         entailment = undefined;
       }
