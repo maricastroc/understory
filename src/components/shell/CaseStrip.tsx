@@ -33,7 +33,7 @@ export function CaseStrip({
         <span aria-hidden className="flex flex-col items-center gap-1">
           {items.map((item) => (
             <span
-              key={`${item.kind}-${item.id}`}
+              key={item.id}
               className={`flex size-7 justify-center ${
                 item.current ? "bg-li-datum-tint" : ""
               } ${item.child ? "pl-1.5" : ""}`}

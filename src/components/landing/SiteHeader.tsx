@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { useAuth } from "../investigator/use-auth";
-import { liButton } from "../line-investigation/parts/button-class";
 import { AccountButton } from "../shell/AccountButton";
 import { BrandMark } from "../shell/BrandMark";
 import { CONTAINER } from "./parts/landing-classes";
@@ -18,9 +16,6 @@ export function SiteHeader() {
           code archaeology
         </span>
         <nav aria-label="Main" className="ml-auto flex items-center gap-2">
-          <Link href="/pr" className={liButton("secondary", "max-[640px]:hidden")}>
-            Explain a PR
-          </Link>
           <PrimaryLink href="/app">Explain a line</PrimaryLink>
           <AccountButton user={user} signIn="ghost" />
         </nav>

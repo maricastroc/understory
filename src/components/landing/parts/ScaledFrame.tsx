@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useElementWidth } from "../../pr-investigation/case/use-element-width";
+import { useElementWidth } from "../../use-element-width";
 
 export function ScaledFrame({
   width,

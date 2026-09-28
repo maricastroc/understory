@@ -6,7 +6,7 @@ export const saveSchema = z.object({
   repoPath: z.string().min(1).max(2000),
   location: z.string().min(1).max(2000),
   result: z.record(z.string(), z.unknown()),
-  parentCaseId: z.string().min(1).max(200).nullish(),
+  parentCaseId: z.string().min(1).max(64).nullish(),
 });
 
 export function isMissingColumn(error: unknown): boolean {

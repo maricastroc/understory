@@ -49,10 +49,7 @@ async function installationId(owner: string, repo: string): Promise<number | nul
 type Cached = { token: string; exp: number };
 const cache = new Map<number, Cached>();
 
-export async function installationTokenForRepo(
-  owner: string,
-  repo: string,
-): Promise<string | null> {
+async function installationTokenForRepo(owner: string, repo: string): Promise<string | null> {
   if (!githubAppConfigured()) return null;
 
   const id = await installationId(owner, repo);

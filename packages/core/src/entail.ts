@@ -61,86 +61,9 @@ const CLAIM_SYSTEM = [
   "do NOT answer 'supported'. Keep `reason` to one short line.",
 ].join("\n");
 
-const checkSchema = z.object({
-  status: z
-    .enum(["supported", "weak", "unsupported"])
-    .describe(
-      "supported = the source's text states or clearly implies the fact(s) the answer draws from it (quote required); weak = clearly the right source / on-topic, but no single line proves the point; unsupported = the source is about something else and the answer could NOT have come from it (a misattribution).",
-    ),
-  quote: z
-    .string()
-    .describe(
-      "For 'supported': a snippet copied VERBATIM from the source text that proves the fact (character for character, never paraphrased). Empty string otherwise.",
-    ),
-  reason: z
-    .string()
-    .describe("One short line: why the source does or does not substantiate the claim."),
-});
-
-const SYSTEM = [
-  "You are a citation auditor. An answer about a line of code's history relies on ONE source.",
-  "The answer may weave together several facts; judge ONLY the part(s) this source is cited",
-  "for — not the whole answer. Judge ONLY from the source text shown — never from outside",
-  "knowledge, never from other sources, never from what merely seems plausible.",
-  "",
-  "- supported: the source states or clearly implies the fact(s) the answer draws from it. You",
-  "  MUST copy a verbatim snippet into `quote` as proof. If it is plainly the PR/commit/issue",
-  "  the answer names, quote the line that shows it.",
-  "- weak: it is clearly the right source or on-topic, but no single line proves the specific",
-  "  point. Reserve this for genuine thinness, not for being one part of a larger answer.",
-  "- unsupported: the source is about something else entirely — the answer could not have been",
-  "  drawn from it. This is a misattribution and the only verdict that lowers confidence.",
-  "",
-  "`quote` must be copied EXACTLY from the source, character for character — never paraphrase,",
-  "never invent. If you cannot find a real supporting snippet, leave `quote` empty and do NOT",
-  "answer 'supported'. Keep `reason` to one short line.",
-].join("\n");
-
 function clampBody(body: string, cap: number): string {
   if (body.length <= cap) return body;
   return `${body.slice(0, cap).trimEnd()}… [truncated]`;
-}
-
-export function finalizeCheck(
-  citation: string,
-  body: string,
-  raw: z.infer<typeof checkSchema>,
-): CitationCheck {
-  if (raw.status === "unsupported") {
-    return { citation, status: "unsupported", quote: null, reason: raw.reason };
-  }
-  const verified = verifyQuote(body, raw.quote);
-  if (raw.status === "supported" && !verified) {
-    return { citation, status: "weak", quote: null, reason: withUnverifiedNote(raw.reason) };
-  }
-  return { citation, status: raw.status, quote: verified, reason: raw.reason };
-}
-
-export async function judgeCitation(
-  question: string,
-  answer: string,
-  a: Artifact,
-  model: Model,
-): Promise<CitationCheck> {
-  const who = a.author?.name ? ` · ${a.author.name}` : "";
-  const prompt = [
-    `Question: ${question}`,
-    "",
-    "Answer under review:",
-    answer,
-    "",
-    `Source being audited — [${a.id}] ${a.kind} · ${a.date.slice(0, 10)}${who}:`,
-    clampBody(a.body, JUDGE_BODY_CAP),
-  ].join("\n");
-
-  const { object } = await generateObject({
-    model,
-    schema: checkSchema,
-    system: SYSTEM,
-    prompt,
-    temperature: 0,
-  });
-  return finalizeCheck(a.id, a.body, object);
 }
 
 export function finalizeClaim(

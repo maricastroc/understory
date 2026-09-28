@@ -1,4 +1,4 @@
-import type { KeyboardEvent, ReactNode } from "react";
+import type { KeyboardEvent } from "react";
 import type { ViewClause } from "../model/types";
 import { ClauseLetters } from "./ClauseLetters";
 import { ClauseRing } from "./ClauseRing";
@@ -23,8 +23,6 @@ export function ClauseRow({
   onPick,
   onKeyDown,
   buttonRef,
-  refs,
-  tally,
 }: {
   clause: ViewClause;
   description: string;
@@ -40,10 +38,7 @@ export function ClauseRow({
   onPick: () => void;
   onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
   buttonRef: (el: HTMLButtonElement | null) => void;
-  refs?: ReactNode;
-  tally?: { cells: ReactNode; label: string };
 }) {
-  const refsNode = refs ?? <ClauseLetters clause={clause} />;
   const descId = `clause-desc-${clause.id}`;
   const surface = pinned ? "bg-li-evidence-pinned" : expanded || marked ? "bg-li-neutral-200" : "";
   const ink = quiet ? "text-li-text-muted" : clause.silent ? "text-li-gap-ink" : "text-li-ink";
@@ -81,27 +76,25 @@ export function ClauseRow({
             <span className={`truncate text-[17px] leading-[1.42] font-medium ${ink}`}>
               {clause.text}
             </span>
-            {refsNode}
+            <ClauseLetters clause={clause} />
           </span>
         ) : (
           <ClauseText
             clause={clause}
-            refs={refsNode}
             expanded={expanded}
             compact={compact}
             ink={ink}
             surface={surface}
-            tally={tally}
           />
         )}
         {dense ? (
           <span className={tallyVisible}>
-            <ClauseTally clause={clause} layout="inline" custom={tally} />
+            <ClauseTally clause={clause} layout="inline" />
           </span>
         ) : (
           !compact && (
             <span className={tallyVisible}>
-              <ClauseTally clause={clause} layout="column" custom={tally} />
+              <ClauseTally clause={clause} layout="column" />
             </span>
           )
         )}

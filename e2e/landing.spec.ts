@@ -98,9 +98,6 @@ test("orange only on the primary calls to action; no ring, no percentage", async
     await expect(link).toHaveCSS("color", "rgb(255, 255, 255)");
     expect(await link.locator("span[aria-hidden]").count()).toBe(4);
   }
-  for (const link of await page.getByRole("link", { name: /^Explain a PR/ }).all()) {
-    await expect(link).not.toHaveCSS("background-color", "rgb(180, 83, 9)");
-  }
 });
 
 test("the demo reads the same tokens as the app: changing --color-li-evidence changes both", async ({
@@ -122,31 +119,15 @@ test("the demo reads the same tokens as the app: changing --color-li-evidence ch
   expect(await traced()).toBe("rgb(1, 2, 3)");
 });
 
-test("links resolve: /app, /pr and #method", async ({ page }) => {
+test("links resolve: /app and #method", async ({ page }) => {
   await open(page);
   for (const link of await page.getByRole("link", { name: /^Explain a line/ }).all())
     await expect(link).toHaveAttribute("href", "/app");
-  for (const link of await page.getByRole("link", { name: /^Explain a PR/ }).all())
-    await expect(link).toHaveAttribute("href", "/pr");
   await page.getByRole("link", { name: "How it works" }).click();
   await expect(page).toHaveURL(/#method$/);
   await expect(
     page.getByRole("heading", { name: /From a line you don.t understand/ }),
   ).toBeInViewport();
-});
-
-test("the PR diagram is one image with one band across R1–R4 and two hatches", async ({ page }) => {
-  await open(page);
-  const img = page.getByRole("img", { name: /6 changed regions/ });
-  await expect(img).toBeVisible();
-  const counts = await img.evaluate((el) => ({
-    bands: [...el.querySelectorAll("rect.fill-li-evidence-tint")].filter(
-      (r) => r.getBoundingClientRect().width > 100,
-    ).length,
-    hatches: el.querySelectorAll("rect.stroke-li-gap").length,
-    controls: el.querySelectorAll("button, a").length,
-  }));
-  expect(counts).toEqual({ bands: 1, hatches: 2, controls: 0 });
 });
 
 for (const width of [1440, 1024, 899, 700, 375]) {

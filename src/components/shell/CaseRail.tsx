@@ -1,41 +1,22 @@
 import { useId } from "react";
 import { CaseRailRow } from "./CaseRailRow";
 import { RailFooter } from "./RailFooter";
-import { SegmentedFilter } from "./SegmentedFilter";
-import type { RailFilter, RailFooterInfo, RailItem } from "./types";
-
-const FILTERS: Array<{ value: RailFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "lines", label: "Lines" },
-  { value: "prs", label: "PRs" },
-];
-
-const EMPTY: Record<RailFilter, string> = {
-  all: "No investigations yet.",
-  lines: "No line investigations yet.",
-  prs: "No pull requests explained yet.",
-};
+import type { RailFooterInfo, RailItem } from "./types";
 
 export function CaseRail({
   items,
-  filter,
-  onFilter,
   onSelect,
   onRemove,
   footer,
   onClose,
   onNew,
-  showFilters = true,
 }: {
   items: RailItem[];
-  filter: RailFilter;
-  onFilter: (filter: RailFilter) => void;
   onSelect: (item: RailItem) => void;
   onRemove?: (item: RailItem) => void;
   footer: RailFooterInfo;
   onClose?: () => void;
   onNew?: () => void;
-  showFilters?: boolean;
 }) {
   const headingId = useId();
   return (
@@ -68,14 +49,6 @@ export function CaseRail({
           </button>
         )}
       </div>
-      {showFilters && (
-        <SegmentedFilter
-          label="Show investigations"
-          options={FILTERS}
-          value={filter}
-          onChange={onFilter}
-        />
-      )}
       <nav aria-label="Case list" className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
         {items.length === 0 ? (
           <div className="grid grid-cols-[24px_minmax(0,1fr)] gap-3 px-2 pt-3">
@@ -106,25 +79,16 @@ export function CaseRail({
               />
             </svg>
             <div className="flex flex-col gap-1.5 pt-0.5">
-              <p className="text-[14px] font-medium text-li-ink">
-                {EMPTY[showFilters ? filter : "all"]}
+              <p className="text-[14px] font-medium text-li-ink">No investigations yet.</p>
+              <p className="text-[12.5px] leading-snug text-li-neutral-800">
+                Each line you investigate stays here, with the trail it followed.
               </p>
-              {!showFilters && (
-                <p className="text-[12.5px] leading-snug text-li-neutral-800">
-                  Each line or pull request you investigate stays here, with the trail it followed.
-                </p>
-              )}
             </div>
           </div>
         ) : (
           <ul className="flex flex-col gap-px">
             {items.map((item) => (
-              <CaseRailRow
-                key={`${item.kind}-${item.id}`}
-                item={item}
-                onSelect={onSelect}
-                onRemove={onRemove}
-              />
+              <CaseRailRow key={item.id} item={item} onSelect={onSelect} onRemove={onRemove} />
             ))}
           </ul>
         )}

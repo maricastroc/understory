@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { AuthUser } from "../investigator/use-auth";
 import { Menu } from "../icons";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
@@ -20,7 +19,6 @@ export function AppHeader({
   onSelectCase,
   fileSearch,
   onOpenFile,
-  crossLink,
   onNewInvestigation,
   showNew = true,
   user,
@@ -32,7 +30,6 @@ export function AppHeader({
   onSelectCase: (item: RailItem) => void;
   fileSearch: { repoPath: string; token?: string } | null;
   onOpenFile?: (path: string) => void;
-  crossLink: "pr" | "line";
   onNewInvestigation: () => void;
   showNew?: boolean;
   user: AuthUser | null;
@@ -74,15 +71,6 @@ export function AppHeader({
       />
       <div className="ml-auto flex shrink-0 items-center gap-2">
         <LanguageSwitch language={language} onChange={setLanguage} />
-        {crossLink === "pr" ? (
-          <Link href="/pr" className={liButton("secondary", "max-[640px]:hidden")}>
-            Explain a PR
-          </Link>
-        ) : (
-          <Link href="/app" className={liButton("secondary", "max-[640px]:hidden")}>
-            Explain a line
-          </Link>
-        )}
         {showNew && (
           <button type="button" onClick={onNewInvestigation} className={liButton("primary")}>
             {newLabel}

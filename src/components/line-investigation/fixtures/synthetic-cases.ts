@@ -1,8 +1,6 @@
-import type { DiffResult, VerifiedDiffFinding } from "@git-investigator/core/diff/types";
 import { verify } from "@git-investigator/core/verify";
 import type { Artifact, DigResult, Evidence } from "@git-investigator/core/types";
 import type { Entry } from "../../investigator/use-investigation";
-import type { PrEntry } from "../../pr/pr-entry";
 import { syntheticArtifacts, syntheticEvidence, syntheticRetryCap } from "./synthetic-retry-cap";
 import { syntheticEvidenceOnly, syntheticNotRecorded } from "./synthetic-states";
 
@@ -181,51 +179,4 @@ export const syntheticCases: Entry[] = [
       42,
     ),
   },
-];
-
-const prRegion = (i: number, explained: boolean): VerifiedDiffFinding => ({
-  ref: sha(`c${i}`),
-  targets: [{ path: "src/webhooks/legacy.ts", range: { start: i * 10, end: i * 10 + 4 } }],
-  why: explained ? "Recorded in the pull request that introduced the handler." : "",
-  connection: "",
-  citations: [],
-  unknownCitations: [],
-  grounded: explained,
-  recorded: explained,
-  confidence: {
-    score: explained ? 0.6 : 0,
-    level: explained ? "medium" : "low",
-    primarySources: 0,
-    corroborating: 0,
-    contradicting: 0,
-  },
-  artifacts: [],
-  contradictions: [],
-});
-
-const prResult = {
-  repo: { path: REPO.path, name: REPO.name },
-  pr: {
-    number: 944,
-    title: "Drop legacy webhook path",
-    url: `${REMOTE}/pull/944`,
-    baseSha: sha("1a2b3c4"),
-    headSha: sha("5d6e7f8"),
-  },
-  triage: {
-    filesChanged: 8,
-    filesConsidered: 8,
-    filesSkipped: 0,
-    targetsBlamed: 8,
-    clustersFound: 8,
-    clustersDetailed: 8,
-    truncated: false,
-  },
-  summary: "",
-  summaryClaims: [],
-  findings: Array.from({ length: 8 }, (_, i) => prRegion(i + 1, i < 3)),
-} satisfies DiffResult;
-
-export const syntheticPrCases: PrEntry[] = [
-  { key: "synthetic/payments-service#944", result: prResult },
 ];

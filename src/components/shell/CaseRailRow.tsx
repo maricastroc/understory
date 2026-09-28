@@ -8,7 +8,6 @@ const STATUS_LABEL = {
   "out-of-scope": "out of scope",
   fabrication: "fabrication caught",
   pending: "reconstructing",
-  pr: "pull request",
 } as const;
 
 export function CaseRailRow({

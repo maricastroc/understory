@@ -9,9 +9,6 @@ import {
 } from "./fixtures/synthetic-overview";
 import type { Repo } from "./use-repo";
 
-const push = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
     <a href={href} {...rest}>
@@ -197,12 +194,6 @@ describe("Composer — new investigation", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Open a repository" })).toBeTruthy();
     expect(screen.getByRole("textbox", { name: "Repository" })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Open the demo/ })).toBeTruthy();
-    expect(screen.getByRole("textbox", { name: /Pull request URL/ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Sign in with GitHub/ })).toBeNull();
-    fireEvent.change(screen.getByRole("textbox", { name: /Pull request URL/ }), {
-      target: { value: "chalk/chalk#664" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Explain →" }));
-    expect(push).toHaveBeenCalledWith("/pr?pr=chalk%2Fchalk%23664");
   });
 });

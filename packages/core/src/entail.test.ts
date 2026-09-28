@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { entailClaims, finalizeCheck, finalizeClaim } from "./entail";
+import { entailClaims, finalizeClaim } from "./entail";
 import { verifyQuote } from "./quote";
 import { TOOL_CALL_ERROR, failingJudge, scriptedJudge } from "./testing/scripted-judge";
 import type { Artifact, Evidence, Narrative } from "./types";
@@ -17,66 +17,50 @@ const artifact = (id: string, body: string): Artifact => ({
 const BODY =
   "Cap retries at 3 because the upstream gateway rate-limits\nbursts above five per second.";
 
-describe("finalizeCheck — the judge cannot vouch for itself", () => {
-  it("keeps 'supported' when the quote is real", () => {
-    const c = finalizeCheck("commit:c1", BODY, {
-      status: "supported",
-      quote: "the upstream gateway rate-limits",
-      reason: "commit states the cap reason",
-    });
-    expect(c.status).toBe("supported");
-    expect(c.quote).toBe("the upstream gateway rate-limits");
-  });
-
-  it("downgrades 'supported' to 'weak' when the quote is not in the source — an unverifiable quote is not a misattribution", () => {
-    const c = finalizeCheck("commit:c1", BODY, {
-      status: "supported",
-      quote: "because the database was slow",
-      reason: "claims a db reason",
-    });
-    expect(c.status).toBe("weak");
-    expect(c.quote).toBeNull();
-    expect(c.reason).toBe("claims a db reason (the cited quote was not found in the source)");
-  });
+describe("finalizeClaim — the judge cannot vouch for itself", () => {
+  const source = artifact("commit:c1", BODY);
 
   it("keeps the unverified-quote note even when the judge gave no reason", () => {
-    const c = finalizeCheck("commit:c1", BODY, {
+    const r = finalizeClaim([source], {
       status: "supported",
       quote: "invented",
       reason: "",
     });
-    expect(c.status).toBe("weak");
-    expect(c.reason).toBe("the cited quote was not found in the source");
+    expect(r.status).toBe("weak");
+    expect(r.reason).toBe("the cited quote was not found in the source");
   });
 
   it("downgrades 'supported' with no quote at all to 'weak'", () => {
-    const c = finalizeCheck("commit:c1", BODY, {
+    const r = finalizeClaim([source], {
       status: "supported",
       quote: "",
       reason: "stated",
     });
-    expect(c.status).toBe("weak");
-    expect(c.quote).toBeNull();
+    expect(r.status).toBe("weak");
+    expect(r.quote).toBeNull();
+    expect(r.quoteSourceId).toBeNull();
   });
 
   it("keeps 'weak' as-is and only surfaces a verified quote", () => {
-    const c = finalizeCheck("pr:1", BODY, {
+    const r = finalizeClaim([source], {
       status: "weak",
       quote: "no such text",
       reason: "on topic, does not state it",
     });
-    expect(c.status).toBe("weak");
-    expect(c.quote).toBeNull();
+    expect(r.status).toBe("weak");
+    expect(r.quote).toBeNull();
+    expect(r.quoteSourceId).toBeNull();
   });
 
   it("passes 'unsupported' through with no quote", () => {
-    const c = finalizeCheck("issue:9", BODY, {
+    const r = finalizeClaim([source], {
       status: "unsupported",
-      quote: "",
+      quote: "the upstream gateway rate-limits",
       reason: "unrelated",
     });
-    expect(c.status).toBe("unsupported");
-    expect(c.quote).toBeNull();
+    expect(r.status).toBe("unsupported");
+    expect(r.quote).toBeNull();
+    expect(r.quoteSourceId).toBeNull();
   });
 });
 
@@ -133,14 +117,14 @@ describe("regression P2 — a truthful quote the judge abbreviated with '...'", 
   });
 
   it("lands on weak with the unverified note, not on a misattribution", () => {
-    const c = finalizeCheck("pr:4011", PR_4011_BODY, {
+    const r = finalizeClaim([artifact("pr:4011", PR_4011_BODY)], {
       status: "supported",
       quote: abbreviated,
       reason: "the PR states the bump and that it is not a security update",
     });
-    expect(c.status).toBe("weak");
-    expect(c.quote).toBeNull();
-    expect(c.reason).toMatch(/the cited quote was not found in the source/);
+    expect(r.status).toBe("weak");
+    expect(r.quote).toBeNull();
+    expect(r.reason).toMatch(/the cited quote was not found in the source/);
   });
 });
 

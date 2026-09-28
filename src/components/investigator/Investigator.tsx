@@ -1,13 +1,12 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ErrorState } from "../ErrorState";
 import { Composer } from "../composer/Composer";
 import type { ComposerPrefill } from "../composer/composer-prefill";
 import { useRepo } from "../composer/use-repo";
 import { LiveLineInvestigation } from "../line-investigation/case/LiveLineInvestigation";
-import { usePrHistory } from "../pr/use-pr-history";
 import { CaseDetails } from "../rail/CaseDetails";
 import { RightRail } from "../rail/RightRail";
 import { AppHeader } from "../shell/AppHeader";
@@ -16,13 +15,12 @@ import { CaseRail } from "../shell/CaseRail";
 import { CaseStrip } from "../shell/CaseStrip";
 import { railFooterInfo } from "../shell/rail-footer-info";
 import { repoDisplayName } from "../shell/repo-display-name";
-import { filterRail, lineRailItems, prRailItems, railFiltersUseful } from "../shell/rail-items";
-import type { RailFilter, RailItem, RepoSummary } from "../shell/types";
+import { lineRailItems } from "../shell/rail-items";
+import type { RailItem, RepoSummary } from "../shell/types";
 import { useLanguage } from "../use-language";
 import { CaseFailure } from "./CaseFailure";
 import { CaseView } from "./CaseView";
 import { draftResult } from "./draft-result";
-import { parseDrillRef } from "./drill-link";
 import type { FollowUpParent } from "./follow-up-parent";
 import { LoadingCard } from "./LoadingCard";
 import { useAuth } from "./use-auth";
@@ -56,13 +54,10 @@ export function Investigator() {
   } = useInvestigation(user);
 
   const repo = useRepo();
-  const router = useRouter();
   const params = useSearchParams();
   const { language } = useLanguage();
-  const prHistory = usePrHistory(null);
   const [token, setToken] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [filter, setFilter] = useState<RailFilter>("all");
   const [prefill, setPrefill] = useState<ComposerPrefill | null>(null);
   const [followParent, setFollowParent] = useState<FollowUpParent | null>(null);
   const [now] = useState(() => Date.now());
@@ -73,20 +68,7 @@ export function Investigator() {
     const deepRepo = params.get("repo");
     const deepFile = params.get("file");
     const deepLine = params.get("line");
-    const drillRef = parseDrillRef(params.get("drill"));
-    const drillParent = params.get("parent");
-    if (deepRepo && drillRef && drillParent) {
-      setRepoPath(deepRepo);
-      window.history.replaceState(null, "", "/app");
-      void drillInto(
-        drillParent,
-        params.get("title") ?? "",
-        drillRef,
-        deepRepo,
-        undefined,
-        language,
-      );
-    } else if (deepRepo && deepFile && deepLine) {
+    if (deepRepo && deepFile && deepLine) {
       setRepoPath(deepRepo);
       void repo.open(deepRepo);
       void investigate(
@@ -124,26 +106,15 @@ export function Investigator() {
     () => lineRailItems(history, { activeId: activeCaseId, now }),
     [history, activeCaseId, now],
   );
-  const prItems = useMemo(() => prRailItems(prHistory.entries, null), [prHistory.entries]);
-  const railItems = filterRail(lineItems, prItems, filter);
   const cases = useMemo(() => casePaths(history, repoPath), [history, repoPath]);
   const recent = useMemo(() => recentRepos(history), [history]);
 
+  const parentPresent =
+    !!current?.parentCaseId && history.some((e) => e.caseId === current.parentCaseId);
+
   function openRailItem(item: RailItem) {
     setMenuOpen(false);
-    if (item.kind === "pr") router.push(`/pr?pr=${encodeURIComponent(item.id)}`);
-    else selectCase(item.id);
-  }
-
-  function openParent(id: string) {
-    if (history.some((e) => e.caseId === id)) selectCase(id);
-    else if (prHistory.entries.some((e) => e.key === id))
-      router.push(`/pr?pr=${encodeURIComponent(id)}`);
-  }
-
-  function removeRailItem(item: RailItem) {
-    if (item.kind === "pr") prHistory.remove(item.id);
-    else removeCase(item.id);
+    selectCase(item.id);
   }
 
   function startInRepo(path: string) {
@@ -222,30 +193,26 @@ export function Investigator() {
         <AppHeader
           repo={repoSummary}
           onNewInRepo={summaryRepoPath.trim() ? () => startInRepo(summaryRepoPath) : undefined}
-          cases={[...lineItems, ...prItems]}
+          cases={lineItems}
           onSelectCase={openRailItem}
           fileSearch={repoPath.trim() && repo.ready ? { repoPath, token: tokenValue } : null}
           onOpenFile={openFile}
-          crossLink="pr"
           onNewInvestigation={handleNewInvestigation}
           showNew={!browsing}
           user={user}
           onMenuClick={() => setMenuOpen(true)}
         />
       }
-      strip={<CaseStrip items={railItems} expanded={menuOpen} onOpen={() => setMenuOpen(true)} />}
+      strip={<CaseStrip items={lineItems} expanded={menuOpen} onOpen={() => setMenuOpen(true)} />}
       rail={(onClose) => (
         <CaseRail
-          items={railItems}
-          showFilters={railFiltersUseful(lineItems, prItems)}
+          items={lineItems}
           onNew={() => {
             onClose?.();
             handleNewInvestigation();
           }}
-          filter={filter}
-          onFilter={setFilter}
           onSelect={openRailItem}
-          onRemove={removeRailItem}
+          onRemove={(item) => removeCase(item.id)}
           footer={railFooterInfo(user, persisted)}
           onClose={onClose}
         />
@@ -329,7 +296,7 @@ export function Investigator() {
               entry={current}
               onBack={backToCode}
               onDrill={drill(current)}
-              onOpenParent={openParent}
+              onOpenParent={parentPresent ? selectCase : undefined}
             />
           )}
 

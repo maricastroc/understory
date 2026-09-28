@@ -23,7 +23,6 @@ test("the rail marks the open case and nests the follow-up under its parent", as
   const current = rail.locator('button[aria-current="page"]');
   await expect(current).toContainText("Why exactly 3 retries?");
   await expect(rail.locator("li").nth(1)).toContainText("from B · review·dmitri-k");
-  await expect(rail.locator("li").last()).toContainText("#944 · 3 of 8 regions");
 });
 
 test("⌘K searches cases and Escape closes the list without unpinning the case", async ({
@@ -34,8 +33,8 @@ test("⌘K searches cases and Escape closes the list without unpinning the case"
   await page.keyboard.press("Meta+k");
   const box = page.getByRole("combobox");
   await expect(box).toBeFocused();
-  await page.keyboard.type("webhook");
-  await expect(page.getByRole("option")).toHaveText(/Drop legacy webhook path/);
+  await page.keyboard.type("ledger");
+  await expect(page.getByRole("option")).toHaveText(/Why does refund skip the ledger\?/);
   await page.keyboard.press("Escape");
   await expect(box).toHaveAttribute("aria-expanded", "false");
   await expect(page.locator('li[data-clause="c1"] button')).toHaveAttribute("aria-pressed", "true");
@@ -101,7 +100,7 @@ test("the collapsed strip opens the case list as an overlay and gives focus back
 }) => {
   await open(page, 1200);
   const strip = page.getByRole("button", {
-    name: /^Show investigations, 6\. Open: Why exactly 3 retries\?/,
+    name: /^Show investigations, 5\. Open: Why exactly 3 retries\?/,
   });
   await strip.click();
   const overlay = page.getByRole("dialog", { name: "Investigations" });

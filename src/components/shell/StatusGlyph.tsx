@@ -2,15 +2,6 @@ import type { RailStatus } from "./types";
 import { HATCH } from "../line-investigation/parts/hatch";
 
 export function StatusGlyph({ status }: { status: RailStatus }) {
-  if (status === "pr") {
-    return (
-      <span aria-hidden className="mt-1 flex gap-px">
-        <span className="h-2.25 w-0.5 bg-li-ink" />
-        <span className="mt-1 h-1.25 w-0.5 bg-li-ink" />
-        <span className="h-2.25 w-0.5 bg-li-ink" />
-      </span>
-    );
-  }
   if (status === "silent") {
     return (
       <span

@@ -9,32 +9,11 @@ function typing(target: EventTarget | null): boolean {
   return el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName);
 }
 
-export function useCaseKeyboard(
-  state: CaseState,
-  dispatch: Dispatch<CaseAction>,
-  order: string[],
-  regions?: { order: string[]; tooltip: boolean },
-) {
+export function useCaseKeyboard(state: CaseState, dispatch: Dispatch<CaseAction>, order: string[]) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        dispatch({ type: "escape", tooltip: regions?.tooltip });
-        return;
-      }
-      const drawer = state.inspected !== null || state.drawerList;
-      if (
-        regions &&
-        !drawer &&
-        state.selectedRegion &&
-        !typing(e.target) &&
-        (e.key === "ArrowLeft" || e.key === "ArrowRight")
-      ) {
-        e.preventDefault();
-        dispatch({
-          type: "move-region",
-          order: regions.order,
-          delta: e.key === "ArrowRight" ? 1 : -1,
-        });
+        dispatch({ type: "escape" });
         return;
       }
       if (!state.inspected || typing(e.target)) return;
@@ -46,5 +25,5 @@ export function useCaseKeyboard(
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [state.inspected, state.drawerList, state.selectedRegion, dispatch, order, regions]);
+  }, [state.inspected, dispatch, order]);
 }

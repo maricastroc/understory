@@ -4,7 +4,6 @@ import type { CasePhase } from "./types";
 import { liButton } from "../parts/button-class";
 import { VerdictButton } from "../verdict/VerdictButton";
 import { VerdictPopover } from "../verdict/VerdictPopover";
-import { VERDICT_TITLE, verdictConfidence, verdictRows } from "../copy/verdict-copy";
 
 function Location({ view, reserve }: { view: InvestigationView; reserve: boolean }) {
   const loc = view.location;
@@ -84,14 +83,7 @@ export function TitleRow({
               onToggle={onToggleVerdict}
             />
             {verdictOpen && (
-              <VerdictPopover
-                id={popoverId}
-                title={VERDICT_TITLE[view.verdict]}
-                rows={verdictRows(view)}
-                confidence={verdictConfidence(view)}
-                onClose={onCloseVerdict}
-                anchor={anchor}
-              />
+              <VerdictPopover id={popoverId} view={view} onClose={onCloseVerdict} anchor={anchor} />
             )}
           </div>
           {onFollowUp && (

@@ -9,7 +9,7 @@ import { verify } from "./verify";
 const NO_LLM =
   "No language model is configured — showing the collected evidence and provenance only.";
 
-export function synthesisError(e: unknown): string {
+function synthesisError(e: unknown): string {
   const raw = e instanceof Error ? e.message : String(e);
   if (/rate.?limit|too large|tokens per minute|\bTPM\b|quota|\b429\b/i.test(raw)) {
     return "The write-up model is rate-limited for the moment — the evidence and provenance chain below are complete. Try the summary again in a minute.";
