@@ -1,12 +1,10 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { axe } from "@/test/axe";
 import { SYNTHETIC_PR_NOW, syntheticPr944 } from "../fixtures/synthetic-pr-944";
 import { syntheticPrEvidenceOnly } from "../fixtures/synthetic-pr-states";
 import { PrInvestigation } from "./PrInvestigation";
-
-vi.mock("../../line-investigation/fonts", () => ({ lineInvestigationFonts: "" }));
 
 const NOW = Date.parse(SYNTHETIC_PR_NOW);
 const rect = HTMLElement.prototype.getBoundingClientRect;

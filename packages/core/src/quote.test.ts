@@ -3,13 +3,32 @@ import { locateQuote, verifyQuote } from "./quote";
 
 const BODY = "Bound retries in chargeCustomer to 3 attempts\nwith 1s/2s/4s backoff. Fixes #1187.";
 
-describe("verifyQuote", () => {
-  it("keeps the same contract after moving out of entail", () => {
+describe("verifyQuote — the deterministic proof gate", () => {
+  const GATE =
+    "Cap retries at 3 because the upstream gateway rate-limits\nbursts above five per second.";
+
+  it("accepts a snippet that appears verbatim in the source", () => {
+    expect(verifyQuote(GATE, "the upstream gateway rate-limits")).toBe(
+      "the upstream gateway rate-limits",
+    );
+  });
+
+  it("ignores case and collapsed whitespace/newlines", () => {
+    expect(verifyQuote(GATE, "RATE-LIMITS   bursts above five")).toBe(
+      "RATE-LIMITS   bursts above five",
+    );
     expect(verifyQuote(BODY, "3 attempts with 1s/2s/4s backoff")).toBe(
       "3 attempts with 1s/2s/4s backoff",
     );
-    expect(verifyQuote(BODY, "at 3")).toBeNull();
+  });
+
+  it("rejects a snippet the model invented", () => {
+    expect(verifyQuote(GATE, "because the database was slow")).toBeNull();
     expect(verifyQuote(BODY, "five attempts")).toBeNull();
+  });
+
+  it("rejects a too-short snippet that would match noise", () => {
+    expect(verifyQuote(GATE, "at 3")).toBeNull();
   });
 });
 

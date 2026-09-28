@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { finalizeCheck, finalizeClaim, verifyQuote } from "./entail";
+import { finalizeCheck, finalizeClaim } from "./entail";
 import type { Artifact } from "./types";
 
 const artifact = (id: string, body: string): Artifact => ({
@@ -12,28 +12,6 @@ const artifact = (id: string, body: string): Artifact => ({
 });
 
 const BODY = "Cap retries at 3 because the upstream gateway rate-limits\nbursts above five per second.";
-
-describe("verifyQuote — the deterministic proof gate", () => {
-  it("accepts a snippet that appears verbatim in the source", () => {
-    expect(verifyQuote(BODY, "the upstream gateway rate-limits")).toBe(
-      "the upstream gateway rate-limits",
-    );
-  });
-
-  it("ignores case and collapsed whitespace/newlines", () => {
-    expect(verifyQuote(BODY, "RATE-LIMITS   bursts above five")).toBe(
-      "RATE-LIMITS   bursts above five",
-    );
-  });
-
-  it("rejects a snippet the model invented", () => {
-    expect(verifyQuote(BODY, "because the database was slow")).toBeNull();
-  });
-
-  it("rejects a too-short snippet that would match noise", () => {
-    expect(verifyQuote(BODY, "at 3")).toBeNull();
-  });
-});
 
 describe("finalizeCheck — the judge cannot vouch for itself", () => {
   it("keeps 'supported' when the quote is real", () => {

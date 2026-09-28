@@ -5,8 +5,6 @@ import { blameWindowGitHub, parseGitHubRepo } from "./github";
 import { blameWindowGitLab, parseGitLabRepo } from "./gitlab";
 import { isCommitSha } from "./sha";
 
-export { MAX_BLAME_WINDOW };
-
 export async function blameWindow(input: {
   repoPath: string;
   file: string;

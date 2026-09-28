@@ -15,8 +15,6 @@ import type {
 const MAX_CHECKS = 6;
 const JUDGE_BODY_CAP = 1_600;
 
-export { verifyQuote };
-
 const EMPTY: Entailment = { checked: false, checks: [], supported: 0, misattributed: 0 };
 
 const claimSchema = z.object({

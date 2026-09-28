@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { lineInvestigationFonts } from "../line-investigation/fonts";
 import { RailDrawer } from "./RailDrawer";
 
 export function AppShell({
@@ -20,7 +19,7 @@ export function AppShell({
   children: ReactNode;
 }) {
   return (
-    <div className={`${lineInvestigationFonts} min-h-screen bg-li-paper`}>
+    <div className="min-h-screen bg-li-paper">
       {header}
       <div className="grid grid-cols-[256px_minmax(0,1fr)] max-[1360px]:grid-cols-[56px_minmax(0,1fr)] max-[820px]:grid-cols-1">
         <div className="sticky top-14 h-[calc(100vh-3.5rem)] border-r border-li-divider max-[1360px]:hidden">

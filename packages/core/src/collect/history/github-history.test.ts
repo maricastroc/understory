@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { runWithToken } from "../token-context";
+import { runWithTokens } from "../token-context";
 import { blameFilesGitHub, prLookupsGitHub } from "./github-history";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -22,7 +22,7 @@ describe("blameFilesGitHub", () => {
       data: { repository: { object: { f0: { ranges: [range(1, 3, "a")] }, f1: null } } },
       errors: [{ message: "timeout", path: ["repository", "object", "f1"] }],
     });
-    const out = await runWithToken("t", () =>
+    const out = await runWithTokens({ github: "t" }, () =>
       blameFilesGitHub("acme", "pay", "head", ["a.ts", "b.ts"]),
     );
     expect(fetch).toHaveBeenCalledTimes(1);
@@ -48,7 +48,9 @@ describe("prLookupsGitHub", () => {
         },
       },
     });
-    const out = await runWithToken("t", () => prLookupsGitHub("acme", "pay", ["a", "b", "c"]));
+    const out = await runWithTokens({ github: "t" }, () =>
+      prLookupsGitHub("acme", "pay", ["a", "b", "c"]),
+    );
     expect(fetch).toHaveBeenCalledTimes(1);
     expect([...out]).toEqual([
       ["a", "found"],

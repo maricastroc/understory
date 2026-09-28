@@ -1,59 +1,49 @@
 # Git Investigator — VS Code extension
 
-Third frontend over the `src/lib` investigation core (alongside the CLI and the Next.js API).
-It talks to a configurable backend over HTTP — it does **not** bundle the core.
+Investigate why a line of code is the way it is without leaving the editor. The extension embeds
+the same core as the web app (`packages/core`, bundled by esbuild) and has no runtime dependencies.
 
-## Status
+## Commands
 
-- **Phase 1 (done):** scaffold + `gitInvestigator.digCurrentLine` command that captures the
-  current workspace, active file and cursor line.
-- **Phase 2 (done):** the command POSTs `{ repoPath, location }` to `{backendUrl}/api/dig` and
-  renders loading → result → error in a Webview (answer, confidence, honest abstention,
-  contradictions, evidence). Network happens in the extension host; the Webview only renders.
-- **Phase 3 (done):** Webview layout polish (answer card + confidence + provenance timeline with
-  kind-colored nodes), typed error states (backend offline / cancelled / failed) with an actionable
-  hint, a **Re-investigate / Try again** button (webview→host `postMessage`), and the editor
-  right-click menu entry.
-
-## Try Phase 2
-
-1. Start the backend from the repo root: `npm run dev` (serves `http://localhost:3000`).
-   For the written summary, `GROQ_API_KEY` must be set in `.env.local`; without it the Webview
-   shows the collected evidence plus a notice.
-2. Press **F5** here (or reload the Extension Development Host with `Cmd+R` if it's already open,
-   so it picks up the latest compiled code).
-3. In the dev host window, open a file in a git repo, put the cursor on a line, and run
-   **"Git Investigator: Why is this line?"**. A panel opens beside the editor with the result.
+- **Git Investigator: Why is this line?** (`gitInvestigator.digCurrentLine`, also in the editor
+  context menu) — investigates the line under the cursor. In `local` mode it runs in-process
+  against the local git repo; in `backend` mode it calls `{backendUrl}/api/dig`.
+- **Git Investigator: Full Investigation (in editor)** (`gitInvestigator.digCurrentLineFull`) —
+  sends the workspace's GitHub/GitLab remote to `{webUrl}/api/dig`, so PRs, reviews and issues
+  are collected from the provider, and lets you drill into any cited artifact from the panel.
+- **Git Investigator: Open Full Investigation on the Web** (`gitInvestigator.openOnWeb`) — opens
+  `{webUrl}/app?repo=…&file=…&line=…`.
+- **Git Investigator: Set Groq API Key** / **Set GitHub Token** — stored in VS Code's
+  SecretStorage. Without a Groq key the panel shows the evidence only; a GitHub token enriches
+  local history with the PRs, issues and reviews behind each commit and is sent along for private
+  repositories.
 
 ## Settings
 
-- `gitInvestigator.backendUrl` (default `http://localhost:3000`) — the extension calls
-  `{backendUrl}/api/dig`.
-
-## Package & install (`.vsix`)
-
-The extension has no runtime dependencies, so packaging bundles only the compiled `out/`.
-
-```bash
-npm run package      # → git-investigator-vscode-<version>.vsix
-```
-
-Install the built `.vsix` into any VS Code (no repo clone needed):
-
-```bash
-code --install-extension git-investigator-vscode-0.0.1.vsix
-```
-
-Or from the UI: **Extensions** view → `···` menu → **Install from VSIX…**. If the Extension
-Development Host is open, close it first so the command isn't registered twice.
+- `gitInvestigator.mode` — `local` (default) or `backend`.
+- `gitInvestigator.backendUrl` — default `http://localhost:3000`, used in `backend` mode.
+- `gitInvestigator.webUrl` — default `https://git-investigator.marianacastro.dev`, used by the full
+  investigation and by Open on the Web.
 
 ## Develop
 
+Install from the repository root (`npm install`; the extension is an npm workspace), then in this
+folder:
+
 ```bash
-npm install
 npm run compile      # or: npm run watch
+npm run typecheck
 ```
 
-Then open this folder in VS Code and press **F5** ("Run Extension") to launch an Extension
-Development Host. In that window, open any file, put the cursor on a line, and run
-**"Git Investigator: Why is this line?"** from the Command Palette or the editor right-click menu.
+Open this folder in VS Code and press **F5** ("Run Extension"): it compiles and launches an
+Extension Development Host.
+
+## Package & install (`.vsix`)
+
+```bash
+npm run package      # → git-investigator-vscode-<version>.vsix, bundling dist/
+code --install-extension git-investigator-vscode-0.0.1.vsix
+```
+
+Or from the UI: **Extensions** view → `···` menu → **Install from VSIX…**. Close the Extension
+Development Host first so the commands aren't registered twice.

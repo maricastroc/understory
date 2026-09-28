@@ -17,8 +17,6 @@ export function QuestionForm({
   enclosing,
   canExpand,
   onExpand,
-  noCapture,
-  setNoCapture,
 }: {
   subject: string;
   runLabel: string;
@@ -28,8 +26,6 @@ export function QuestionForm({
   enclosing: SymbolSpan | null;
   canExpand: boolean;
   onExpand: () => void;
-  noCapture: boolean;
-  setNoCapture: (v: boolean) => void;
 }) {
   const id = useId();
   const ready = question.trim().length > 0;
@@ -78,20 +74,6 @@ export function QuestionForm({
           </span>
         </button>
       )}
-      <label className="flex w-fit cursor-pointer items-start gap-2 text-[11.5px] leading-snug text-li-text-subtle">
-        <input
-          type="checkbox"
-          checked={noCapture}
-          onChange={(e) => setNoCapture(e.target.checked)}
-          className="mt-0.5 size-3.5 shrink-0 cursor-pointer accent-li-ink"
-        />
-        <span>
-          Don&apos;t log this question
-          <span className="block text-li-text-muted">
-            Otherwise it is logged anonymously, with the repo and location, to improve answers.
-          </span>
-        </span>
-      </label>
     </form>
   );
 }

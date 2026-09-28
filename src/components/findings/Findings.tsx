@@ -1,7 +1,5 @@
 "use client";
 
-import { cosmeticOrigin } from "@git-investigator/core/cosmetic";
-import { traceProvenance } from "@git-investigator/core/provenance";
 import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
 import { CopyButton } from "../CopyButton";
 import { letter } from "../format";
@@ -13,7 +11,6 @@ import { ContradictionAlert } from "./ContradictionAlert";
 import { EntailmentQuotes } from "./EntailmentQuotes";
 import { FabricationAlert } from "./FabricationAlert";
 import { MisattributionAlert } from "./MisattributionAlert";
-import { OriginTrace } from "./OriginTrace";
 import { OutOfScopeCard } from "./OutOfScopeCard";
 import { SourcesUsed } from "./SourcesUsed";
 import { UncitedClaimsAlert } from "./UncitedClaimsAlert";
@@ -37,8 +34,6 @@ export function Findings({
 
   const idToLetter = new Map(evidence.artifacts.map((a, i) => [a.id, letter(i)]));
   const byId = new Map(evidence.artifacts.map((a) => [a.id, a]));
-  const provenance = traceProvenance(evidence);
-  const cosmetic = cosmeticOrigin(evidence);
   const resolved = narrative.citations.filter((id) => idToLetter.has(id));
   const citedSet = new Set(resolved);
   const contradictions = evidence.contradictions.filter((c) => citedSet.has(c.artifactId));
@@ -49,8 +44,6 @@ export function Findings({
 
   const auditUnavailable =
     narrative.recorded && narrative.grounded && resolved.length > 0 && !entailment?.checked;
-
-  const coarseGranularity = evidence.coverage?.granularity === "file";
 
   return (
     <section className="mt-6">
@@ -77,7 +70,6 @@ export function Findings({
                 {narrative.answer}
               </p>
             )}
-            {provenance && <OriginTrace provenance={provenance} byId={byId} />}
             <FabricationAlert ids={narrative.unknownCitations} />
             <UncitedClaimsAlert count={ungroundedClaims} />
             <MisattributionAlert checks={checks} idToLetter={idToLetter} />
@@ -91,8 +83,6 @@ export function Findings({
             grounded={narrative.grounded}
             entailment={entailment}
             auditUnavailable={auditUnavailable}
-            coarseGranularity={coarseGranularity}
-            cosmeticRef={cosmetic?.ref}
           />
         </div>
       </div>

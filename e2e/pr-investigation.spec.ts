@@ -1,7 +1,5 @@
-import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-
-const AXE = path.join(process.cwd(), "node_modules/axe-core/axe.min.js");
+import { axeViolations } from "./axe";
 
 async function open(page: Page, width = 1440, state = "default") {
   await page.setViewportSize({ width, height: 900 });
@@ -9,20 +7,6 @@ async function open(page: Page, width = 1440, state = "default") {
   await page.getByRole("region", { name: "Changed regions" }).waitFor();
   await page.locator("svg line.stroke-li-datum").waitFor({ state: "attached" });
   await page.evaluate(() => document.fonts.ready);
-}
-
-async function axeViolations(page: Page) {
-  await page.addScriptTag({ path: AXE });
-  return page.evaluate(async () => {
-    const axe = (
-      window as unknown as {
-        axe: {
-          run: (el: Document) => Promise<{ violations: Array<{ id: string; nodes: unknown[] }> }>;
-        };
-      }
-    ).axe;
-    return (await axe.run(document)).violations.map((v) => `${v.id} (${v.nodes.length})`);
-  });
 }
 
 const list = (page: Page) => page.getByRole("region", { name: "Changed regions" });

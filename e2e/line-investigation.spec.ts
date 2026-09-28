@@ -1,28 +1,11 @@
-import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-
-const AXE = path.join(process.cwd(), "node_modules/axe-core/axe.min.js");
+import { axeViolations } from "./axe";
 
 async function open(page: Page, width = 1440, state = "resolved") {
   await page.setViewportSize({ width, height: 900 });
   await page.goto(`/dev/line?state=${state}`);
   await page.locator('ol[aria-label="History, newest first"] button').first().waitFor();
   await page.evaluate(() => document.fonts.ready);
-}
-
-async function axeViolations(page: Page) {
-  await page.addScriptTag({ path: AXE });
-  return page.evaluate(async () => {
-    const axe = (
-      window as unknown as {
-        axe: {
-          run: (el: Element) => Promise<{ violations: Array<{ id: string; nodes: unknown[] }> }>;
-        };
-      }
-    ).axe;
-    const result = await axe.run(document.querySelector("main")!);
-    return result.violations.map((v) => `${v.id} (${v.nodes.length})`);
-  });
 }
 
 function labelBoxes(page: Page) {
@@ -124,7 +107,7 @@ for (const setup of ["default", "pinned", "drawer"] as const) {
     if (setup === "pinned") await page.locator('li[data-clause="c1"] button').click();
     if (setup === "drawer") await page.getByRole("button", { name: /^E, issue/ }).click();
     await page.mouse.move(0, 0);
-    expect(await axeViolations(page)).toEqual([]);
+    expect(await axeViolations(page, { within: "main" })).toEqual([]);
   });
 }
 

@@ -1,18 +1,16 @@
-type Tone = "good" | "warn" | "crit" | "accent" | "neutral";
+import { initials } from "./shell/initials";
+
+type Tone = "good" | "warn" | "neutral";
 
 const toneBadge: Record<Tone, string> = {
   good: "bg-good-tint text-good",
   warn: "bg-warn-tint text-warn",
-  crit: "bg-crit-tint text-crit",
-  accent: "bg-accent-tint text-accent-press",
   neutral: "bg-inset text-ink-3",
 };
 
 const toneDot: Record<Tone, string> = {
   good: "bg-good",
   warn: "bg-warn",
-  crit: "bg-crit",
-  accent: "bg-accent",
   neutral: "bg-ink-3",
 };
 
@@ -46,26 +44,7 @@ export function Pill({
 
 const AVATAR_BG = ["#8A5A44", "#4B57D6", "#3F6B58", "#6B718A", "#9A6A2E", "#5B5F97"];
 
-export function Avatar({ name, src, size = 28 }: { name: string; src?: string; size?: number }) {
-  if (src) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={src}
-        alt={name}
-        width={size}
-        height={size}
-        className="shrink-0 rounded-full object-cover"
-      />
-    );
-  }
-  const initials =
-    name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase() ?? "")
-      .join("") || "?";
+export function Avatar({ name, size = 28 }: { name: string; size?: number }) {
   let h = 0;
   for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   const bg = AVATAR_BG[h % AVATAR_BG.length];
@@ -74,7 +53,7 @@ export function Avatar({ name, src, size = 28 }: { name: string; src?: string; s
       className="inline-grid shrink-0 place-items-center rounded-full font-semibold text-white"
       style={{ width: size, height: size, background: bg, fontSize: Math.round(size * 0.36) }}
     >
-      {initials}
+      {initials(name)}
     </span>
   );
 }

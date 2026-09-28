@@ -8,7 +8,8 @@ import type { ComposerPrefill } from "../composer/composer-prefill";
 import { useRepo } from "../composer/use-repo";
 import { LiveLineInvestigation } from "../line-investigation/case/LiveLineInvestigation";
 import { usePrHistory } from "../pr/use-pr-history";
-import { RailContent, RightRail } from "../rail/RightRail";
+import { CaseDetails } from "../rail/CaseDetails";
+import { RightRail } from "../rail/RightRail";
 import { AppHeader } from "../shell/AppHeader";
 import { AppShell } from "../shell/AppShell";
 import { CaseRail } from "../shell/CaseRail";
@@ -223,9 +224,7 @@ export function Investigator() {
           onNewInRepo={summaryRepoPath.trim() ? () => startInRepo(summaryRepoPath) : undefined}
           cases={[...lineItems, ...prItems]}
           onSelectCase={openRailItem}
-          fileSearch={
-            repoPath.trim() && repo.ready ? { repoPath, enabled: true, token: tokenValue } : null
-          }
+          fileSearch={repoPath.trim() && repo.ready ? { repoPath, token: tokenValue } : null}
           onOpenFile={openFile}
           crossLink="pr"
           onNewInvestigation={handleNewInvestigation}
@@ -326,25 +325,23 @@ export function Investigator() {
           ) : null}
 
           {!busy && !lineCase && !draftCase && view === "case" && current && (
-            <div className="legacy-tokens">
-              <CaseView
-                entry={current}
-                onBack={backToCode}
-                onDrill={drill(current)}
-                onOpenParent={openParent}
-              />
-            </div>
+            <CaseView
+              entry={current}
+              onBack={backToCode}
+              onDrill={drill(current)}
+              onOpenParent={openParent}
+            />
           )}
 
           {railResult && (
-            <div className="legacy-tokens mt-5 flex flex-col gap-3.5 xl:hidden">
-              <RailContent result={railResult} />
+            <div className="mt-5 flex flex-col gap-3.5 xl:hidden">
+              <CaseDetails result={railResult} />
             </div>
           )}
         </div>
 
         {railResult && (
-          <div className="legacy-tokens sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
+          <div className="sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
             <RightRail result={railResult} />
           </div>
         )}

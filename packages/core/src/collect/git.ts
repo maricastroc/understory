@@ -122,12 +122,6 @@ export function commitToArtifact(c: GitCommit, repo: RepoRef): Artifact {
   };
 }
 
-export async function introducingCommits(repoPath: string, loc: CodeLocation): Promise<Artifact[]> {
-  const repo = await resolveRepo(repoPath);
-  const commits = await lineHistory(repoPath, loc);
-  return commits.map((c) => commitToArtifact(c, repo));
-}
-
 export async function defaultFiles(repoPath: string, limit = 5): Promise<string[]> {
   try {
     const files = (await git(repoPath, ["ls-files"])).split("\n").filter(Boolean);

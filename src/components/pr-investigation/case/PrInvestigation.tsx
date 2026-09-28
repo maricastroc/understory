@@ -12,7 +12,6 @@ import { useFocusReturn } from "../../line-investigation/case/use-focus-return";
 import { evidenceEntries } from "../../line-investigation/copy/evidence-entries";
 import { EvidenceDrawer } from "../../line-investigation/drawer/EvidenceDrawer";
 import type { DrawerExtensions } from "../../line-investigation/drawer/types";
-import { lineInvestigationFonts } from "../../line-investigation/fonts";
 import type { ViewArtifact } from "../../line-investigation/model/types";
 import {
   caseReducer,
@@ -109,7 +108,7 @@ export function PrInvestigation({
   };
 
   return (
-    <div className={`${lineInvestigationFonts} flex flex-col gap-5.5 font-li-body text-li-ink`}>
+    <div className="flex flex-col gap-5.5 font-li-body text-li-ink">
       <PrTitleRow
         view={view}
         open={state.verdictOpen}

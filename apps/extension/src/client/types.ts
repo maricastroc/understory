@@ -5,5 +5,4 @@ export type DigRequest = {
   location?: string;
   target?: ArtifactRef;
   question?: string;
-  noCapture?: boolean;
 };

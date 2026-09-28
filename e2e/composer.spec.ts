@@ -1,22 +1,5 @@
-import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-
-const AXE = path.join(process.cwd(), "node_modules/axe-core/axe.min.js");
-
-async function axeViolations(page: Page) {
-  await page.waitForTimeout(400);
-  await page.addScriptTag({ path: AXE });
-  return page.evaluate(async () => {
-    const axe = (
-      window as unknown as {
-        axe: {
-          run: (el: Document) => Promise<{ violations: Array<{ id: string; nodes: unknown[] }> }>;
-        };
-      }
-    ).axe;
-    return (await axe.run(document)).violations.map((v) => `${v.id} (${v.nodes.length})`);
-  });
-}
+import { axeViolations } from "./axe";
 
 function watchRequests(page: Page) {
   const blame: string[] = [];
@@ -47,7 +30,7 @@ test("the demo opens on the file stage: map of current lines, then a file, a lin
   await expect(trail.getByRole("button")).toHaveCount(1);
   await expect(page.getByText("Changed in the last 12 commits")).toBeVisible();
   await expect(page.getByText(/PR data (is )?unavailable/)).toBeHidden();
-  expect(await axeViolations(page)).toEqual([]);
+  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
 
   await page.getByRole("button", { name: /^src\/billing\/charge\.ts, / }).click();
   await expect(
@@ -66,7 +49,7 @@ test("the demo opens on the file stage: map of current lines, then a file, a lin
     "Last changed by",
   );
   await expect(page.getByRole("button", { name: /Investigate this line/ })).toBeVisible();
-  expect(await axeViolations(page)).toEqual([]);
+  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
   expect(calls.blame).toEqual([]);
 });
 
@@ -106,11 +89,11 @@ test("the demo maps its files by itself after a second of idle; no remote means 
   await files.getByRole("button", { name: /^src\/billing\/charge\.ts/ }).focus();
   await expect(inspector.getByRole("button", { name: "Open charge.ts →" })).toBeVisible();
   await expect(inspector).toContainText("Oldest line");
-  expect(await axeViolations(page)).toEqual([]);
+  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
   await page.keyboard.press("Escape");
   await expect(inspector).toContainText("Hover or focus a file to inspect its history.");
   expect(calls.blame).toEqual([]);
-  expect(await axeViolations(page)).toEqual([]);
+  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
 });
 
 test("the first node of the path leads back to the repository stage", async ({ page }) => {
@@ -129,7 +112,7 @@ test("the first node of the path leads back to the repository stage", async ({ p
   await expect(page.getByRole("textbox", { name: /Pull request URL/ })).toBeVisible();
   await expect(page.getByText(/Sign in with GitHub/)).toHaveCount(0);
   await page.waitForTimeout(400);
-  expect(await axeViolations(page)).toEqual([]);
+  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
 });
 
 test("the cold map matches the design geometry at 1440", async ({ page }) => {
@@ -163,7 +146,7 @@ for (const state of ["auto", "mapping", "warm", "unknown"]) {
       14,
     );
     await page.getByRole("button", { name: /^config\/env\.ts/ }).focus();
-    expect(await axeViolations(page)).toEqual([]);
+    expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
   });
 }
 
@@ -182,7 +165,7 @@ for (const width of [1440, 1024, 390]) {
     expect(overflow).toBeLessThanOrEqual(0);
     await page.getByRole("button", { name: /^src\/billing\/charge\.ts/ }).focus();
     await expect(page.getByText("Shown because you have cases here.")).toBeVisible();
-    expect(await axeViolations(page)).toEqual([]);
+    expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
   });
 }
 
@@ -201,7 +184,7 @@ test("one much older file breaks the depth axis explicitly and the legend says s
   ).toBeVisible();
   await page.getByRole("button", { name: "About this map" }).click();
   await expect(page.getByText(/below the zigzag break it is compressed/)).toBeVisible();
-  expect(await axeViolations(page)).toEqual([]);
+  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
 });
 
 test("the path focus ring hugs the step it belongs to", async ({ page }) => {
@@ -220,5 +203,5 @@ test("the path focus ring hugs the step it belongs to", async ({ page }) => {
   expect(box.width).toBeLessThanOrEqual(content + 1);
   expect(box.height).toBeLessThan(32);
   expect(await step.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe("solid");
-  expect(await axeViolations(page)).toEqual([]);
+  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
 });

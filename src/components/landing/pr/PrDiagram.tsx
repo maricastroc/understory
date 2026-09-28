@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { computePrSectionLayout } from "../../pr-investigation/layout/compute-pr-section-layout";
 import { SectionGraphics } from "../../pr-investigation/section/SectionGraphics";
-import { SectionOverlay } from "../../pr-investigation/section/SectionOverlay";
+import { SectionCaptions } from "../../pr-investigation/section/SectionCaptions";
 import { ScaledFrame } from "../parts/ScaledFrame";
 import { landingPrView } from "./landing-pr-fixture";
 import { prDiagramLabel } from "./pr-diagram-label";
@@ -35,21 +35,7 @@ export function PrDiagram({ className = "" }: { className?: string }) {
           selected={null}
           inspected={null}
         />
-        <SectionOverlay
-          view={landingPrView}
-          layout={layout}
-          width={FRAME.width}
-          activeRegions={null}
-          clause={null}
-          selected={null}
-          hoverArtifact={null}
-          showTooltip={false}
-          onHoverRegion={() => {}}
-          onSelectRegion={() => {}}
-          onHoverArtifact={() => {}}
-          onInspect={() => {}}
-          static
-        />
+        <SectionCaptions view={landingPrView} layout={layout} />
       </ScaledFrame>
     </div>
   );

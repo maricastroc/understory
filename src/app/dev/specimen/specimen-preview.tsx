@@ -7,7 +7,6 @@ import {
   syntheticChargeLines,
 } from "@/components/line-investigation/fixtures/synthetic-charge-file";
 import { SYNTHETIC_NOW } from "@/components/line-investigation/fixtures/synthetic-retry-cap";
-import { lineInvestigationFonts } from "@/components/line-investigation/fonts";
 import { CodeSpecimen } from "@/components/line-investigation/specimen/CodeSpecimen";
 import { LiveCodeSpecimen } from "@/components/line-investigation/specimen/LiveCodeSpecimen";
 import type {
@@ -75,9 +74,7 @@ export function SpecimenPreview({
   const ruleLeft = active.mode === "panel" ? (active.width === "wide" ? 460 : 420) : 0;
 
   return (
-    <main
-      className={`${lineInvestigationFonts} min-h-screen bg-li-paper px-8 py-6 font-li-body text-li-ink max-[820px]:px-4`}
-    >
+    <main className="min-h-screen bg-li-paper px-8 py-6 font-li-body text-li-ink max-[820px]:px-4">
       <p className="mb-4 font-li-mono text-[11px] leading-4 text-li-text-muted">
         dev preview · CodeSpecimen · {demo ? `live ${demo.repo}` : "synthetic fixture"} · {state} ·{" "}
         {active.mode}/{active.width}

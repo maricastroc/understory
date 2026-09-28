@@ -10,10 +10,6 @@ export function gapLabel(gap: ViewGap): string {
   return gap.missing === "issue" ? "no linked issue" : "not recorded";
 }
 
-export function isReasonGap(gap: ViewGap): boolean {
-  return gap.missing === "reason";
-}
-
 export function gapKind(gap: ViewGap): string {
   return gap.verified ? "NOT RECOVERED" : "NOT VERIFIED";
 }

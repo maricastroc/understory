@@ -8,10 +8,6 @@ export function runWithTokens<T>(tokens: Tokens, fn: () => T): T {
   return store.run({ github: tokens.github || undefined, gitlab: tokens.gitlab || undefined }, fn);
 }
 
-export function runWithToken<T>(token: string | undefined, fn: () => T): T {
-  return runWithTokens({ github: token }, fn);
-}
-
 export function getRequestToken(): string | undefined {
   return store.getStore()?.github;
 }

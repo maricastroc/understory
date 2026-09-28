@@ -6,7 +6,6 @@ import { blameRequestRange } from "./blame-request-range";
 import { CodeSpecimen } from "./CodeSpecimen";
 import { codeWindow } from "./code-window";
 import type { LineRange, SpecimenLayout } from "./types";
-import { useSpecimenLayout } from "./use-specimen-layout";
 import { useSpecimenSource } from "./use-specimen-source";
 import { useWindowBlame } from "./use-window-blame";
 
@@ -33,14 +32,12 @@ export function LiveCodeSpecimen({
   now: number;
   expanded: boolean;
   onToggleExpanded: () => void;
-  layout?: SpecimenLayout;
+  layout: SpecimenLayout;
   targetDatumY?: number;
   onDatumY?: (y: number) => void;
   token?: string;
   awaitingSha?: boolean;
 }) {
-  const responsive = useSpecimenLayout();
-  const active = layout ?? responsive;
   const source = useSpecimenSource(repo, path, sha, token);
   const lines = source.lines;
 
@@ -50,13 +47,13 @@ export function LiveCodeSpecimen({
       lineCount: lines.length,
       datum,
       enclosing: enclosingSymbol(lines, datum.end, path),
-      mode: active.mode,
-      context: active.context,
+      mode: layout.mode,
+      context: layout.context,
       targetDatumY,
       expanded,
     });
     return blameRequestRange({ start: win.start, end: win.end }, datum);
-  }, [lines, datum, path, active.mode, active.context, targetDatumY, expanded]);
+  }, [lines, datum, path, layout.mode, layout.context, targetDatumY, expanded]);
 
   const blame = useWindowBlame(repo, path, sha, request, token);
 
@@ -91,7 +88,7 @@ export function LiveCodeSpecimen({
       blame={blame.spans}
       blameStatus={awaitingSha && !sha ? "loading" : blame.status}
       now={now}
-      layout={active}
+      layout={layout}
       expanded={expanded}
       onToggleExpanded={onToggleExpanded}
       targetDatumY={targetDatumY}

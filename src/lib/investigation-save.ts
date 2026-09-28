@@ -9,8 +9,6 @@ export const saveSchema = z.object({
   parentCaseId: z.string().min(1).max(200).nullish(),
 });
 
-export type SavePayload = z.infer<typeof saveSchema>;
-
 export function isMissingColumn(error: unknown): boolean {
   return (
     typeof error === "object" &&

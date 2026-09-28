@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { readJson } from "@/lib/read-json";
 
-export function useFileSearch(
-  repoPath: string,
-  enabled: boolean,
-  openedPath: string | undefined,
-  token?: string,
-) {
+export function useFileSearch(repoPath: string, enabled: boolean, token?: string) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<string[]>([]);
   const [searching, setSearching] = useState(false);
@@ -17,7 +12,7 @@ export function useFileSearch(
     const id = ++seq.current;
     const q = query.trim();
 
-    if (!enabled || openedPath === q) {
+    if (!enabled) {
       if (id === seq.current) {
         setResults([]);
         setSearching(false);
@@ -55,7 +50,7 @@ export function useFileSearch(
       isDefault ? 0 : 220,
     );
     return () => clearTimeout(t);
-  }, [query, repoPath, enabled, openedPath, token]);
+  }, [query, repoPath, enabled, token]);
 
   function clear() {
     setQuery("");

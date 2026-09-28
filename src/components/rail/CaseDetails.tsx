@@ -4,14 +4,10 @@ import { Avatar } from "../ui";
 import { MetaRow, RailCard } from "./RailCard";
 import { Provenance } from "./Provenance";
 
-export function CaseRail({ result }: { result: DigResult }) {
+export function CaseDetails({ result }: { result: DigResult }) {
   const ev: Evidence = result.evidence;
   const repoName = ev.repo.name ?? ev.repo.path.split("/").filter(Boolean).pop() ?? ev.repo.path;
-  const loc = ev.location
-    ? `${ev.location.file}:${ev.location.startLine}${
-        ev.location.endLine !== ev.location.startLine ? `-${ev.location.endLine}` : ""
-      }`
-    : (ev.anchor?.ref ?? ev.anchor?.id ?? "—");
+  const anchor = ev.anchor?.ref ?? ev.anchor?.id ?? "—";
 
   const counts = new Map<string, number>();
   for (const a of ev.artifacts) {
@@ -33,7 +29,7 @@ export function CaseRail({ result }: { result: DigResult }) {
         </div>
         <div className="mt-3">
           <MetaRow k="Branch" v={ev.repo.branch ?? "—"} mono tail />
-          <MetaRow k={ev.location ? "Location" : "Anchor"} v={loc} mono tail />
+          <MetaRow k="Anchor" v={anchor} mono tail />
           <MetaRow
             k="History"
             v={

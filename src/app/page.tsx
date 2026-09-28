@@ -5,13 +5,11 @@ import { Method } from "@/components/landing/Method";
 import { PrScale } from "@/components/landing/PrScale";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SiteHeader } from "@/components/landing/SiteHeader";
-import { displayFont, lineInvestigationFonts } from "@/components/line-investigation/fonts";
+import { displayFont } from "@/components/line-investigation/fonts";
 
 export default function Home() {
   return (
-    <div
-      className={`${lineInvestigationFonts} ${displayFont} min-h-screen bg-li-paper font-li-body text-li-ink`}
-    >
+    <div className={`${displayFont} min-h-screen bg-li-paper font-li-body text-li-ink`}>
       <SiteHeader />
       <main>
         <Hero />

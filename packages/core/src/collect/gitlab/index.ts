@@ -1,25 +1,13 @@
-export { parseGitLabRepo, getProjectMeta, gitlabHosts, getBranchHeadGitLab } from "./repo";
-export type { GitLabProjectMeta } from "./repo";
+export { parseGitLabRepo, getProjectMeta, getBranchHeadGitLab } from "./repo";
 export {
   defaultFilesGitLab,
   searchFilesGitLab,
   getFileContentGitLab,
   getFileSizeGitLab,
 } from "./browse";
-export {
-  blameLinesGitLab,
-  blameWindowGitLab,
-  fileHistoryGitLab,
-  spansFromGitLabRanges,
-} from "./blame";
+export { blameLinesGitLab, blameWindowGitLab, fileHistoryGitLab } from "./blame";
 export type { GitLabCommit } from "./blame";
-export {
-  glCommitArtifact,
-  glMrArtifact,
-  glIssueArtifact,
-  glReviewArtifact,
-} from "./artifacts";
-export type { GlCommit, GlMr, GlIssue, GlNote } from "./artifacts";
+export { glCommitArtifact, glMrArtifact, glIssueArtifact, glReviewArtifact } from "./artifacts";
 export {
   mergeRequestBundle,
   mrContextArtifacts,

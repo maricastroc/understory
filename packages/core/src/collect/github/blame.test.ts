@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { runWithToken } from "../token-context";
+import { runWithTokens } from "../token-context";
 import { type AssociatedPr, attachEnrichment, enrichCommits, spansFromGitHubRanges } from "./blame";
 
 const lean = (oid: string, date = "2024-01-01T00:00:00Z") => ({
@@ -71,7 +71,7 @@ describe("enrichCommits", () => {
         }),
       })),
     );
-    const out = await runWithToken("t", () => enrichCommits("o", "r", ["x1", "x2"]));
+    const out = await runWithTokens({ github: "t" }, () => enrichCommits("o", "r", ["x1", "x2"]));
     expect(out.get("x1")).toEqual([]);
     expect(out.get("x2")).toBeNull();
   });

@@ -59,7 +59,7 @@ export function Composer({
   const viewer = useFileViewer(repoPath);
   const [query, setQuery] = useState("");
   const q = query.trim();
-  const search = useFileSearch(repoPath, repo.ready && q.length >= 2, undefined, tokenValue);
+  const search = useFileSearch(repoPath, repo.ready && q.length >= 2, tokenValue);
   const { overview, error: overviewError } = useOverview(
     repoPath,
     repo.ready,
@@ -76,13 +76,6 @@ export function Composer({
     busy: typing || viewer.loading || investigating,
   });
   const [question, setQuestion] = useState("Why is this line the way it is?");
-  const [noCapture, setNoCapture] = useState(
-    () => typeof window !== "undefined" && localStorage.getItem("gi:no-capture") === "1",
-  );
-  function updateNoCapture(v: boolean) {
-    setNoCapture(v);
-    localStorage.setItem("gi:no-capture", v ? "1" : "0");
-  }
 
   const handledPrefill = useRef<number | null>(null);
   useEffect(() => {
@@ -155,7 +148,6 @@ export function Composer({
       repoPath,
       location: `${file.path}:${span}`,
       question: question.trim(),
-      noCapture,
     });
   }
 
@@ -313,8 +305,6 @@ export function Composer({
                 enclosing={enclosing}
                 canExpand={canExpand}
                 onExpand={viewer.expandToSymbol}
-                noCapture={noCapture}
-                setNoCapture={updateNoCapture}
               />
             )}
           </CodeContext>
