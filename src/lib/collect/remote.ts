@@ -53,7 +53,10 @@ export async function maybeDelegate(
 
   const src = new URL(req.url);
   const target = `${process.env.COLLECTOR_URL!.replace(/\/$/, "")}${src.pathname}${src.search}`;
-  const init: RequestInit = { method: req.method, headers: forwardHeaders(req, body !== undefined) };
+  const init: RequestInit = {
+    method: req.method,
+    headers: forwardHeaders(req, body !== undefined),
+  };
   if (body !== undefined) init.body = JSON.stringify(body);
 
   let res: Response;

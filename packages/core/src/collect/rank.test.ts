@@ -58,10 +58,12 @@ describe("rankByHistory", () => {
       ["pnpm-lock.yaml", 9],
       ["README.md", 9],
     ]);
-    expect(rankByHistory(
-      ["src/real.ts", "src/real.test.ts", "src/__tests__/x.ts", "pnpm-lock.yaml", "README.md"],
-      churn,
-    )).toEqual(["src/real.ts"]);
+    expect(
+      rankByHistory(
+        ["src/real.ts", "src/real.test.ts", "src/__tests__/x.ts", "pnpm-lock.yaml", "README.md"],
+        churn,
+      ),
+    ).toEqual(["src/real.ts"]);
   });
 
   it("caps the result at the requested limit", () => {

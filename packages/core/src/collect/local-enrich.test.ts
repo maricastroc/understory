@@ -27,7 +27,13 @@ const pr: AssociatedPr = {
   url: "https://github.com/o/r/pull/42",
   createdAt: "2023-02-10T00:00:00Z",
   comments: {
-    nodes: [{ author: { login: "reviewer" }, body: "why 3 and not 5?", createdAt: "2023-02-11T00:00:00Z" }],
+    nodes: [
+      {
+        author: { login: "reviewer" },
+        body: "why 3 and not 5?",
+        createdAt: "2023-02-11T00:00:00Z",
+      },
+    ],
   },
   reviews: {
     nodes: [

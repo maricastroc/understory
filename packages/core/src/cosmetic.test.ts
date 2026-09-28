@@ -65,7 +65,9 @@ describe("cosmeticOrigin", () => {
   });
 
   it("returns null for a drill-down (no location) or no commits", () => {
-    expect(cosmeticOrigin(ev([commit("aaa", "style: fmt", "2023-01-01T00:00:00Z")], false))).toBeNull();
+    expect(
+      cosmeticOrigin(ev([commit("aaa", "style: fmt", "2023-01-01T00:00:00Z")], false)),
+    ).toBeNull();
     expect(cosmeticOrigin(ev([]))).toBeNull();
   });
 });

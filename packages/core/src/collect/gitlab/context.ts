@@ -112,7 +112,11 @@ export async function commitContextArtifactsGitLab(
 
   const out: Artifact[] = [glCommitArtifact(commit)];
 
-  const mrs = await get<GlMr[]>(host, `/projects/${id}/repository/commits/${sha}/merge_requests`, []);
+  const mrs = await get<GlMr[]>(
+    host,
+    `/projects/${id}/repository/commits/${sha}/merge_requests`,
+    [],
+  );
   const iid = mrs[0]?.iid;
   if (iid != null) out.push(...(await mrContextArtifacts(host, project, iid).catch(() => [])));
 

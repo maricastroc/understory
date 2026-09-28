@@ -27,9 +27,9 @@ describe("parseGitLabRepo", () => {
   });
 
   it("strips a /-/ file path suffix and .git", () => {
-    expect(parseGitLabRepo("https://gitlab.company.com/team/payments/-/blob/main/src/x.ts")).toEqual(
-      { host: "gitlab.company.com", project: "team/payments" },
-    );
+    expect(
+      parseGitLabRepo("https://gitlab.company.com/team/payments/-/blob/main/src/x.ts"),
+    ).toEqual({ host: "gitlab.company.com", project: "team/payments" });
     expect(parseGitLabRepo("https://gitlab.company.com/team/payments.git")).toEqual({
       host: "gitlab.company.com",
       project: "team/payments",

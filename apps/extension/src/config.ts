@@ -7,9 +7,7 @@ export function getMode(): Mode {
 }
 
 export function getBackendUrl(): string {
-  const configured = vscode.workspace
-    .getConfiguration("gitInvestigator")
-    .get<string>("backendUrl");
+  const configured = vscode.workspace.getConfiguration("gitInvestigator").get<string>("backendUrl");
   return (configured ?? "http://localhost:3000").replace(/\/+$/, "");
 }
 
