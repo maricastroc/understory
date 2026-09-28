@@ -92,7 +92,7 @@ function printReport(ev: Evidence) {
 
   console.log();
   console.log(RULE);
-  console.log(`${bold("GIT INVESTIGATOR")} ${gray("· evidence collection")}`);
+  console.log(`${bold("UNDERSTORY")} ${gray("· evidence collection")}`);
   console.log(RULE);
   console.log(`${gray("Question:")} ${ev.question}`);
   console.log(`${gray("Repo:    ")} ${repoName}${branch}`);

@@ -52,7 +52,7 @@ async function openOnWeb(): Promise<void> {
   const remote = await detectRemoteUrl(target.workspacePath);
   if (!remote) {
     vscode.window.showWarningMessage(
-      "Git Investigator: no GitHub/GitLab remote found. A full investigation on the web needs a remote repository.",
+      "Understory: no GitHub/GitLab remote found. A full investigation on the web needs a remote repository.",
     );
     return;
   }

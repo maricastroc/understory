@@ -3,7 +3,7 @@ import { lineInvestigationFonts } from "@/components/line-investigation/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Git Investigator",
+  title: "Understory",
   description:
     "Reconstruct the historical reason behind code decisions — grounded in git, honest when the record is silent.",
 };
