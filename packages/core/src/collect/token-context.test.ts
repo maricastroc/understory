@@ -1,21 +1,23 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { getRequestToken, resolveToken, runWithToken, runWithTokens } from "./token-context";
+import { getRequestToken, resolveToken, runWithTokens } from "./token-context";
 
-describe("runWithToken / getRequestToken", () => {
+describe("runWithTokens / getRequestToken", () => {
   it("is undefined outside any run", () => {
     expect(getRequestToken()).toBeUndefined();
   });
 
   it("exposes the token inside the run", () => {
-    expect(runWithToken("abc", () => getRequestToken())).toBe("abc");
+    expect(runWithTokens({ github: "abc" }, () => getRequestToken())).toBe("abc");
   });
 
   it("normalizes an empty token to undefined", () => {
-    expect(runWithToken("", () => getRequestToken())).toBeUndefined();
+    expect(runWithTokens({ github: "" }, () => getRequestToken())).toBeUndefined();
   });
 
   it("isolates nested runs (inner wins, does not leak out)", () => {
-    const inner = runWithToken("outer", () => runWithToken("inner", () => getRequestToken()));
+    const inner = runWithTokens({ github: "outer" }, () =>
+      runWithTokens({ github: "inner" }, () => getRequestToken()),
+    );
     expect(inner).toBe("inner");
     expect(getRequestToken()).toBeUndefined();
   });
@@ -35,7 +37,7 @@ describe("resolveToken — precedence", () => {
 
   it("prefers the request token over the env token", () => {
     process.env.GITHUB_TOKEN = "env-token";
-    expect(runWithToken("req-token", () => resolveToken())).toBe("req-token");
+    expect(runWithTokens({ github: "req-token" }, () => resolveToken())).toBe("req-token");
   });
 
   it("is undefined when neither is present", () => {

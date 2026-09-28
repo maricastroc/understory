@@ -1,29 +1,20 @@
 import {
   BookMarked,
-  Braces,
   Check,
   ChevronLeft,
   ChevronRight,
   CircleDot,
-  Clock,
   Copy,
   ExternalLink,
-  FileText,
   GitBranch,
   GitCommitHorizontal,
-  GitFork,
   GitPullRequest,
-  Languages,
   Lock,
   Menu,
   MessageSquare,
-  Pencil,
-  Plus,
   Search,
   ShieldCheck,
-  Star,
   TriangleAlert,
-  User,
   Users,
   X,
   type LucideIcon,
@@ -31,28 +22,6 @@ import {
 import type { ArtifactKind } from "@git-investigator/core/types";
 
 type IconProps = { className?: string };
-
-export function Logo({ className }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-      className={className}
-    >
-      <line x1="7" y1="2.5" x2="7" y2="21.5" strokeWidth="1.7" />
-      <circle cx="7" cy="5" r="1.5" strokeWidth="1.7" />
-      <circle cx="7" cy="19" r="1.5" strokeWidth="1.7" />
-      <path d="M7 12 h5.5 a3 3 0 0 1 3 3 v4" strokeWidth="1.7" />
-      <circle cx="15.5" cy="19" r="1.5" strokeWidth="1.7" />
-      <circle cx="7" cy="12" r="4" strokeWidth="1.6" opacity="0.4" />
-      <circle cx="7" cy="12" r="2" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
 
 export function Github({ className }: IconProps) {
   return (
@@ -82,28 +51,15 @@ export const kindLabel: Record<ArtifactKind, string> = {
 };
 
 export {
-  GitCommitHorizontal as Commit,
-  GitPullRequest as PullRequest,
-  CircleDot as Issue,
-  MessageSquare as Review,
   Search,
-  Plus,
   BookMarked as Repo,
   GitBranch as Branch,
-  Clock,
   Copy,
-  FileText as FileIcon,
-  Braces,
   Check,
   TriangleAlert as Alert,
   ExternalLink,
-  Languages,
   Lock,
   ShieldCheck as Shield,
-  Star,
-  GitFork as Fork,
-  Pencil,
-  User,
   Users,
   X as Close,
   ChevronRight,

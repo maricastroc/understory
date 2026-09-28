@@ -4,7 +4,6 @@ import type { DigResult } from "@git-investigator/core/types";
 import { type ReactNode, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { evidenceEntries } from "../copy/evidence-entries";
 import { EvidenceDrawer } from "../drawer/EvidenceDrawer";
-import { lineInvestigationFonts } from "../fonts";
 import { Instrument } from "../instrument/Instrument";
 import type { SpecimenSlot } from "../instrument/types";
 import { buildInvestigationView } from "../model/build-investigation-view";
@@ -67,7 +66,7 @@ export function LineInvestigation({
   const active = clause ? new Set(clause.citations) : null;
 
   return (
-    <div className={`${lineInvestigationFonts} flex flex-col gap-5.5 font-li-body text-li-ink`}>
+    <div className="flex flex-col gap-5.5 font-li-body text-li-ink">
       <TitleRow
         view={view}
         verdictOpen={state.verdictOpen}

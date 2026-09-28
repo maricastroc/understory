@@ -1,9 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { axe } from "@/test/axe";
 import { HeroDemo } from "./HeroDemo";
-
-vi.mock("../../line-investigation/fonts", () => ({ lineInvestigationFonts: "", displayFont: "" }));
 
 const demo = () =>
   screen.getByRole("region", {

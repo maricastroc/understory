@@ -3,10 +3,6 @@ import { displayId, kindName } from "./artifact-copy";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
-export function clauseNumber(clause: ViewClause): number {
-  return clause.index + 1;
-}
-
 export function tallyText(clause: ViewClause): string {
   if (clause.silent) return "no reason on record";
   const known = clause.cells.filter((c) => c.state !== "unknown").length;

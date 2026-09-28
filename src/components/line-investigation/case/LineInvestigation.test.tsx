@@ -15,8 +15,6 @@ import { CodeSpecimen } from "../specimen/CodeSpecimen";
 import { SPECIMEN_LAYOUTS } from "../specimen/use-specimen-layout";
 import { LineInvestigation } from "./LineInvestigation";
 
-vi.mock("../fonts", () => ({ lineInvestigationFonts: "" }));
-
 const NOW = Date.parse(SYNTHETIC_NOW);
 
 const slot: SpecimenSlot = (props) => (

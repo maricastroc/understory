@@ -9,9 +9,6 @@ export const FIELD_LABEL =
 export const ICON_BUTTON =
   "grid size-6 shrink-0 cursor-pointer place-items-center rounded-[3px] text-li-text-muted transition-colors hover:bg-li-neutral-200 hover:text-li-ink focus-visible:outline-2 focus-visible:outline-li-focus";
 
-export const CHIP =
-  "inline-flex items-center gap-1.5 border border-li-divider bg-li-paper px-2 py-0.5 font-li-mono text-[11px] text-li-ink";
-
 export const SPINNER =
   "shrink-0 animate-spin rounded-full border-2 border-li-neutral-300 border-t-li-ink";
 
@@ -25,5 +22,3 @@ export const SECTION_LABEL =
   "li-eyebrow flex items-center gap-2 border-b border-li-rule pb-2 text-li-ink";
 
 export const SECTION_RULE = "border-t border-li-rule pt-3";
-
-export const META = "font-li-mono text-[12px] text-li-text-subtle tnum";

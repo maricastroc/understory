@@ -26,7 +26,7 @@ export function HeaderSearch({
 }: {
   cases: RailItem[];
   onSelectCase: (item: RailItem) => void;
-  files: { repoPath: string; enabled: boolean; token?: string } | null;
+  files: { repoPath: string; token?: string } | null;
   onOpenFile?: (path: string) => void;
 }) {
   const listId = useId();
@@ -36,10 +36,10 @@ export function HeaderSearch({
   const [active, setActive] = useState(0);
   const [searchText, setSearchText] = useState("");
   const needle = searchText.trim().toLowerCase();
+  const searchFiles = !!files;
   const fileSearch = useFileSearch(
     files?.repoPath ?? "",
-    !!files?.enabled && needle.length >= 2,
-    undefined,
+    searchFiles && needle.length >= 2,
     files?.token,
   );
   const query = searchText;
@@ -71,11 +71,11 @@ export function HeaderSearch({
       .slice(0, MAX_CASES)
       .map((item) => ({ type: "case" as const, item }));
     const fileHits =
-      files?.enabled && needle.length >= 2
+      searchFiles && needle.length >= 2
         ? fileSearch.results.slice(0, MAX_FILES).map((path) => ({ type: "file" as const, path }))
         : [];
     return [...caseHits, ...fileHits];
-  }, [needle, cases, files?.enabled, fileSearch.results]);
+  }, [needle, cases, searchFiles, fileSearch.results]);
 
   const choose = (option: SearchOption) => {
     setOpen(false);
@@ -108,7 +108,7 @@ export function HeaderSearch({
   const fileOptions = options.filter((o) => o.type === "file");
   const optionId = (i: number) => `${listId}-opt-${i}`;
   const showList = open && needle.length > 0;
-  const placeholder = files?.enabled ? "Search files, symbols or cases" : "Search cases";
+  const placeholder = searchFiles ? "Search files, symbols or cases" : "Search cases";
 
   const renderOption = (o: SearchOption, i: number) => (
     <li

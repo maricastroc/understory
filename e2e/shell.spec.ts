@@ -1,32 +1,11 @@
-import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-
-const AXE = path.join(process.cwd(), "node_modules/axe-core/axe.min.js");
+import { axeViolations } from "./axe";
 
 async function open(page: Page, width = 1440, user = "synthetic") {
   await page.setViewportSize({ width, height: 900 });
   await page.goto(`/dev/line?state=resolved&user=${user}`);
   await page.locator('ol[aria-label="History, newest first"] button').first().waitFor();
   await page.evaluate(() => document.fonts.ready);
-}
-
-async function axeViolations(page: Page) {
-  await page.addScriptTag({ path: AXE });
-  return page.evaluate(async () => {
-    const axe = (
-      window as unknown as {
-        axe: {
-          run: (
-            el: Document,
-          ) => Promise<{ violations: Array<{ id: string; nodes: Array<{ target: string[] }> }> }>;
-        };
-      }
-    ).axe;
-    const result = await axe.run(document);
-    return result.violations.map(
-      (v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`,
-    );
-  });
 }
 
 for (const user of ["synthetic", "guest"]) {

@@ -1,13 +1,5 @@
-import path from "node:path";
-import { expect, type Page, type TestInfo, test } from "@playwright/test";
-
-const AXE = path.join(process.cwd(), "node_modules/axe-core/axe.min.js");
-
-async function shot(page: Page, info: TestInfo, name: string) {
-  const dir = process.env.SPECIMEN_SHOTS;
-  const file = dir ? path.join(dir, `${name}.png`) : info.outputPath(`${name}.png`);
-  await page.getByTestId("instrument").screenshot({ path: file, animations: "disabled" });
-}
+import { expect, type Page, test } from "@playwright/test";
+import { axeViolations } from "./axe";
 
 async function open(page: Page, query = "") {
   await page.goto(`/dev/specimen${query}`);
@@ -32,21 +24,6 @@ async function datumOffset(page: Page) {
   });
 }
 
-async function axeViolations(page: Page) {
-  await page.addScriptTag({ path: AXE });
-  return page.evaluate(async () => {
-    const axe = (
-      window as unknown as {
-        axe: {
-          run: (el: Element) => Promise<{ violations: Array<{ id: string; nodes: unknown[] }> }>;
-        };
-      }
-    ).axe;
-    const result = await axe.run(document.querySelector("section[data-datum-y]")!);
-    return result.violations.map((v) => `${v.id} (${v.nodes.length})`);
-  });
-}
-
 const VIEWPORTS = [
   { name: "1440-wide", width: 1440, mode: "panel", specimenWidth: 460 },
   { name: "1280-narrow", width: 1280, mode: "panel", specimenWidth: 420 },
@@ -55,9 +32,7 @@ const VIEWPORTS = [
 ] as const;
 
 for (const vp of VIEWPORTS) {
-  test(`responsive ${vp.name}: layout, datum alignment and no page overflow`, async ({
-    page,
-  }, info) => {
+  test(`responsive ${vp.name}: layout, datum alignment and no page overflow`, async ({ page }) => {
     await page.setViewportSize({ width: vp.width, height: 900 });
     await open(page);
     const section = page.locator("section[data-datum-y]");
@@ -71,7 +46,6 @@ for (const vp of VIEWPORTS) {
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow).toBeLessThanOrEqual(0);
-    await shot(page, info, `responsive-${vp.name}`);
   });
 }
 
@@ -86,12 +60,11 @@ const STATES = [
 ];
 
 for (const state of STATES) {
-  test(`state ${state} keeps the datum on the rule`, async ({ page }, info) => {
+  test(`state ${state} keeps the datum on the rule`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await open(page, `?state=${state}&layout=wide`);
     const offset = await datumOffset(page);
     expect(Math.abs(offset.rowBottom - offset.reported)).toBeLessThanOrEqual(1);
-    await shot(page, info, `state-${state}`);
   });
 }
 
@@ -110,15 +83,12 @@ test("long lines scroll inside the panel only", async ({ page }) => {
   expect(Math.abs(offset.rowBottom - offset.reported)).toBeLessThanOrEqual(1);
 });
 
-test("keyboard: focus ring, expand and collapse", async ({ page }, info) => {
+test("keyboard: focus ring, expand and collapse", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await open(page, "?layout=wide");
   await page.keyboard.press("Tab");
   const toggle = page.getByRole("button", { name: "⋯ lines 20–24 · isTransient()" });
   await expect(toggle).toBeFocused();
-  await shot(page, info, "interaction-focus");
-  await toggle.hover();
-  await shot(page, info, "interaction-hover");
   await page.keyboard.press("Enter");
   await expect(page.locator("li[data-line]")).toHaveCount(24);
   await expect(page.getByRole("button", { name: "Show less" })).toHaveAttribute(
@@ -143,16 +113,15 @@ for (const query of ["?layout=wide", "?layout=wide&state=unpinned", "?layout=com
   test(`axe in Chrome, contrast included: ${query}`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await open(page, query);
-    expect(await axeViolations(page)).toEqual([]);
+    expect(await axeViolations(page, { within: "section[data-datum-y]" })).toEqual([]);
   });
 }
 
-test("live data: the seeded demo through /api/file?ref and /api/blame", async ({ page }, info) => {
+test("live data: the seeded demo through /api/file?ref and /api/blame", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/dev/specimen?source=demo&layout=wide");
   await expect(page.locator('li[data-datum] [data-tone="datum"]')).toBeVisible({ timeout: 30_000 });
   await expect(page.locator("li[data-datum]")).toHaveAttribute("data-line", "8");
   const offset = await datumOffset(page);
   expect(Math.abs(offset.rowBottom - offset.reported)).toBeLessThanOrEqual(1);
-  await shot(page, info, "live-demo");
 });

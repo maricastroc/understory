@@ -38,15 +38,15 @@
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **🔗 Verifiable why**                     | Every sentence in the answer is backed by a real artifact — a commit, PR, issue or review — cited by exact id and linked so you can open the source.                                                                                                                                                                                                                      |
 | **📜 Explain a PR**                       | The same investigation at pull-request scale: paste a PR and it blames the changed (old-side) code against the **base** commit, reconstructs why each touched region existed, and leads with that history — risk surfaces only as a consequence of it. New code with no past is skipped; the recorded trail that _is_ there is grounded and abstention-honest per region. |
-| **🧬 PR case file**                       | The result is a full case file, not just a summary: a per-region **genealogy** drawing the issue → PR → review → commit path (and its gaps), a **confidence ledger** that makes each region's score auditable — what was collected, whether every citation resolved, whether the judge could substantiate it in-source — and a **reconstruction panel** counting what the dig actually recovered (files with history, regions explained, origin commits, PRs, reviews, issues).                                                                                                                                                                                                                                                                                       |
-| **⛓️ Provenance chain, gaps and all**     | The causal path from motivation to change — issue → PR → review → commit — laid out per commit, with the missing links (no PR, no review, a direct commit) drawn explicitly. The gaps _are_ the signal: they mark exactly where the recorded reason runs out.                                                                                                             |
+| **🧬 PR case file**                       | Each changed region becomes its own core in one section drawn below the PR: the region's commits, PRs, reviews and issues at their real depth in time, with the gaps marked. A region list opens the hunk and the region's grounded clauses, and a coverage popover says what was collected, what resolved and what was trimmed by the budget. |
+| **⛓️ Provenance chain, gaps and all**     | The causal path from motivation to change — issue → PR → review → commit — drawn at its real depth in time, with the missing links (no PR, no review, no linked issue) marked explicitly: `∅` when the provider was asked and has nothing on record, `?` when absence could not be confirmed. The gaps _are_ the signal: they mark exactly where the recorded reason runs out. |
 | **🤐 Honest abstention**                  | When the history genuinely doesn't explain a line, it says so (`recorded: false`) and scores low, instead of inventing a motivation. Silence is a result.                                                                                                                                                                                                                 |
 | **✅ Grounding check**                    | A deterministic pass compares every citation against the collected evidence. Any id the model made up is flagged as a fabrication — no LLM in the loop.                                                                                                                                                                                                                   |
 | **🔬 Substantiation, not just existence** | A second, equally-boxed LLM pass confirms each cited source actually _supports_ the claim — it may only say so by quoting the source verbatim, and a deterministic gate checks that quote is real. A genuine source pinned to the wrong reason is caught as a misattribution and docks confidence; being real is no longer enough.                                        |
 | **📊 Confidence, not vibes**              | A 0–100 score derived only from real signals — grounding, abstention, and how many primary sources corroborate the answer — never from the model itself.                                                                                                                                                                                                                  |
 | **🔎 Drill into any exhibit**             | Every cited commit, PR, issue or review is a doorway: click **Investigate** to open a fresh, equally-grounded case anchored on that artifact — pulling in the discussion (review threads, issue comments, linked PRs) the line trail never surfaced. The child case links back to its parent and shows the origin question it was drilled from.                           |
 | **🌐 No clone required**                  | GitHub **and GitLab** repos are read straight from the API — line-level blame plus PR/MR, issue and review enrichment — so nothing is cloned; local paths use `git` on disk.                                                                                                                                                                                              |
-| **🏢 Self-hosted GitLab**                 | Point it at a private, firewalled GitLab and it collects through the GitLab REST API in-process — a single container inside your network, no separate collector or tunnel. See [Private GitLab](#-private-gitlab-self-hosted).                                                                                                                                            |
+| **🏢 Self-hosted GitLab**                 | Point it at a private, firewalled GitLab and it collects through the GitLab REST API in-process — a single container inside your network, or that same container acting as a collector for a public UI. See [Private GitLab](#-private-gitlab-self-hosted).                                                                                                                                            |
 | **🔐 Sign in & pick up later**            | Sign in with GitHub to investigate private repos with your own token and to keep a persistent case file — every investigation is saved to Postgres and restored across sessions and devices.                                                                                                                                                                              |
 
 <br/>
@@ -76,10 +76,10 @@
 | **Model**       | Groq inference, default `openai/gpt-oss-120b` (override via `GROQ_MODEL`)                                               |
 | **Evidence**    | GitHub GraphQL blame + REST enrichment, GitLab REST v4 (blame + MR / issue enrichment), or local `git log -L` / blame   |
 | **Validation**  | Zod 4 (structured LLM output + input parsing)                                                                           |
-| **Auth**        | GitHub OAuth (`read:user`), HMAC-signed session cookie — no auth library                                                |
+| **Auth**        | GitHub OAuth (`read:user repo`), HMAC-signed session cookie — no auth library                                           |
 | **Persistence** | PostgreSQL via Prisma 6 — saved investigations scoped per user                                                          |
-| **Runtime**     | Node.js API routes — `/api/dig`, `/api/explain-diff`, `/api/repo`, `/api/file(s)`, `/api/auth/*`, `/api/investigations` |
-| **Deploy**      | Vercel (public UI), or a single Docker container on-prem for private GitLab                                             |
+| **Runtime**     | Node.js API routes — `/api/dig`, `/api/explain-diff`, `/api/repo`, `/api/file(s)`, `/api/blame`, `/api/overview`, `/api/history-map`, `/api/auth/*`, `/api/investigations` |
+| **Deploy**      | Vercel (public UI); for private GitLab, a Docker container on-prem — on its own, or as the collector behind the public UI |
 | **Tooling**     | ESLint, Prettier (+ Tailwind plugin), Vitest, tsx                                                                       |
 
 <br/>
@@ -92,7 +92,7 @@ You paste a GitHub repo (or a local path), find a file, and click the line you'r
 
 It then asks a language model to reconstruct the reasoning **using only that evidence**, and — crucially — it doesn't take the model's word for it. Every citation is checked against the real artifacts before anything is shown. If the model cites something that doesn't exist, it's caught. If the evidence simply doesn't explain the line, the answer is marked _inconclusive_ rather than dressed up as fact.
 
-The result is presented as a **case file**: a verdict and prose answer, a confidence score, a **provenance chain** tracing the causal path — issue → PR → review → commit — and marking where it breaks, a timeline of the artifacts oldest-to-newest, evidence cards labelled as _cited_ or _supporting_, and a grounding sidebar showing exactly what backs the conclusion.
+The result is presented as a **case**: the answer broken into clauses, each lettered with the sources it cites; the code at the investigated revision with its blame; a **bore** that drops from the line down through its history — commits, PRs, reviews and issues at their real age — marking where the trail breaks; an evidence drawer with every source and its verified quotes; and a verdict popover listing every honesty signal behind the confidence. A case drilled from an artifact (not a line) opens as a case file with the findings, the provenance chain, the evidence cards and a timeline.
 
 **Additional features:**
 
@@ -101,8 +101,8 @@ The result is presented as a **case file**: a verdict and prose answer, a confid
 - **Fabrication-proof citations:** The verification step ([`packages/core/src/verify.ts`](packages/core/src/verify.ts)) is pure and deterministic — it intersects the model's citations with the set of real artifact ids and surfaces any it invented. The LLM never gets to vouch for its own sources.
 - **Confidence you can audit:** The score is a function of concrete signals only — is the answer grounded, did the history actually record a reason, and how many primary sources corroborate it — mapping to `high` / `medium` / `low` with the source counts shown in the UI.
 - **Graceful without a key:** With no `GROQ_API_KEY` set, the app still collects and displays all the evidence — it just skips the synthesized answer instead of failing.
-- **Sign in with GitHub:** Optional OAuth (`read:user`) that unlocks private repos — the session carries your own token into the blame query — and gives each user their own persistent case file. The session is a plain HMAC-signed cookie; there's no auth framework in the stack.
-- **Case history that persists:** Each investigation is saved in a left rail with its question and status (Resolved / Inconclusive / Evidence only). Signed in with a database configured, cases are written to Postgres (via Prisma, scoped per user) and restored on any device; without either, the rail stays in memory for the session.
+- **Sign in with GitHub:** Optional OAuth (`read:user repo`) that unlocks private repos — the session carries your own token into the blame query — and gives each user their own persistent case file. The session is a plain HMAC-signed cookie; there's no auth framework in the stack.
+- **Case history that persists:** Each investigation is saved in a left rail with its question and status (resolved, not recorded, evidence only, out of scope, fabrication caught), with drilled cases nested under their parent. Signed in with a database configured, line cases are written to Postgres (via Prisma, scoped per user) and restored on any device; without either, the rail stays in memory for the session. Pull-request cases stay in the browser.
 - **A terminal companion:** `npm run dig` runs the same collect → synthesize → verify pipeline from the CLI, with `--why`, `--dry-run` (prints the exact prompt without calling the model) and `--json` flags.
 - **Explain a whole pull request ([`packages/core/src/diff`](packages/core/src/diff)):** the very same `collect → synthesize → verify` engine, entered from a PR instead of a line. It parses the unified diff, blames each changed **old-side** region against the PR's **base** commit (never the head), clusters the hits by origin commit, ranks them by how much recorded history they carry, and explains each region on its own evidence — abstaining where the history is silent. The executive summary leads with _why_ the touched code existed; which regions deserve the closest read falls out of that history, not a risk verdict. Purely-added files have no past, so they're skipped by design.
 - **Substantiation, not just existence ([`packages/core/src/entail.ts`](packages/core/src/entail.ts)):** a second LLM layer, boxed exactly like synthesis — it may only rule a citation _supported_ if it copies a verbatim snippet from the source, and a deterministic `verifyQuote` gate confirms that snippet is really there. Only a genuine misattribution — a real source that doesn't back the claim — lowers confidence. It runs on both the line and PR flows, default-on (set `ENTAILMENT=0` to disable), and degrades gracefully to existence-grounding under rate limits.
@@ -121,28 +121,33 @@ a line — or every changed region of a PR
    → check each cited source substantiates the claim   [LLM · verbatim-quote gate]
    → verify every citation against real ids             [deterministic]
    → score confidence from real signals only            [deterministic]
-   → case file (verdict · provenance chain · evidence · timeline)
+   → case (clauses · bore · evidence drawer · verdict)
 ```
 
 **Collect ([`packages/core/src/collect`](packages/core/src/collect)).** A location is blamed to the commits that shaped it. On GitHub, a single GraphQL blame query returns the commit ranges, and each commit is enriched with its associated PR, that PR's reviews, and the issues it closed. Every commit, PR, issue and review becomes an `Artifact` with a stable id (`commit:sha`, `pr:812`, `issue:1187`, …), deduplicated and sorted oldest-first. The same stage can also be **anchored on an artifact instead of a line** (the drill-down): given a PR, issue or commit, [`collect/github/context.ts`](packages/core/src/collect/github/context.ts) gathers that artifact's body plus its immediate discussion — review-comment threads, issue comments, a PR's commits, cross-referenced PRs — folded into the same `Artifact` list, so synthesis and verification treat it identically.
 
-**Synthesize ([`packages/core/src/synthesize.ts`](packages/core/src/synthesize.ts)).** The evidence is rendered as an id-tagged list and handed to the model with a strict system prompt: explain the _why_ using **only** the evidence, back every claim with an exact artifact id, and if the evidence doesn't explain it, set `recorded: false` and admit it. Output is forced through a Zod schema — `{ answer, citations, recorded }` — so it's structured, not scraped from prose.
+**Synthesize ([`packages/core/src/synthesize.ts`](packages/core/src/synthesize.ts)).** The evidence is rendered as an id-tagged list and handed to the model with a strict system prompt: explain the _why_ using **only** the evidence, back every claim with an exact artifact id, and if the evidence doesn't explain it, set `recorded: false` and admit it. Output is forced through a Zod schema — `{ answerable, claims: [{ text, citations }], answer, recorded }` — so every claim carries its own citations, and a question the history can't speak to comes back as `answerable: false` instead of an answer.
 
 **Check entailment ([`packages/core/src/entail.ts`](packages/core/src/entail.ts)).** Grounding proves a citation is _real_; entailment proves it's _relevant_. A second model pass audits each cited source against the claim it backs — but it may only answer `supported` by quoting the source verbatim, and the deterministic `verifyQuote` gate rejects any quote it can't find in the artifact body. A `supported` verdict with no findable quote is downgraded to a misattribution, which is the only entailment outcome that lowers confidence. Default-on and best-effort: if the judge is rate-limited it's skipped and the result falls back to existence-grounding.
 
 **Verify ([`packages/core/src/verify.ts`](packages/core/src/verify.ts)).** No model involved. The narrative's citations are intersected with the real artifact ids; anything left over is a fabrication and the answer is marked ungrounded. Confidence is then computed purely from signals that can't be faked:
 
-| Condition                          | Score | Level  |
-| ---------------------------------- | ----- | ------ |
-| Fabricated citation (not grounded) | 0.20  | low    |
-| `recorded: false` (history silent) | 0.30  | low    |
-| Grounded, 0 primary sources        | 0.35  | low    |
-| Grounded, 1 primary source         | 0.65  | medium |
-| Grounded, 2+ primary sources       | 0.90  | high   |
+| Condition                                                   | Score | Level  |
+| ----------------------------------------------------------- | ----- | ------ |
+| Fabricated citation (not grounded)                          | 0.20  | low    |
+| `recorded: false` (history silent)                          | 0.30  | low    |
+| Grounded, 0 primary sources                                 | 0.35  | low    |
+| Grounded, citations not audited (entailment off or skipped) | 0.50  | medium |
+| Audited, no primary source substantiated                    | 0.55  | medium |
+| Audited, 1 primary source substantiated                     | 0.65  | medium |
+| The commit that owns the line explains itself               | 0.85  | high   |
+| Audited, 2+ primary sources substantiated                   | 0.90  | high   |
 
-With entailment on, a citation the judge rules a **misattribution** stops counting as a primary source — so a grounded-but-wrongly-attributed answer can't borrow `high` confidence it never earned.
+Then the caps: a contradiction among the cited sources (a revert, a reopened issue, a declined PR) drops the score to 0.30–0.55, claims without citations cap it at 0.40–0.55, and `high` is never kept on file-level history or when the last touch looks cosmetic. A citation the judge rules a **misattribution** stops counting as a primary source — so a grounded-but-wrongly-attributed answer can't borrow `high` confidence it never earned.
 
-**At PR scale ([`packages/core/src/diff`](packages/core/src/diff)).** A pull request is just a different entry point to the same stages. [`diff/parse.ts`](packages/core/src/diff/parse.ts) reads the unified diff into per-file old-side ranges; [`diff/plan.ts`](packages/core/src/diff/plan.ts) coalesces the changed/removed lines into blame targets; [`diff/collect.ts`](packages/core/src/diff/collect.ts) blames each target against the PR's **base** SHA, clusters the results by origin commit, and ranks them by recorded context (a contested or reviewed change outranks a bare commit). Every cluster then flows through the identical `synthesize → entail → verify → score` path — one grounded, abstention-honest finding per region, plus an executive summary that leads with the history rather than a risk verdict. The findings are presented as a case file: each region carries a **genealogy** ([`diff/Genealogy.tsx`](src/components/diff/Genealogy.tsx)) redrawing the issue → PR → review → commit path with its gaps, and a **confidence ledger** ([`diff/ConfidenceLedger.tsx`](src/components/diff/ConfidenceLedger.tsx)) that makes the score traceable — what was collected, whether every citation resolved, whether the judge substantiated it in-source — while a **reconstruction panel** ([`diff/pr-metrics.ts`](src/components/diff/pr-metrics.ts)) counts, distinct-by-id, the files with history, regions explained, and origin commits / PRs / reviews / issues the dig actually recovered.
+**Gaps are only drawn when they're known.** Collection records, per commit, whether the provider was asked for a PR (`prLookup`: `found`, `none`, `skipped`, `failed`) and, per PR, whether it has reviews and closing issues (`reviewLookup`, `issueLookup`). A missing link is drawn as verified silence (`∅`) only when the lookup answered `none`; skipped, failed or pre-lookup cases draw a neutral, unverified gap (`?`). A PR reached through another commit of the same trail, or a review without text, is not a gap.
+
+**At PR scale ([`packages/core/src/diff`](packages/core/src/diff)).** A pull request is just a different entry point to the same stages. [`diff/parse.ts`](packages/core/src/diff/parse.ts) reads the unified diff into per-file old-side ranges; [`diff/plan.ts`](packages/core/src/diff/plan.ts) coalesces the changed/removed lines into blame targets; [`diff/collect.ts`](packages/core/src/diff/collect.ts) blames each target against the PR's **base** SHA, clusters the results by origin commit, and ranks them by recorded context (a contested or reviewed change outranks a bare commit). Every cluster then flows through the identical `synthesize → entail → verify → score` path — one grounded, abstention-honest finding per region, plus an executive summary that leads with the history rather than a risk verdict and is itself split into cited, entailment-checked claims. In the UI ([`src/components/pr-investigation`](src/components/pr-investigation)) the findings are normalized into concrete regions (path + line range) and drawn as parallel cores below the PR; the coverage popover counts, distinct-by-id, what the dig actually recovered ([`diff/pr-metrics.ts`](src/components/diff/pr-metrics.ts)).
 
 <br/>
 
@@ -153,6 +158,7 @@ The central constraint is that a _why_ answer is worthless unless it's true, and
 - **The model is boxed between two deterministic layers.** Collection produces the only evidence that exists, and the model cannot reach past it; verification checks every citation against real artifact ids, and the model cannot influence it. The LLM's entire job is to explain within a fixed evidence set — it never sources, never scores, and never vouches for itself.
 - **Abstention is a first-class result.** "The history doesn't record why" is a correct, useful answer, not an error to be papered over. The synthesis contract lets the model return `recorded: false`, and the UI treats _inconclusive_ as a real verdict — which is what keeps it from inventing motivations to fill space.
 - **Confidence is a function of evidence, not of the model's tone.** The score is computed from signals that can't be faked — is the answer grounded, did the history actually record a reason, how many primary sources corroborate it — so a well-written guess and a well-supported conclusion can't end up looking the same.
+- **The UI only shows what the system can back.** Loading never stages steps the API doesn't stream, a case is only called saved across devices when the server actually persisted it, and a missing link is only drawn as silence when the provider was asked. Where a design implied evidence the pipeline can't produce, the design gave way.
 - **The trustworthy parts are the boring parts.** Everything that determines whether output can be believed — blame, enrichment, citation grounding, scoring — is deterministic and unit-tested. The probabilistic component is deliberately the smallest, most contained piece of the pipeline.
 
 <br/>
@@ -163,21 +169,13 @@ A tool that stakes its value on honesty should be just as honest about its own e
 
 - **GitHub blame is last-writer, not full history.** The GraphQL path attributes each selected line to the single commit that _last_ touched it, so a line rewritten several times surfaces only its most recent author — not every commit that shaped it. A local checkout uses `git log -L`, which follows the full evolution of those lines; the no-clone GitHub reading is intentionally shallower in exchange.
 - **Large files fall back to file-level history.** When a file is too big for GitHub's blame API (or blame fails), collection switches to the commits that touched the _file_ rather than the specific lines — coarser, and surfaced in the UI with a note so it's never silently passed off as line-level.
-- **Entailment is best-effort, and a PR's summary isn't verified claim-by-claim.** The substantiation pass now catches misattributed citations — but it's a second model call, so under rate limits it's skipped and the answer falls back to plain existence-grounding. And while every _region_ finding is grounded and entailment-checked, a pull request's **executive summary** is prose synthesized over those findings; it isn't itself citation-verified line by line, so read it as the grounded findings' headline, not a separately-audited verdict.
+- **Entailment is best-effort.** The substantiation pass catches misattributed citations — but it's a second model call, so under rate limits it's skipped and the answer falls back to plain existence-grounding, capped at `medium`.
+- **A misattribution lowers confidence, not the verdict.** A case whose history records a reason and whose citations all exist still reads _resolved_ even when the judge rules one of its sources a misattribution; the confidence drops and the verdict popover shows the count.
 - **A PR's brand-new code has no past to recover.** The diff investigation only blames the **old-side** lines a PR changes or deletes — code being modified or removed. Purely-added files and lines have no prior history, so they're skipped by design (there's nothing to reconstruct) and the empty state says so; on very large PRs the changed regions are ranked and budget-capped, with the trimming surfaced in the triage counts rather than hidden.
 - **Big investigations trim the prompt.** The synthesis model is rate-limited by tokens per minute, so on large cases the evidence _bodies_ sent to the model are budget-trimmed — every artifact id is always kept, so citations and grounding stay intact, and the full bodies remain visible in the evidence cards.
-- **The reconstruction panel counts what was recovered, not what exists.** A PR's counts — files with history, regions explained, origin commits, PRs, reviews, issues — reflect only what this dig actually pulled in. Because blame is last-writer, large PRs are ranked and budget-capped, and added code has no past, the panel is a summary of the recovered trail, not a coverage guarantee that everything shaping the PR was found.
-
-<br/>
-
-## 🔒 Data & privacy
-
-A tool that stakes its value on honesty has to hold itself to the same standard on the data it collects. When a database is configured, Git Investigator keeps an **anonymous** log of the questions asked — used only to understand what people actually want to know and make the investigations better.
-
-- **Recorded:** the question, the repository, and the file location.
-- **Never recorded:** your identity, your GitHub token, or the investigation's result — the log is not linked to any user.
-- **Opt out per question:** a _"Don't log this question"_ checkbox sits beside the composer; your choice is remembered in your browser.
-- **Turn it off entirely:** set `CAPTURE_QUESTIONS=0` and nothing is ever written.
+- **Coverage counts what was recovered, not what exists.** A PR's counts — files with history, regions explained, origin commits, PRs, reviews, issues — reflect only what this dig actually pulled in. Because blame is last-writer, large PRs are ranked and budget-capped, and added code has no past, they summarize the recovered trail, not a guarantee that everything shaping the PR was found.
+- **Enrichment is bounded.** On GitHub each commit gets at most one associated PR, five reviews, five closing issues and eight comments per thread, and at most ten commits per investigation are enriched; on GitLab, up to ten merge requests, whose notes carry no review state, so a missing review or issue stays _unverified_ there. "No linked issue" means no issue closed by a closing keyword. A local commit that was never pushed reports its PR lookup as failed. Remotes that are neither GitHub nor GitLab are read from a shallow clone (`CLONE_DEPTH`, default 150), so a line's local history can be truncated.
+- **The code is shown at the investigated revision.** A case reads its code and blame at the sha it recorded; cases saved before revisions were recorded have no blame bars and say the code shown is the current HEAD.
 
 <br/>
 
@@ -226,20 +224,40 @@ npm run dig -- .demo/payments-service src/billing/charge.ts:8 --why "why cap ret
 
 <br/>
 
+## 🧪 Development
+
+- **Layout.** `packages/core` holds the pipeline (collect → synthesize → entail → verify) and never imports Next.js, Prisma or Upstash; the web app (`src/`), the CLI (`scripts/dig.ts`) and the VS Code extension (`apps/extension`) are shells over it.
+- **Unit tests** — `npm test`. Vitest runs two projects: `node` for `*.test.ts` and `dom` (jsdom + Testing Library) for `*.test.tsx`, with axe checks that skip color contrast, since jsdom computes no colors.
+- **End-to-end** — `npm run test:e2e`. Playwright drives the dev server in the locally installed Chrome, with full axe checks including contrast. It needs the seeded demo (`npm run seed:demo`).
+- **Dev previews.** Files named `page.dev.tsx` are only routed in development (`pageExtensions` in `next.config.ts`), so they never reach a production build. They render real components over synthetic fixtures, and the e2e suite runs against them:
+  - `/dev/line?state=` `resolved` · `collecting` · `failed` · `empty` · `pending` · `not-recorded` · `evidence-only` · `out-of-scope` · `fabricated` · `misattributed` · `unverified` · `commits-only` · `crowded`
+  - `/dev/pr?state=` `default` · `all-silent` · `evidence-only` · `truncated` · `legacy` · `many` · `overlapping`
+  - `/dev/composer?state=` `cold` · `partial` · `auto` · `mapping` · `warm` · `outlier` · `unknown`
+  - `/dev/specimen?state=` `default` · `expanded` · `unpinned` · `unavailable` · `loading` · `no-literal` · `range` · `long-line`, with `layout=` and `source=demo` to read the seeded demo
+  - `/dev/case` — a drilled (artifact-anchored) case
+- **Migrations.** Run `npx prisma migrate deploy` before deploying new code. A database still missing the `parentCaseId` column keeps working, but drilled and follow-up cases are saved without their parent link.
+- **`turbopack.root`** is pinned to the project in `next.config.ts`: a lockfile higher up the directory tree otherwise makes Turbopack watch the whole home directory.
+
+<br/>
+
 ## 🏢 Private GitLab (self-hosted)
 
-Git Investigator also reads **GitLab** — including private, self-hosted instances. The only real constraint is physical: a GitLab behind a corporate firewall isn't reachable from a public host like Vercel, so the app has to run **inside the network** where it can open a connection to your GitLab. It ships as a single container that talks to the GitLab REST API in-process — no separate collector, no tunnel, no extra moving parts. The access token never leaves that network.
+Git Investigator also reads **GitLab** — including private, self-hosted instances. The only real constraint is physical: a GitLab behind a corporate firewall isn't reachable from a public host like Vercel, so whatever talks to GitLab has to run **inside the network**. That's this repository's Docker image, which talks to the GitLab REST API in-process; the access token never leaves that network. It can be deployed two ways:
 
-The GitHub path is untouched; GitLab support is purely additive. Provider is detected from the repo URL's host (`GITLAB_HOSTS`), and every artifact is normalized to the same evidence shape, so blame, enrichment, grounding and scoring all behave identically.
+- **Single container (below):** the whole app runs inside the network — no collector, no tunnel.
+- **Split deploy:** the UI stays public (e.g. Vercel) and forwards only requests for hosts in `COLLECTOR_HOSTS` to the same container running inside the network as a *collector*, through an outbound tunnel. The public instance sets `COLLECTOR_URL`, `COLLECTOR_HOSTS` and `COLLECTOR_SECRET`; the container sets `COLLECTOR_INBOUND_SECRET` to the same secret and rejects requests without it. See the split-deploy block in `.env.example`.
+
+The GitHub path is untouched; GitLab support is purely additive. Provider is detected from the repo URL's host (`GITLAB_HOSTS`), and every artifact is normalized to the same evidence shape, so blame, enrichment, grounding and scoring all behave identically. On GitLab this covers line investigations, enriched with merge requests, issues and notes; drilling into an artifact and explaining a pull request are GitHub-only.
 
 > **Prerequisite:** Docker (Desktop or Engine) on a machine that can reach your GitLab host — i.e. on the corporate network / VPN.
 
-> Configure it — copy `.env.on-prem.example` to `.env.on-prem` and set at least a GitLab **access token** and your **host**:
+> Configure it — copy `.env.on-prem.example` to `.env.on-prem` (gitignored, and excluded from the Docker build context) and set at least a GitLab **access token** and your **host**. Setting `NEXT_PUBLIC_DEFAULT_REPO` to a project is recommended: without it the app opens on the local demo path, which doesn't exist in the image, so it shows "Not a git repository" and asks for one.
 
 ```bash
 cp .env.on-prem.example .env.on-prem
 # GITLAB_TOKEN=glpat-...
 # GITLAB_HOSTS=gitlab.company.com
+# NEXT_PUBLIC_DEFAULT_REPO=https://gitlab.company.com/group/project
 ```
 
 > The token must have the **`read_api`** and **`read_repository`** scopes, and be created **on that same GitLab instance** — a `gitlab.com` token will not work against a self-hosted host. To sanity-check it before wiring it in:
@@ -264,7 +282,7 @@ docker compose logs -f app
 docker compose --env-file .env.on-prem down
 ```
 
-> Optional — persist investigation history in the bundled Postgres:
+> Case history on-prem: cases are saved to Postgres per **signed-in** user, and sign-in (GitHub OAuth) is not configured in this image, so on-prem the case rail keeps line cases for the browser session and pull-request cases in the browser. The bundled Postgres only prepares the schema — uncomment `DATABASE_URL` / `DATABASE_DIRECT_URL` in `.env.on-prem`, then:
 
 ```bash
 docker compose --env-file .env.on-prem --profile db up -d --build

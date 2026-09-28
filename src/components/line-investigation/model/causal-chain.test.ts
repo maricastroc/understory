@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
-import { buildCausalChain } from "./use-causal-chain";
+import { buildCausalChain } from "./causal-chain";
 
 function mk(kind: ArtifactKind, id: string, date: string, parentId?: string): Artifact {
   return { id, kind, title: `${kind} ${id}`, body: "", url: `https://x/${id}`, date, parentId };

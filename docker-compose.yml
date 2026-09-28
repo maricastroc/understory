@@ -25,11 +25,13 @@ services:
       GROQ_API_KEY: "${GROQ_API_KEY:-}"
       # --- optional: also investigate GitHub Enterprise / github.com repos ---
       GITHUB_TOKEN: "${GITHUB_TOKEN:-}"
-      # --- optional: persist history. In-memory (per session) when unset ---
+      # --- optional: Postgres for per-user case history (needs sign-in, see README) ---
       DATABASE_URL: "${DATABASE_URL:-}"
       DATABASE_DIRECT_URL: "${DATABASE_DIRECT_URL:-}"
-      # NOTE: deliberately NO COLLECTOR_* here — that is what makes this instance
-      # collect in-process instead of trying to delegate to a remote collector.
+      # --- optional: only when this container is the collector behind a public UI ---
+      COLLECTOR_INBOUND_SECRET: "${COLLECTOR_INBOUND_SECRET:-}"
+      # NOTE: deliberately NO COLLECTOR_URL / COLLECTOR_HOSTS here — that is what makes
+      # this instance collect in-process instead of delegating to a remote collector.
     # This container must be able to open a connection to your GitLab host. If
     # GitLab is only reachable from the Docker host itself (not the bridge
     # network), uncomment the next line (Linux only):

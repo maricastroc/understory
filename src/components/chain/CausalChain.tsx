@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
 import { Alert, Check, ChevronRight, KindIcon, kindLabel } from "../icons";
 import { SectionLabel } from "../ui";
-import { type ChainLane, type ChainSlot, useCausalChain } from "./use-causal-chain";
+import {
+  buildCausalChain,
+  type ChainLane,
+  type ChainSlot,
+} from "../line-investigation/model/causal-chain";
 
 const VISIBLE_LANES = 3;
 
@@ -179,7 +183,7 @@ export function CausalChain({
   artifacts: Artifact[];
   citedIds: Set<string>;
 }) {
-  const chain = useCausalChain(artifacts);
+  const chain = useMemo(() => buildCausalChain(artifacts), [artifacts]);
   const [expanded, setExpanded] = useState(false);
 
   if (chain.mode === "empty") return null;

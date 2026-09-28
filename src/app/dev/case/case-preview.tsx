@@ -48,16 +48,9 @@ export function CasePreview() {
     >
       <div className="flex">
         <div className="mx-auto max-w-270 min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-          <div className="legacy-tokens">
-            <CaseView
-              entry={ANCHORED}
-              onBack={() => {}}
-              onDrill={() => {}}
-              onOpenParent={() => {}}
-            />
-          </div>
+          <CaseView entry={ANCHORED} onBack={() => {}} onDrill={() => {}} onOpenParent={() => {}} />
         </div>
-        <div className="legacy-tokens sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
+        <div className="sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
           <RightRail result={ANCHORED.result} />
         </div>
       </div>

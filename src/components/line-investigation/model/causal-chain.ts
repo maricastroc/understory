@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
 
 export type ChainSlot = { artifact: Artifact | null; extra: number };
@@ -66,8 +65,4 @@ export function buildCausalChain(artifacts: Artifact[]): CausalChain {
 
   const gaps = lanes.reduce((sum, lane) => sum + laneGaps(lane), 0);
   return { mode: "lanes", lanes, gaps };
-}
-
-export function useCausalChain(artifacts: Artifact[]): CausalChain {
-  return useMemo(() => buildCausalChain(artifacts), [artifacts]);
 }

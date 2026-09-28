@@ -22,14 +22,3 @@ model Investigation {
   @@unique([userLogin, caseId])
   @@index([userLogin, createdAt])
 }
-
-model QuestionLog {
-  id         String   @id @default(cuid())
-  question   String
-  repoPath   String
-  location   String?
-  anchorKind String?
-  createdAt  DateTime @default(now())
-
-  @@index([createdAt])
-}

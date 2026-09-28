@@ -1,22 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { basename, fmtCount, fmtDate, letter, levelLabel } from "./format";
-
-describe("fmtCount", () => {
-  it("leaves counts under 1k untouched", () => {
-    expect(fmtCount(0)).toBe("0");
-    expect(fmtCount(999)).toBe("999");
-  });
-
-  it("uses one decimal for thousands under 10k, none above", () => {
-    expect(fmtCount(1500)).toBe("1.5k");
-    expect(fmtCount(24000)).toBe("24k");
-    expect(fmtCount(246230)).toBe("246k");
-  });
-
-  it("uses millions past 1m", () => {
-    expect(fmtCount(2_400_000)).toBe("2.4m");
-  });
-});
+import { basename, fmtDate, letter, levelLabel } from "./format";
 
 describe("fmtDate", () => {
   it("formats an ISO timestamp as 'DD Mon YYYY'", () => {

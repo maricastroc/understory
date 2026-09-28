@@ -7,7 +7,6 @@ import type { CoreLayout, HitTarget, PrSectionLayout } from "../layout/types";
 import type { PrClause, PrView } from "../model/types";
 import { ArtifactTooltip } from "./ArtifactTooltip";
 import { SectionAxis } from "./SectionAxis";
-import { SectionCaptions } from "./SectionCaptions";
 import { tooltipAnchor } from "./tooltip-anchor";
 
 const FADE = "transition-opacity duration-150 motion-reduce:transition-none";
@@ -35,7 +34,6 @@ export function SectionOverlay({
   onSelectRegion,
   onHoverArtifact,
   onInspect,
-  static: still = false,
 }: {
   view: PrView;
   layout: PrSectionLayout;
@@ -49,7 +47,6 @@ export function SectionOverlay({
   onSelectRegion: (id: string) => void;
   onHoverArtifact: (id: string | null) => void;
   onInspect: (id: string) => void;
-  static?: boolean;
 }) {
   const tooltipId = useId();
   const { datumY } = layout;
@@ -59,8 +56,6 @@ export function SectionOverlay({
     !activeRegions || c.regionIds.some((r) => activeRegions.has(r));
   const primaryRegion = (c: CoreLayout) => c.regionIds[0];
   const tooltip = showTooltip && hoverArtifact ? tooltipAnchor(hoverArtifact, layout, width) : null;
-
-  if (still) return <SectionCaptions view={view} layout={layout} />;
 
   const nameOf = (t: HitTarget, core: CoreLayout) => {
     const gap = gapById.get(t.id);

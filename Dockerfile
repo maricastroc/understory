@@ -2,7 +2,7 @@
 #
 # On-prem ("Formato A") image: the whole app in one container, running the
 # GitLab adapter in-process. It reaches your private GitLab directly, so there
-# is NO collector and NO tunnel — do not set any COLLECTOR_* env here.
+# is NO collector and NO tunnel — do not set COLLECTOR_URL / COLLECTOR_HOSTS here.
 
 # ---- builder ----
 FROM node:22-bookworm-slim AS builder
@@ -23,10 +23,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 
 COPY . .
-# Generate the Prisma client and build. We call the steps directly instead of
-# `npm run build` to skip `seed:demo` — the git demo repo is only for the public
-# playground, not an on-prem GitLab deploy.
-RUN npx prisma generate && npx next build
+RUN npm run build
 
 # ---- runner ----
 FROM node:22-bookworm-slim AS runner

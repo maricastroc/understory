@@ -30,10 +30,10 @@ export function AppHeader({
   onNewInRepo?: () => void;
   cases: RailItem[];
   onSelectCase: (item: RailItem) => void;
-  fileSearch: { repoPath: string; enabled: boolean; token?: string } | null;
+  fileSearch: { repoPath: string; token?: string } | null;
   onOpenFile?: (path: string) => void;
   crossLink: "pr" | "line";
-  onNewInvestigation?: () => void;
+  onNewInvestigation: () => void;
   showNew?: boolean;
   user: AuthUser | null;
   onMenuClick: () => void;
@@ -83,16 +83,11 @@ export function AppHeader({
             Explain a line
           </Link>
         )}
-        {showNew &&
-          (onNewInvestigation ? (
-            <button type="button" onClick={onNewInvestigation} className={liButton("primary")}>
-              {newLabel}
-            </button>
-          ) : (
-            <Link href="/app" className={liButton("primary")}>
-              {newLabel}
-            </Link>
-          ))}
+        {showNew && (
+          <button type="button" onClick={onNewInvestigation} className={liButton("primary")}>
+            {newLabel}
+          </button>
+        )}
         <AccountButton user={user} signIn="ghost" />
       </div>
     </header>

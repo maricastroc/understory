@@ -1,5 +1,5 @@
 import type { Artifact, Evidence } from "@git-investigator/core/types";
-import { buildCausalChain } from "../../chain/use-causal-chain";
+import { buildCausalChain } from "./causal-chain";
 import type { GapBasis, ViewArtifact, ViewGap } from "./types";
 
 type Missing = ViewGap["missing"];

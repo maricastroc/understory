@@ -26,8 +26,6 @@ import { toArtifactRef } from "@/components/format";
 import type { ViewArtifact } from "@/components/line-investigation/model/types";
 import { PrInvestigation } from "@/components/pr-investigation/case/PrInvestigation";
 
-const EXAMPLE = "chalk/chalk#664";
-
 export default function PrPage() {
   const user = useAuth();
   const [pr, setPr] = useState("");
@@ -66,9 +64,9 @@ export default function PrPage() {
   const runPr = (value = pr) => {
     if (value.trim()) void run(value, language, gh());
   };
-  const tryExample = () => {
-    setPr(EXAMPLE);
-    runPr(EXAMPLE);
+  const tryExample = (example: string) => {
+    setPr(example);
+    runPr(example);
   };
 
   const firstLang = useRef(true);

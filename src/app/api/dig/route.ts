@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { anchorQuestion } from "@git-investigator/core/anchor-question";
 import { sessionToken } from "@/lib/auth/current-user";
-import { captureQuestion } from "@/lib/capture";
 import { type CollectInput, collect, parseLocation } from "@git-investigator/core/collect";
 import { parseGitHubRepo } from "@git-investigator/core/collect/github";
 import { parseGitLabRepo } from "@git-investigator/core/collect/gitlab";
@@ -33,7 +32,6 @@ export async function POST(req: Request) {
     location?: string;
     question?: string;
     target?: ArtifactRef;
-    noCapture?: boolean;
     language?: string;
   };
   try {
@@ -42,7 +40,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { repoPath, location, question, target, noCapture } = body;
+  const { repoPath, location, question, target } = body;
   const language = body.language === "pt" || body.language === "en" ? body.language : "auto";
   if (!repoPath || (!location && !target)) {
     return NextResponse.json(
@@ -73,15 +71,6 @@ export async function POST(req: Request) {
       { error: e instanceof Error ? e.message : String(e) },
       { status: 400 },
     );
-  }
-
-  if (!noCapture) {
-    captureQuestion({
-      question: collectArgs.question,
-      repoPath,
-      location: collectArgs.location ? location : undefined,
-      anchorKind: target?.kind,
-    });
   }
 
   const gh = parseGitHubRepo(repoPath);

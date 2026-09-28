@@ -4,7 +4,7 @@ import { Evidence } from "../Evidence";
 import { Findings } from "../findings/Findings";
 import { FindingsPending } from "../findings/FindingsPending";
 import { basename, levelLabel, toArtifactRef } from "../format";
-import { Alert, Branch, ChevronLeft, FileIcon, KindIcon, kindLabel } from "../icons";
+import { Alert, Branch, ChevronLeft, KindIcon, kindLabel } from "../icons";
 import { Timeline } from "../Timeline";
 import { Pill } from "../ui";
 import type { Entry } from "./use-investigation";
@@ -29,12 +29,6 @@ export function CaseView({
   const citedIds = new Set(narrative?.citations ?? []);
 
   const repoName = ev.repo.name ?? basename(ev.repo.path);
-
-  const loc = ev.location
-    ? `${ev.location.file}:${ev.location.startLine}${
-        ev.location.endLine !== ev.location.startLine ? `-${ev.location.endLine}` : ""
-      }`
-    : null;
 
   const anchor = ev.anchor;
 
@@ -95,19 +89,12 @@ export function CaseView({
         </h1>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-ink-2">
-          {loc ? (
+          {anchor && (
             <span className="inline-flex items-center gap-1.5">
-              <FileIcon className="size-3.5 text-ink-3" />
-              <span className="font-mono text-ink">{loc}</span>
+              <KindIcon kind={anchor.kind} className="size-3.5 text-ink-3" />
+              <span className="text-ink-3">{kindLabel[anchor.kind]}</span>
+              <span className="font-mono text-ink">{anchor.ref ?? anchor.id}</span>
             </span>
-          ) : (
-            anchor && (
-              <span className="inline-flex items-center gap-1.5">
-                <KindIcon kind={anchor.kind} className="size-3.5 text-ink-3" />
-                <span className="text-ink-3">{kindLabel[anchor.kind]}</span>
-                <span className="font-mono text-ink">{anchor.ref ?? anchor.id}</span>
-              </span>
-            )
           )}
           <span className="inline-flex items-center gap-1.5">
             <Branch className="size-3.5 text-ink-3" />

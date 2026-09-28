@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { collect } from "./index";
-import { runWithToken } from "./token-context";
+import { runWithTokens } from "./token-context";
 
 const HEAD = "f".repeat(40);
 const OWNER = "c".repeat(40);
@@ -71,7 +71,7 @@ describe("collect — GitHub pins the investigated revision", () => {
       return undefined;
     });
 
-    const ev = await runWithToken("t", () =>
+    const ev = await runWithTokens({ github: "t" }, () =>
       collect({
         repoPath: "pin1/r",
         question: "why?",
@@ -107,7 +107,7 @@ describe("collect — GitHub pins the investigated revision", () => {
       return undefined;
     });
 
-    const ev = await runWithToken("t", () =>
+    const ev = await runWithTokens({ github: "t" }, () =>
       collect({
         repoPath: "pin2/r",
         question: "why?",
@@ -132,7 +132,7 @@ describe("collect — GitHub pins the investigated revision", () => {
       return undefined;
     });
 
-    const ev = await runWithToken("t", () =>
+    const ev = await runWithTokens({ github: "t" }, () =>
       collect({
         repoPath: "pin3/r",
         question: "why?",
