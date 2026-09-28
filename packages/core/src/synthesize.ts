@@ -88,6 +88,7 @@ function languageRule(language: Language): string {
 const EVIDENCE_CHAR_BUDGET = 13_000;
 const MAX_BODY = 3_000;
 const MIN_BODY = 280;
+const MAX_OUTPUT_TOKENS = 4_000;
 
 function clampBody(body: string, cap: number): string {
   if (body.length <= cap) return body;
@@ -158,6 +159,7 @@ export async function synthesize(
     system,
     prompt,
     temperature: 0,
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
   });
   return toNarrative(object);
 }

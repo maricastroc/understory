@@ -28,6 +28,17 @@ const limiters = redis
     }
   : null;
 
+const dailyLimit = Number(process.env.AI_DAILY_LIMIT);
+
+const aiDaily =
+  redis && Number.isInteger(dailyLimit) && dailyLimit > 0
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.fixedWindow(dailyLimit, "1 d"),
+        prefix: `${NAMESPACE}:ai-daily`,
+      })
+    : null;
+
 export type RateTier = "ai" | "browse" | "map";
 
 function clientIp(req: Request): string {
@@ -62,4 +73,14 @@ export async function rateLimit(req: Request, tier: RateTier): Promise<NextRespo
       },
     },
   );
+}
+
+export async function consumeAiDailyLimit(): Promise<boolean> {
+  if (!aiDaily) return true;
+  try {
+    return (await aiDaily.limit("global")).success;
+  } catch (e) {
+    console.error("[ratelimit] Upstash unavailable, failing open:", e);
+    return true;
+  }
 }
