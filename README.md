@@ -173,7 +173,7 @@ A tool that stakes its value on honesty should be just as honest about its own e
 
 <br/>
 
-## ℹ️ How to run the application?
+## ℹ️ How to run the application:
 
 > Clone the repository:
 
