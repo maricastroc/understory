@@ -1,4 +1,4 @@
-import type { Artifact, ArtifactKind, EntailmentStatus } from "@git-investigator/core/types";
+import type { Artifact, ArtifactKind, EntailmentStatus } from "@understory/core/types";
 import { Alert, Check, ExternalLink, KindIcon } from "../icons";
 
 const sourceNoun = (kind: ArtifactKind): string =>

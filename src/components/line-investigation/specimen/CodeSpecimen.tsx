@@ -1,7 +1,7 @@
 "use client";
 
-import { enclosingSymbol } from "@git-investigator/core/collect/symbol";
-import type { BlameSpan } from "@git-investigator/core/types";
+import { enclosingSymbol } from "@understory/core/collect/symbol";
+import type { BlameSpan } from "@understory/core/types";
 import { useEffect, useId, useMemo } from "react";
 import { blameBars } from "./blame-bars";
 import { codeWindow } from "./code-window";

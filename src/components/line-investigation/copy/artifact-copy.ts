@@ -1,4 +1,4 @@
-import type { ArtifactKind } from "@git-investigator/core/types";
+import type { ArtifactKind } from "@understory/core/types";
 import { shortAge } from "../format/age";
 import type { ViewArtifact } from "../model/types";
 

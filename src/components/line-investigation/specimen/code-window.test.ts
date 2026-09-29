@@ -1,4 +1,4 @@
-import { enclosingSymbol } from "@git-investigator/core/collect/symbol";
+import { enclosingSymbol } from "@understory/core/collect/symbol";
 import { describe, expect, it } from "vitest";
 import { syntheticChargeLines } from "../fixtures/synthetic-charge-file";
 import { codeWindow } from "./code-window";

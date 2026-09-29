@@ -1,4 +1,4 @@
-import type { ArtifactKind } from "@git-investigator/core/types";
+import type { ArtifactKind } from "@understory/core/types";
 
 export const BORE = {
   coreX: 500,

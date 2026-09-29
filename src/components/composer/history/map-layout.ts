@@ -1,4 +1,4 @@
-import type { ShownFile } from "@git-investigator/core/types";
+import type { ShownFile } from "@understory/core/types";
 import { MAP, SPARSE } from "./map-geometry";
 import type { MapCore, MapDir, MapLayout } from "./types";
 

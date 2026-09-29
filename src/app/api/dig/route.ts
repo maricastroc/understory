@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import { anchorQuestion } from "@git-investigator/core/anchor-question";
+import { anchorQuestion } from "@understory/core/anchor-question";
 import { sessionToken } from "@/lib/auth/current-user";
-import { type CollectInput, collect, parseLocation } from "@git-investigator/core/collect";
-import { parseGitHubRepo } from "@git-investigator/core/collect/github";
-import { parseGitLabRepo } from "@git-investigator/core/collect/gitlab";
+import { type CollectInput, collect, parseLocation } from "@understory/core/collect";
+import { parseGitHubRepo } from "@understory/core/collect/github";
+import { parseGitLabRepo } from "@understory/core/collect/gitlab";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
-import { runWithTokens } from "@git-investigator/core/collect/token-context";
+import { runWithTokens } from "@understory/core/collect/token-context";
 import { githubAppConfigured, githubTokenForRepo, installUrl } from "@/lib/github-app";
-import { narrate } from "@git-investigator/core/investigate";
-import { getModel } from "@git-investigator/core/llm";
+import { narrate } from "@understory/core/investigate";
+import { getModel } from "@understory/core/llm";
 import { ensureHistoryStore } from "@/lib/history-store";
 import { consumeAiDailyLimit, rateLimit } from "@/lib/ratelimit";
-import type { ArtifactRef, Evidence } from "@git-investigator/core/types";
+import type { ArtifactRef, Evidence } from "@understory/core/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;

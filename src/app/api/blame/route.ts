@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { blameWindow } from "@git-investigator/core/collect/blame-window";
-import { parseGitHubRepo } from "@git-investigator/core/collect/github";
-import { parseGitLabRepo } from "@git-investigator/core/collect/gitlab";
-import { runWithTokens } from "@git-investigator/core/collect/token-context";
+import { blameWindow } from "@understory/core/collect/blame-window";
+import { parseGitHubRepo } from "@understory/core/collect/github";
+import { parseGitLabRepo } from "@understory/core/collect/gitlab";
+import { runWithTokens } from "@understory/core/collect/token-context";
 import { sessionToken } from "@/lib/auth/current-user";
 import { parseBlameQuery } from "@/lib/blame-query";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";

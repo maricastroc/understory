@@ -1,4 +1,4 @@
-import { verify } from "@git-investigator/core/verify";
+import { verify } from "@understory/core/verify";
 import type {
   Artifact,
   CitationCheck,
@@ -7,7 +7,7 @@ import type {
   Evidence,
   Narrative,
   VerifiedNarrative,
-} from "@git-investigator/core/types";
+} from "@understory/core/types";
 import {
   syntheticArtifacts,
   syntheticEntailment,

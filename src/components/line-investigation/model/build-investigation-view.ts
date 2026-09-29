@@ -1,4 +1,4 @@
-import type { DigResult } from "@git-investigator/core/types";
+import type { DigResult } from "@understory/core/types";
 import { auditClaims } from "./audit-claims";
 import { countLinks } from "./count-links";
 import { deriveArtifacts } from "./derive-artifacts";

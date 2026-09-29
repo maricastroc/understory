@@ -1,6 +1,6 @@
 "use client";
 
-import type { ArtifactRef, DigResult } from "@git-investigator/core/types";
+import type { ArtifactRef, DigResult } from "@understory/core/types";
 import { type ReactNode, useState } from "react";
 import { toArtifactRef } from "../../format";
 import type { SpecimenSlot } from "../instrument/types";

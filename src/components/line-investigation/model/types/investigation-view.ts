@@ -1,4 +1,4 @@
-import type { CodeLocation, Confidence, RepoRef } from "@git-investigator/core/types";
+import type { CodeLocation, Confidence, RepoRef } from "@understory/core/types";
 import type { ChainLinks } from "./chain-links";
 import type { ChecklistItem } from "./checklist-item";
 import type { Verdict } from "./verdict";

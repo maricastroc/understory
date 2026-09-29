@@ -18,25 +18,23 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("gitInvestigator.digCurrentLine", () => {
+    vscode.commands.registerCommand("understory.digCurrentLine", () => {
       try {
         void investigate(getCurrentTarget());
       } catch (e) {
         vscode.window.showWarningMessage(e instanceof Error ? e.message : String(e));
       }
     }),
-    vscode.commands.registerCommand("gitInvestigator.digCurrentLineFull", () => {
+    vscode.commands.registerCommand("understory.digCurrentLineFull", () => {
       try {
         void investigateRemote(getCurrentTarget());
       } catch (e) {
         vscode.window.showWarningMessage(e instanceof Error ? e.message : String(e));
       }
     }),
-    vscode.commands.registerCommand("gitInvestigator.openOnWeb", () => openOnWeb()),
-    vscode.commands.registerCommand("gitInvestigator.setGroqKey", () => setGroqKeyInteractive()),
-    vscode.commands.registerCommand("gitInvestigator.setGithubToken", () =>
-      setGithubTokenInteractive(),
-    ),
+    vscode.commands.registerCommand("understory.openOnWeb", () => openOnWeb()),
+    vscode.commands.registerCommand("understory.setGroqKey", () => setGroqKeyInteractive()),
+    vscode.commands.registerCommand("understory.setGithubToken", () => setGithubTokenInteractive()),
   );
 }
 

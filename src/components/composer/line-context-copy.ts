@@ -1,4 +1,4 @@
-import type { BlameSpan, HeadCommit } from "@git-investigator/core/types";
+import type { BlameSpan, HeadCommit } from "@understory/core/types";
 import { fmtDate } from "../format";
 import { shortAge } from "../line-investigation/format/age";
 import { ageDays } from "./history/depth";

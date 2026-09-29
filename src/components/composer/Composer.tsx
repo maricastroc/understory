@@ -1,6 +1,6 @@
 "use client";
 
-import type { InvestigateInput } from "@git-investigator/core/types";
+import type { InvestigateInput } from "@understory/core/types";
 import { useEffect, useRef, useState } from "react";
 import { Alert } from "../icons";
 import type { CasePaths } from "../investigator/case-paths";

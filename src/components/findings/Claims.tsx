@@ -1,6 +1,6 @@
 "use client";
 
-import type { VerifiedClaim } from "@git-investigator/core/types";
+import type { VerifiedClaim } from "@understory/core/types";
 import { useLanguage } from "../use-language";
 
 export function Claims({

@@ -1,4 +1,4 @@
-import type { Artifact, ArtifactRef, Confidence } from "@git-investigator/core/types";
+import type { Artifact, ArtifactRef, Confidence } from "@understory/core/types";
 
 export const letter = (i: number) => String.fromCharCode(65 + i);
 

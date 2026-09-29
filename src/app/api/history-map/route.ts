@@ -1,18 +1,15 @@
 import { NextResponse } from "next/server";
-import { isGitRepo } from "@git-investigator/core/collect/git";
-import { parseGitHubRepo } from "@git-investigator/core/collect/github";
-import { parseGitLabRepo } from "@git-investigator/core/collect/gitlab";
+import { isGitRepo } from "@understory/core/collect/git";
+import { parseGitHubRepo } from "@understory/core/collect/github";
+import { parseGitLabRepo } from "@understory/core/collect/gitlab";
 import {
   type MapFile,
   mapHistories,
   MAX_MAP_FILES,
-} from "@git-investigator/core/collect/history/map-histories";
-import {
-  githubHistorySource,
-  localHistorySource,
-} from "@git-investigator/core/collect/history/sources";
-import { isCommitSha } from "@git-investigator/core/collect/sha";
-import { runWithTokens } from "@git-investigator/core/collect/token-context";
+} from "@understory/core/collect/history/map-histories";
+import { githubHistorySource, localHistorySource } from "@understory/core/collect/history/sources";
+import { isCommitSha } from "@understory/core/collect/sha";
+import { runWithTokens } from "@understory/core/collect/token-context";
 import { sessionToken } from "@/lib/auth/current-user";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";

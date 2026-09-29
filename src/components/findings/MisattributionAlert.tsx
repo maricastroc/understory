@@ -1,4 +1,4 @@
-import type { CitationCheck } from "@git-investigator/core/types";
+import type { CitationCheck } from "@understory/core/types";
 import { Alert } from "../icons";
 
 export function MisattributionAlert({

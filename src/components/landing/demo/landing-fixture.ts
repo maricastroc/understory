@@ -1,4 +1,4 @@
-import { verify } from "@git-investigator/core/verify";
+import { verify } from "@understory/core/verify";
 import type {
   Artifact,
   BlameSpan,
@@ -6,7 +6,7 @@ import type {
   Entailment,
   Evidence,
   Narrative,
-} from "@git-investigator/core/types";
+} from "@understory/core/types";
 import { buildInvestigationView } from "../../line-investigation/model/build-investigation-view";
 
 export const LANDING_NOW = Date.parse("2026-09-27T12:00:00.000Z");

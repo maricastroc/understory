@@ -1,4 +1,4 @@
-import { type DigResult, investigate, parseLocation, runWithTokens } from "@git-investigator/core";
+import { type DigResult, investigate, parseLocation, runWithTokens } from "@understory/core";
 import type { InvestigationTarget } from "../target";
 
 const DEFAULT_QUESTION = "Why is this line the way it is? Reconstruct why it changed.";

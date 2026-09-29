@@ -1,5 +1,5 @@
 import { createSign } from "node:crypto";
-import { parseGitHubRepo } from "@git-investigator/core/collect/github";
+import { parseGitHubRepo } from "@understory/core/collect/github";
 
 const APP_ID = process.env.GITHUB_APP_ID;
 const APP_SLUG = process.env.GITHUB_APP_SLUG;

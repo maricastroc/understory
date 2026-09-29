@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
+import type { Artifact, ArtifactKind } from "@understory/core/types";
 import { Alert, Check, ChevronRight, KindIcon, kindLabel } from "../icons";
 import { SectionLabel } from "../ui";
 import {

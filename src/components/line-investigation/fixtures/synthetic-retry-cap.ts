@@ -1,11 +1,5 @@
-import { verify } from "@git-investigator/core/verify";
-import type {
-  Artifact,
-  DigResult,
-  Entailment,
-  Evidence,
-  Narrative,
-} from "@git-investigator/core/types";
+import { verify } from "@understory/core/verify";
+import type { Artifact, DigResult, Entailment, Evidence, Narrative } from "@understory/core/types";
 
 export const SYNTHETIC_NOW = "2026-09-27T12:00:00.000Z";
 

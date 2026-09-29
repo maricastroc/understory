@@ -1,4 +1,4 @@
-import type { ArtifactKind } from "@git-investigator/core/types";
+import type { ArtifactKind } from "@understory/core/types";
 import { ArtifactGlyph } from "../../line-investigation/bore/ArtifactGlyph";
 
 export function GlyphIcon({

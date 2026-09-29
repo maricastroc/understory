@@ -1,4 +1,4 @@
-import type { FileHistory, TreeOverview } from "@git-investigator/core/types";
+import type { FileHistory, TreeOverview } from "@understory/core/types";
 import { shortAge } from "../../line-investigation/format/age";
 import { markTone } from "./depth";
 import type { CoreHistory } from "./types";

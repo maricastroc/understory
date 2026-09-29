@@ -1,6 +1,6 @@
 "use client";
 
-import type { TreeOverview } from "@git-investigator/core/types";
+import type { TreeOverview } from "@understory/core/types";
 import { useEffect, useState } from "react";
 
 export function useOverview(

@@ -1,10 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
-import { getAuditor } from "@git-investigator/core/auditor";
-import { collect, parseLocation } from "@git-investigator/core/collect";
-import { parseGitHubRepo } from "@git-investigator/core/collect/github";
-import { narrate } from "@git-investigator/core/investigate";
-import { getModel } from "@git-investigator/core/llm";
-import type { Evidence } from "@git-investigator/core/types";
+import { getAuditor } from "@understory/core/auditor";
+import { collect, parseLocation } from "@understory/core/collect";
+import { parseGitHubRepo } from "@understory/core/collect/github";
+import { narrate } from "@understory/core/investigate";
+import { getModel } from "@understory/core/llm";
+import type { Evidence } from "@understory/core/types";
 import { type Case, type Gold, type Outcome, outcomeOf, parseArgs, tally } from "./eval-check";
 
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };

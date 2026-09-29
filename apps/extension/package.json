@@ -1,11 +1,11 @@
 {
-  "name": "git-investigator-vscode",
+  "name": "understory-vscode",
   "displayName": "Understory",
   "description": "Investigate why a line of code is the way it is, from your editor.",
   "version": "0.0.1",
   "private": true,
   "license": "MIT",
-  "publisher": "git-investigator",
+  "publisher": "maricastroc",
   "repository": {
     "type": "git",
     "url": "https://github.com/maricastroc/understory.git",
@@ -21,49 +21,49 @@
   "contributes": {
     "commands": [
       {
-        "command": "gitInvestigator.digCurrentLine",
+        "command": "understory.digCurrentLine",
         "title": "Understory: Why is this line?"
       },
       {
-        "command": "gitInvestigator.digCurrentLineFull",
+        "command": "understory.digCurrentLineFull",
         "title": "Understory: Full Investigation (in editor)"
       },
       {
-        "command": "gitInvestigator.openOnWeb",
+        "command": "understory.openOnWeb",
         "title": "Understory: Open Full Investigation on the Web"
       },
       {
-        "command": "gitInvestigator.setGroqKey",
+        "command": "understory.setGroqKey",
         "title": "Understory: Set Groq API Key"
       },
       {
-        "command": "gitInvestigator.setGithubToken",
+        "command": "understory.setGithubToken",
         "title": "Understory: Set GitHub Token"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "gitInvestigator.digCurrentLine",
+          "command": "understory.digCurrentLine",
           "when": "editorTextFocus",
-          "group": "z_gitInvestigator@1"
+          "group": "z_understory@1"
         },
         {
-          "command": "gitInvestigator.digCurrentLineFull",
+          "command": "understory.digCurrentLineFull",
           "when": "editorTextFocus",
-          "group": "z_gitInvestigator@2"
+          "group": "z_understory@2"
         },
         {
-          "command": "gitInvestigator.openOnWeb",
+          "command": "understory.openOnWeb",
           "when": "editorTextFocus",
-          "group": "z_gitInvestigator@3"
+          "group": "z_understory@3"
         }
       ]
     },
     "configuration": {
       "title": "Understory",
       "properties": {
-        "gitInvestigator.mode": {
+        "understory.mode": {
           "type": "string",
           "enum": [
             "local",
@@ -76,12 +76,12 @@
           "default": "local",
           "markdownDescription": "How investigations run. `local` collects and synthesizes in-process (needs a Groq API key set via the *Set Groq API Key* command). `backend` calls `{backendUrl}/api/dig`."
         },
-        "gitInvestigator.backendUrl": {
+        "understory.backendUrl": {
           "type": "string",
           "default": "http://localhost:3000",
-          "markdownDescription": "Base URL of the Understory backend, used when `gitInvestigator.mode` is `backend`. The extension calls `{backendUrl}/api/dig`."
+          "markdownDescription": "Base URL of the Understory backend, used when `understory.mode` is `backend`. The extension calls `{backendUrl}/api/dig`."
         },
-        "gitInvestigator.webUrl": {
+        "understory.webUrl": {
           "type": "string",
           "default": "https://understory.marianacastro.dev",
           "markdownDescription": "Base URL of the hosted Understory web app, opened by *Open Full Investigation on the Web*. Point this at the deployment where you are signed in, so private-repo investigations use your session. The extension opens `{webUrl}/app?repo=…&file=…&line=…`, where the full GitHub/GitLab provenance (PRs, reviews, issues) is collected."

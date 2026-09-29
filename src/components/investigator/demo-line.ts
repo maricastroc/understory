@@ -1,4 +1,4 @@
-import { parseLocation } from "@git-investigator/core/collect/parse-location";
+import { parseLocation } from "@understory/core/collect/parse-location";
 
 export function demoLine(raw: string | null | undefined): { path: string; line: number } | null {
   if (!raw?.trim()) return null;

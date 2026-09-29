@@ -1,6 +1,6 @@
 "use client";
 
-import type { DigResult } from "@git-investigator/core/types";
+import type { DigResult } from "@understory/core/types";
 import { useMemo, useState } from "react";
 import { CaseFailure } from "@/components/investigator/CaseFailure";
 import type { AuthUser } from "@/components/investigator/use-auth";

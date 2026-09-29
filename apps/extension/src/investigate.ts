@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { ArtifactRef } from "@git-investigator/core";
+import type { ArtifactRef } from "@understory/core";
 import { runDig } from "./client/dig";
 import { DigError } from "./client/errors";
 import { runLocalDig } from "./client/local";
@@ -84,14 +84,14 @@ async function runLocal(
         "Set Groq API Key",
       )
       .then((pick) => {
-        if (pick) void vscode.commands.executeCommand("gitInvestigator.setGroqKey");
+        if (pick) void vscode.commands.executeCommand("understory.setGroqKey");
       });
   } else if (!githubToken && result.evidence.repo.remoteUrl?.includes("github.com")) {
     void nudgeOnce(
       "githubTokenLocalEnrich",
       "Understory: set a GitHub token to enrich local history with the PRs, issues, and reviews behind each commit.",
       "Set GitHub Token",
-      "gitInvestigator.setGithubToken",
+      "understory.setGithubToken",
     );
   }
 }
@@ -151,7 +151,7 @@ function errorView(e: unknown, mode: Mode): ErrorView {
       tone: "error",
       title: "Backend unreachable",
       message: e.message,
-      hint: `Start it with \`npm run dev\`, or point \`gitInvestigator.backendUrl\` at a running backend.`,
+      hint: `Start it with \`npm run dev\`, or point \`understory.backendUrl\` at a running backend.`,
     };
   }
   if (e instanceof DigError && e.kind === "cancelled") {

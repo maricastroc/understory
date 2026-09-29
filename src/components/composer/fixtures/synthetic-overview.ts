@@ -1,4 +1,4 @@
-import type { RepoMeta, ShownFile, TreeOverview } from "@git-investigator/core/types";
+import type { RepoMeta, ShownFile, TreeOverview } from "@understory/core/types";
 
 const file = (path: string, reason: ShownFile["reason"], churn = 0): ShownFile => ({
   path,

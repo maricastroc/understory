@@ -20,8 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@git-investigator/core": ["./packages/core/src/index.ts"],
-      "@git-investigator/core/*": ["./packages/core/src/*"]
+      "@understory/core": ["./packages/core/src/index.ts"],
+      "@understory/core/*": ["./packages/core/src/*"]
     }
   },
   "include": [

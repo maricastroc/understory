@@ -1,4 +1,4 @@
-import type { RepoMeta, TreeOverview } from "@git-investigator/core/types";
+import type { RepoMeta, TreeOverview } from "@understory/core/types";
 import type { ReactNode } from "react";
 import { fmtDate } from "../format";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";

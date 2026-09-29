@@ -76,14 +76,14 @@ describe("rateLimit", () => {
     error.mockRestore();
   });
 
-  it("keeps every limiter key under the git-investigator:ratelimit namespace", async () => {
+  it("keeps every limiter key under the understory:ratelimit namespace", async () => {
     await load({});
     expect(prefixes).toEqual([
-      "git-investigator:ratelimit:ai",
-      "git-investigator:ratelimit:browse",
-      "git-investigator:ratelimit:map",
+      "understory:ratelimit:ai",
+      "understory:ratelimit:browse",
+      "understory:ratelimit:map",
     ]);
-    for (const p of prefixes) expect(p.startsWith("git-investigator:ratelimit:")).toBe(true);
+    for (const p of prefixes) expect(p.startsWith("understory:ratelimit:")).toBe(true);
   });
 
   it("passes through when under the limit", async () => {
@@ -105,7 +105,7 @@ describe("consumeAiDailyLimit", () => {
     await load({});
     const consume = (await import("./ratelimit")).consumeAiDailyLimit;
     expect(await consume()).toBe(true);
-    expect(prefixes).not.toContain("git-investigator:ratelimit:ai-daily");
+    expect(prefixes).not.toContain("understory:ratelimit:ai-daily");
     expect(limitCalls).toEqual([]);
   });
 
@@ -118,7 +118,7 @@ describe("consumeAiDailyLimit", () => {
   it("consumes one unit of a single global counter under the same namespace", async () => {
     const consume = await loadDaily({ over: false });
     expect(await consume()).toBe(true);
-    expect(prefixes).toContain("git-investigator:ratelimit:ai-daily");
+    expect(prefixes).toContain("understory:ratelimit:ai-daily");
     expect(limitCalls).toEqual(["global"]);
   });
 
@@ -131,7 +131,7 @@ describe("consumeAiDailyLimit", () => {
     for (const daily of ["0", "-5", "ten", "2.5"]) {
       const consume = await loadDaily({ over: true }, daily);
       expect(await consume()).toBe(true);
-      expect(prefixes).not.toContain("git-investigator:ratelimit:ai-daily");
+      expect(prefixes).not.toContain("understory:ratelimit:ai-daily");
     }
   });
 

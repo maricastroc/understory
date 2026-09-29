@@ -1,4 +1,4 @@
-import type { FileHistory, ShownFile } from "@git-investigator/core/types";
+import type { FileHistory, ShownFile } from "@understory/core/types";
 
 export async function requestHistories(input: {
   repo: string;

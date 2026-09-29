@@ -1,5 +1,5 @@
 import { Redis } from "@upstash/redis";
-import { setPersistentHistoryStore } from "@git-investigator/core/collect/history/history-cache";
+import { setPersistentHistoryStore } from "@understory/core/collect/history/history-cache";
 
 const PREFIX = "gi:map:";
 const TTL_SECONDS = 90 * 24 * 60 * 60;

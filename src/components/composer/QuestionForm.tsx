@@ -1,6 +1,6 @@
 "use client";
 
-import type { SymbolSpan } from "@git-investigator/core/collect/symbol";
+import type { SymbolSpan } from "@understory/core/collect/symbol";
 import { useId } from "react";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
 import { SECTION_RULE } from "./composer-classes";

@@ -6,7 +6,7 @@ const configured = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_
 
 const redis = configured ? Redis.fromEnv() : null;
 
-const NAMESPACE = "git-investigator:ratelimit";
+const NAMESPACE = "understory:ratelimit";
 
 const limiters = redis
   ? {
