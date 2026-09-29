@@ -26,7 +26,7 @@ import { LoadingCard } from "./LoadingCard";
 import { useAuth } from "./use-auth";
 import { casePaths } from "./case-paths";
 import { recentRepos } from "./recent-repos";
-import { DEFAULT_REPO, type Entry, useInvestigation } from "./use-investigation";
+import { DEFAULT_REPO, DEMO_LINE, type Entry, useInvestigation } from "./use-investigation";
 
 export function Investigator() {
   const user = useAuth();
@@ -82,6 +82,7 @@ export function Investigator() {
       );
     } else {
       void repo.open(repoPath);
+      if (!params.get("case")) openDemoLine();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -139,6 +140,10 @@ export function Investigator() {
     });
     setPrefill({ path: loc.file, line: loc.startLine, nonce: ++prefillNonce.current });
     backToCode();
+  }
+
+  function openDemoLine() {
+    if (DEMO_LINE) setPrefill({ ...DEMO_LINE, nonce: ++prefillNonce.current });
   }
 
   function openFile(path: string) {
@@ -253,6 +258,7 @@ export function Investigator() {
               cases={cases}
               recent={recent}
               demoRepo={DEFAULT_REPO}
+              onDemoOpened={openDemoLine}
               active={browsing}
               investigating={loading}
             />

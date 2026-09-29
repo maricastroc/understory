@@ -38,6 +38,7 @@ export function Composer({
   cases,
   recent = [],
   demoRepo = null,
+  onDemoOpened,
   active = true,
   investigating = false,
 }: {
@@ -52,6 +53,7 @@ export function Composer({
   cases: CasePaths;
   recent?: RecentRepo[];
   demoRepo?: string | null;
+  onDemoOpened?: () => void;
   active?: boolean;
   investigating?: boolean;
 }) {
@@ -240,6 +242,7 @@ export function Composer({
             if (!demoRepo) return;
             editRepo(demoRepo);
             openRepo(demoRepo);
+            onDemoOpened?.();
           }}
         />
       )}

@@ -9,8 +9,10 @@ import type { CaseParent } from "./case-parent";
 import { draftResult } from "./draft-result";
 import type { SavedCase } from "./saved-case";
 import { fetchSavedCases } from "./saved-cases";
+import { demoLine } from "./demo-line";
 
 export const DEFAULT_REPO = process.env.NEXT_PUBLIC_DEFAULT_REPO || ".demo/payments-service";
+export const DEMO_LINE = demoLine(process.env.NEXT_PUBLIC_DEFAULT_LINE);
 const FIRST_CASE = 2049;
 
 export type Form = InvestigateInput;
