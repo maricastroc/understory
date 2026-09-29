@@ -25,8 +25,8 @@ export function stageCopy(input: {
   if (input.fileLoading) return { title: "Opening the file", lead: "Loading its current lines." };
   if (!input.lineValue) {
     return {
-      title: "Choose a line",
-      lead: "Click the line you want explained. Shift-click selects a range.",
+      title: "Choose a line or a range",
+      lead: "Click the line you want explained, or drag across lines (or shift-click) to explain a range.",
     };
   }
   const about =

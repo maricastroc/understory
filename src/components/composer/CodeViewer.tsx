@@ -1,5 +1,5 @@
 import type { SymbolSpan } from "@git-investigator/core/collect/symbol";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { CodeText } from "../line-investigation/specimen/CodeText";
 import { highlightLines } from "../line-investigation/specimen/highlight-code";
 import { GoToLine } from "./GoToLine";
@@ -32,6 +32,22 @@ export function CodeViewer({
     if (focusLine) scrollToIndex(focusLine - 1);
   }, [focusLine, scrollToIndex]);
   const segments = useMemo(() => highlightLines(file.lines, file.path), [file.lines, file.path]);
+  const dragging = useRef(false);
+  const pointerPicked = useRef(false);
+  useEffect(() => {
+    const stop = () => {
+      dragging.current = false;
+      setTimeout(() => {
+        pointerPicked.current = false;
+      }, 0);
+    };
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    return () => {
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+    };
+  }, []);
 
   const goToLine = (n: number) => {
     onSelect(n, false);
@@ -57,8 +73,8 @@ export function CodeViewer({
         <span className="font-li-mono text-[11px] text-li-text-subtle">
           {file.lines.length} lines
         </span>
-        <span className="ml-auto text-[11px] text-li-text-subtle max-[640px]:hidden">
-          shift-click selects a range
+        <span className="ml-auto text-[11.5px] text-li-neutral-800 max-[640px]:hidden">
+          Drag or shift-click to select a range
         </span>
         <GoToLine max={file.lines.length} onGo={goToLine} />
       </div>
@@ -86,9 +102,20 @@ export function CodeViewer({
               >
                 <button
                   type="button"
-                  onClick={(e) => onSelect(n, e.shiftKey)}
+                  onPointerDown={(e) => {
+                    if (e.pointerType !== "mouse" || e.button !== 0) return;
+                    pointerPicked.current = true;
+                    dragging.current = true;
+                    onSelect(n, e.shiftKey);
+                  }}
+                  onPointerEnter={(e) => {
+                    if (dragging.current && e.buttons === 1) onSelect(n, true);
+                  }}
+                  onClick={(e) => {
+                    if (!pointerPicked.current) onSelect(n, e.shiftKey);
+                  }}
                   aria-pressed={inRange}
-                  aria-label={`Line ${n}${inRange ? ", selected" : ""}. Shift-click or shift-enter to extend the range.`}
+                  aria-label={`Line ${n}${inRange ? ", selected" : ""}. Shift-click, shift-enter or drag to extend the range.`}
                   className={`group flex h-full w-full cursor-pointer items-center border-l-[3px] text-left font-li-mono text-xs leading-[1.6] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus ${
                     inRange
                       ? "border-li-datum bg-li-datum-row font-medium text-li-ink"
