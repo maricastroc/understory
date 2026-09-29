@@ -197,3 +197,42 @@ describe("Composer — new investigation", () => {
     expect(screen.queryByRole("button", { name: /Sign in with GitHub/ })).toBeNull();
   });
 });
+
+describe("Composer — the demo line", () => {
+  function renderWith(props: Partial<React.ComponentProps<typeof Composer>>) {
+    return render(
+      <Composer
+        repo={repo}
+        repoPath=".demo/payments-service"
+        setRepoPath={() => {}}
+        token=""
+        setToken={() => {}}
+        onInvestigate={() => {}}
+        cases={{ ordered: [], counts: new Map() }}
+        demoRepo=".demo/payments-service"
+        {...props}
+      />,
+    );
+  }
+
+  it("opens the prefilled file with the line already selected", async () => {
+    mockFetch();
+    renderWith({ prefill: { path: "src/billing/charge.ts", line: 4, nonce: 1 } });
+    const line = await screen.findByRole("button", { name: /^Line 4, selected/ });
+    expect(line.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("heading", { level: 2, name: "Ask about line 4" })).toBeTruthy();
+    expect(
+      trail().getByRole("button", { name: /^02 file: src\/billing\/charge\.ts/ }),
+    ).toBeTruthy();
+  });
+
+  it("asks for the demo line again when the demo is reopened", () => {
+    mockFetch();
+    const onDemoOpened = vi.fn();
+    renderWith({ onDemoOpened });
+    fireEvent.click(trail().getByRole("button", { name: /^01 repository/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Open the demo/ }));
+    expect(repo.open).toHaveBeenLastCalledWith(".demo/payments-service", undefined);
+    expect(onDemoOpened).toHaveBeenCalledTimes(1);
+  });
+});
