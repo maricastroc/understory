@@ -8,7 +8,7 @@
   "publisher": "git-investigator",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maricastroc/git-investigator.git",
+    "url": "https://github.com/maricastroc/understory.git",
     "directory": "apps/extension"
   },
   "engines": {
@@ -83,7 +83,7 @@
         },
         "gitInvestigator.webUrl": {
           "type": "string",
-          "default": "https://git-investigator.marianacastro.dev",
+          "default": "https://understory.marianacastro.dev",
           "markdownDescription": "Base URL of the hosted Understory web app, opened by *Open Full Investigation on the Web*. Point this at the deployment where you are signed in, so private-repo investigations use your session. The extension opens `{webUrl}/app?repo=…&file=…&line=…`, where the full GitHub/GitLab provenance (PRs, reviews, issues) is collected."
         }
       }

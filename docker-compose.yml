@@ -13,7 +13,7 @@ services:
       args:
         # Baked in at build time (NEXT_PUBLIC_* is inlined). Point at your project.
         NEXT_PUBLIC_DEFAULT_REPO: "${NEXT_PUBLIC_DEFAULT_REPO:-}"
-    image: git-investigator:onprem
+    image: understory:onprem
     restart: unless-stopped
     ports:
       - "3000:3000"
