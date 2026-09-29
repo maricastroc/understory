@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/vnd.github+json",
-        "User-Agent": "git-investigator",
+        "User-Agent": "understory",
       },
     });
     if (!userRes.ok) return fail("profile_failed");

@@ -22,7 +22,7 @@ the same core as the web app (`packages/core`, bundled by esbuild) and has no ru
 
 - `gitInvestigator.mode` — `local` (default) or `backend`.
 - `gitInvestigator.backendUrl` — default `http://localhost:3000`, used in `backend` mode.
-- `gitInvestigator.webUrl` — default `https://git-investigator.marianacastro.dev`, used by the full
+- `gitInvestigator.webUrl` — default `https://understory.marianacastro.dev`, used by the full
   investigation and by Open on the Web.
 
 ## Develop

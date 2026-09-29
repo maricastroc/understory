@@ -178,7 +178,7 @@ A tool that stakes its value on honesty should be just as honest about its own e
 > Clone the repository:
 
 ```bash
-git clone https://github.com/maricastroc/git-investigator
+git clone https://github.com/maricastroc/understory
 ```
 
 > Install the dependencies:
@@ -291,7 +291,7 @@ A **Groq key** is still optional — without it you get the evidence and provena
 
 ## 📄 License
 
-Released under the MIT License. You're free to use, study, fork and build on this code — **as long as the original copyright and license notice are kept**. Reuse it and learn from it; don't strip the attribution and present it as your own.
+Released under the [MIT License](LICENSE). You're free to use, study, fork and build on this code — **as long as the original copyright and license notice are kept**. Reuse it and learn from it; don't strip the attribution and present it as your own.
 
 © 2025–2026 Mariana Castro
 
