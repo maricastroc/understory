@@ -48,7 +48,7 @@ test("the demo opens on the file stage: map of current lines, then a file, a lin
   await expect(page.getByRole("complementary", { name: "Context" })).toContainText(
     "Last changed by",
   );
-  await expect(page.getByRole("button", { name: /Investigate this line/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Investigate line 8/ })).toBeVisible();
   expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
   expect(calls.blame).toEqual([]);
 });

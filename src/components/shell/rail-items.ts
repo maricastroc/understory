@@ -1,4 +1,5 @@
 import { basename } from "../format";
+import { isDefaultQuestion } from "../investigator/default-question";
 import type { Entry } from "../investigator/use-investigation";
 import { displayId } from "../line-investigation/copy/artifact-copy";
 import { buildInvestigationView } from "../line-investigation/model/build-investigation-view";
@@ -29,6 +30,19 @@ function statusSuffix(view: InvestigationView): string | null {
   return links.unverified === 0
     ? `${links.filled} of ${links.filled + links.gaps} links`
     : `${links.filled} links`;
+}
+
+function caseTitle(entry: Entry): string {
+  const question = entry.form.question || entry.result.evidence.question || "";
+  const loc = entry.result.evidence.location;
+  if (loc && isDefaultQuestion(question)) {
+    const lines =
+      loc.startLine === loc.endLine
+        ? `Line ${loc.startLine}`
+        : `Lines ${loc.startLine}–${loc.endLine}`;
+    return `${lines} of ${basename(loc.file)}`;
+  }
+  return question || "(no question asked)";
 }
 
 function lineSubline(
@@ -73,7 +87,7 @@ export function lineRailItems(
     const parent = isChild(e) ? (views.get(e.parentCaseId!) ?? null) : null;
     return {
       id: e.caseId,
-      title: e.form.question || e.result.evidence.question || "(no question asked)",
+      title: caseTitle(e),
       subline: lineSubline(e, view, parent),
       status: STATUS[view.verdict],
       child: isChild(e),
