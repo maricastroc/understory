@@ -55,6 +55,31 @@ test("labels never overlap, collapsed or revealed", async ({ page }) => {
   expect(overlapping(await labelBoxes(page))).toBeNull();
 });
 
+test("a long history folds at the code's height; chips and rows never overlap", async ({
+  page,
+}) => {
+  await open(page, 1440, "many-owners");
+  const history = page.getByRole("list", { name: "History, newest first" });
+  const more = history.getByRole("button", { name: /^Show \d+ more in the history/ });
+  await expect(more).toBeVisible();
+  await expect(
+    history.getByRole("button", { name: /no review on pull request pr:700/ }),
+  ).toHaveText("∅ review");
+  expect(overlapping(await labelBoxes(page))).toBeNull();
+  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
+
+  await more.click();
+  const less = history.getByRole("button", { name: "Show less of the history" });
+  await expect(less).toBeFocused();
+  expect(overlapping(await labelBoxes(page))).toBeNull();
+  await page.locator('li[data-clause="c0"] button').hover();
+  expect(overlapping(await labelBoxes(page))).toBeNull();
+  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
+
+  await less.click();
+  await expect(more).toBeVisible();
+});
+
 test("hovering clause 2 dims everything but its sources and draws the trace", async ({ page }) => {
   await open(page);
   await page.locator('li[data-clause="c1"] button').hover();

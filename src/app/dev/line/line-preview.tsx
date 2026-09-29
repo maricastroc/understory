@@ -58,6 +58,7 @@ const STATES: Record<string, () => DigResult> = {
   unverified: states.syntheticWithoutStageFourData,
   "commits-only": states.syntheticCommitsOnly,
   crowded: () => states.syntheticManyArtifacts(9),
+  "many-owners": () => states.syntheticManyOwners(8),
 };
 
 export function LinePreview({ state, user }: { state: string; user: string | null }) {

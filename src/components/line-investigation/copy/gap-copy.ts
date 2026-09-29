@@ -5,6 +5,16 @@ export function gapLetter(gap: ViewGap): string {
   return gap.verified ? "∅" : "?";
 }
 
+const CHIP_NOUN: Record<ViewGap["missing"], string> = {
+  pull_request: "PR",
+  review: "review",
+  issue: "issue",
+};
+
+export function gapChip(gap: ViewGap): string {
+  return `${gapLetter(gap)} ${CHIP_NOUN[gap.missing]}`;
+}
+
 export function gapLabel(gap: ViewGap): string {
   if (!gap.verified) return "not verified";
   return gap.missing === "issue" ? "no linked issue" : "not recorded";

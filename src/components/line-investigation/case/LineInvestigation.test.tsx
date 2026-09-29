@@ -333,3 +333,60 @@ describe("LineInvestigation — no history", () => {
     expect(document.querySelector("li[data-clause]")).toBeNull();
   });
 });
+
+describe("LineInvestigation — a long history", () => {
+  const fold = () =>
+    within(history())
+      .getAllByRole("button")
+      .find(
+        (b) => b.hasAttribute("aria-expanded") && /history/.test(b.getAttribute("aria-label")!),
+      );
+  const names = () =>
+    within(history())
+      .getAllByRole("button")
+      .map((b) => b.getAttribute("aria-label")!);
+
+  it("shows each absence as a chip on the row it belongs to", () => {
+    setup();
+    const chip = within(history()).getByRole("button", {
+      name: "Not recorded: no pull request, review or issue before commit 7be210e",
+    });
+    expect(chip.textContent).toBe("∅ PR");
+    expect(
+      within(chip.closest("li")!).getByRole("button", { name: /^F, commit 7be210e/ }),
+    ).toBeTruthy();
+  });
+
+  it("folds the oldest rows behind a count and opens them on request", () => {
+    setup(states.syntheticManyOwners(8));
+    const more = fold()!;
+    expect(more.getAttribute("aria-expanded")).toBe("false");
+    expect(more.getAttribute("aria-label")).toMatch(
+      /^Show \d+ more in the history: \d+ commits, \d+ PRs$/,
+    );
+    expect(names().some((n) => n.includes("commit 7be210e"))).toBe(false);
+
+    fireEvent.click(more);
+    expect(fold()!.getAttribute("aria-expanded")).toBe("true");
+    expect(fold()!.getAttribute("aria-label")).toBe("Show less of the history");
+    expect(names().some((n) => n.includes("commit 7be210e"))).toBe(true);
+
+    fireEvent.click(fold()!);
+    expect(fold()!.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("opens by itself when a clause cites something folded away", async () => {
+    const user = userEvent.setup();
+    setup(states.syntheticManyOwners(8));
+    expect(clause(3).textContent).toContain("The retry loop itself came earlier");
+    await user.click(clause(3));
+    expect(names().some((n) => /^\w+, commit 7be210e, .*cited by clause 4/.test(n))).toBe(true);
+    expect(fold()).toBeUndefined();
+  });
+
+  it("has no axe violations while folded", async () => {
+    const { container } = setup(states.syntheticManyOwners(8));
+    expect(fold()).toBeTruthy();
+    expect((await axe(container)).violations).toEqual([]);
+  });
+});
