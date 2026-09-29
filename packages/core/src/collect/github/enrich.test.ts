@@ -202,3 +202,87 @@ describe("expandCommit — lookup and review metadata", () => {
     expect(arts.find((a) => a.id === "pr:44")?.meta).toMatchObject({ reviewLookup: "found" });
   });
 });
+
+describe("expandCommit — bots are not evidence", () => {
+  const bot = (login: string, body: string) => ({
+    author: { __typename: "Bot", login },
+    state: "COMMENTED",
+    body,
+    submittedAt: "2024-01-02T00:00:00Z",
+  });
+  const human = (login: string, body: string) => ({
+    author: { __typename: "User", login },
+    state: "APPROVED",
+    body,
+    submittedAt: "2024-01-03T00:00:00Z",
+  });
+  const withReviews = (nodes: ReturnType<typeof bot>[]) =>
+    bc({
+      associatedPullRequests: {
+        nodes: [{ ...pr(42, 0), reviews: { nodes }, closingIssuesReferences: { nodes: [] } }],
+      },
+    });
+
+  it("drops bot reviews and numbers the human ones from zero", () => {
+    const arts = expandCommit(
+      withReviews([
+        bot("copilot-pull-request-reviewer", "Pull request overview"),
+        human("kitten", "The growth formula cut off too early."),
+        bot("github-advanced-security", "Code scanning found an issue"),
+        human("quantizor", "LGTM"),
+      ]),
+    );
+    const reviews = arts.filter((a) => a.kind === "review");
+    expect(reviews.map((a) => [a.id, a.author?.name])).toEqual([
+      ["review:42-0", "kitten"],
+      ["review:42-1", "quantizor"],
+    ]);
+  });
+
+  it("does not let bots crowd out the humans past the review cap", () => {
+    const bots = Array.from({ length: 6 }, (_, i) => bot(`bot-${i}`, "automated summary"));
+    const arts = expandCommit(
+      withReviews([...bots, human("ana", "Why not make it configurable?")]),
+    );
+    expect(arts.filter((a) => a.kind === "review").map((a) => a.author?.name)).toEqual(["ana"]);
+  });
+
+  it("reports a PR reviewed only by bots as having no review", () => {
+    const arts = expandCommit(withReviews([bot("copilot-pull-request-reviewer", "overview")]));
+    expect(arts.some((a) => a.kind === "review")).toBe(false);
+    expect(arts.find((a) => a.id === "pr:42")?.meta).toMatchObject({ reviewLookup: "none" });
+  });
+
+  it("leaves bot comments out of the folded discussion", () => {
+    const arts = expandCommit(
+      bc({
+        associatedPullRequests: {
+          nodes: [
+            {
+              ...pr(42, 0),
+              body: "caps retries",
+              comments: {
+                nodes: [
+                  {
+                    author: { __typename: "Bot", login: "changeset-bot" },
+                    body: "No changeset found",
+                    createdAt: "x",
+                  },
+                  {
+                    author: { __typename: "User", login: "lee" },
+                    body: "does this cover webhooks?",
+                    createdAt: "x",
+                  },
+                ],
+              },
+              closingIssuesReferences: { nodes: [] },
+            },
+          ],
+        },
+      }),
+    );
+    const body = arts.find((a) => a.id === "pr:42")!.body;
+    expect(body).toContain("does this cover webhooks?");
+    expect(body).not.toContain("changeset");
+  });
+});

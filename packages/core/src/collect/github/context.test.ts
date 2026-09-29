@@ -160,3 +160,27 @@ describe("commitContextArtifacts", () => {
     expect(ids).toContain("issue:5");
   });
 });
+
+describe("prContextArtifacts — bots are not evidence", () => {
+  it("skips bot reviews, keeps human ids contiguous and asks for enough to see past them", async () => {
+    const bots = Array.from({ length: 12 }, (_, i) => ({
+      author: { __typename: "Bot", login: `bot-${i}` },
+      state: "COMMENTED",
+      body: "automated summary",
+      submittedAt: "2024-02-02T00:00:00Z",
+      comments: { nodes: [] },
+    }));
+    graphql.mockResolvedValue({
+      repository: {
+        pullRequest: { ...PR, reviews: { nodes: [...bots, PR.reviews.nodes[0]] } },
+      },
+    });
+    const arts = await prContextArtifacts("o", "r", 12);
+    expect(arts.filter((a) => a.kind === "review").map((a) => [a.id, a.author?.name])).toEqual([
+      ["review:12-0", "rev"],
+    ]);
+    const query = String(graphql.mock.calls[0][0]);
+    expect(query).toMatch(/reviews\(first: 20\)/);
+    expect(query).toContain("__typename");
+  });
+});
