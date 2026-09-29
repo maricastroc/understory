@@ -4,6 +4,7 @@ import type { InvestigateInput } from "@understory/core/types";
 import { useEffect, useRef, useState } from "react";
 import { Alert } from "../icons";
 import type { CasePaths } from "../investigator/case-paths";
+import { defaultQuestion } from "../investigator/default-question";
 import { repoDisplayName } from "../shell/repo-display-name";
 import { CodeContext } from "./CodeContext";
 import { CodeViewer } from "./CodeViewer";
@@ -77,7 +78,7 @@ export function Composer({
     active: active && repo.ready,
     busy: typing || viewer.loading || investigating,
   });
-  const [question, setQuestion] = useState("Why is this line the way it is?");
+  const [question, setQuestion] = useState("");
 
   const handledPrefill = useRef<number | null>(null);
   useEffect(() => {
@@ -129,35 +130,39 @@ export function Composer({
     !!selection &&
     (selection.start !== enclosing.start || selection.end !== enclosing.end);
   const rangeSize = selection ? selection.end - selection.start + 1 : 0;
-  const subject =
-    isSymbolSelected && enclosing ? symbolNoun(enclosing.kind) : rangeSize > 1 ? "range" : "line";
-  const runLabel =
-    isSymbolSelected && enclosing?.name
-      ? `Investigate ${enclosing.name}`
-      : isSymbolSelected
-        ? `Investigate this ${subject}`
-        : rangeSize > 1
-          ? "Investigate these lines"
-          : "Investigate this line";
-
-  function run() {
-    if (!file || !selection) return;
-    const span =
-      selection.end !== selection.start
-        ? `${selection.start}-${selection.end}`
-        : `${selection.start}`;
-    onInvestigate({
-      repoPath,
-      location: `${file.path}:${span}`,
-      question: question.trim(),
-    });
-  }
-
   const lineValue = selection
     ? rangeSize > 1
       ? `lines ${selection.start}–${selection.end}`
       : `line ${selection.start}`
     : null;
+  const subject =
+    isSymbolSelected && enclosing ? symbolNoun(enclosing.kind) : rangeSize > 1 ? "range" : "line";
+  const target =
+    isSymbolSelected && enclosing
+      ? (enclosing.name ?? `this ${subject}`)
+      : (lineValue ?? `this ${subject}`);
+  const runLabel = `Investigate ${target}`;
+
+  function investigate(span: { start: number; end: number }, name: string | null) {
+    if (!file) return;
+    const at = span.end !== span.start ? `${span.start}-${span.end}` : `${span.start}`;
+    onInvestigate({
+      repoPath,
+      location: `${file.path}:${at}`,
+      question: question.trim() || defaultQuestion({ ...span, name }),
+    });
+  }
+
+  function run() {
+    if (selection) investigate(selection, isSymbolSelected ? (enclosing?.name ?? null) : null);
+  }
+
+  function runWider() {
+    if (!enclosing) return;
+    viewer.expandToSymbol();
+    investigate(enclosing, enclosing.name ?? null);
+  }
+
   const steps: PathStep[] = [
     {
       key: "repo",
@@ -300,14 +305,13 @@ export function Composer({
           >
             {selection && (
               <QuestionForm
-                subject={subject}
+                target={target}
                 runLabel={runLabel}
                 question={question}
                 setQuestion={setQuestion}
                 onRun={run}
-                enclosing={enclosing}
-                canExpand={canExpand}
-                onExpand={viewer.expandToSymbol}
+                wider={canExpand ? enclosing : null}
+                onRunWider={runWider}
               />
             )}
           </CodeContext>

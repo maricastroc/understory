@@ -20,6 +20,7 @@ import type { RailItem, RepoSummary } from "../shell/types";
 import { useLanguage } from "../use-language";
 import { CaseFailure } from "./CaseFailure";
 import { CaseView } from "./CaseView";
+import { DEEP_LINK_QUESTION, LINE_QUESTION } from "./default-question";
 import { draftResult } from "./draft-result";
 import type { FollowUpParent } from "./follow-up-parent";
 import { LoadingCard } from "./LoadingCard";
@@ -75,7 +76,7 @@ export function Investigator() {
         {
           repoPath: deepRepo,
           location: `${deepFile}:${deepLine}`,
-          question: "Why is this line the way it is? Reconstruct why it changed.",
+          question: DEEP_LINK_QUESTION,
         },
         undefined,
         language,
@@ -183,7 +184,7 @@ export function Investigator() {
   const drill = (entry: Entry) => (anchor: Parameters<typeof drillInto>[2]) =>
     drillInto(
       entry.caseId,
-      entry.form.question || "Why is this line the way it is?",
+      entry.form.question || LINE_QUESTION,
       anchor,
       entry.form.repoPath,
       tokenValue,
