@@ -38,8 +38,11 @@ for (const vp of VIEWPORTS) {
     await open(page);
     const section = page.locator("section[data-datum-y]");
     await expect(section).toHaveAttribute("data-mode", vp.mode);
-    const box = (await section.boundingBox())!;
-    if (vp.specimenWidth) expect(Math.round(box.width)).toBe(vp.specimenWidth);
+    if (vp.specimenWidth) {
+      await expect
+        .poll(async () => Math.round((await section.boundingBox())!.width))
+        .toBe(vp.specimenWidth);
+    }
     const offset = await datumOffset(page);
     expect(Math.abs(offset.rowBottom - offset.reported)).toBeLessThanOrEqual(1);
     expect(Math.abs(offset.ruleCenter - offset.reported)).toBeLessThanOrEqual(1);
