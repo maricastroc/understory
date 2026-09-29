@@ -21,6 +21,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "dig": "tsx scripts/dig.ts",
+    "eval": "tsx scripts/eval.ts",
     "seed:demo": "bash scripts/seed-demo.sh",
     "test": "vitest run",
     "test:watch": "vitest",
