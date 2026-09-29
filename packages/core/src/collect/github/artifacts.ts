@@ -1,4 +1,5 @@
 import type { Artifact } from "../../types";
+import type { Actor } from "./bots";
 
 export type CommitNode = {
   oid: string;
@@ -30,7 +31,7 @@ export type IssueNode = {
 };
 
 export type ReviewNode = {
-  author: { login: string } | null;
+  author: Actor;
   state: string;
   body: string;
   submittedAt: string;

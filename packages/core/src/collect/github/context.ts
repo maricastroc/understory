@@ -9,8 +9,11 @@ import {
   prArtifact,
   reviewArtifact,
 } from "./artifacts";
+import { ACTOR, withoutBots } from "./bots";
 import { graphql } from "./client";
 import { type Comment, COMMENTS, foldComments } from "./comments";
+
+const MAX_REVIEWS = 10;
 
 const PR_CONTEXT_QUERY = `
 query PrContext($owner:String!, $repo:String!, $number:Int!) {
@@ -20,9 +23,9 @@ query PrContext($owner:String!, $repo:String!, $number:Int!) {
       commits(first: 20) {
         nodes { commit { oid abbreviatedOid messageHeadline message url committedDate author { name email } } }
       }
-      reviews(first: 10) {
+      reviews(first: 20) {
         nodes {
-          author { login } state body submittedAt
+          ${ACTOR} state body submittedAt
           ${COMMENTS}
         }
       }
@@ -88,14 +91,16 @@ export async function prContextArtifacts(
   prA.body = foldComments(prA.body, pr.comments.nodes);
   out.push(prA);
 
-  pr.reviews.nodes.forEach((rv, i) => {
-    const hasBody = !!rv.body.trim();
-    const hasComments = rv.comments.nodes.some((c) => c.body?.trim());
-    if (!hasBody && !hasComments) return;
-    const rvA = reviewArtifact(pr.number, pr.url, rv, i);
-    rvA.body = foldComments(rv.body.trim(), rv.comments.nodes);
-    out.push(rvA);
-  });
+  withoutBots(pr.reviews.nodes)
+    .slice(0, MAX_REVIEWS)
+    .forEach((rv, i) => {
+      const hasBody = !!rv.body.trim();
+      const hasComments = rv.comments.nodes.some((c) => c.body?.trim());
+      if (!hasBody && !hasComments) return;
+      const rvA = reviewArtifact(pr.number, pr.url, rv, i);
+      rvA.body = foldComments(rv.body.trim(), rv.comments.nodes);
+      out.push(rvA);
+    });
 
   for (const iss of pr.closingIssuesReferences.nodes) {
     const issA = issueArtifact(iss);
