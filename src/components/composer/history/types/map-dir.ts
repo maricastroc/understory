@@ -1,1 +1,1 @@
-export type MapDir = { key: string; label: string; left: number; width: number };
+export type MapDir = { key: string; label: string; left: number; width: number; room: number };

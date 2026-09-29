@@ -92,14 +92,17 @@ export function MapCanvas({
       {layout.dirs.map((d) => (
         <p
           key={d.key}
-          className={`absolute top-0 truncate border-t-2 pt-1.5 font-li-mono text-[12px] transition-colors motion-reduce:transition-none ${
+          className={`absolute top-0 border-t-2 pt-1.5 font-li-mono text-[12px] whitespace-nowrap transition-colors motion-reduce:transition-none ${
             focused && (focused.dir || "./") !== d.key
               ? "border-li-neutral-500 text-li-text-muted"
               : "border-li-ink text-li-ink"
           }`}
           style={{ left: d.left, width: d.width }}
+          title={d.label === d.key ? undefined : d.key}
         >
-          {d.label}
+          <span className="block w-max truncate" style={{ maxWidth: d.room }}>
+            {d.label}
+          </span>
         </p>
       ))}
 

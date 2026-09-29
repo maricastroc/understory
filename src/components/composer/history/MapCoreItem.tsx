@@ -78,10 +78,10 @@ export function MapCoreItem({
             aria-label={label}
             onClick={onOpen}
             {...events}
-            className={`pointer-events-auto absolute origin-bottom-left -rotate-40 cursor-pointer px-0.5 font-li-mono text-[12px] leading-3.5 whitespace-nowrap underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-li-focus ${
+            className={`pointer-events-auto absolute origin-bottom-left -rotate-40 cursor-pointer truncate px-0.5 pb-0.5 font-li-mono text-[12px] leading-3.5 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-li-focus ${
               focused ? "font-semibold text-li-ink" : muted ? "text-li-text-muted" : "text-li-ink"
             }`}
-            style={{ left: core.x - 2, top: top - MAP.labelRise }}
+            style={{ left: core.x - 2, top: top - MAP.labelRise, maxWidth: MAP.labelMax }}
           >
             {core.name}
           </button>
