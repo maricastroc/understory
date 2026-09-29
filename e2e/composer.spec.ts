@@ -135,6 +135,25 @@ test("the cold map matches the design geometry at 1440", async ({ page }) => {
   expect(geometry.stubs[1].x - geometry.stubs[0].x).toBe(64);
   expect(geometry.stubs.every((s) => s.h === 24)).toBe(true);
   await expect(page.getByRole("button", { name: "Map 14 more" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: /^Scroll (left|right)/ })).toHaveCount(0);
+});
+
+test("a map wider than the screen says so at its top and pages sideways", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/dev/composer");
+  await expect(page.getByRole("list", { name: "Files shown" }).getByRole("button")).toHaveCount(14);
+  const map = page.getByRole("region", { name: "History map, scroll sideways for more files" });
+  const right = page.getByRole("button", { name: /^Scroll right, \d+ more files$/ });
+  await expect(right).toBeVisible();
+  const mapBox = (await map.boundingBox())!;
+  const cueBox = (await right.boundingBox())!;
+  expect(cueBox.y - mapBox.y).toBeLessThan(160);
+  expect(cueBox.x + cueBox.width).toBeCloseTo(mapBox.x + mapBox.width, 0);
+  await expect(page.getByRole("button", { name: /^Scroll left/ })).toHaveCount(0);
+  await right.click();
+  await expect.poll(() => map.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  await expect(page.getByRole("button", { name: /^Scroll left, \d+ more files$/ })).toBeVisible();
+  expect(await axeViolations(page, { settleMs: 600 })).toEqual([]);
 });
 
 for (const state of ["auto", "mapping", "warm", "unknown"]) {

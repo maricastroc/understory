@@ -222,6 +222,7 @@ npm run dig -- .demo/payments-service src/billing/charge.ts:8 --why "why cap ret
 
 - **Layout.** `packages/core` holds the pipeline (collect → synthesize → entail → verify) and never imports Next.js, Prisma or Upstash; the web app (`src/`), the CLI (`scripts/dig.ts`) and the VS Code extension (`apps/extension`) are shells over it.
 - **Unit tests** — `npm test`. Vitest runs two projects: `node` for `*.test.ts` and `dom` (jsdom + Testing Library) for `*.test.tsx`, with axe checks that skip color contrast, since jsdom computes no colors.
+- **Eval** — `npm run eval`. Runs a gold set through the real pipeline, model included, and checks grounding, abstention and out-of-scope refusal. It needs `GROQ_API_KEY` and the seeded demo, and stays out of CI. Results and how to read them are in [`eval/README.md`](eval/README.md).
 - **End-to-end** — `npm run test:e2e`. Playwright drives the dev server in the locally installed Chrome, with full axe checks including contrast. It needs the seeded demo (`npm run seed:demo`).
 - **Dev previews.** Files named `page.dev.tsx` are only routed in development (`pageExtensions` in `next.config.ts`), so they never reach a production build. They render real components over synthetic fixtures, and the e2e suite runs against them:
   - `/dev/line?state=` `resolved` · `collecting` · `failed` · `empty` · `pending` · `not-recorded` · `evidence-only` · `out-of-scope` · `fabricated` · `misattributed` · `unverified` · `commits-only` · `crowded`

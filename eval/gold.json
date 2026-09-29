@@ -1,0 +1,80 @@
+{
+  "repo": ".demo/payments-service",
+  "cases": [
+    {
+      "id": "retry-cap",
+      "location": "src/billing/charge.ts:8",
+      "question": "Why cap the retries at 3?",
+      "expect": {
+        "answerable": true,
+        "recorded": true,
+        "grounded": true,
+        "minScore": 0.65,
+        "citesBodyMatch": "INC-1187|cap|webhook|double"
+      }
+    },
+    {
+      "id": "why-retry-loop",
+      "location": "src/billing/charge.ts:7",
+      "question": "Why does chargeCustomer wrap the Stripe call in a retry loop?",
+      "expect": {
+        "answerable": true,
+        "recorded": true,
+        "grounded": true,
+        "minScore": 0.65,
+        "citesBodyMatch": "retry|transient|network|blip"
+      }
+    },
+    {
+      "id": "jitter",
+      "location": "src/billing/charge.ts:12",
+      "question": "Why add jitter to the backoff delay?",
+      "expect": {
+        "answerable": true,
+        "recorded": true,
+        "grounded": true,
+        "minScore": 0.65,
+        "citesBodyMatch": "lockstep|jitter|herd|retrying"
+      }
+    },
+    {
+      "id": "bug-phrasing",
+      "location": "src/billing/charge.ts:8",
+      "question": "Was this retry cap introduced to fix a bug?",
+      "expect": {
+        "answerable": true,
+        "recorded": true,
+        "grounded": true,
+        "citesBodyMatch": "INC-1187|double|outage"
+      }
+    },
+    {
+      "id": "refund-silent",
+      "location": "src/billing/refund.ts:2",
+      "question": "Why does refundCharge always report refunded: true?",
+      "expect": {
+        "answerable": true,
+        "recorded": false,
+        "grounded": true
+      }
+    },
+    {
+      "id": "oos-love",
+      "location": "src/billing/charge.ts:8",
+      "question": "Why don't you love me?",
+      "expect": { "answerable": false }
+    },
+    {
+      "id": "oos-france",
+      "location": "src/billing/charge.ts:8",
+      "question": "What is the capital of France?",
+      "expect": { "answerable": false }
+    },
+    {
+      "id": "oos-poem",
+      "location": "src/billing/charge.ts:8",
+      "question": "Write me a haiku about the ocean.",
+      "expect": { "answerable": false }
+    }
+  ]
+}

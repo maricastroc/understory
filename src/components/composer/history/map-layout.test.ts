@@ -45,6 +45,27 @@ describe("layoutMap", () => {
     expect(tight.width).toBeGreaterThan(1120);
   });
 
+  it("keeps the last file's tilted name and the last folder label inside the canvas", () => {
+    const long = "src/app/presentation/pt-BR/an-unusually-long-component-name.tsx";
+    const few = ["src/a.ts", "src/b.ts", long];
+    const many = [...Array.from({ length: 16 }, (_, i) => `src/f${i}.ts`), long];
+    const tilt = (40 * Math.PI) / 180;
+    for (const [paths, available] of [
+      [few, 420],
+      [many, 600],
+    ] as const) {
+      const fitted = layoutMap(
+        paths.map((path) => ({ ...syntheticOverview.files[0], path })),
+        available,
+        new Map(),
+      );
+      expect(fitted.mode).toBe("dense");
+      const last = fitted.cores.at(-1)!;
+      expect(last.x + MAP.labelMax * Math.cos(tilt)).toBeLessThanOrEqual(fitted.width);
+      for (const d of fitted.dirs) expect(d.left + d.room).toBeLessThanOrEqual(fitted.width);
+    }
+  });
+
   it("labels files at the repository root", () => {
     const root = layoutMap([{ ...syntheticOverview.files[0], path: "index.js" }], 1120, new Map());
     expect(root.dirs[0].label).toBe("./");

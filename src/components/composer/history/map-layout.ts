@@ -15,6 +15,12 @@ function segments(dir: string): string[] {
 
 const fits = (label: string, width: number) => label.length * MAP.dirChar <= width;
 
+const TILT = (40 * Math.PI) / 180;
+
+function labelReach(name: string): number {
+  return Math.ceil(Math.min(MAP.labelMax, name.length * MAP.dirChar + 4) * Math.cos(TILT));
+}
+
 function dirLabels(dirs: string[], widths: number[]): string[] {
   const all = dirs.map(segments);
   const tail = (segs: string[], k: number) => segs.slice(-k).join("/");
@@ -58,6 +64,7 @@ function place(
   caseCounts: ReadonlyMap<string, number>,
   firstX: number = MAP.firstX,
   reach = 10,
+  tail: number = MAP.rightPad,
 ): { dirs: MapDir[]; cores: MapCore[]; end: number } {
   const placed: Omit<MapDir, "label">[] = [];
   const cores: MapCore[] = [];
@@ -84,6 +91,9 @@ function place(
       room: x - start - MAP.dirLabelGap,
     });
   }
+  const end = x - step - MAP.dirGap;
+  const final = placed.at(-1);
+  if (final) final.room = Math.min(final.room, end + tail - final.left);
   const labels = dirLabels(
     [...groups.keys()],
     placed.map((d) => d.room),
@@ -91,7 +101,7 @@ function place(
   return {
     dirs: placed.map((d, i) => ({ ...d, label: labels[i] })),
     cores,
-    end: x - step - MAP.dirGap,
+    end,
   };
 }
 
@@ -110,14 +120,17 @@ export function layoutMap(
     const step = Math.min(SPARSE.maxStep, sparseFit);
     const firstX = MAP.axisX + step / 2 + 6;
     const tabHalf = step / 2 - SPARSE.tabInset;
-    const { dirs, cores, end } = place(groups, step, caseCounts, firstX, tabHalf);
-    return { dirs, cores, width: end + step / 2 + 12, mode: "sparse", step, datumY: SPARSE.datumY };
+    const tail = step / 2 + 12;
+    const { dirs, cores, end } = place(groups, step, caseCounts, firstX, tabHalf, tail);
+    return { dirs, cores, width: end + tail, mode: "sparse", step, datumY: SPARSE.datumY };
   }
 
-  const fit = (available - MAP.firstX - MAP.rightPad - gaps) / spans;
+  const lastName = split([...groups.values()].at(-1)?.at(-1)?.path ?? "").name;
+  const pad = Math.max(MAP.rightPad, labelReach(lastName));
+  const fit = (available - MAP.firstX - pad - gaps) / spans;
   const step = Math.max(MAP.minStep, Math.min(MAP.step, fit));
-  const { dirs, cores } = place(groups, step, caseCounts);
-  const right = cores.length ? cores[cores.length - 1].x + MAP.rightPad : available;
+  const { dirs, cores } = place(groups, step, caseCounts, MAP.firstX, 10, pad);
+  const right = cores.length ? cores[cores.length - 1].x + pad : available;
   return {
     dirs,
     cores,
