@@ -19,8 +19,11 @@ export const BORE = {
   leaderMin: 20,
   leaderMax: 40,
   leaderStep: 6,
-  gapLeaderX: 510,
   maxPerKind: 4,
+  chipRow: 16,
+  foldRow: 44,
+  foldRows: 8,
+  foldMin: 3,
 } as const;
 
 export const HALF: Record<ArtifactKind, number> = {

@@ -1,6 +1,6 @@
 import { artifactName, gapName } from "../copy/accessible-name";
 import { displayId, labelTitle } from "../copy/artifact-copy";
-import { gapLabel, gapLetter, gapTitle } from "../copy/gap-copy";
+import { gapChip } from "../copy/gap-copy";
 import type { ViewArtifact, ViewClause, ViewGap } from "../model/types";
 import { EvidenceLetter } from "../parts/EvidenceLetter";
 
@@ -45,31 +45,32 @@ export function StaticArtifactLabel({
   );
 }
 
-export function StaticGapLabel({
-  gap,
+export function StaticGapChips({
+  gaps,
   after,
   dim,
-  show,
 }: {
-  gap: ViewGap;
+  gaps: ViewGap[];
   after: ViewArtifact;
   dim: boolean;
-  show: boolean;
 }) {
-  const ink = gap.verified && !dim ? "text-li-gap-ink" : "text-li-text-muted";
   return (
-    <>
-      <span className="sr-only">{gapName(gap, after)}</span>
-      <span aria-hidden className={ROW}>
-        <EvidenceLetter
-          letter={gapLetter(gap)}
-          variant={dim ? "dimmed" : gap.verified ? "gap" : "unverified"}
-        />
-        <span className={LINE}>
-          <span className={ink}>{gapLabel(gap)}</span>
-          {show && <span className={`${TITLE} ${ink}`}>{gapTitle(gap)}</span>}
+    <span className="flex flex-wrap gap-1 pt-0.5 pl-[30px]">
+      {gaps.map((gap) => (
+        <span key={gap.id}>
+          <span className="sr-only">{gapName(gap, after)}</span>
+          <span
+            aria-hidden
+            className={`rounded-[3px] border border-dashed px-1 font-li-mono text-[10.5px] leading-3.5 ${
+              gap.verified && !dim
+                ? "border-li-gap text-li-gap-ink"
+                : "border-li-text-muted text-li-text-muted"
+            }`}
+          >
+            {gapChip(gap)}
+          </span>
         </span>
-      </span>
-    </>
+      ))}
+    </span>
   );
 }
