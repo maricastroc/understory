@@ -1,12 +1,12 @@
-import { collect, parseLocation } from "@git-investigator/core/collect";
-import { checkEntailment } from "@git-investigator/core/entail";
-import { cosmeticOrigin } from "@git-investigator/core/cosmetic";
-import { getAuditor } from "@git-investigator/core/auditor";
-import { getModel } from "@git-investigator/core/llm";
-import { traceProvenance } from "@git-investigator/core/provenance";
-import { buildSynthesisInput, synthesize } from "@git-investigator/core/synthesize";
-import { verify } from "@git-investigator/core/verify";
-import type { Artifact, Evidence, VerifiedNarrative } from "@git-investigator/core/types";
+import { collect, parseLocation } from "@understory/core/collect";
+import { checkEntailment } from "@understory/core/entail";
+import { cosmeticOrigin } from "@understory/core/cosmetic";
+import { getAuditor } from "@understory/core/auditor";
+import { getModel } from "@understory/core/llm";
+import { traceProvenance } from "@understory/core/provenance";
+import { buildSynthesisInput, synthesize } from "@understory/core/synthesize";
+import { verify } from "@understory/core/verify";
+import type { Artifact, Evidence, VerifiedNarrative } from "@understory/core/types";
 
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };
 try {

@@ -1,4 +1,4 @@
-import type { DigResult } from "@git-investigator/core/types";
+import type { DigResult } from "@understory/core/types";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";

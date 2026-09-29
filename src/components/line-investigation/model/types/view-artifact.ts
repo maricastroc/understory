@@ -1,4 +1,4 @@
-import type { Artifact, ArtifactKind, PrLookup } from "@git-investigator/core/types";
+import type { Artifact, ArtifactKind, PrLookup } from "@understory/core/types";
 import type { ViewQuote } from "./view-quote";
 
 export type ViewArtifact = {

@@ -1,6 +1,6 @@
 "use client";
 
-import type { DigResult } from "@git-investigator/core/types";
+import type { DigResult } from "@understory/core/types";
 import { type ReactNode, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { evidenceEntries } from "../copy/evidence-entries";
 import { EvidenceDrawer } from "../drawer/EvidenceDrawer";

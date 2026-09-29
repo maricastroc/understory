@@ -1,4 +1,4 @@
-import { anchorQuestion } from "@git-investigator/core/anchor-question";
+import { anchorQuestion } from "@understory/core/anchor-question";
 import { depthText, displayId, kindName, labelTitle } from "../copy/artifact-copy";
 import { artifactStatus, citesText, contextLines, metaLine } from "../copy/drawer-copy";
 import {

@@ -1,4 +1,4 @@
-import type { VerifiedNarrative } from "@git-investigator/core/types";
+import type { VerifiedNarrative } from "@understory/core/types";
 import { clauseId } from "./clause-id";
 import type { ClaimAudit, TallyState, ViewClause, ViewQuote } from "./types";
 

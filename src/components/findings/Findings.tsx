@@ -1,6 +1,6 @@
 "use client";
 
-import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
+import type { Evidence, VerifiedNarrative } from "@understory/core/types";
 import { CopyButton } from "../CopyButton";
 import { letter } from "../format";
 import { useLanguage } from "../use-language";

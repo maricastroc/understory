@@ -1,6 +1,6 @@
 "use client";
 
-import type { TreeOverview } from "@git-investigator/core/types";
+import type { TreeOverview } from "@understory/core/types";
 import { useMemo } from "react";
 import { HistoryMap } from "./history/HistoryMap";
 import type { HistoryMapControl } from "./history/use-history-map";

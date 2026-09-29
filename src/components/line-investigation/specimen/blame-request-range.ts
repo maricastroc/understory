@@ -1,4 +1,4 @@
-import { MAX_BLAME_WINDOW } from "@git-investigator/core/collect/blame-limits";
+import { MAX_BLAME_WINDOW } from "@understory/core/collect/blame-limits";
 import type { LineRange } from "./types";
 
 export function blameRequestRange(visible: LineRange, datum: LineRange): LineRange {

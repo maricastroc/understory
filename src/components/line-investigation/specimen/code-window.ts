@@ -1,4 +1,4 @@
-import type { SymbolSpan } from "@git-investigator/core/collect/symbol";
+import type { SymbolSpan } from "@understory/core/collect/symbol";
 import { datumYFor, rowsAboveFor } from "./datum-y";
 import { SPECIMEN } from "./specimen-metrics";
 import type { LineRange, SpecimenMode, SpecimenWindow } from "./types";

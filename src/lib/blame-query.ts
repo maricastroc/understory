@@ -1,5 +1,5 @@
-import { MAX_BLAME_WINDOW } from "@git-investigator/core/collect/blame-limits";
-import { isCommitSha } from "@git-investigator/core/collect/sha";
+import { MAX_BLAME_WINDOW } from "@understory/core/collect/blame-limits";
+import { isCommitSha } from "@understory/core/collect/sha";
 
 export type BlameQuery = { repo: string; path: string; ref: string; start: number; end: number };
 

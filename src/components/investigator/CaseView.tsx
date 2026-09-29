@@ -1,4 +1,4 @@
-import type { Artifact, ArtifactRef } from "@git-investigator/core/types";
+import type { Artifact, ArtifactRef } from "@understory/core/types";
 import { CausalChain } from "../chain/CausalChain";
 import { Evidence } from "../Evidence";
 import { Findings } from "../findings/Findings";

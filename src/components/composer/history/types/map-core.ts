@@ -1,4 +1,4 @@
-import type { ShownReason } from "@git-investigator/core/types";
+import type { ShownReason } from "@understory/core/types";
 
 export type MapCore = {
   path: string;

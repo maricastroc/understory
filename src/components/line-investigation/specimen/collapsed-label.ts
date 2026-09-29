@@ -1,4 +1,4 @@
-import { enclosingSymbol } from "@git-investigator/core/collect/symbol";
+import { enclosingSymbol } from "@understory/core/collect/symbol";
 import type { LineRange } from "./types";
 
 const SCAN_LIMIT = 200;

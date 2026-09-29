@@ -1,4 +1,4 @@
-import type { Contradiction } from "@git-investigator/core/types";
+import type { Contradiction } from "@understory/core/types";
 import type { ChecklistTone } from "./checklist-tone";
 
 export type ChecklistItem =

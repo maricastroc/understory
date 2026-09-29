@@ -1,4 +1,4 @@
-import type { Artifact, Evidence } from "@git-investigator/core/types";
+import type { Artifact, Evidence } from "@understory/core/types";
 import { buildCausalChain } from "./causal-chain";
 import type { GapBasis, ViewArtifact, ViewGap } from "./types";
 

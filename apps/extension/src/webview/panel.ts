@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { ArtifactRef, DigResult } from "@git-investigator/core";
+import type { ArtifactRef, DigResult } from "@understory/core";
 import { type ErrorView, renderError, renderLoading, renderResult } from "./render";
 
 export type WebviewMessage = { type: "retry" } | { type: "drill"; ref: ArtifactRef };
@@ -24,7 +24,7 @@ function ensurePanel(): vscode.WebviewPanel {
     return panel;
   }
   panel = vscode.window.createWebviewPanel(
-    "gitInvestigator.result",
+    "understory.result",
     "Understory",
     { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
     { enableScripts: true, retainContextWhenHidden: true },

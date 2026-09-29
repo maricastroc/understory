@@ -1,4 +1,4 @@
-import type { Confidence } from "@git-investigator/core/types";
+import type { Confidence } from "@understory/core/types";
 import { levelLabel, levelTone } from "./format";
 
 export function ConfidenceRing({

@@ -7,12 +7,12 @@ const mocks = vi.hoisted(() => ({
   consumeAiDailyLimit: vi.fn(),
 }));
 
-vi.mock("@git-investigator/core/collect", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@git-investigator/core/collect")>()),
+vi.mock("@understory/core/collect", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@understory/core/collect")>()),
   collect: mocks.collect,
 }));
-vi.mock("@git-investigator/core/investigate", () => ({ narrate: mocks.narrate }));
-vi.mock("@git-investigator/core/llm", () => ({ getModel: mocks.getModel }));
+vi.mock("@understory/core/investigate", () => ({ narrate: mocks.narrate }));
+vi.mock("@understory/core/llm", () => ({ getModel: mocks.getModel }));
 vi.mock("@/lib/ratelimit", () => ({
   rateLimit: async () => null,
   consumeAiDailyLimit: mocks.consumeAiDailyLimit,

@@ -1,4 +1,4 @@
-import type { FileHistory, HeadCommit, PrLookup } from "@git-investigator/core/types";
+import type { FileHistory, HeadCommit, PrLookup } from "@understory/core/types";
 import { MAP } from "./map-geometry";
 import type { CoreHistory, DepthScale, MarkTone } from "./types";
 

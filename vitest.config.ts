@@ -4,7 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
-      "@git-investigator/core": path.resolve(__dirname, "packages/core/src"),
+      "@understory/core": path.resolve(__dirname, "packages/core/src"),
       "@": path.resolve(__dirname, "src"),
     },
   },

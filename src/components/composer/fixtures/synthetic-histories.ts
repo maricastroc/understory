@@ -1,4 +1,4 @@
-import type { FileHistory, PrLookup } from "@git-investigator/core/types";
+import type { FileHistory, PrLookup } from "@understory/core/types";
 import type { HistoryMapControl } from "../history/use-history-map";
 import type { CoreState } from "../history/types";
 import { syntheticOverview } from "./synthetic-overview";

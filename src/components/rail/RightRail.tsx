@@ -1,4 +1,4 @@
-import type { DigResult } from "@git-investigator/core/types";
+import type { DigResult } from "@understory/core/types";
 import { CaseDetails } from "./CaseDetails";
 
 export function RightRail({ result }: { result: DigResult }) {

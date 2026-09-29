@@ -1,5 +1,5 @@
 import path from "node:path";
-import { headSha } from "@git-investigator/core/collect/git";
+import { headSha } from "@understory/core/collect/git";
 import { SpecimenPreview } from "./specimen-preview";
 
 const DEMO_REPO = ".demo/payments-service";

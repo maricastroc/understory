@@ -1,4 +1,4 @@
-import type { Artifact, Evidence, PrLookup } from "@git-investigator/core/types";
+import type { Artifact, Evidence, PrLookup } from "@understory/core/types";
 import { timeOf } from "./depth-order";
 import type { ViewArtifact, ViewClause, ViewQuote } from "./types";
 

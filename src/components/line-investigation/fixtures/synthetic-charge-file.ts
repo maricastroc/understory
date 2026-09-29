@@ -1,4 +1,4 @@
-import type { BlameSpan } from "@git-investigator/core/types";
+import type { BlameSpan } from "@understory/core/types";
 
 export const SYNTHETIC_FILE_PATH = "src/billing/charge.ts";
 

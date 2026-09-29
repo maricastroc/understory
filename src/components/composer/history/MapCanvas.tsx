@@ -1,6 +1,6 @@
 "use client";
 
-import type { HeadCommit } from "@git-investigator/core/types";
+import type { HeadCommit } from "@understory/core/types";
 import { useMemo } from "react";
 import { DatumRule } from "../../line-investigation/bore/DatumRule";
 import { shortAge } from "../../line-investigation/format/age";

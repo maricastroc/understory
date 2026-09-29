@@ -1,4 +1,4 @@
-import type { SymbolSpan } from "@git-investigator/core/collect/symbol";
+import type { SymbolSpan } from "@understory/core/collect/symbol";
 import { useEffect, useMemo, useRef } from "react";
 import { CodeText } from "../line-investigation/specimen/CodeText";
 import { highlightLines } from "../line-investigation/specimen/highlight-code";

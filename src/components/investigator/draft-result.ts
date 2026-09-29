@@ -1,5 +1,5 @@
-import { parseLocation } from "@git-investigator/core/collect/parse-location";
-import type { DigResult, InvestigateInput } from "@git-investigator/core/types";
+import { parseLocation } from "@understory/core/collect/parse-location";
+import type { DigResult, InvestigateInput } from "@understory/core/types";
 
 export function draftResult(form: InvestigateInput): DigResult | null {
   if (!form.location) return null;

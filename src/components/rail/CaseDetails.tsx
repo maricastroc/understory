@@ -1,4 +1,4 @@
-import type { DigResult, Evidence } from "@git-investigator/core/types";
+import type { DigResult, Evidence } from "@understory/core/types";
 import { ExternalLink, Github, Repo, Shield, Users } from "../icons";
 import { Avatar } from "../ui";
 import { MetaRow, RailCard } from "./RailCard";
