@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { axe } from "@/test/axe";
 import { FileStage } from "./FileStage";
 import { syntheticCaseCounts, syntheticOverview } from "./fixtures/synthetic-overview";
@@ -225,5 +225,65 @@ describe("FileStage — quiet by default, detailed on intent", () => {
     expect(screen.getByText("Changed in the last 12 commits")).toBeTruthy();
     expect(screen.queryByText(/of 2 mapped/)).toBeNull();
     expect(screen.getAllByText(/\b2 files\b/)).toHaveLength(1);
+  });
+});
+
+describe("FileStage — a map wider than its box", () => {
+  function narrowBox(clientWidth: number) {
+    let left = 0;
+    const content = { scrollWidth: 0 };
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(clientWidth);
+    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const inner = this.firstElementChild as HTMLElement | null;
+      content.scrollWidth = Math.max(clientWidth, parseFloat(inner?.style.width ?? "") || 0);
+      return content.scrollWidth;
+    });
+    vi.spyOn(HTMLElement.prototype, "scrollLeft", "get").mockImplementation(() => left);
+    const scrollBy = vi.fn(function (this: HTMLElement, opts: ScrollToOptions) {
+      left = Math.min(Math.max(0, left + (opts.left ?? 0)), content.scrollWidth - clientWidth);
+      this.dispatchEvent(new Event("scroll"));
+    });
+    Object.defineProperty(HTMLElement.prototype, "scrollBy", {
+      configurable: true,
+      value: scrollBy,
+    });
+    return scrollBy;
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    delete (HTMLElement.prototype as { scrollBy?: unknown }).scrollBy;
+  });
+
+  it("says how many files are past the edge, at the HEAD line, and pages to them", () => {
+    const scrollBy = narrowBox(500);
+    setup();
+    const region = screen.getByRole("region", {
+      name: "History map, scroll sideways for more files",
+    });
+    const right = screen.getByRole("button", { name: /^Scroll right, \d+ more files$/ });
+    const count = Number(right.textContent!.match(/^(\d+) more →$/)![1]);
+    expect(count).toBeGreaterThan(0);
+    expect(count).toBeLessThan(14);
+    expect(screen.queryByRole("button", { name: /^Scroll left/ })).toBeNull();
+    expect(region.contains(right)).toBe(false);
+
+    fireEvent.click(right);
+    expect(scrollBy).toHaveBeenCalledWith({ left: 400, behavior: "smooth" });
+    fireEvent.click(screen.getByRole("button", { name: /^Scroll right/ }));
+    expect(screen.queryByRole("button", { name: /^Scroll right/ })).toBeNull();
+    const back = screen.getByRole("button", { name: /^Scroll left, \d+ more files$/ });
+    expect(back.textContent).toMatch(/^← \d+ more$/);
+    fireEvent.click(back);
+    expect(scrollBy).toHaveBeenLastCalledWith({ left: -400, behavior: "smooth" });
+  });
+
+  it("shows no cue when the map fits", () => {
+    narrowBox(1120);
+    setup();
+    expect(screen.queryByRole("region", { name: /scroll sideways/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Scroll (left|right)/ })).toBeNull();
   });
 });

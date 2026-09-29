@@ -2,18 +2,19 @@
 
 import type { TreeOverview } from "@git-investigator/core/types";
 import { useId, useMemo, useState } from "react";
-import { useHorizontalOverflow } from "../../line-investigation/specimen/use-horizontal-overflow";
 import { useElementWidth } from "../../use-element-width";
 import { MapCanvas, useCoreViews } from "./MapCanvas";
 import { MapHeader } from "./MapHeader";
 import { legendKeys } from "./legend-keys";
 import { MapLegend } from "./MapLegend";
 import { MapReading } from "./MapReading";
+import { MapScrollCue } from "./MapScrollCue";
 import { layoutMap } from "./map-layout";
 import { mapSummary } from "./map-summary";
 import { mappedLine, scopeAbout, scopeWhy } from "./scope-copy";
 import { prAbsence, shareLine } from "./share-copy";
 import type { HistoryMapControl } from "./use-history-map";
+import { useSideScroll } from "./use-side-scroll";
 
 export function HistoryMap({
   overview,
@@ -30,12 +31,13 @@ export function HistoryMap({
 }) {
   const titleId = useId();
   const [boxRef, width] = useElementWidth();
-  const [scrollRef, scrolls] = useHorizontalOverflow();
   const [focus, setFocus] = useState<string | null>(null);
   const layout = useMemo(
     () => layoutMap(overview.files, width || 1120, caseCounts),
     [overview.files, width, caseCounts],
   );
+  const xs = useMemo(() => layout.cores.map((c) => c.x), [layout.cores]);
+  const [sideRef, hidden, page] = useSideScroll(xs);
   const { views, scale } = useCoreViews(layout, map.states, overview.head);
   const total = overview.files.length;
   const histories = useMemo(
@@ -60,24 +62,42 @@ export function HistoryMap({
   const focused = focus ? (layout.cores.find((c) => c.path === focus) ?? null) : null;
 
   const canvas = (
-    <div
-      ref={scrollRef}
-      tabIndex={scrolls ? 0 : undefined}
-      role={scrolls ? "region" : undefined}
-      aria-label={scrolls ? "History map, scroll sideways for more files" : undefined}
-      className="min-w-0 overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
-    >
-      <MapCanvas
-        layout={layout}
-        head={overview.head}
-        recentCommits={overview.recentCommits}
-        matches={matches}
-        states={map.states}
-        focus={focus}
-        onFocus={setFocus}
-        onOpen={onOpen}
-        card={!sparse}
-      />
+    <div className="relative min-w-0">
+      <div
+        ref={sideRef}
+        tabIndex={hidden.scrolls ? 0 : undefined}
+        role={hidden.scrolls ? "region" : undefined}
+        aria-label={hidden.scrolls ? "History map, scroll sideways for more files" : undefined}
+        className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
+      >
+        <MapCanvas
+          layout={layout}
+          head={overview.head}
+          recentCommits={overview.recentCommits}
+          matches={matches}
+          states={map.states}
+          focus={focus}
+          onFocus={setFocus}
+          onOpen={onOpen}
+          card={!sparse}
+        />
+      </div>
+      {hidden.before > 0 && (
+        <MapScrollCue
+          side="before"
+          count={hidden.before}
+          top={layout.datumY}
+          onPage={() => page(-1)}
+        />
+      )}
+      {hidden.after > 0 && (
+        <MapScrollCue
+          side="after"
+          count={hidden.after}
+          top={layout.datumY}
+          onPage={() => page(1)}
+        />
+      )}
     </div>
   );
 
