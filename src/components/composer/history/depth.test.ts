@@ -138,9 +138,9 @@ describe("share copy", () => {
     ["2020-01-01T00:00:00Z", 2, "failed"],
   ]);
 
-  it("scopes the percentage to the mapped files and reports not-checked separately", () => {
+  it("scopes the percentages to the lines of the mapped files, all on the same base", () => {
     expect(shareLine([a], "github")).toBe(
-      "75% of lines in 1 mapped file have a PR · 20% not checked",
+      "60% of lines in 1 mapped file have a PR · 20% not checked",
     );
     expect(shareLine([a, { ...a, path: "b.ts" }], "github")).toMatch(/in 2 mapped files/);
     expect(shareLine([], "github")).toBeNull();
@@ -164,6 +164,15 @@ describe("share copy", () => {
       "Oldest surviving line: 6y 8m. 3 commits own its 10 lines at HEAD.",
     );
     expect(historyShares(view)).toBe("60% PR · 20% no PR · 20% not checked (of lines)");
+    expect(historyShares({ ...view, shares: { found: 1, none: 1, unknown: 1 } })).toBe(
+      "34% PR · 33% no PR · 33% not checked (of lines)",
+    );
+    expect(historyShares({ ...view, shares: { found: 996, none: 4, unknown: 0 } })).toBe(
+      ">99% PR · <1% no PR (of lines)",
+    );
+    expect(historyShares({ ...view, shares: { found: 5, none: 0, unknown: 0 } })).toBe(
+      "100% PR (of lines)",
+    );
     const cut = coreHistory({ ...a, cut: true }, head, depthScale([a], head));
     expect(historyFacts(cut)).toMatch(
       /^Oldest surviving line: ≥ 6y 8m\..* History cut at clone depth\.$/,

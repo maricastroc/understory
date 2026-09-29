@@ -9,6 +9,32 @@ function split(path: string): { dir: string; name: string } {
     : { dir: path.slice(0, at + 1), name: path.slice(at + 1) };
 }
 
+function segments(dir: string): string[] {
+  return dir.split("/").filter(Boolean);
+}
+
+const fits = (label: string, width: number) => label.length * MAP.dirChar <= width;
+
+function dirLabels(dirs: string[], widths: number[]): string[] {
+  const all = dirs.map(segments);
+  const tail = (segs: string[], k: number) => segs.slice(-k).join("/");
+  return all.map((segs, i) => {
+    if (segs.length === 0) return "./";
+    const full = `${segs.join("/")}/`;
+    if (fits(full, widths[i])) return full;
+    const shared = (k: number) =>
+      all.some((other, j) => j !== i && other.length >= k && tail(other, k) === tail(segs, k));
+    let unique = 1;
+    while (unique < segs.length && shared(unique)) unique += 1;
+    if (unique === segs.length) return full;
+    for (let k = segs.length - 1; k > unique; k -= 1) {
+      const label = `…/${tail(segs, k)}/`;
+      if (fits(label, widths[i])) return label;
+    }
+    return `…/${tail(segs, unique)}/`;
+  });
+}
+
 function group(files: ShownFile[]): Map<string, ShownFile[]> {
   const groups = new Map<string, ShownFile[]>();
   for (const f of files) {
@@ -33,7 +59,7 @@ function place(
   firstX: number = MAP.firstX,
   reach = 10,
 ): { dirs: MapDir[]; cores: MapCore[]; end: number } {
-  const dirs: MapDir[] = [];
+  const placed: Omit<MapDir, "label">[] = [];
   const cores: MapCore[] = [];
   let x = firstX;
   for (const [dir, list] of groups) {
@@ -50,15 +76,23 @@ function place(
       x += step;
     }
     const last = x - step;
-    dirs.push({
+    x = last + step + MAP.dirGap;
+    placed.push({
       key: dir || "./",
-      label: dir || "./",
       left: start - reach,
       width: last - start + reach + Math.max(30, reach),
+      room: x - start - MAP.dirLabelGap,
     });
-    x = last + step + MAP.dirGap;
   }
-  return { dirs, cores, end: x - step - MAP.dirGap };
+  const labels = dirLabels(
+    [...groups.keys()],
+    placed.map((d) => d.room),
+  );
+  return {
+    dirs: placed.map((d, i) => ({ ...d, label: labels[i] })),
+    cores,
+    end: x - step - MAP.dirGap,
+  };
 }
 
 export function layoutMap(

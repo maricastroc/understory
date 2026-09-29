@@ -4,6 +4,7 @@ import { axe } from "@/test/axe";
 import { FileStage } from "./FileStage";
 import { syntheticCaseCounts, syntheticOverview } from "./fixtures/synthetic-overview";
 import { SYNTHETIC_MAP_STATES } from "./fixtures/synthetic-histories";
+import { MAP } from "./history/map-geometry";
 
 function setup(query = "", onOpen = vi.fn(), state = "cold", overview = syntheticOverview) {
   const view = render(
@@ -48,6 +49,20 @@ describe("FileStage — history of current lines, cold", () => {
     fireEvent.click(charge);
     expect(onOpen).toHaveBeenCalledWith("src/billing/charge.ts");
     expect(files().getAllByRole("button")).toHaveLength(14);
+  });
+
+  it("caps a long file name below the folder row instead of letting it run into it", () => {
+    const long = {
+      ...syntheticOverview,
+      files: syntheticOverview.files.map((f, i) =>
+        i === 0 ? { ...f, path: "src/billing/AVeryLongStyledNativeComponentName.ts" } : f,
+      ),
+    };
+    setup("", vi.fn(), "cold", long);
+    const label = files().getByRole("button", { name: /^src\/billing\/AVeryLong/ });
+    expect(label.style.maxWidth).toBe(`${MAP.labelMax}px`);
+    expect(label.className).toContain("truncate");
+    expect(label.textContent).toBe("AVeryLongStyledNativeComponentName.ts");
   });
 
   it("explains why a file is shown on hover or focus", () => {

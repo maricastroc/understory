@@ -3,11 +3,28 @@ import { shortAge } from "../../line-investigation/format/age";
 import { markTone } from "./depth";
 import type { CoreHistory } from "./types";
 
-const pct = (part: number, whole: number) => {
-  if (!whole || !part) return "0%";
-  const p = Math.round((100 * part) / whole);
-  return p === 0 ? "<1%" : `${p}%`;
-};
+function percents(parts: number[]): string[] {
+  const whole = parts.reduce((sum, n) => sum + n, 0);
+  if (!whole) return parts.map(() => "0%");
+  const exact = parts.map((n) => (100 * n) / whole);
+  const rounded = exact.map(Math.floor);
+  let left = 100 - rounded.reduce((sum, n) => sum + n, 0);
+  const byRemainder = exact
+    .map((e, i) => ({ i, rest: e - Math.floor(e) }))
+    .sort((a, b) => b.rest - a.rest);
+  for (const { i } of byRemainder) {
+    if (left <= 0) break;
+    rounded[i] += 1;
+    left -= 1;
+  }
+  return parts.map((n, i) => {
+    if (!n) return "0%";
+    if (rounded[i] === 0) return "<1%";
+    if (rounded[i] === 100 && n < whole) return ">99%";
+    return `${rounded[i]}%`;
+  });
+}
+
 const files = (n: number) => `${n} mapped file${n === 1 ? "" : "s"}`;
 
 function tallyLines(histories: FileHistory[]) {
@@ -21,8 +38,9 @@ export function shareLine(histories: FileHistory[], prData: TreeOverview["prData
   if (prData === "none") return null;
   const t = tallyLines(histories);
   if (t.mapped === 0 || t.checked === 0) return null;
-  const unknown = t.unknown ? ` · ${pct(t.unknown, t.checked + t.unknown)} not checked` : "";
-  return `${pct(t.found, t.checked)} of lines in ${files(t.mapped)} have a PR${unknown}`;
+  const [found, , unknown] = percents([t.found, t.none, t.unknown]);
+  const notChecked = t.unknown ? ` · ${unknown} not checked` : "";
+  return `${found} of lines in ${files(t.mapped)} have a PR${notChecked}`;
 }
 
 export function prAbsence(histories: FileHistory[], prData: TreeOverview["prData"]): string | null {
@@ -44,11 +62,12 @@ export function historyFacts(view: CoreHistory): string {
 }
 
 export function historyShares(view: CoreHistory): string {
-  const total = view.shares.found + view.shares.none + view.shares.unknown;
+  const { found, none, unknown } = view.shares;
+  const [foundPct, nonePct, unknownPct] = percents([found, none, unknown]);
   const parts = [
-    view.shares.found ? `${pct(view.shares.found, total)} PR` : "",
-    view.shares.none ? `${pct(view.shares.none, total)} no PR` : "",
-    view.shares.unknown ? `${pct(view.shares.unknown, total)} not checked` : "",
+    found ? `${foundPct} PR` : "",
+    none ? `${nonePct} no PR` : "",
+    unknown ? `${unknownPct} not checked` : "",
   ].filter(Boolean);
   return `${parts.join(" · ")} (of lines)`;
 }
