@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
+import type { Artifact, ArtifactKind } from "@understory/core/types";
 import { buildCausalChain } from "./causal-chain";
 
 function mk(kind: ArtifactKind, id: string, date: string, parentId?: string): Artifact {

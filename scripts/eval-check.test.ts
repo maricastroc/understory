@@ -1,4 +1,4 @@
-import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
+import type { Evidence, VerifiedNarrative } from "@understory/core/types";
 import { describe, expect, it } from "vitest";
 import { checkExpect, outcomeOf, parseArgs, tally } from "./eval-check";
 

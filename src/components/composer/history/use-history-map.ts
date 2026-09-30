@@ -1,6 +1,6 @@
 "use client";
 
-import type { FileHistory, ShownFile, TreeOverview } from "@git-investigator/core/types";
+import type { FileHistory, ShownFile, TreeOverview } from "@understory/core/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MapQueue } from "./map-queue";
 import { requestHistories } from "./map-request";

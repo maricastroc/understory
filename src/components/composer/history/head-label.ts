@@ -1,4 +1,4 @@
-import type { HeadCommit } from "@git-investigator/core/types";
+import type { HeadCommit } from "@understory/core/types";
 import { fmtDate } from "../../format";
 
 export function headLabel(head: HeadCommit): { sha: string; day: string; year: string } {

@@ -4,12 +4,13 @@ import { type Dispatch, type ReactNode, useCallback, useMemo, useState } from "r
 import { arrivalDelays } from "../bore/arrival-delays";
 import { markCenter, boreMarks } from "../bore/bore-marks";
 import { BoreGraphics } from "../bore/BoreGraphics";
-import { BoreLabels } from "../bore/BoreLabels";
+import { type BoreFoldControl, BoreLabels } from "../bore/BoreLabels";
 import { DatumRule } from "../bore/DatumRule";
 import type { CasePhase } from "../case/types";
 import { tracePath } from "../bore/trace-path";
 import { boreInput } from "../layout/bore-input";
 import { computeBoreLayout } from "../layout/compute-bore-layout";
+import { foldBore } from "../layout/fold-bore";
 import { BORE } from "../layout/geometry";
 import type { InvestigationView, ViewGap } from "../model/types";
 import { SPECIMEN } from "../specimen/specimen-metrics";
@@ -51,6 +52,7 @@ export function Instrument({
   const [specimenDatum, setSpecimenDatum] = useState<number | null>(null);
   const [rings, setRings] = useState<Map<string, number>>(new Map());
   const [userExpanded, setUserExpanded] = useState<Set<string>>(new Set());
+  const [unfolded, setUnfolded] = useState(false);
 
   const effective = effectiveClause(state);
   const clause = view.clauses.find((c) => c.id === effective) ?? null;
@@ -91,7 +93,29 @@ export function Instrument({
         });
   }, [input, now, boreTop, userExpanded, active]);
 
-  const drawn = bore && (bore.glyphs.length > 0 || bore.gaps.length > 0) ? bore : null;
+  const fold = useMemo(() => {
+    if (!bore || boreTop === null) return null;
+    const floor = boreTop + BORE.foldRows * BORE.labelPitch;
+    const limit = panel ? Math.max(specimenTop + specimenHeight, floor) : floor;
+    return foldBore(bore, { datumY: boreTop, limit, pitch: BORE.labelPitch });
+  }, [bore, boreTop, panel, specimenTop, specimenHeight]);
+  const forcedOpen =
+    !!fold &&
+    ((active !== null && [...active].some((id) => fold.hidden.has(id))) ||
+      (state.inspected !== null && fold.hidden.has(state.inspected)));
+  const folded = !!fold && !unfolded && !forcedOpen;
+  const shown = fold && folded ? fold.layout : bore;
+  const foldControl: BoreFoldControl | null =
+    fold && bore && boreTop !== null && !forcedOpen
+      ? {
+          top: folded ? fold.top : boreTop + bore.height,
+          open: !folded,
+          kinds: fold.hiddenArtifacts.flatMap((id) => byId.get(id)?.kind ?? []),
+          onToggle: () => setUnfolded((v) => !v),
+        }
+      : null;
+
+  const drawn = shown && (shown.glyphs.length > 0 || shown.gaps.length > 0) ? shown : null;
   const marks = drawn ? boreMarks(drawn, byId, active) : [];
   const arrival = useMemo(() => (arrive && drawn ? arrivalDelays(drawn) : null), [arrive, drawn]);
   const trace = (() => {
@@ -131,7 +155,8 @@ export function Instrument({
     [],
   );
 
-  const boreBottom = boreTop !== null && drawn ? boreTop + drawn.height : 0;
+  const boreBottom =
+    boreTop !== null && drawn ? boreTop + drawn.height + (foldControl?.open ? BORE.foldRow : 0) : 0;
   const height = Math.max(specimenTop + specimenHeight, boreBottom, whyHeight) + 8;
   const location = view.location;
   const datumLabel = location
@@ -192,6 +217,7 @@ export function Instrument({
                 inspected={state.inspected}
                 trace={trace}
                 arrival={arrival}
+                continues={folded && fold ? fold.top : null}
               />
             )}
           </svg>
@@ -220,6 +246,7 @@ export function Instrument({
                 onInspect={(id) => dispatch({ type: "inspect", id })}
                 onToggleGroup={toggleGroup}
                 arrival={arrival}
+                fold={foldControl}
               />
             </section>
           )}

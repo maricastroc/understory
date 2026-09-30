@@ -181,12 +181,36 @@ describe("computeBoreLayout — retry-cap case", () => {
       "pr:812",
       "issue:1187",
       "commit:7be210e",
-      "gap:pull_request:commit:7be210e",
     ]);
   });
 
   it("is deterministic", () => {
     expect(layoutOf().layout).toEqual(layout);
+  });
+});
+
+describe("computeBoreLayout — absences ride on their host's row", () => {
+  const { layout } = layoutOf(states.syntheticManyOwners(3));
+  const extraAfter = (id: string) => (layout.gaps.some((g) => g.afterId === id) ? BORE.chipRow : 0);
+
+  it("gives an absence no label row or leader of its own", () => {
+    expect(layout.gaps.length).toBeGreaterThan(0);
+    expect(layout.labels.some((l) => l.id.startsWith("gap:"))).toBe(false);
+    expect(layout.leaders.some((l) => l.id.startsWith("gap:"))).toBe(false);
+  });
+
+  it("leaves room for the chips under a host before the next label", () => {
+    for (let i = 1; i < layout.labels.length; i++) {
+      const prev = layout.labels[i - 1];
+      expect(layout.labels[i].top - prev.top).toBeGreaterThanOrEqual(
+        BORE.labelPitch + extraAfter(prev.id) - 1e-9,
+      );
+    }
+    const last = layout.labels.at(-1)!;
+    expect(DATUM + layout.height).toBeGreaterThanOrEqual(
+      last.top + BORE.labelPitch + extraAfter(last.id),
+    );
+    expectWellFormed(layout);
   });
 });
 

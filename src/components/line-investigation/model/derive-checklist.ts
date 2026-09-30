@@ -1,5 +1,5 @@
-import { cosmeticOrigin } from "@git-investigator/core/cosmetic";
-import type { DigResult } from "@git-investigator/core/types";
+import { cosmeticOrigin } from "@understory/core/cosmetic";
+import type { DigResult } from "@understory/core/types";
 import type { ChecklistItem, ViewClause, ViewQuote } from "./types";
 
 function evidenceCaveats(result: DigResult): ChecklistItem[] {

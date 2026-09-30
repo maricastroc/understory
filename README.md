@@ -225,7 +225,7 @@ npm run dig -- .demo/payments-service src/billing/charge.ts:8 --why "why cap ret
 - **Eval** — `npm run eval`. Runs a gold set through the real pipeline, model included, and checks grounding, abstention and out-of-scope refusal. It needs `GROQ_API_KEY` and the seeded demo, and stays out of CI. Results and how to read them are in [`eval/README.md`](eval/README.md).
 - **End-to-end** — `npm run test:e2e`. Playwright drives the dev server in the locally installed Chrome, with full axe checks including contrast. It needs the seeded demo (`npm run seed:demo`).
 - **Dev previews.** Files named `page.dev.tsx` are only routed in development (`pageExtensions` in `next.config.ts`), so they never reach a production build. They render real components over synthetic fixtures, and the e2e suite runs against them:
-  - `/dev/line?state=` `resolved` · `collecting` · `failed` · `empty` · `pending` · `not-recorded` · `evidence-only` · `out-of-scope` · `fabricated` · `misattributed` · `unverified` · `commits-only` · `crowded`
+  - `/dev/line?state=` `resolved` · `collecting` · `failed` · `empty` · `pending` · `not-recorded` · `evidence-only` · `out-of-scope` · `fabricated` · `misattributed` · `unverified` · `commits-only` · `crowded` · `many-owners`
   - `/dev/composer?state=` `cold` · `partial` · `auto` · `mapping` · `warm` · `outlier` · `unknown`
   - `/dev/specimen?state=` `default` · `expanded` · `unpinned` · `unavailable` · `loading` · `no-literal` · `range` · `long-line`, with `layout=` and `source=demo` to read the seeded demo
   - `/dev/case` — a drilled (artifact-anchored) case

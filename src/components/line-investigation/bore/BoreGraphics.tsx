@@ -31,6 +31,7 @@ export function BoreGraphics({
   inspected,
   trace,
   arrival = null,
+  continues = null,
 }: {
   layout: BoreLayout;
   marks: BoreMark[];
@@ -40,6 +41,7 @@ export function BoreGraphics({
   inspected: string | null;
   trace: TraceModel | null;
   arrival?: Map<string, number> | null;
+  continues?: number | null;
 }) {
   const leaderFor = new Map(layout.leaders.map((l) => [l.id, l]));
   const coreEnd = Math.max(
@@ -70,6 +72,17 @@ export function BoreGraphics({
         strokeWidth={1.5}
         className="stroke-li-ink"
       />
+      {continues !== null && continues > coreEnd && (
+        <line
+          x1={BORE.coreX}
+          x2={BORE.coreX}
+          y1={coreEnd}
+          y2={continues + 10}
+          strokeWidth={1.5}
+          strokeDasharray="2 4"
+          className="stroke-li-neutral-500"
+        />
+      )}
       {layout.breaks
         .filter((b) => b.strokes)
         .map((b) => (

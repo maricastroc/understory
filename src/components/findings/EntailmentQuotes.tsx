@@ -1,4 +1,4 @@
-import type { Artifact, CitationCheck } from "@git-investigator/core/types";
+import type { Artifact, CitationCheck } from "@understory/core/types";
 import { Check } from "../icons";
 
 export function EntailmentQuotes({

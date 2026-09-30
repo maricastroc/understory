@@ -1,6 +1,6 @@
 "use client";
 
-import type { TreeOverview } from "@git-investigator/core/types";
+import type { TreeOverview } from "@understory/core/types";
 import { useId, useMemo, useState } from "react";
 import { useElementWidth } from "../../use-element-width";
 import { MapCanvas, useCoreViews } from "./MapCanvas";

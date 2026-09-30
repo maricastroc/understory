@@ -1,4 +1,4 @@
-import type { DigResult } from "@git-investigator/core/types";
+import type { DigResult } from "@understory/core/types";
 import type { Verdict } from "./types";
 
 export function deriveVerdict(result: DigResult, pending: boolean): Verdict {

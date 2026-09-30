@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { RepoMeta } from "@git-investigator/core/types";
+import type { RepoMeta } from "@understory/core/types";
 import { readJson } from "@/lib/read-json";
 
 export type Repo = ReturnType<typeof useRepo>;

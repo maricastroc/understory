@@ -1,6 +1,8 @@
+import type { ArtifactKind } from "@understory/core/types";
 import { artifactName, gapName } from "../copy/accessible-name";
 import { dateLine, displayId, kindName, labelTitle, tickText } from "../copy/artifact-copy";
-import { gapLabel, gapLetter, gapTitle } from "../copy/gap-copy";
+import { foldLabel, foldName, foldParts } from "../copy/fold-copy";
+import { gapChip } from "../copy/gap-copy";
 import { longAge, shortAge } from "../format/age";
 import { BORE } from "../layout/geometry";
 import type { BoreLayout } from "../layout/types";
@@ -11,8 +13,15 @@ import type { LetterVariant } from "../parts/letter-variant";
 type LabelItem =
   | { key: string; top: number; type: "artifact"; artifact: ViewArtifact }
   | { key: string; top: number; type: "group"; members: ViewArtifact[] }
-  | { key: string; top: number; type: "gap"; gap: ViewGap; after: ViewArtifact }
-  | { key: string; top: number; type: "break"; first: boolean; days: number };
+  | { key: string; top: number; type: "break"; first: boolean; days: number }
+  | { key: string; top: number; type: "fold" };
+
+export type BoreFoldControl = {
+  top: number;
+  open: boolean;
+  kinds: ArtifactKind[];
+  onToggle: () => void;
+};
 
 function surface(selected: boolean, hovered: boolean): string {
   if (selected) return "bg-li-steel-100";
@@ -35,6 +44,7 @@ export function BoreLabels({
   onInspect,
   onToggleGroup,
   arrival = null,
+  fold = null,
 }: {
   layout: BoreLayout;
   byId: Map<string, ViewArtifact>;
@@ -50,8 +60,14 @@ export function BoreLabels({
   onInspect: (id: string) => void;
   onToggleGroup: (id: string) => void;
   arrival?: Map<string, number> | null;
+  fold?: BoreFoldControl | null;
 }) {
   const glyphById = new Map(layout.glyphs.map((g) => [g.id, g]));
+  const chipsFor = new Map<string, ViewGap[]>();
+  for (const placed of layout.gaps) {
+    const gap = gaps.get(placed.id);
+    if (gap) chipsFor.set(placed.afterId, [...(chipsFor.get(placed.afterId) ?? []), gap]);
+  }
   const items: LabelItem[] = [];
   for (const label of layout.labels) {
     const glyph = glyphById.get(label.id);
@@ -61,14 +77,9 @@ export function BoreLabels({
       continue;
     }
     const artifact = byId.get(label.id);
-    if (artifact) {
-      items.push({ key: label.id, top: label.top, type: "artifact", artifact });
-      continue;
-    }
-    const gap = gaps.get(label.id);
-    const after = gap ? byId.get(gap.afterId) : undefined;
-    if (gap && after) items.push({ key: label.id, top: label.top, type: "gap", gap, after });
+    if (artifact) items.push({ key: label.id, top: label.top, type: "artifact", artifact });
   }
+  if (fold) items.push({ key: "fold", top: fold.top, type: "fold" });
   layout.breaks.forEach((b, i) =>
     items.push({
       key: `break-${i}`,
@@ -133,11 +144,8 @@ export function BoreLabels({
             );
           }
 
-          if (item.type === "gap") {
-            const { gap, after } = item;
-            const selected = inspected === gap.id;
-            const show = revealed.has(gap.id) || hovered === gap.id || selected;
-            const dim = active !== null && !active.has(gap.afterId);
+          if (item.type === "fold") {
+            if (!fold) return null;
             return (
               <li
                 key={item.key}
@@ -146,29 +154,19 @@ export function BoreLabels({
               >
                 <button
                   type="button"
-                  aria-label={gapName(gap, after)}
-                  onMouseEnter={() => onHover(gap.id)}
-                  onMouseLeave={() => onHover(null)}
-                  onFocus={() => onHover(gap.id)}
-                  onBlur={() => onHover(null)}
-                  onClick={() => onInspect(gap.id)}
-                  className={`grid w-full cursor-pointer grid-cols-[20px_minmax(0,1fr)] gap-2 rounded-[3px] py-0.5 pr-1.5 pl-0.5 text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none ${surface(selected, hovered === gap.id)}`}
+                  aria-expanded={fold.open}
+                  aria-label={fold.open ? "Show less of the history" : foldName(fold.kinds)}
+                  onClick={fold.onToggle}
+                  className="grid w-full cursor-pointer grid-cols-[20px_minmax(0,1fr)] gap-2 rounded-[3px] py-0.5 pr-1.5 pl-0.5 text-left hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
                 >
-                  <EvidenceLetter
-                    letter={gapLetter(gap)}
-                    variant={dim ? "dimmed" : gap.verified ? "gap" : "unverified"}
-                  />
-                  <span className="pointer-events-none flex flex-col gap-0.5">
-                    <span
-                      className={`font-li-mono text-[11px] leading-4 ${gap.verified && !dim ? "text-li-gap-ink" : "text-li-text-muted"}`}
-                    >
-                      {gapLabel(gap)}
+                  <EvidenceLetter letter={fold.open ? "−" : "⋯"} variant="supporting" />
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="font-li-mono text-[11px] leading-4 text-li-ink">
+                      {fold.open ? "Show less" : foldLabel(fold.kinds.length)}
                     </span>
-                    {show && (
-                      <span
-                        className={`text-[13.5px] leading-[1.35] ${gap.verified ? "text-li-gap-ink" : "text-li-text-subtle"}`}
-                      >
-                        {gapTitle(gap)}
+                    {!fold.open && (
+                      <span className="text-[12.5px] leading-[1.35] text-li-text-subtle">
+                        {foldParts(fold.kinds).join(" · ")}
                       </span>
                     )}
                   </span>
@@ -207,6 +205,7 @@ export function BoreLabels({
           }
 
           const a = item.artifact;
+          const chips = chipsFor.get(a.id) ?? [];
           const selected = inspected === a.id;
           const isHovered = hovered === a.id;
           const show = revealed.has(a.id) || isHovered || selected;
@@ -246,6 +245,29 @@ export function BoreLabels({
                   )}
                 </span>
               </button>
+              {chips.length > 0 && (
+                <span className="flex flex-wrap gap-1 pt-0.5 pl-[30px]">
+                  {chips.map((gap) => (
+                    <button
+                      key={gap.id}
+                      type="button"
+                      aria-label={gapName(gap, a)}
+                      onMouseEnter={() => onHover(gap.id)}
+                      onMouseLeave={() => onHover(null)}
+                      onFocus={() => onHover(gap.id)}
+                      onBlur={() => onHover(null)}
+                      onClick={() => onInspect(gap.id)}
+                      className={`cursor-pointer rounded-[3px] border border-dashed px-1 font-li-mono text-[10.5px] leading-3.5 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none ${
+                        gap.verified && !dim
+                          ? "border-li-gap text-li-gap-ink"
+                          : "border-li-text-muted text-li-text-muted"
+                      } ${surface(inspected === gap.id, hovered === gap.id)}`}
+                    >
+                      {gapChip(gap)}
+                    </button>
+                  ))}
+                </span>
+              )}
             </li>
           );
         })}

@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.3",
-    "@git-investigator/core": "*",
+    "@understory/core": "*",
     "@prisma/client": "^6.19.3",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",

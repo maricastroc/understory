@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { locateQuote, verifyQuote } from "@git-investigator/core/quote";
-import { verify } from "@git-investigator/core/verify";
+import { locateQuote, verifyQuote } from "@understory/core/quote";
+import { verify } from "@understory/core/verify";
 import {
   syntheticEntailment,
   syntheticEvidence,

@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
-import { isGitRepo, readFileAtHead, readFileAtRef } from "@git-investigator/core/collect/git";
+import { isGitRepo, readFileAtHead, readFileAtRef } from "@understory/core/collect/git";
 import {
   getFileContentGitHub,
   getRepoMeta,
   parseGitHubRepo,
-} from "@git-investigator/core/collect/github";
+} from "@understory/core/collect/github";
 import {
   getFileContentGitLab,
   getProjectMeta,
   parseGitLabRepo,
-} from "@git-investigator/core/collect/gitlab";
+} from "@understory/core/collect/gitlab";
 import { sessionToken } from "@/lib/auth/current-user";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
-import { isCommitSha } from "@git-investigator/core/collect/sha";
-import { runWithTokens } from "@git-investigator/core/collect/token-context";
+import { isCommitSha } from "@understory/core/collect/sha";
+import { runWithTokens } from "@understory/core/collect/token-context";
 import { githubTokenForRepo } from "@/lib/github-app";
 import { rateLimit } from "@/lib/ratelimit";
 

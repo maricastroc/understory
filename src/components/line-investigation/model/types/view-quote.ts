@@ -1,3 +1,3 @@
-import type { QuoteRange } from "@git-investigator/core/types";
+import type { QuoteRange } from "@understory/core/types";
 
 export type ViewQuote = { clauseId: string | null; text: string; range: QuoteRange | null };

@@ -1,4 +1,4 @@
-import type { ArtifactKind } from "@git-investigator/core/types";
+import type { ArtifactKind } from "@understory/core/types";
 import { boreInput } from "../../../line-investigation/layout/bore-input";
 import { timeAxis } from "../../../line-investigation/layout/time-axis";
 import type { InvestigationView, ViewGap } from "../../../line-investigation/model/types";

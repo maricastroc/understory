@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { isGitRepo } from "@git-investigator/core/collect/git";
-import { getRepoMeta, parseGitHubRepo } from "@git-investigator/core/collect/github";
+import { isGitRepo } from "@understory/core/collect/git";
+import { getRepoMeta, parseGitHubRepo } from "@understory/core/collect/github";
 import {
   defaultFilesGitLab,
   getProjectMeta,
   parseGitLabRepo,
-} from "@git-investigator/core/collect/gitlab";
-import { overviewGitHub, overviewLocal } from "@git-investigator/core/collect/history/overview";
-import { RECENT_COMMITS } from "@git-investigator/core/collect/rank";
-import { runWithTokens } from "@git-investigator/core/collect/token-context";
+} from "@understory/core/collect/gitlab";
+import { overviewGitHub, overviewLocal } from "@understory/core/collect/history/overview";
+import { RECENT_COMMITS } from "@understory/core/collect/rank";
+import { runWithTokens } from "@understory/core/collect/token-context";
 import { sessionToken } from "@/lib/auth/current-user";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";

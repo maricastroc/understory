@@ -1,4 +1,4 @@
-import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
+import type { Artifact, ArtifactKind } from "@understory/core/types";
 
 const KIND_RANK: Record<ArtifactKind, number> = {
   commit: 0,

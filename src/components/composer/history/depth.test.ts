@@ -1,4 +1,4 @@
-import type { FileHistory } from "@git-investigator/core/types";
+import type { FileHistory } from "@understory/core/types";
 import { describe, expect, it } from "vitest";
 import { coreHistory, depthScale, markTone, markWidth } from "./depth";
 import { MAP } from "./map-geometry";

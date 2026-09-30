@@ -1,4 +1,4 @@
-import type { Evidence, VerifiedNarrative } from "@git-investigator/core/types";
+import type { Evidence, VerifiedNarrative } from "@understory/core/types";
 
 export type Expect = {
   answerable?: boolean;

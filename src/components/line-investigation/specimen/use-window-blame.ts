@@ -1,6 +1,6 @@
 "use client";
 
-import type { BlameSpan } from "@git-investigator/core/types";
+import type { BlameSpan } from "@understory/core/types";
 import { useEffect, useState } from "react";
 import type { LineRange, WindowBlame } from "./types";
 

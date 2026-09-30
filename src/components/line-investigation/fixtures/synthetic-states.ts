@@ -1,4 +1,4 @@
-import { verify } from "@git-investigator/core/verify";
+import { verify } from "@understory/core/verify";
 import type {
   Artifact,
   CitationCheck,
@@ -7,7 +7,7 @@ import type {
   Evidence,
   Narrative,
   VerifiedNarrative,
-} from "@git-investigator/core/types";
+} from "@understory/core/types";
 import {
   syntheticArtifacts,
   syntheticEntailment,
@@ -201,6 +201,64 @@ export function syntheticManyArtifacts(count: number): DigResult {
     a.date.localeCompare(b.date),
   );
   return { evidence: { ...syntheticEvidence, artifacts }, narrative: null };
+}
+
+export function syntheticManyOwners(count: number): DigResult {
+  const remote = syntheticEvidence.repo.remoteUrl;
+  const newest = Date.parse("2023-01-10T12:00:00Z");
+  const owners: Artifact[] = Array.from({ length: count }, (_, i): Artifact[] => {
+    const short = `b${String(i + 1).padStart(6, "0")}`;
+    const merged = new Date(newest - i * 60 * 86_400_000).toISOString();
+    const opened = new Date(newest - i * 60 * 86_400_000 - 2 * 86_400_000).toISOString();
+    const title = `Tidy charge step ${i + 1}`;
+    return [
+      {
+        id: `commit:${short}`,
+        kind: "commit",
+        title,
+        body: title,
+        url: `${remote}/commit/${short.padEnd(40, "0")}`,
+        date: merged,
+        author: { name: "Sam Ortiz", email: "sam@example.com" },
+        ref: short,
+        meta: { sha: short.padEnd(40, "0"), prLookup: "found" },
+      },
+      {
+        id: `pr:${700 + i}`,
+        kind: "pull_request",
+        title,
+        body: title,
+        url: `${remote}/pull/${700 + i}`,
+        date: opened,
+        ref: `#${700 + i}`,
+        parentId: `commit:${short}`,
+        meta: { mergedAt: merged, reviewLookup: "none", issueLookup: "none" },
+      },
+    ];
+  }).flat();
+  const ev: Evidence = {
+    ...syntheticEvidence,
+    location: { file: "src/billing/charge.ts", startLine: 7, endLine: 16 },
+    artifacts: [...syntheticArtifacts, ...owners],
+  };
+  const claims = [
+    ...syntheticNarrative.claims,
+    {
+      text: "The retry loop itself came earlier, in a commit with no pull request.",
+      citations: ["commit:7be210e"],
+    },
+  ];
+  const entailment = entailmentOf([
+    ...syntheticEntailment.checks,
+    {
+      citation: "commit:7be210e",
+      claim: 3,
+      status: "supported",
+      quote: "Add retry loop to charge",
+      reason: "the commit adds the loop",
+    },
+  ]);
+  return withNarrative(narrativeOf(claims), entailment, ev);
 }
 
 export function syntheticWithoutStageFourData(): DigResult {

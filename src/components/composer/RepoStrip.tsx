@@ -1,6 +1,6 @@
 "use client";
 
-import type { RepoMeta, TreeOverview } from "@git-investigator/core/types";
+import type { RepoMeta, TreeOverview } from "@understory/core/types";
 import { useId, useState } from "react";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { repoDisplayName } from "../shell/repo-display-name";

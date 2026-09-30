@@ -1,7 +1,7 @@
 import { BORE } from "./geometry";
 import type { LabelPlacement, LeaderPath } from "./types";
 
-type Anchor = { id: string; x: number; y: number };
+type Anchor = { id: string; x: number; y: number; extra?: number };
 
 export function placeLabels(
   anchors: Anchor[],
@@ -10,9 +10,11 @@ export function placeLabels(
 ): { labels: LabelPlacement[]; leaders: LeaderPath[] } {
   const labels: LabelPlacement[] = [];
   let previous = Number.NEGATIVE_INFINITY;
+  let previousExtra = 0;
   for (const a of anchors) {
-    const top = Math.max(a.y - BORE.labelAnchor, previous + pitch, minTop);
+    const top = Math.max(a.y - BORE.labelAnchor, previous + pitch + previousExtra, minTop);
     previous = top;
+    previousExtra = a.extra ?? 0;
     labels.push({ id: a.id, top, anchorY: top + BORE.labelAnchor });
   }
 

@@ -5,13 +5,13 @@ the same core as the web app (`packages/core`, bundled by esbuild) and has no ru
 
 ## Commands
 
-- **Understory: Why is this line?** (`gitInvestigator.digCurrentLine`, also in the editor
+- **Understory: Why is this line?** (`understory.digCurrentLine`, also in the editor
   context menu) — investigates the line under the cursor. In `local` mode it runs in-process
   against the local git repo; in `backend` mode it calls `{backendUrl}/api/dig`.
-- **Understory: Full Investigation (in editor)** (`gitInvestigator.digCurrentLineFull`) —
+- **Understory: Full Investigation (in editor)** (`understory.digCurrentLineFull`) —
   sends the workspace's GitHub/GitLab remote to `{webUrl}/api/dig`, so PRs, reviews and issues
   are collected from the provider, and lets you drill into any cited artifact from the panel.
-- **Understory: Open Full Investigation on the Web** (`gitInvestigator.openOnWeb`) — opens
+- **Understory: Open Full Investigation on the Web** (`understory.openOnWeb`) — opens
   `{webUrl}/app?repo=…&file=…&line=…`.
 - **Understory: Set Groq API Key** / **Set GitHub Token** — stored in VS Code's
   SecretStorage. Without a Groq key the panel shows the evidence only; a GitHub token enriches
@@ -20,9 +20,9 @@ the same core as the web app (`packages/core`, bundled by esbuild) and has no ru
 
 ## Settings
 
-- `gitInvestigator.mode` — `local` (default) or `backend`.
-- `gitInvestigator.backendUrl` — default `http://localhost:3000`, used in `backend` mode.
-- `gitInvestigator.webUrl` — default `https://understory.marianacastro.dev`, used by the full
+- `understory.mode` — `local` (default) or `backend`.
+- `understory.backendUrl` — default `http://localhost:3000`, used in `backend` mode.
+- `understory.webUrl` — default `https://understory.marianacastro.dev`, used by the full
   investigation and by Open on the Web.
 
 ## Develop
@@ -41,8 +41,8 @@ Extension Development Host.
 ## Package & install (`.vsix`)
 
 ```bash
-npm run package      # → git-investigator-vscode-<version>.vsix, bundling dist/
-code --install-extension git-investigator-vscode-0.0.1.vsix
+npm run package      # → understory-vscode-<version>.vsix, bundling dist/
+code --install-extension understory-vscode-0.0.1.vsix
 ```
 
 Or from the UI: **Extensions** view → `···` menu → **Install from VSIX…**. Close the Extension

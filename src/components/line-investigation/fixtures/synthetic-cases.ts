@@ -1,5 +1,5 @@
-import { verify } from "@git-investigator/core/verify";
-import type { Artifact, DigResult, Evidence } from "@git-investigator/core/types";
+import { verify } from "@understory/core/verify";
+import type { Artifact, DigResult, Evidence } from "@understory/core/types";
 import type { Entry } from "../../investigator/use-investigation";
 import { syntheticArtifacts, syntheticEvidence, syntheticRetryCap } from "./synthetic-retry-cap";
 import { syntheticEvidenceOnly, syntheticNotRecorded } from "./synthetic-states";

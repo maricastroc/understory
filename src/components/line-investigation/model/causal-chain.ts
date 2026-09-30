@@ -1,4 +1,4 @@
-import type { Artifact, ArtifactKind } from "@git-investigator/core/types";
+import type { Artifact, ArtifactKind } from "@understory/core/types";
 
 export type ChainSlot = { artifact: Artifact | null; extra: number };
 

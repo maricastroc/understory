@@ -1,6 +1,6 @@
 "use client";
 
-import { enclosingSymbol } from "@git-investigator/core/collect/symbol";
+import { enclosingSymbol } from "@understory/core/collect/symbol";
 import { useMemo } from "react";
 import { blameRequestRange } from "./blame-request-range";
 import { CodeSpecimen } from "./CodeSpecimen";

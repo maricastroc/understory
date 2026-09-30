@@ -1,4 +1,4 @@
-import type { ShownReason, TreeOverview } from "@git-investigator/core/types";
+import type { ShownReason, TreeOverview } from "@understory/core/types";
 
 const count = (n: number) => n.toLocaleString("en-US");
 

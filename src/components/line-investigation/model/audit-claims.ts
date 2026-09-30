@@ -1,5 +1,5 @@
-import { locateQuote, verifyQuote } from "@git-investigator/core/quote";
-import type { Artifact, VerifiedNarrative } from "@git-investigator/core/types";
+import { locateQuote, verifyQuote } from "@understory/core/quote";
+import type { Artifact, VerifiedNarrative } from "@understory/core/types";
 import { clauseId } from "./clause-id";
 import type { ClaimAudit, ViewQuote } from "./types";
 

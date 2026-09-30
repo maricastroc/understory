@@ -1,6 +1,6 @@
 "use client";
 
-import type { HeadCommit } from "@git-investigator/core/types";
+import type { HeadCommit } from "@understory/core/types";
 import { useMemo } from "react";
 import { useWindowBlame } from "../line-investigation/specimen/use-window-blame";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";

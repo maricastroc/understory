@@ -1,4 +1,4 @@
-import type { ArtifactRef } from "@git-investigator/core";
+import type { ArtifactRef } from "@understory/core";
 
 export type DigRequest = {
   repoPath: string;

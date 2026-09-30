@@ -1,4 +1,4 @@
-import type { BlameSpan } from "@git-investigator/core/types";
+import type { BlameSpan } from "@understory/core/types";
 import { SPECIMEN } from "./specimen-metrics";
 import type { BlameBarModel, BlameTone, LineRange } from "./types";
 

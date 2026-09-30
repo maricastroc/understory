@@ -105,26 +105,21 @@ export function computeBoreLayout(
 
   resolveGapCollisions(glyphs, gaps, breaks, ticks);
 
-  const anchors = [
-    ...glyphs.map((g, i) => ({ id: g.id, x: g.leaderX, y: g.anchorY, order: i })),
-    ...gaps.map((g, i) => ({
-      id: g.id,
-      x: BORE.gapLeaderX,
-      y: g.anchorY,
-      order: glyphs.length + i,
-    })),
-  ].sort((a, b) => a.y - b.y || a.order - b.order);
-  const { labels, leaders } = placeLabels(
-    anchors,
-    opts.datumY + BORE.firstSegment,
-    BORE.labelPitch,
-  );
+  const hosts = new Set(gaps.map((g) => g.afterId));
+  const extraOf = (g: GlyphPlacement) =>
+    g.members.length === 1 && hosts.has(g.id) ? BORE.chipRow : 0;
+  const extra = new Map(glyphs.map((g) => [g.id, extraOf(g)]));
+  const anchors = glyphs
+    .map((g, i) => ({ id: g.id, x: g.leaderX, y: g.anchorY, extra: extraOf(g), order: i }))
+    .sort((a, b) => a.y - b.y || a.order - b.order);
+  const pitch = BORE.labelPitch;
+  const { labels, leaders } = placeLabels(anchors, opts.datumY + BORE.firstSegment, pitch);
 
   const height = Math.max(
     ...glyphs.map((g) => g.bottom),
     ...gaps.map((g) => g.top + g.height),
     ...breaks.map((b) => b.top + b.height),
-    ...labels.map((l) => l.top + BORE.labelPitch),
+    ...labels.map((l) => l.top + pitch + (extra.get(l.id) ?? 0)),
   );
 
   return { glyphs, gaps, labels, leaders, breaks, ticks, height: height - opts.datumY };

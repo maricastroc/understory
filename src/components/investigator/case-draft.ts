@@ -1,4 +1,4 @@
-import type { InvestigateInput } from "@git-investigator/core/types";
+import type { InvestigateInput } from "@understory/core/types";
 import type { CaseParent } from "./case-parent";
 
 export type CaseDraft = {

@@ -1,4 +1,4 @@
-import type { DigResult } from "@git-investigator/core";
+import type { DigResult } from "@understory/core";
 import { DigError } from "./errors";
 import type { DigRequest } from "./types";
 

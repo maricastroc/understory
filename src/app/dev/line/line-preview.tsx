@@ -1,6 +1,6 @@
 "use client";
 
-import type { DigResult } from "@git-investigator/core/types";
+import type { DigResult } from "@understory/core/types";
 import { useMemo, useState } from "react";
 import { CaseFailure } from "@/components/investigator/CaseFailure";
 import type { AuthUser } from "@/components/investigator/use-auth";
@@ -58,6 +58,7 @@ const STATES: Record<string, () => DigResult> = {
   unverified: states.syntheticWithoutStageFourData,
   "commits-only": states.syntheticCommitsOnly,
   crowded: () => states.syntheticManyArtifacts(9),
+  "many-owners": () => states.syntheticManyOwners(8),
 };
 
 export function LinePreview({ state, user }: { state: string; user: string | null }) {

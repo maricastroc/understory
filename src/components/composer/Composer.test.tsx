@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import type { InvestigateInput } from "@git-investigator/core/types";
+import type { InvestigateInput } from "@understory/core/types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Composer } from "./Composer";
 import { syntheticHistory } from "./fixtures/synthetic-histories";

@@ -1,4 +1,4 @@
-import type { QuoteRange } from "@git-investigator/core/types";
+import type { QuoteRange } from "@understory/core/types";
 
 const BAR = {
   verified: "border-li-evidence",
