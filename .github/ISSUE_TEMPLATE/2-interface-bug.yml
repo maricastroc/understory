@@ -1,0 +1,104 @@
+name: "🧭 The interface misbehaves"
+description: Something on screen is broken, hidden, misplaced or hard to operate.
+labels: ["bug", "ui"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting it. A screenshot and the exact steps usually make this a quick fix.
+
+        ---
+        ### 🗺️ Where
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Pick every one that applies.
+      multiple: true
+      options:
+        - Landing page
+        - "Composer: repository, file, line or question"
+        - History of current lines (map)
+        - "Case: Reconstructed why"
+        - "Case: Evidence under a clause"
+        - "Case: History section"
+        - "Case: verdict, follow-up or back to question"
+        - Case list, search (⌘K) or sign-in
+        - Language switch (EN / PT)
+        - VS Code extension panel
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 🔁 What happened
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a case on src/billing/charge.ts:9
+        2. Select clause 2
+        3. Click “Show in history”
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+    validations:
+      required: true
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or recording
+      description: Drag images or a short screen recording here.
+  - type: dropdown
+    id: impact
+    attributes:
+      label: How much it gets in the way
+      options:
+        - I can't read the answer or its evidence
+        - It makes a claim harder to verify
+        - It's a visual glitch, everything still works
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 💻 Environment
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Safari
+        - Firefox
+        - Edge
+        - VS Code webview
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: viewport
+    attributes:
+      label: Screen size or device
+      placeholder: "1440 × 900 · iPhone 15 · 125% zoom"
+  - type: checkboxes
+    id: input
+    attributes:
+      label: How you were interacting
+      options:
+        - label: Mouse or trackpad
+        - label: Keyboard only
+        - label: Screen reader
+        - label: Touch

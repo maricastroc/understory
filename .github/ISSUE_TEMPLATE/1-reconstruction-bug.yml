@@ -1,0 +1,134 @@
+name: "🔎 The reconstruction is wrong"
+description: A clause, a citation, a gap or the verdict doesn't match the line's real history.
+labels: ["bug", "engine"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Understory promises that every claim points to a real artifact, that a quote marked verified is really in its source, and that a silent history is reported as silent. Use this form when that promise broke.
+
+        > **Tip:** open the clause's evidence and use **Show in history** first. Pointing at a clause, a letter (A, B, C…) or a gap is the fastest way to get this fixed.
+
+        ---
+        ### 🧭 The case
+  - type: input
+    id: location
+    attributes:
+      label: Line investigated
+      description: Repository, file and line (or range), as shown in the case header.
+      placeholder: "acme/payments-service · src/billing/charge.ts:9"
+    validations:
+      required: true
+  - type: input
+    id: question
+    attributes:
+      label: Question asked
+      placeholder: "Why exactly 3 retries?"
+    validations:
+      required: true
+  - type: dropdown
+    id: verdict
+    attributes:
+      label: Verdict shown
+      options:
+        - Resolved
+        - Not recorded
+        - Evidence only
+        - Out of scope
+        - Fabrication caught
+        - "Stuck on “Reconstructing…”"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 🧪 What went wrong
+  - type: dropdown
+    id: failure
+    attributes:
+      label: Kind of problem
+      description: Pick every one that applies.
+      multiple: true
+      options:
+        - A clause states something the history doesn't support
+        - A citation points to the wrong artifact
+        - A quote is marked verified but isn't in the source
+        - A real commit, pull request, review or issue was not collected
+        - "A gap (∅) is shown where a record exists, or missing where one doesn't"
+        - The history reads as silent, but it isn't
+        - The confidence or verdict doesn't match the evidence
+        - The analysis came back in the wrong language
+        - Collection failed or timed out
+    validations:
+      required: true
+  - type: textarea
+    id: shown
+    attributes:
+      label: What Understory said
+      description: Paste the clauses you disagree with, with their letters. **Copy the why** copies the whole reconstruction.
+      placeholder: |
+        ● After 212 customers were charged twice [E][D]
+          E issue:1187 · quoted “212 customers were charged twice”
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What the history actually shows
+      description: Link the commits, pull requests, reviews or issues that tell the real story.
+      placeholder: |
+        The cap came from review B (dmitri-k) on #812, not from the incident in #1187.
+        https://github.com/acme/payments-service/pull/812#pullrequestreview-…
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 🛠️ Where it ran
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Where the history lives
+      options:
+        - GitHub, public repository
+        - GitHub, private repository (signed in)
+        - GitLab.com
+        - Self-hosted GitLab
+        - Local repository (git on disk)
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where you ran it
+      options:
+        - Web app (understory.marianacastro.dev)
+        - Web app, running locally
+        - VS Code extension, local mode
+        - VS Code extension, full investigation
+        - CLI (npm run dig)
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Analysis language
+      options:
+        - English
+        - Português
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or error text
+      description: Server output, browser console, or the message shown in the case.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I removed tokens, secrets and any code I can't share publicly.
+          required: true
+        - label: I opened the clause's evidence before filing.

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "📖 How Understory works"
+    url: https://github.com/maricastroc/understory#-how-it-works
+    about: The pipeline, the checks behind every claim, and what a “not recorded” answer means.
+  - name: "⚠️ Known limitations"
+    url: https://github.com/maricastroc/understory#%EF%B8%8F-limitations
+    about: What Understory can't see yet. Worth a look before reporting a gap in the history.
