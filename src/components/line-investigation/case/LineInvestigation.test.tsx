@@ -10,6 +10,8 @@ import {
 } from "../fixtures/synthetic-charge-file";
 import { SYNTHETIC_NOW, syntheticRetryCap } from "../fixtures/synthetic-retry-cap";
 import * as states from "../fixtures/synthetic-states";
+import { syntheticCases } from "../fixtures/synthetic-cases";
+import { AnchorSpecimen } from "../answer/AnchorSpecimen";
 import type { SpecimenSlot } from "../instrument/types";
 import { CodeSpecimen } from "../specimen/CodeSpecimen";
 import { SPECIMEN_LAYOUTS } from "../specimen/use-specimen-layout";
@@ -311,6 +313,70 @@ describe("LineInvestigation — going back", () => {
     );
     await user.click(screen.getByRole("button", { name: "← Back to question" }));
     expect(onBackToQuestion).toHaveBeenCalledOnce();
+  });
+});
+
+describe("LineInvestigation — a drilled case", () => {
+  const drilled = syntheticCases.find((c) => !c.result.evidence.location)!.result;
+  const anchor = drilled.evidence.anchor!;
+  const renderDrilled = (onOpen = vi.fn()) => {
+    const utils = render(
+      <LineInvestigation
+        result={drilled}
+        pending={false}
+        now={NOW}
+        layout={SPECIMEN_LAYOUTS.wide}
+        renderSpecimen={() => (
+          <AnchorSpecimen
+            anchor={anchor}
+            artifact={drilled.evidence.artifacts.find((a) => a.id === anchor.id) ?? null}
+            collected={drilled.evidence.artifacts.length}
+            now={NOW}
+          />
+        )}
+        parent={{ id: "GI-2049", question: "Why exactly 3 retries?", onOpen }}
+      />,
+    );
+    return { ...utils, onOpen };
+  };
+
+  it("shows the artifact it is anchored on where a line case shows code", () => {
+    renderDrilled();
+    const panel = screen.getByRole("region", { name: "Anchor, review review·dmitri-k" });
+    expect(within(panel).getByText("Review by dmitri-k on #812")).toBeTruthy();
+    expect(within(panel).getByText("3 artifacts collected around it")).toBeTruthy();
+    expect(screen.getByText("anchored on")).toBeTruthy();
+  });
+
+  it("names its history after the anchor and never claims anything about a line", () => {
+    renderDrilled();
+    const section = screen
+      .getByRole("heading", { level: 2, name: "Around review·dmitri-k" })
+      .closest("section")!;
+    expect(section.textContent).not.toMatch(/\bline\b/);
+    expect(within(row("review:812-1")).getByText("the review this case asks about")).toBeTruthy();
+  });
+
+  it("links back to the case it was drilled from", async () => {
+    const user = userEvent.setup();
+    const { onOpen } = renderDrilled();
+    await user.click(screen.getByRole("button", { name: "GI-2049" }));
+    expect(onOpen).toHaveBeenCalledOnce();
+    expect(screen.getByText(/drilled from “Why exactly 3 retries\?”/)).toBeTruthy();
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = renderDrilled();
+    expect((await axe(container)).violations).toEqual([]);
+  });
+});
+
+describe("LineInvestigation — coverage notes", () => {
+  it("says when the line fell back to the file's history", () => {
+    const note =
+      "This file is too large for GitHub's blame API, so line-level history isn't available here.";
+    setup({ ...syntheticRetryCap, evidence: { ...syntheticRetryCap.evidence, note } });
+    expect(screen.getByText(note)).toBeTruthy();
   });
 });
 

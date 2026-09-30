@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CaseView } from "@/components/investigator/CaseView";
+import { AnchoredInvestigation } from "@/components/line-investigation/case/AnchoredInvestigation";
 import { syntheticCases } from "@/components/line-investigation/fixtures/synthetic-cases";
 import { SYNTHETIC_NOW } from "@/components/line-investigation/fixtures/synthetic-retry-cap";
-import { RightRail } from "@/components/rail/RightRail";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { AppShell } from "@/components/shell/AppShell";
 import { CaseRail } from "@/components/shell/CaseRail";
@@ -43,13 +42,21 @@ export function CasePreview() {
         />
       )}
     >
-      <div className="flex">
-        <div className="mx-auto max-w-270 min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-          <CaseView entry={ANCHORED} onBack={() => {}} onDrill={() => {}} onOpenParent={() => {}} />
-        </div>
-        <div className="sticky top-14 flex h-[calc(100vh-3.5rem)] self-start">
-          <RightRail result={ANCHORED.result} />
-        </div>
+      <div className="min-w-0 px-8 pt-6 pb-20 max-[820px]:px-4">
+        <AnchoredInvestigation
+          result={ANCHORED.result}
+          pending={false}
+          onDrill={() => {}}
+          parent={
+            ANCHORED.parentCaseId
+              ? {
+                  id: ANCHORED.parentCaseId,
+                  question: ANCHORED.parentQuestion,
+                  onOpen: () => {},
+                }
+              : undefined
+          }
+        />
       </div>
     </AppShell>
   );

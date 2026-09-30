@@ -89,25 +89,6 @@ export function currentCommit(all: ViewArtifact[]): ViewArtifact | null {
   return all.find((a) => a.kind === "commit" && a.onBore) ?? null;
 }
 
-export function lineLabel(location: InvestigationView["location"]): string {
-  if (!location) return "the file";
-  return location.startLine === location.endLine
-    ? `line ${location.startLine}`
-    : `lines ${location.startLine}–${location.endLine}`;
-}
-
-export function commitRole(
-  commit: ViewArtifact | null,
-  current: ViewArtifact | null,
-  location: InvestigationView["location"],
-): string | null {
-  if (!commit) return null;
-  const line = lineLabel(location);
-  return commit.id === current?.id
-    ? `wrote ${line} as it reads today`
-    : `an earlier change to ${line}`;
-}
-
 const AROUND = 150;
 const PLAIN = 320;
 

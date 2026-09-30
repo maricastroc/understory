@@ -4,6 +4,8 @@ import { artifactName, gapName } from "../copy/accessible-name";
 import { contextLines, metaLine } from "../copy/drawer-copy";
 import { gapChip } from "../copy/gap-copy";
 import { excerpt } from "../copy/source-copy";
+import { subjectCaption } from "../copy/subject-copy";
+import type { CaseSubject } from "../copy/types";
 import { QuoteBlock } from "../drawer/QuoteBlock";
 import { sourceLinkLabel } from "../drawer/source-link";
 import type { InvestigationView, ViewArtifact } from "../model/types";
@@ -28,7 +30,7 @@ export function HistoryRow({
   clause,
   opened,
   located,
-  line,
+  subject,
   last,
   dispatch,
   onBack,
@@ -41,7 +43,7 @@ export function HistoryRow({
   clause: string | null;
   opened: boolean;
   located: boolean;
-  line: string;
+  subject: CaseSubject;
   last: boolean;
   dispatch: Dispatch<CaseAction>;
   onBack: (clause: string, source: string) => void;
@@ -56,6 +58,7 @@ export function HistoryRow({
   const quotes = a.quotes.filter((q) => q.range !== null);
   const citing = view.clauses.filter((c) => a.citedBy.includes(c.id));
   const detailsId = `history-details-${a.id}`;
+  const caption = subjectCaption(subject, a, anchor && stratum.current);
   const name = [artifactName(a, view.clauses), ...chips.map((g) => gapName(g, a))].join(". ");
   const shown = opened ? excerpt(a, quotes[0]?.range ?? null) : null;
   const context = opened ? contextLines(a, view.artifacts) : [];
@@ -135,11 +138,7 @@ export function HistoryRow({
             </span>
           ))}
         </button>
-        {anchor && stratum.current && (
-          <span className="font-li-mono text-[11px] text-li-text-subtle">
-            wrote {line} as it reads today
-          </span>
-        )}
+        {caption && <span className="font-li-mono text-[11px] text-li-text-subtle">{caption}</span>}
         {quotes.map((q, i) => {
           const c = view.clauses.find((x) => x.id === q.clauseId);
           const active = q.clauseId === clause;

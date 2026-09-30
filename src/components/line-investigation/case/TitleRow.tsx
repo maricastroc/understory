@@ -1,9 +1,21 @@
 import { useId, useRef } from "react";
+import type { CaseSubject } from "../copy/types";
 import type { InvestigationView } from "../model/types";
 import type { CasePhase } from "./types";
 import { liButton } from "../parts/button-class";
 import { VerdictButton } from "../verdict/VerdictButton";
 import { VerdictPopover } from "../verdict/VerdictPopover";
+
+function Anchor({ view, subject }: { view: InvestigationView; subject: CaseSubject }) {
+  if (subject.kind !== "anchor") return null;
+  return (
+    <div className="flex shrink-0 items-center gap-1.5 font-li-mono text-xs text-li-text-subtle">
+      <span>anchored on{subject.artifact === "commit" ? " commit" : ""}</span>
+      <span className="bg-li-datum-strong px-1.5 py-px text-li-ink">{subject.ref}</span>
+      {view.repo.branch && <span className="ml-2 whitespace-nowrap">on {view.repo.branch}</span>}
+    </div>
+  );
+}
 
 function Location({ view, reserve }: { view: InvestigationView; reserve: boolean }) {
   const loc = view.location;
@@ -33,6 +45,7 @@ function Location({ view, reserve }: { view: InvestigationView; reserve: boolean
 
 export function TitleRow({
   view,
+  subject,
   verdictOpen,
   onToggleVerdict,
   onCloseVerdict,
@@ -41,6 +54,7 @@ export function TitleRow({
   phase,
 }: {
   view: InvestigationView;
+  subject?: CaseSubject;
   verdictOpen: boolean;
   onToggleVerdict: () => void;
   onCloseVerdict: () => void;
@@ -60,6 +74,7 @@ export function TitleRow({
           {view.question}
         </h1>
         <Location view={view} reserve={!!phase} />
+        {subject && <Anchor view={view} subject={subject} />}
       </div>
       {phase ? (
         <div className="flex items-center gap-2">

@@ -4,13 +4,13 @@ import * as states from "../fixtures/synthetic-states";
 import { buildInvestigationView } from "../model/build-investigation-view";
 import {
   clauseSources,
-  commitRole,
   currentCommit,
   excerpt,
   hostCommit,
   provenance,
   sourceStatus,
 } from "./source-copy";
+import { caseSubject, commitRole } from "./subject-copy";
 
 const now = Date.parse(SYNTHETIC_NOW);
 const view = buildInvestigationView(syntheticRetryCap, { now });
@@ -62,12 +62,11 @@ describe("provenance", () => {
 
   it("says whether that commit wrote the line as it reads today", () => {
     const current = currentCommit(view.artifacts);
-    expect(commitRole(hostCommit(art("issue:1187"), view.artifacts), current, view.location)).toBe(
+    const line = caseSubject(view, undefined);
+    expect(commitRole(hostCommit(art("issue:1187"), view.artifacts), current, line)).toBe(
       "wrote line 9 as it reads today",
     );
-    expect(commitRole(art("commit:7be210e"), current, view.location)).toBe(
-      "an earlier change to line 9",
-    );
+    expect(commitRole(art("commit:7be210e"), current, line)).toBe("an earlier change to line 9");
   });
 });
 

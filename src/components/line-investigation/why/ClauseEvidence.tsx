@@ -2,15 +2,9 @@ import { anchorQuestion } from "@understory/core/anchor-question";
 import type { KeyboardEvent } from "react";
 import { dateLine, depthText, displayId, kindName, labelTitle } from "../copy/artifact-copy";
 import { gapBasis, gapBody, gapChip, gapTitle } from "../copy/gap-copy";
-import {
-  commitRole,
-  currentCommit,
-  excerpt,
-  hostCommit,
-  provenance,
-  sourceStatus,
-} from "../copy/source-copy";
-import type { ClauseSource } from "../copy/types";
+import { currentCommit, excerpt, hostCommit, provenance, sourceStatus } from "../copy/source-copy";
+import { commitRole } from "../copy/subject-copy";
+import type { CaseSubject, ClauseSource } from "../copy/types";
 import { MiniCore } from "../drawer/MiniCore";
 import { QuoteBlock } from "../drawer/QuoteBlock";
 import { sourceLinkLabel } from "../drawer/source-link";
@@ -59,6 +53,7 @@ function ArtifactBody({
   source,
   clause,
   view,
+  subject,
   maxDays,
   onLocate,
   onDrill,
@@ -66,6 +61,7 @@ function ArtifactBody({
   source: Extract<ClauseSource, { type: "artifact" }>;
   clause: ViewClause;
   view: InvestigationView;
+  subject: CaseSubject;
   maxDays: number;
   onLocate: (id: string) => void;
   onDrill?: (a: ViewArtifact) => void;
@@ -73,11 +69,7 @@ function ArtifactBody({
   const a = source.artifact;
   const status = sourceStatus(source, clause);
   const path = provenance(a, view.artifacts);
-  const role = commitRole(
-    hostCommit(a, view.artifacts),
-    currentCommit(view.artifacts),
-    view.location,
-  );
+  const role = commitRole(hostCommit(a, view.artifacts), currentCommit(view.artifacts), subject);
   const shown = excerpt(a, source.quote?.range ?? null);
   const fraction = maxDays > 0 && a.daysBeforeNow !== null ? a.daysBeforeNow / maxDays : 0;
 
@@ -163,6 +155,7 @@ export function ClauseEvidence({
   sources,
   sourceId,
   view,
+  subject,
   maxDays,
   onShow,
   onStep,
@@ -175,6 +168,7 @@ export function ClauseEvidence({
   sources: ClauseSource[];
   sourceId: string | null;
   view: InvestigationView;
+  subject: CaseSubject;
   maxDays: number;
   onShow: (id: string) => void;
   onStep: (delta: 1 | -1) => void;
@@ -258,6 +252,7 @@ export function ClauseEvidence({
           source={source}
           clause={clause}
           view={view}
+          subject={subject}
           maxDays={maxDays}
           onLocate={onLocate}
           onDrill={onDrill}
