@@ -112,7 +112,7 @@ export function computeBoreLayout(
   const anchors = glyphs
     .map((g, i) => ({ id: g.id, x: g.leaderX, y: g.anchorY, extra: extraOf(g), order: i }))
     .sort((a, b) => a.y - b.y || a.order - b.order);
-  const pitch = opts.labelPitch ?? BORE.labelPitch;
+  const pitch = BORE.labelPitch;
   const { labels, leaders } = placeLabels(anchors, opts.datumY + BORE.firstSegment, pitch);
 
   const height = Math.max(

@@ -11,8 +11,11 @@ const demo = (page: Page) =>
   page.getByRole("region", { name: "Example investigation of src/billing/charge.ts line 9" });
 const visibleClause = (page: Page, text: RegExp) =>
   demo(page).locator("li[data-clause] button:visible", { hasText: text });
+const visibleCode = (page: Page) => demo(page).locator('ol[aria-label^="Code, lines"]:visible');
+const visibleHistory = (page: Page) =>
+  demo(page).locator('ol[aria-label="History, newest first"]:visible');
 
-test("at 1440 the demo is the 1120-wide instrument at scale 1 and nothing is clipped", async ({
+test("at 1440 the demo is the 1120-wide roots drawing at scale 1 and nothing is clipped", async ({
   page,
 }) => {
   await open(page);
@@ -34,7 +37,7 @@ test("at 1440 the demo is the 1120-wide instrument at scale 1 and nothing is cli
   expect(frame.width).toBe(1120);
   expect(frame.transform).toBe("scale(1)");
   expect(frame.lowest).toBeLessThanOrEqual(frame.height);
-  await expect(demo(page).getByRole("region", { name: /^Code, / })).toBeVisible();
+  await expect(visibleCode(page)).toBeVisible();
 });
 
 test("the hero reads eyebrow, headline, subheadline, actions, then the preview", async ({
@@ -52,17 +55,16 @@ test("the hero reads eyebrow, headline, subheadline, actions, then the preview",
   expect([...order].sort((a, b) => a - b)).toEqual(order);
 });
 
-test("clause 2 is active on load with a green trace to E and D; hover moves it", async ({
+test("clause 2 is active on load with a green root to E and D; hover moves it", async ({
   page,
 }) => {
   await open(page);
   await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "true");
   const trace = demo(page).locator("svg path.stroke-li-evidence:visible");
   await expect(trace).toHaveCount(1);
-  await expect(
-    demo(page).locator("svg g:has(> path.stroke-li-evidence) > circle:visible"),
-  ).toHaveCount(2);
-  const labels = demo(page).locator('section[aria-label="History"]:visible li');
+  await expect(demo(page).locator("svg .fill-li-evidence:visible")).toHaveCount(1);
+  await expect(demo(page).locator("svg .fill-li-evidence-tint:visible")).toHaveCount(1);
+  const labels = visibleHistory(page).locator("li");
   await expect(
     labels.filter({ hasText: "Customers double-billed during Stripe outage" }),
   ).toHaveCount(1);
@@ -131,7 +133,7 @@ test("links resolve: /app and #method", async ({ page }) => {
 });
 
 for (const width of [1440, 1024, 899, 700, 375]) {
-  test(`responsive ${width}: no horizontal overflow, panel or vertical preview, axe clean`, async ({
+  test(`responsive ${width}: no horizontal overflow, wide or narrow roots, axe clean`, async ({
     page,
   }) => {
     await open(page, width);
@@ -139,13 +141,16 @@ for (const width of [1440, 1024, 899, 700, 375]) {
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow).toBeLessThanOrEqual(0);
-    const code = demo(page).locator('section[aria-label^="Code, "]:visible');
+    const code = visibleCode(page);
     await expect(code).toHaveCount(1);
-    await expect(code).toHaveAttribute("data-mode", width < 900 ? "strip" : "panel");
+    await expect(demo(page).locator("[data-roots]:visible")).toHaveAttribute(
+      "data-roots",
+      width < 900 ? "narrow" : "wide",
+    );
     await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "true");
-    await expect(demo(page).locator('section[aria-label="History"]:visible')).toHaveCount(1);
+    await expect(visibleHistory(page)).toHaveCount(1);
     if (width < 900) {
-      const box = await code.boundingBox();
+      const box = await code.locator("..").boundingBox();
       const clauses = await visibleClause(page, /212 customers/).boundingBox();
       expect(box!.y).toBeGreaterThan(clauses!.y);
       expect(box!.width).toBeLessThanOrEqual(width);

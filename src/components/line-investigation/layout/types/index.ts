@@ -9,3 +9,4 @@ export type { AxisBreak } from "./axis-break";
 export type { DepthTick } from "./depth-tick";
 export type { BoreLayout } from "./bore-layout";
 export type { TimeCluster } from "./time-cluster";
+export type { AxisMetrics } from "./axis-metrics";
