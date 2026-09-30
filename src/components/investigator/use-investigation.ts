@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { ArtifactRef, DigResult, InvestigateInput } from "@understory/core/types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { narrativeLanguage } from "@understory/core/narrative-language";
+import type {
+  ArtifactRef,
+  DigResult,
+  InvestigateInput,
+  NarrativeLanguage,
+} from "@understory/core/types";
 import { readJson } from "@/lib/read-json";
 import type { AuthUser } from "./use-auth";
 import type { CaseDraft } from "./case-draft";
@@ -24,6 +30,9 @@ export type Entry = {
   parentQuestion?: string;
   pending?: boolean;
   mountKey?: string;
+  rewriting?: NarrativeLanguage | null;
+  rewriteError?: { language: NarrativeLanguage; message: string } | null;
+  alternates?: Partial<Record<NarrativeLanguage, DigResult["narrative"]>>;
 };
 export type View = "browse" | "case";
 
@@ -107,6 +116,67 @@ export function useInvestigation(user: AuthUser | null) {
   }, [user]);
 
   const current = history.find((e) => e.caseId === activeId) ?? null;
+  const historyRef = useRef(history);
+  useEffect(() => {
+    historyRef.current = history;
+  }, [history]);
+
+  const rewrite = useCallback(
+    async (caseId: string, language: NarrativeLanguage) => {
+      const entry = historyRef.current.find((e) => e.caseId === caseId);
+      const previous = entry?.result.narrative;
+      if (!entry || !previous || entry.rewriting) return;
+      const from = narrativeLanguage(previous);
+      const alternates = { ...entry.alternates, ...(from ? { [from]: previous } : {}) };
+      const patch = (fn: (e: Entry) => Entry) =>
+        setHistory((h) => h.map((e) => (e.caseId === caseId ? fn(e) : e)));
+      const save = (result: DigResult) => {
+        if (!user) return;
+        void fetch("/api/investigations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            caseId,
+            question: entry.form.question,
+            repoPath: entry.form.repoPath,
+            location: entry.form.location,
+            result,
+            ...(entry.parentCaseId ? { parentCaseId: entry.parentCaseId } : {}),
+          } satisfies SavedCase),
+        }).catch(() => {});
+      };
+      const settle = (narrative: NonNullable<DigResult["narrative"]>) => {
+        const result = { ...entry.result, narrative };
+        patch((e) => ({ ...e, result, alternates, rewriting: null, rewriteError: null }));
+        save(result);
+      };
+
+      const cached = entry.alternates?.[language];
+      if (cached) {
+        settle(cached);
+        return;
+      }
+      patch((e) => ({ ...e, rewriting: language, rewriteError: null }));
+      const failed = (message: string) =>
+        patch((e) => ({ ...e, rewriting: null, rewriteError: { language, message } }));
+      try {
+        const res = await fetch("/api/narrate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ evidence: entry.result.evidence, language }),
+        });
+        const data = await readJson<{ narrative: DigResult["narrative"]; error?: string }>(res);
+        if (!res.ok || !data.narrative) {
+          failed(data.error || `Request failed (${res.status})`);
+          return;
+        }
+        settle(data.narrative);
+      } catch (err) {
+        failed(err instanceof Error ? err.message : String(err));
+      }
+    },
+    [user],
+  );
 
   async function submit(
     reqBody: object,
@@ -334,6 +404,7 @@ export function useInvestigation(user: AuthUser | null) {
     investigate,
     drillInto,
     retryDraft,
+    rewrite,
     selectCase,
     backToCode,
     newInvestigation,

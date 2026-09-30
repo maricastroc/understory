@@ -120,3 +120,71 @@ describe("useInvestigation — a line case before its evidence arrives", () => {
     expect(result.current.view).toBe("browse");
   });
 });
+
+describe("useInvestigation — rewriting a case in another language", () => {
+  const portuguese = {
+    ...syntheticRetryCap.narrative!,
+    language: "pt" as const,
+    claims: syntheticRetryCap.narrative!.claims.map((c) => ({
+      ...c,
+      text: `Em português: ${c.text}`,
+    })),
+  };
+
+  async function opened(narrate: Route) {
+    const calls: Array<{ url: string; body: unknown }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url === "/api/investigations") {
+          return Response.json({ investigations: [], persisted: false });
+        }
+        calls.push({ url, body: init?.body ? JSON.parse(String(init.body)) : null });
+        if (url === "/api/dig") return Response.json(syntheticRetryCap);
+        if (url === "/api/narrate") return narrate(init);
+        throw new Error(`unexpected ${url}`);
+      }),
+    );
+    const hook = await mounted();
+    await act(async () => {
+      await hook.result.current.investigate(FORM);
+    });
+    return { ...hook, calls };
+  }
+
+  it("rewrites the same evidence in the selected language and keeps the other one for later", async () => {
+    const { result, calls } = await opened(async () => Response.json({ narrative: portuguese }));
+    const id = result.current.current!.caseId;
+    await act(async () => {
+      await result.current.rewrite(id, "pt");
+    });
+    const narrate = calls.find((c) => c.url === "/api/narrate")!;
+    expect(narrate.body).toEqual({ evidence: syntheticRetryCap.evidence, language: "pt" });
+    expect(result.current.current?.result.narrative?.language).toBe("pt");
+    expect(result.current.current?.result.evidence).toEqual(syntheticRetryCap.evidence);
+
+    await act(async () => {
+      await result.current.rewrite(id, "en");
+    });
+    expect(calls.filter((c) => c.url === "/api/narrate")).toHaveLength(1);
+    expect(result.current.current?.result.narrative?.claims[0].text).toBe(
+      syntheticRetryCap.narrative!.claims[0].text,
+    );
+  });
+
+  it("keeps the text it has and says why when the rewrite fails", async () => {
+    const { result } = await opened(async () =>
+      Response.json({ narrative: null, error: "AI reconstruction is temporarily unavailable." }),
+    );
+    const id = result.current.current!.caseId;
+    await act(async () => {
+      await result.current.rewrite(id, "pt");
+    });
+    expect(result.current.current?.rewriteError).toEqual({
+      language: "pt",
+      message: "AI reconstruction is temporarily unavailable.",
+    });
+    expect(result.current.current?.rewriting).toBeNull();
+    expect(result.current.current?.result.narrative).toEqual(syntheticRetryCap.narrative);
+  });
+});
