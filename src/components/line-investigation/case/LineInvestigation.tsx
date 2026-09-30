@@ -32,6 +32,7 @@ const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 export function LineInvestigation({
   result,
   pending,
+  status,
   now,
   layout,
   renderSpecimen,
@@ -44,6 +45,7 @@ export function LineInvestigation({
 }: {
   result: DigResult;
   pending: boolean;
+  status?: string;
   now: number;
   layout: SpecimenLayout;
   renderSpecimen: SpecimenSlot;
@@ -169,6 +171,7 @@ export function LineInvestigation({
           onDrill={onDrill}
           phase={phase}
           failure={failure}
+          status={status}
         />
       </div>
       {!phase && (

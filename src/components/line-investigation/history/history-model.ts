@@ -70,7 +70,8 @@ export function historyModel(
   let previous = now;
   strata.forEach((stratum, index) => {
     const days = (previous - stratum.time) / DAY;
-    if (days >= QUIET_DAYS) items.push({ type: "break", days, first: index === 0 });
+    if (days >= QUIET_DAYS)
+      items.push({ type: "break", id: `break:${stratum.id}`, days, first: index === 0 });
     items.push({ type: "stratum", stratum, index });
     previous = stratum.time;
   });

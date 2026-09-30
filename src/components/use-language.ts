@@ -8,7 +8,7 @@ const KEY = "gi:lang";
 const listeners = new Set<() => void>();
 let current: Language | null = null;
 
-function read(): Language {
+export function readLanguage(): Language {
   if (current !== null) return current;
   if (typeof window === "undefined") return "en";
   current = localStorage.getItem(KEY) === "pt" ? "pt" : "en";
@@ -37,6 +37,6 @@ function subscribe(fn: () => void) {
 }
 
 export function useLanguage() {
-  const language = useSyncExternalStore(subscribe, read, () => "en" as Language);
+  const language = useSyncExternalStore(subscribe, readLanguage, () => "en" as Language);
   return { language, setLanguage: write };
 }

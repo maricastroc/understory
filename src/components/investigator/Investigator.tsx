@@ -20,7 +20,7 @@ import { railFooterInfo } from "../shell/rail-footer-info";
 import { repoDisplayName } from "../shell/repo-display-name";
 import { lineRailItems } from "../shell/rail-items";
 import type { RailItem, RepoSummary } from "../shell/types";
-import { useLanguage } from "../use-language";
+import { readLanguage, useLanguage } from "../use-language";
 import { CaseFailure } from "./CaseFailure";
 import { CaseView } from "./CaseView";
 import { DEEP_LINK_QUESTION, LINE_QUESTION } from "./default-question";
@@ -33,6 +33,9 @@ import { recentRepos } from "./recent-repos";
 import { DEFAULT_REPO, DEMO_LINE, type Entry, useInvestigation } from "./use-investigation";
 
 const LANGUAGE_NAME = { en: "English", pt: "Portuguese" } as const;
+
+const rewritingStatus = (entry: Entry) =>
+  entry.rewriting ? `rewriting in ${LANGUAGE_NAME[entry.rewriting]}…` : undefined;
 
 export function Investigator() {
   const user = useAuth();
@@ -85,7 +88,7 @@ export function Investigator() {
           question: DEEP_LINK_QUESTION,
         },
         undefined,
-        language,
+        readLanguage(),
       );
     } else {
       void repo.open(repoPath);
@@ -318,6 +321,23 @@ export function Investigator() {
 
           {busy && <LoadingCard />}
 
+          {(lineCase || anchoredCase) && current?.rewriteError?.language === language && (
+            <p
+              role="status"
+              className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-li-text-subtle"
+            >
+              Could not rewrite this analysis in {LANGUAGE_NAME[language]}:{" "}
+              {current.rewriteError.message}
+              <button
+                type="button"
+                onClick={() => void rewrite(current.caseId, language)}
+                className={liButton("ghost", "", "sm")}
+              >
+                Try again
+              </button>
+            </p>
+          )}
+
           {draftCase && draft ? (
             <LiveLineInvestigation
               key={draft.key}
@@ -337,50 +357,28 @@ export function Investigator() {
                 ) : undefined
               }
             />
-          ) : (lineCase || anchoredCase) && current ? (
-            <>
-              {current.rewriteError?.language === language && (
-                <p
-                  role="status"
-                  className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-li-text-subtle"
-                >
-                  Could not rewrite this analysis in {LANGUAGE_NAME[language]}:{" "}
-                  {current.rewriteError.message}
-                  <button
-                    type="button"
-                    onClick={() => void rewrite(current.caseId, language)}
-                    className={liButton("ghost", "", "sm")}
-                  >
-                    Try again
-                  </button>
-                </p>
-              )}
-              {lineCase ? (
-                <LiveLineInvestigation
-                  key={current.mountKey ?? current.caseId}
-                  result={
-                    current.rewriting ? { ...current.result, narrative: null } : current.result
-                  }
-                  repoPath={current.form.repoPath}
-                  pending={(current.pending ?? false) || !!current.rewriting}
-                  token={tokenValue}
-                  onDrill={drill(current)}
-                  onFollowUp={() => followUp(current)}
-                  onBackToQuestion={() => backToQuestion(current)}
-                  parent={parentLink(current)}
-                />
-              ) : (
-                <AnchoredInvestigation
-                  key={current.mountKey ?? current.caseId}
-                  result={
-                    current.rewriting ? { ...current.result, narrative: null } : current.result
-                  }
-                  pending={(current.pending ?? false) || !!current.rewriting}
-                  onDrill={drill(current)}
-                  parent={parentLink(current)}
-                />
-              )}
-            </>
+          ) : lineCase && current ? (
+            <LiveLineInvestigation
+              key={current.mountKey ?? current.caseId}
+              result={current.result}
+              repoPath={current.form.repoPath}
+              pending={current.pending ?? false}
+              status={rewritingStatus(current)}
+              token={tokenValue}
+              onDrill={drill(current)}
+              onFollowUp={() => followUp(current)}
+              onBackToQuestion={() => backToQuestion(current)}
+              parent={parentLink(current)}
+            />
+          ) : anchoredCase && current ? (
+            <AnchoredInvestigation
+              key={current.mountKey ?? current.caseId}
+              result={current.result}
+              pending={current.pending ?? false}
+              status={rewritingStatus(current)}
+              onDrill={drill(current)}
+              parent={parentLink(current)}
+            />
           ) : null}
 
           {!busy && !lineCase && !anchoredCase && !draftCase && view === "case" && current && (

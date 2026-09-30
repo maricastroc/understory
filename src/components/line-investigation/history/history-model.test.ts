@@ -56,6 +56,15 @@ describe("historyModel", () => {
     expect(QUIET_DAYS).toBe(45);
   });
 
+  it("gives every break its own key, even when two quiet spells last as long", () => {
+    const { items } = model(states.syntheticManyOwners(8));
+    const breaks = items
+      .flatMap((i) => (i.type === "run" ? i.items : [i]))
+      .flatMap((i) => (i.type === "break" ? [i] : []));
+    expect(new Set(breaks.map((b) => Math.round(b.days))).size).toBeLessThan(breaks.length);
+    expect(new Set(breaks.map((b) => b.id)).size).toBe(breaks.length);
+  });
+
   it("keeps a short run of uncited changes in place", () => {
     const { items } = model(states.syntheticManyOwners(MIN_RUN - 1));
     expect(items.some((i) => i.type === "run")).toBe(false);

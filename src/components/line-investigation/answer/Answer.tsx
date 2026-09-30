@@ -28,6 +28,7 @@ export function Answer({
   onDrill,
   phase,
   failure,
+  status,
 }: {
   view: InvestigationView;
   state: CaseState;
@@ -39,6 +40,7 @@ export function Answer({
   onDrill?: (a: ViewArtifact) => void;
   phase?: CasePhase;
   failure?: ReactNode;
+  status?: string;
 }) {
   const panel = layout.mode === "panel";
   const byId = useMemo(() => new Map(view.artifacts.map((a) => [a.id, a])), [view.artifacts]);
@@ -59,6 +61,7 @@ export function Answer({
       compact={!panel}
       phase={phase}
       failure={failure}
+      status={status}
       renderEvidence={(clause, id) => {
         const sources = clauseSources(clause, view);
         return (

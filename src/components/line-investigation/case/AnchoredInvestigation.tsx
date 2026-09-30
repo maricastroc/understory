@@ -11,11 +11,13 @@ import { LineInvestigation } from "./LineInvestigation";
 export function AnchoredInvestigation({
   result,
   pending,
+  status,
   onDrill,
   parent,
 }: {
   result: DigResult;
   pending: boolean;
+  status?: string;
   onDrill?: (ref: ArtifactRef) => void;
   parent?: { id: string; question?: string; onOpen?: () => void };
 }) {
@@ -34,6 +36,7 @@ export function AnchoredInvestigation({
     <LineInvestigation
       result={result}
       pending={pending}
+      status={status}
       now={now}
       layout={layout}
       renderSpecimen={renderSpecimen}

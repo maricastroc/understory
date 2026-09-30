@@ -96,6 +96,16 @@ test("the demo maps its files by itself after a second of idle; no remote means 
   expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
 });
 
+test("a deep link investigates in the language the reader picked", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("gi:lang", "pt"));
+  await page.route("**/api/dig", (route) =>
+    route.fulfill({ status: 502, json: { error: "stubbed" } }),
+  );
+  const dig = page.waitForRequest((r) => new URL(r.url()).pathname === "/api/dig");
+  await page.goto("/app?repo=.demo/payments-service&file=src/billing/charge.ts&line=9");
+  expect((await dig).postDataJSON()).toMatchObject({ language: "pt" });
+});
+
 test("the first node of the path leads back to the repository stage", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/app");
