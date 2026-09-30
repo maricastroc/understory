@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <a href="#-features">Features</a> •
+  <a href="#%EF%B8%8F-features">Features</a> •
   <a href="#-how-it-works">How It Works</a> •
   <a href="#-design-notes">Design Notes</a> •
   <a href="#ℹ%EF%B8%8F-how-to-run-the-application">How To Run</a> •
