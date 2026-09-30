@@ -13,6 +13,7 @@ export function LiveLineInvestigation({
   result,
   repoPath,
   pending,
+  status,
   token,
   onDrill,
   onFollowUp,
@@ -24,6 +25,7 @@ export function LiveLineInvestigation({
   result: DigResult;
   repoPath: string;
   pending: boolean;
+  status?: string;
   token?: string;
   onDrill?: (ref: ArtifactRef) => void;
   onFollowUp?: () => void;
@@ -56,6 +58,7 @@ export function LiveLineInvestigation({
     <LineInvestigation
       result={result}
       pending={pending}
+      status={status}
       now={now}
       layout={layout}
       renderSpecimen={renderSpecimen}

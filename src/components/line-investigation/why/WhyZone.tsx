@@ -29,6 +29,7 @@ export function WhyZone({
   compact,
   phase,
   failure,
+  status,
   renderEvidence,
 }: {
   view: InvestigationView;
@@ -41,6 +42,7 @@ export function WhyZone({
   compact: boolean;
   phase?: CasePhase;
   failure?: ReactNode;
+  status?: string;
   renderEvidence?: (clause: ViewClause, id: string) => ReactNode;
 }) {
   const headingId = useId();
@@ -74,8 +76,8 @@ export function WhyZone({
         <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
           Reconstructed why
         </h2>
-        <span className="text-xs text-li-text-subtle">
-          {hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
+        <span aria-live="polite" className="text-xs text-li-text-subtle">
+          {status ?? hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
         </span>
       </div>
       <WhyBody view={view} phase={phase} failure={failure} />

@@ -103,7 +103,7 @@ export function HistorySection({
     items.map((item) => {
       if (item.type === "break") {
         return (
-          <li key={`break-${item.days}`} className={`${ROW_GRID} h-10`}>
+          <li key={item.id} className={`${ROW_GRID} h-10`}>
             <Margin>
               {shortAge(item.days)}
               <br />
