@@ -143,6 +143,25 @@ export function Investigator() {
     backToCode();
   }
 
+  function backToQuestion(entry: Entry) {
+    const loc = entry.result.evidence.location;
+    if (!loc) return;
+    const target = entry.form.repoPath;
+    if (target !== repoPath || !repo.ready) {
+      setRepoPath(target);
+      void repo.open(target, tokenValue);
+    }
+    setFollowParent(null);
+    setPrefill({
+      path: loc.file,
+      line: loc.startLine,
+      end: loc.endLine,
+      question: entry.form.question || entry.result.evidence.question,
+      nonce: ++prefillNonce.current,
+    });
+    backToCode();
+  }
+
   function openDemoLine() {
     if (DEMO_LINE) setPrefill({ ...DEMO_LINE, nonce: ++prefillNonce.current });
   }
@@ -295,6 +314,7 @@ export function Investigator() {
               token={tokenValue}
               onDrill={drill(current)}
               onFollowUp={() => followUp(current)}
+              onBackToQuestion={() => backToQuestion(current)}
             />
           ) : null}
 

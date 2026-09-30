@@ -338,6 +338,25 @@ describe("Composer — the demo line", () => {
     ).toBeTruthy();
   });
 
+  it("goes back to a case's question with its lines selected and its question in place", async () => {
+    mockFetch();
+    renderWith({
+      prefill: {
+        path: "src/billing/charge.ts",
+        line: 4,
+        end: 6,
+        question: "Why exactly 3 retries?",
+        nonce: 1,
+      },
+    });
+    const first = await screen.findByRole("button", { name: /^Line 4, selected/ });
+    expect(first.getAttribute("aria-pressed")).toBe("true");
+    expect(
+      screen.getByRole("button", { name: /^Line 6, selected/ }).getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(screen.getByDisplayValue("Why exactly 3 retries?")).toBeTruthy();
+  });
+
   it("asks for the demo line again when the demo is reopened", () => {
     mockFetch();
     const onDemoOpened = vi.fn();

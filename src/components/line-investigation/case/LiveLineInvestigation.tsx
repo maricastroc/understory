@@ -16,6 +16,7 @@ export function LiveLineInvestigation({
   token,
   onDrill,
   onFollowUp,
+  onBackToQuestion,
   phase,
   failure,
 }: {
@@ -25,6 +26,7 @@ export function LiveLineInvestigation({
   token?: string;
   onDrill?: (ref: ArtifactRef) => void;
   onFollowUp?: () => void;
+  onBackToQuestion?: () => void;
   phase?: CasePhase;
   failure?: ReactNode;
 }) {
@@ -57,6 +59,7 @@ export function LiveLineInvestigation({
       renderSpecimen={renderSpecimen}
       onDrill={canDrill ? (a) => onDrill?.(toArtifactRef(a.source)) : undefined}
       onFollowUp={onFollowUp}
+      onBackToQuestion={onBackToQuestion}
       phase={phase}
       failure={failure}
     />

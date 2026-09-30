@@ -2,12 +2,13 @@ import { VERDICT_LABEL } from "../copy/verdict-copy";
 import type { Verdict } from "../model/types";
 
 const CHIP: Record<Verdict, string> = {
-  resolved: "bg-li-evidence-tint text-li-evidence-ink hover:bg-li-evidence-quote",
-  "not-recorded": "bg-li-gap-tint text-li-gap-ink hover:bg-li-neutral-200",
-  "evidence-only": "border border-li-ink text-li-ink hover:bg-li-neutral-200",
-  "out-of-scope": "border border-li-ink text-li-ink hover:bg-li-neutral-200",
-  fabrication: "bg-li-ink text-li-paper hover:bg-li-neutral-800",
-  pending: "border border-li-divider text-li-text-subtle",
+  resolved:
+    "border-li-evidence-edge/45 bg-li-evidence-tint text-li-evidence-ink hover:bg-li-evidence-quote",
+  "not-recorded": "border-dashed border-li-gap bg-li-gap-tint text-li-gap-ink hover:bg-li-paper",
+  "evidence-only": "border-li-ink text-li-ink hover:bg-li-neutral-200",
+  "out-of-scope": "border-li-ink text-li-ink hover:bg-li-neutral-200",
+  fabrication: "border-li-ink bg-li-ink text-li-paper hover:bg-li-neutral-800",
+  pending: "border-li-divider text-li-text-subtle",
 };
 
 export function VerdictButton({
@@ -28,7 +29,7 @@ export function VerdictButton({
       aria-controls={controls}
       aria-haspopup="dialog"
       onClick={onToggle}
-      className={`inline-flex cursor-pointer items-center gap-1.5 rounded-[3px] py-1.25 pr-2.5 pl-2 text-[13px] font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus ${CHIP[verdict]}`}
+      className={`inline-flex cursor-pointer items-center gap-1.5 rounded-[3px] border py-1 pr-2.5 pl-2 text-[13px] font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus ${CHIP[verdict]}`}
     >
       {verdict === "resolved" && (
         <svg

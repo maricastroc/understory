@@ -38,7 +38,7 @@ export function useFileViewer(repoPath: string) {
     setSelectedEnd(enclosing.end);
   }
 
-  async function open(path: string, token?: string, select?: number) {
+  async function open(path: string, token?: string, select?: number, through?: number) {
     setLoading(true);
     setError(null);
     setFile(null);
@@ -56,9 +56,10 @@ export function useFileViewer(repoPath: string) {
       const lines = (data.content as string).replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n");
       setFile({ path, lines });
       if (select && select >= 1 && select <= lines.length) {
+        const end = through && through > select ? Math.min(through, lines.length) : select;
         anchor.current = select;
         setSelectedStart(select);
-        setSelectedEnd(select);
+        setSelectedEnd(end);
         setEnclosing(enclosingSymbol(lines, select, path));
       }
     } catch (e) {

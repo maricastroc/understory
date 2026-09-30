@@ -44,8 +44,24 @@ const DRAFT: DigResult = {
 
 const PHASES: Record<string, CasePhase> = { collecting: "collecting", failed: "failed" };
 
+const LONG_WHY = [
+  "A função chargeCustomer foi criada para envolver a chamada à API da Stripe e repetir a cobrança quando a rede falha de forma transitória.",
+  "O loop inicialmente era ilimitado, mas durante uma interrupção da Stripe ele reenviou cobranças e cobrou duas vezes 212 clientes; por isso o número de tentativas foi limitado a 3 com backoff exponencial (1 s, 2 s, 4 s) para garantir que a cobrança fosse concluída dentro da janela de ACK de 10 s do webhook da Stripe.",
+  "A revisão cortou as cinco tentativas propostas para três.",
+];
+
+function longWhy(): DigResult {
+  const narrative = syntheticRetryCap.narrative!;
+  const claims = narrative.claims.map((c, i) => ({ ...c, text: LONG_WHY[i] ?? c.text }));
+  return {
+    ...syntheticRetryCap,
+    narrative: { ...narrative, claims, answer: claims.map((c) => c.text).join(" ") },
+  };
+}
+
 const STATES: Record<string, () => DigResult> = {
   resolved: () => syntheticRetryCap,
+  "long-why": longWhy,
   collecting: () => DRAFT,
   failed: () => DRAFT,
   empty: states.syntheticNoHistory,
@@ -139,6 +155,7 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
           renderSpecimen={renderSpecimen}
           onDrill={() => {}}
           onFollowUp={() => {}}
+          onBackToQuestion={() => {}}
           phase={phase}
           failure={
             phase === "failed" ? (

@@ -37,6 +37,7 @@ export function TitleRow({
   onToggleVerdict,
   onCloseVerdict,
   onFollowUp,
+  onBackToQuestion,
   phase,
 }: {
   view: InvestigationView;
@@ -44,6 +45,7 @@ export function TitleRow({
   onToggleVerdict: () => void;
   onCloseVerdict: () => void;
   onFollowUp?: () => void;
+  onBackToQuestion?: () => void;
   phase?: CasePhase;
 }) {
   const popoverId = useId();
@@ -74,7 +76,7 @@ export function TitleRow({
           </span>
         </div>
       ) : (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div ref={anchor} className="relative">
             <VerdictButton
               verdict={view.verdict}
@@ -86,6 +88,11 @@ export function TitleRow({
               <VerdictPopover id={popoverId} view={view} onClose={onCloseVerdict} anchor={anchor} />
             )}
           </div>
+          {onBackToQuestion && (
+            <button type="button" onClick={onBackToQuestion} className={liButton("ghost")}>
+              ← Back to question
+            </button>
+          )}
           {onFollowUp && (
             <button type="button" onClick={onFollowUp} className={liButton("secondary")}>
               Ask a follow-up

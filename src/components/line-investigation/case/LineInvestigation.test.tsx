@@ -45,30 +45,79 @@ function setup(result: DigResult = syntheticRetryCap, extra: { onDrill?: () => v
 }
 
 const clause = (n: number) =>
-  screen
-    .getAllByRole("button", { pressed: false })
-    .concat(screen.queryAllByRole("button", { pressed: true }))
-    .find((b) => b.closest("li[data-clause]")?.getAttribute("data-clause") === `c${n}`)!;
+  document.querySelector<HTMLButtonElement>(`li[data-clause="c${n}"] > button`)!;
 const history = () => screen.getByRole("list", { name: "History, newest first" });
+const evidence = () => screen.getByRole("region", { name: /^EVIDENCE · CLAUSE/ });
+const row = (id: string) => document.querySelector<HTMLElement>(`[data-artifact="${id}"]`)!;
+const rowButton = (id: string) =>
+  row(id).querySelector<HTMLButtonElement>("button[aria-expanded]")!;
 
 beforeEach(() => window.localStorage.clear());
 
-describe("LineInvestigation — default", () => {
-  it("shows the question, verdict, clauses with full-text names and the history in depth order", () => {
+describe("LineInvestigation — answer first", () => {
+  it("shows the question, verdict and clauses, with the history below and every row named", () => {
     setup();
     expect(screen.getByRole("heading", { level: 1, name: "Why exactly 3 retries?" })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Resolved/ })).toBeTruthy();
     expect(clause(1).textContent).toContain(
       "The cap followed an unbounded retry loop that charged 212 customers twice",
     );
-    const labels = within(history())
-      .getAllByRole("button")
-      .map((b) => b.getAttribute("aria-label"));
-    expect(labels[0]).toBe("A, commit 92f6a3f, 15 Mar 2023, cited by clause 1, quote verified");
-    expect(labels.at(-1)).toBe(
-      "Not recorded: no pull request, review or issue before commit 7be210e",
+    expect(screen.getByText("select a clause to check its evidence")).toBeTruthy();
+    expect(rowButton("commit:92f6a3f").getAttribute("aria-label")).toBe(
+      "A, commit 92f6a3f, 15 Mar 2023, cited by clause 1, quote verified",
     );
-    expect(screen.getByText("hover a clause to see its evidence")).toBeTruthy();
+    expect(
+      screen.getByRole("note", {
+        name: "Not recorded: no pull request, review or issue before commit 7be210e",
+      }),
+    ).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "History of line 9" })).toBeTruthy();
+  });
+
+  it("reads as a whole at rest: up to three lines per clause, the full text kept for assistive tech", () => {
+    setup();
+    for (const n of [0, 1, 2]) {
+      const text = clause(n).querySelector<HTMLElement>(".line-clamp-3")!;
+      expect(text.textContent).toBe(
+        [
+          "Capped at three attempts, with 1 s · 2 s · 4 s backoff.",
+          "The cap followed an unbounded retry loop that charged 212 customers twice during a Stripe outage.",
+          "Review cut the proposed five to three so retries finish inside Stripe’s 10 s webhook window.",
+        ][n],
+      );
+      expect(within(clause(n)).getByText("2 sources · 1 verified").className).toContain(
+        "opacity-0",
+      );
+    }
+  });
+
+  it("inspects a clause on focus, whole and with its tally, and on hover only after a pause", () => {
+    vi.useFakeTimers();
+    try {
+      setup();
+      fireEvent.focus(clause(1));
+      expect(clause(1).querySelector(".line-clamp-3")).toBeNull();
+      expect(within(clause(1)).getByText("2 sources · 1 verified").className).toContain(
+        "opacity-100",
+      );
+      fireEvent.blur(clause(1));
+      act(() => vi.advanceTimersByTime(250));
+      fireEvent.mouseEnter(clause(2));
+      act(() => vi.advanceTimersByTime(60));
+      expect(within(clause(2)).getByText("2 sources · 1 verified").className).toContain(
+        "opacity-0",
+      );
+      act(() => vi.advanceTimersByTime(100));
+      expect(within(clause(2)).getByText("2 sources · 1 verified").className).toContain(
+        "opacity-100",
+      );
+      fireEvent.mouseLeave(clause(2));
+      act(() => vi.advanceTimersByTime(200));
+      act(() => vi.advanceTimersByTime(250));
+      expect(clause(2).querySelector(".line-clamp-3")).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("describes clause → evidence relations as text", () => {
@@ -79,31 +128,104 @@ describe("LineInvestigation — default", () => {
     );
   });
 
+  it("shows titles and verified quotes in the history at rest", () => {
+    setup();
+    expect(
+      within(history()).getByText("Customers double-billed during Stripe outage"),
+    ).toBeTruthy();
+    expect(within(history()).getByText("“212 customers were charged twice”")).toBeTruthy();
+    expect(within(history()).getByText("wrote line 9 as it reads today")).toBeTruthy();
+  });
+
   it("has no axe violations", async () => {
     const { container } = setup();
     expect((await axe(container)).violations).toEqual([]);
   });
 });
 
-describe("LineInvestigation — clauses", () => {
-  it("previews on focus and reveals only the cited artifacts' details", () => {
+describe("LineInvestigation — evidence in place", () => {
+  it("previews a clause's sources in the history on focus", () => {
     setup();
     fireEvent.focus(clause(1));
-    expect(
-      within(history()).getByText("Customers double-billed during Stripe outage"),
-    ).toBeTruthy();
-    expect(within(history()).queryByText("Cap charge retries at 3, add backoff")).toBeNull();
+    expect(row("issue:1187").dataset.lit).toBe("true");
+    expect(row("pr:812").dataset.lit).toBe("true");
+    expect(row("commit:92f6a3f").dataset.lit).toBeUndefined();
   });
 
-  it("pins on click, shows Clear, and unpins with Escape", async () => {
+  it("opens the evidence of a clause right under it, on its first source", async () => {
     const user = userEvent.setup();
     setup();
     await user.click(clause(1));
-    expect(clause(1).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("tracing clause 2 · other evidence dimmed")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Clear · Esc" })).toBeTruthy();
+    expect(clause(1).getAttribute("aria-expanded")).toBe("true");
+    const panel = evidence();
+    expect(clause(1).getAttribute("aria-controls")).toBe(panel.id);
+    expect(clause(1).closest("li")!.contains(panel)).toBe(true);
+    expect(within(panel).getByRole("heading").textContent).toBe("EVIDENCE · CLAUSE 2 · 1 OF 2");
+    expect(within(panel).getByText("212 customers were charged twice").tagName).toBe("MARK");
+    expect(within(panel).getByText("✓ Quote found verbatim in the source")).toBeTruthy();
+    expect(panel.textContent).toContain(
+      "issue:1187 → closed by pr:812 → merged as 92f6a3f · wrote line 9 as it reads today",
+    );
+    expect(screen.getByText("checking clause 2 · Esc returns here")).toBeTruthy();
+  });
+
+  it("steps through only that clause's sources, by button, chip and arrow key", async () => {
+    const user = userEvent.setup();
+    setup();
+    await user.click(clause(1));
+    await user.click(screen.getByRole("button", { name: "Next source" }));
+    expect(evidence().textContent).toContain("Bound retries in chargeCustomer");
+    expect(
+      within(evidence()).getByText("Cited · the verbatim quote is in another source"),
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Next source" }).getAttribute("aria-disabled")).toBe(
+      "true",
+    );
+    await user.keyboard("{ArrowLeft}");
+    expect(evidence().textContent).toContain("Customers double-billed during Stripe outage");
+    await user.click(within(evidence()).getByRole("button", { name: "D pr:812" }));
+    expect(
+      within(evidence()).getByRole("button", { name: "D pr:812" }).getAttribute("aria-current"),
+    ).toBe("true");
+  });
+
+  it("closes with Escape or ✕ and gives focus back to the clause", async () => {
+    const user = userEvent.setup();
+    setup();
+    await user.click(clause(1));
+    await user.click(screen.getByRole("button", { name: "Next source" }));
     await user.keyboard("{Escape}");
-    expect(clause(1).getAttribute("aria-pressed")).toBe("false");
+    expect(screen.queryByRole("region", { name: /^EVIDENCE/ })).toBeNull();
+    expect(document.activeElement).toBe(clause(1));
+    await user.click(clause(1));
+    await user.click(screen.getByRole("button", { name: "Close evidence" }));
+    expect(clause(1).getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(clause(1));
+  });
+
+  it("shows the source in the history, opened, without closing the answer", async () => {
+    const user = userEvent.setup();
+    setup();
+    await user.click(clause(1));
+    await user.click(within(evidence()).getByRole("button", { name: "Show in history ↓" }));
+    expect(row("issue:1187").dataset.located).toBe("true");
+    expect(rowButton("issue:1187").getAttribute("aria-expanded")).toBe("true");
+    expect(document.activeElement).toBe(rowButton("issue:1187"));
+    expect(clause(1).getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("goes back from a history row to the clause it supports, at that source", async () => {
+    const user = userEvent.setup();
+    setup();
+    await user.click(
+      within(row("pr:812")).getByRole("button", {
+        name: "Back to clause 2 with pr:812 as its source",
+      }),
+    );
+    expect(clause(1).getAttribute("aria-expanded")).toBe("true");
+    expect(evidence().textContent).toContain("Bound retries in chargeCustomer");
+    await act(() => new Promise((r) => requestAnimationFrame(() => r(null))));
+    expect(document.activeElement).toBe(clause(1));
   });
 
   it("moves between clauses with the arrow keys", async () => {
@@ -115,51 +237,35 @@ describe("LineInvestigation — clauses", () => {
     await user.keyboard("{ArrowUp}");
     expect(document.activeElement).toBe(clause(0));
   });
-});
-
-describe("LineInvestigation — evidence drawer", () => {
-  it("opens an artifact with its verified quote highlighted and steps by depth", async () => {
-    const user = userEvent.setup();
-    setup();
-    const label = within(history()).getByRole("button", { name: /^E, issue/ });
-    await user.click(label);
-    const drawer = screen.getByRole("dialog", { name: "issue:1187" });
-    expect(within(drawer).getByText("212 customers were charged twice").tagName).toBe("MARK");
-    expect(within(drawer).getByText("for clause 2")).toBeTruthy();
-    expect(document.activeElement?.textContent).toBe("issue:1187");
-    await user.keyboard("{ArrowDown}");
-    expect(screen.getByRole("dialog", { name: "7be210e" })).toBeTruthy();
-    await user.keyboard("{Escape}");
-    expect(screen.queryByRole("dialog")).toBeNull();
-    expect(document.activeElement).toBe(label);
-  });
-
-  it("lists every artifact plus gaps and switches to artifact mode", async () => {
-    const user = userEvent.setup();
-    setup();
-    await user.click(screen.getByRole("button", { name: "All evidence · 7" }));
-    const drawer = screen.getByRole("dialog", { name: "All evidence" });
-    expect(within(drawer).getAllByRole("button").length).toBe(8);
-    await user.click(within(drawer).getByText("before 7be210e"));
-    expect(screen.getByRole("dialog", { name: "before 7be210e" })).toBeTruthy();
-    expect(screen.getByText("History silent · recorded: false")).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "← All evidence" }));
-    expect(screen.getByRole("dialog", { name: "All evidence" })).toBeTruthy();
-  });
 
   it("offers Investigate only when drill-down is possible", async () => {
     const user = userEvent.setup();
     const onDrill = vi.fn();
     setup(syntheticRetryCap, { onDrill });
-    await user.click(within(history()).getByRole("button", { name: /^A, commit/ }));
-    await user.click(screen.getByRole("button", { name: "Investigate →" }));
+    await user.click(clause(0));
+    await user.click(within(evidence()).getByRole("button", { name: "Investigate →" }));
     expect(onDrill).toHaveBeenCalledTimes(1);
+    expect(onDrill.mock.calls[0][0].id).toBe("commit:92f6a3f");
   });
 
-  it("stays accessible with the drawer open", async () => {
+  it("opens a history row in place with its source, context and actions", async () => {
+    const user = userEvent.setup();
+    setup(syntheticRetryCap, { onDrill: () => {} });
+    await user.click(rowButton("commit:7be210e"));
+    expect(rowButton("commit:7be210e").getAttribute("aria-expanded")).toBe("true");
+    expect(
+      within(row("commit:7be210e")).getByText("No pull request references this commit"),
+    ).toBeTruthy();
+    expect(
+      within(row("commit:7be210e")).getByRole("button", { name: "Investigate →" }),
+    ).toBeTruthy();
+  });
+
+  it("stays accessible with the evidence and a row open", async () => {
     const user = userEvent.setup();
     const { container } = setup();
-    await user.click(within(history()).getByRole("button", { name: /^E, issue/ }));
+    await user.click(clause(1));
+    await user.click(rowButton("commit:7be210e"));
     expect((await axe(container)).violations).toEqual([]);
   });
 });
@@ -186,13 +292,38 @@ describe("LineInvestigation — verdict and key", () => {
   });
 });
 
+describe("LineInvestigation — going back", () => {
+  it("offers a way back to the question only when the host can take it", async () => {
+    const user = userEvent.setup();
+    const onBackToQuestion = vi.fn();
+    const { rerender } = setup();
+    expect(screen.queryByRole("button", { name: "← Back to question" })).toBeNull();
+    rerender(
+      <LineInvestigation
+        result={syntheticRetryCap}
+        pending={false}
+        now={NOW}
+        layout={SPECIMEN_LAYOUTS.wide}
+        renderSpecimen={slot}
+        onFollowUp={() => {}}
+        onBackToQuestion={onBackToQuestion}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "← Back to question" }));
+    expect(onBackToQuestion).toHaveBeenCalledOnce();
+  });
+});
+
 describe("LineInvestigation — honesty states", () => {
-  it("renders a whole-answer abstention as one silent clause", () => {
+  it("renders a whole-answer abstention as one silent clause whose evidence is the silence", async () => {
+    const user = userEvent.setup();
     setup(states.syntheticNotRecorded());
     expect(screen.getByRole("button", { name: "Not recorded" })).toBeTruthy();
     expect(clause(0).textContent).toContain(
       "The history does not explain why the charge is retried at all.",
     );
+    await user.click(clause(0));
+    expect(within(evidence()).getByText("History silent · recorded: false")).toBeTruthy();
   });
 
   it("says there is no reconstruction when only evidence came back", () => {
@@ -211,14 +342,22 @@ describe("LineInvestigation — honesty states", () => {
 
   it("never shows ∅ for a gap that was not searched", () => {
     setup(states.syntheticWithoutStageFourData());
-    expect(within(history()).getByRole("button", { name: /^Not verified:/ })).toBeTruthy();
-    expect(within(history()).queryByText("not recorded")).toBeNull();
+    expect(rowButton("commit:7be210e").getAttribute("aria-label")).toMatch(/Not verified:/);
+    expect(screen.queryByRole("note")).toBeNull();
+    expect(within(history()).queryByText(/∅/)).toBeNull();
   });
 
-  it("strikes through a citation that was never collected", () => {
+  it("strikes through a citation that was never collected, in the clause and its evidence", async () => {
+    const user = userEvent.setup();
     setup(states.syntheticFabricated());
     expect(screen.getByRole("button", { name: /Fabrication caught/ })).toBeTruthy();
     expect(screen.getAllByText("commit:deadbee").some((el) => el.tagName === "S")).toBe(true);
+    const fabricated = [
+      ...document.querySelectorAll<HTMLButtonElement>("li[data-clause] > button"),
+    ].find((b) => b.closest("li")!.querySelector("s"))!;
+    await user.click(fabricated);
+    await user.click(within(evidence()).getByRole("button", { name: "commit:deadbee" }));
+    expect(within(evidence()).getByText(/never collected/)).toBeTruthy();
   });
 });
 
@@ -279,13 +418,13 @@ describe("LineInvestigation — before the evidence arrives", () => {
     expect(screen.getByRole("status").textContent).toContain("Collecting the line's history…");
     expect(screen.getByText("Collecting")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Resolved|Reconstructing/ })).toBeNull();
-    expect(screen.queryByRole("button", { name: /All evidence/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^History/ })).toBeNull();
     expect(screen.queryByRole("button", { name: "Ask a follow-up" })).toBeNull();
     expect(screen.queryByRole("list", { name: "History, newest first" })).toBeNull();
     expect((await axe(container)).violations).toEqual([]);
   });
 
-  it("keeps the instrument and offers a retry when the investigation fails", async () => {
+  it("keeps the answer and offers a retry when the investigation fails", async () => {
     const user = userEvent.setup();
     const { onRetry } = renderPhase("failed");
     expect(screen.getByText("Failed")).toBeTruthy();
@@ -310,11 +449,8 @@ describe("LineInvestigation — before the evidence arrives", () => {
       .filter((li) => li.classList.contains("animate-li-arrive"));
     const delays = arriving.map((li) => Number.parseInt(li.style.animationDelay, 10));
     expect(delays.length).toBeGreaterThan(1);
-    expect([...delays].sort((a, b) => a - b)).toEqual(delays.map((_, i) => i * 60));
-    const shallowest = arriving.find((li) =>
-      within(li).queryByRole("button", { name: /^A, commit/ }),
-    );
-    expect(shallowest?.style.animationDelay).toBe("0ms");
+    expect(delays).toEqual(delays.map((_, i) => i * 45));
+    expect(arriving[0].dataset.stratum).toBe("commit:92f6a3f");
   });
 
   it("does not animate a saved case that opens with its evidence", () => {
@@ -324,69 +460,41 @@ describe("LineInvestigation — before the evidence arrives", () => {
 });
 
 describe("LineInvestigation — no history", () => {
-  it("says what was read, draws no bore and offers no empty evidence list", () => {
+  it("says what was read and offers no empty history", () => {
     setup(states.syntheticNoHistory());
     expect(screen.getByText("No history was found for this line.")).toBeTruthy();
     expect(screen.getByText(/read 4e1d0a2 and found no commit/)).toBeTruthy();
     expect(screen.queryByRole("list", { name: "History, newest first" })).toBeNull();
-    expect(screen.queryByRole("button", { name: /All evidence/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^History/ })).toBeNull();
     expect(document.querySelector("li[data-clause]")).toBeNull();
   });
 });
 
 describe("LineInvestigation — a long history", () => {
-  const fold = () =>
-    within(history())
-      .getAllByRole("button")
-      .find(
-        (b) => b.hasAttribute("aria-expanded") && /history/.test(b.getAttribute("aria-label")!),
-      );
-  const names = () =>
-    within(history())
-      .getAllByRole("button")
-      .map((b) => b.getAttribute("aria-label")!);
-
-  it("shows each absence as a chip on the row it belongs to", () => {
-    setup();
-    const chip = within(history()).getByRole("button", {
-      name: "Not recorded: no pull request, review or issue before commit 7be210e",
-    });
-    expect(chip.textContent).toBe("∅ PR");
-    expect(
-      within(chip.closest("li")!).getByRole("button", { name: /^F, commit 7be210e/ }),
-    ).toBeTruthy();
-  });
-
-  it("folds the oldest rows behind a count and opens them on request", () => {
-    setup(states.syntheticManyOwners(8));
-    const more = fold()!;
-    expect(more.getAttribute("aria-expanded")).toBe("false");
-    expect(more.getAttribute("aria-label")).toMatch(
-      /^Show \d+ more in the history: \d+ commits, \d+ PRs$/,
-    );
-    expect(names().some((n) => n.includes("commit 7be210e"))).toBe(false);
-
-    fireEvent.click(more);
-    expect(fold()!.getAttribute("aria-expanded")).toBe("true");
-    expect(fold()!.getAttribute("aria-label")).toBe("Show less of the history");
-    expect(names().some((n) => n.includes("commit 7be210e"))).toBe(true);
-
-    fireEvent.click(fold()!);
-    expect(fold()!.getAttribute("aria-expanded")).toBe("false");
-  });
-
-  it("opens by itself when a clause cites something folded away", async () => {
+  it("verifies a deep source without opening the rest of the history", async () => {
     const user = userEvent.setup();
     setup(states.syntheticManyOwners(8));
+    const fold = screen.getByRole("button", { name: "Show 8" });
+    expect(row("commit:b000001")).toBeNull();
     expect(clause(3).textContent).toContain("The retry loop itself came earlier");
     await user.click(clause(3));
-    expect(names().some((n) => /^\w+, commit 7be210e, .*cited by clause 4/.test(n))).toBe(true);
-    expect(fold()).toBeUndefined();
+    expect(evidence().textContent).toContain("7be210e");
+    expect(evidence().textContent).toContain("an earlier change to lines 7–16");
+    expect(fold.isConnected).toBe(true);
+    expect(row("commit:b000001")).toBeNull();
+  });
+
+  it("opens a folded run of uncited changes on request", async () => {
+    const user = userEvent.setup();
+    setup(states.syntheticManyOwners(8));
+    expect(screen.getByText("8 earlier changes not cited by the answer")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Show 8" }));
+    expect(row("commit:b000001")).toBeTruthy();
+    expect(row("pr:707")).toBeTruthy();
   });
 
   it("has no axe violations while folded", async () => {
     const { container } = setup(states.syntheticManyOwners(8));
-    expect(fold()).toBeTruthy();
     expect((await axe(container)).violations).toEqual([]);
   });
 });

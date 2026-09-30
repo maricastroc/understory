@@ -29,7 +29,7 @@ test("⌘K searches cases and Escape closes the list without unpinning the case"
   page,
 }) => {
   await open(page);
-  await page.locator('li[data-clause="c1"] button').click();
+  await page.locator('li[data-clause="c1"] > button').click();
   await page.keyboard.press("Meta+k");
   const box = page.getByRole("combobox");
   await expect(box).toBeFocused();
@@ -37,7 +37,10 @@ test("⌘K searches cases and Escape closes the list without unpinning the case"
   await expect(page.getByRole("option")).toHaveText(/Why does refund skip the ledger\?/);
   await page.keyboard.press("Escape");
   await expect(box).toHaveAttribute("aria-expanded", "false");
-  await expect(page.locator('li[data-clause="c1"] button')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator('li[data-clause="c1"] > button')).toHaveAttribute(
+    "aria-expanded",
+    "true",
+  );
 });
 
 test("on a phone the cases open in a drawer that traps focus and closes on Escape", async ({
