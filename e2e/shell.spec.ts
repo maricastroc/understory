@@ -90,7 +90,11 @@ for (const edge of EDGES) {
     expect(await inViewport(page, 'button[aria-label="Open investigations"]')).toBe(edge.menu);
     const specimen = page.locator("section[data-datum-y]");
     await expect(specimen).toHaveAttribute("data-mode", edge.mode);
-    if (edge.code) expect(Math.round((await specimen.boundingBox())!.width)).toBe(edge.code);
+    if (edge.code) {
+      await expect
+        .poll(async () => Math.round((await specimen.boundingBox())!.width))
+        .toBe(edge.code);
+    }
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
