@@ -1,6 +1,7 @@
 import type { Confidence } from "./confidence";
 import type { Entailment } from "./entailment";
 import type { Narrative } from "./narrative";
+import type { NarrativeLanguage } from "./narrative-language";
 import type { VerifiedClaim } from "./verified-claim";
 
 export type VerifiedNarrative = Omit<Narrative, "claims"> & {
@@ -10,4 +11,5 @@ export type VerifiedNarrative = Omit<Narrative, "claims"> & {
   ungroundedClaims: number;
   confidence: Confidence;
   entailment?: Entailment;
+  language?: NarrativeLanguage;
 };

@@ -11,6 +11,7 @@ import { githubAppConfigured, githubTokenForRepo, installUrl } from "@/lib/githu
 import { narrate } from "@understory/core/investigate";
 import { getModel } from "@understory/core/llm";
 import { ensureHistoryStore } from "@/lib/history-store";
+import { AI_DAILY_LIMIT_REACHED } from "@/lib/ai-limit";
 import { consumeAiDailyLimit, rateLimit } from "@/lib/ratelimit";
 import type { ArtifactRef, Evidence } from "@understory/core/types";
 
@@ -18,9 +19,6 @@ export const runtime = "nodejs";
 export const maxDuration = 120;
 
 const DEFAULT_LINE_QUESTION = "Why is this line the way it is? Reconstruct why it changed.";
-
-const AI_DAILY_LIMIT_REACHED =
-  "AI reconstruction is temporarily unavailable. The evidence and provenance chain below are still complete.";
 
 export async function POST(req: Request) {
   const authError = collectorAuthError(req);

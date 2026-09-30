@@ -3,16 +3,16 @@ import { Legend } from "../legend/Legend";
 import { liButton } from "../parts/button-class";
 
 export function Toolbar({
-  count,
+  history,
   keyOpen,
   answer,
-  onOpenList,
+  onHistory,
   onToggleKey,
 }: {
-  count: number;
+  history: string | null;
   keyOpen: boolean;
   answer: string | null;
-  onOpenList: () => void;
+  onHistory: () => void;
   onToggleKey: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -26,13 +26,13 @@ export function Toolbar({
       setCopied(false);
     }
   };
-  if (count === 0 && !answer) return null;
+  if (!history && !answer) return null;
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {count > 0 && (
+      {history && (
         <>
-          <button type="button" onClick={onOpenList} className={liButton("secondary", "", "sm")}>
-            All evidence · {count}
+          <button type="button" onClick={onHistory} className={liButton("secondary", "", "sm")}>
+            {history} ↓
           </button>
           <button
             type="button"

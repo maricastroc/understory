@@ -151,7 +151,7 @@ export function MapCanvas({
             y={datumY + 1}
             width={layout.step - (layout.mode === "sparse" ? 12 : 4)}
             height={reachOf(focused) + 14}
-            className="fill-li-steel-100"
+            className="fill-li-neutral-200 stroke-li-neutral-300"
           />
         )}
         {scale && mapped.length > 0 && (

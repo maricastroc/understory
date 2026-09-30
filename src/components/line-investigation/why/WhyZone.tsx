@@ -1,17 +1,11 @@
-import {
-  type KeyboardEvent,
-  type ReactNode,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState } from "react";
 import type { CasePhase } from "../case/types";
 import { clauseDescription } from "../copy/clause-copy";
-import type { InvestigationView, ViewArtifact } from "../model/types";
+import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types";
 import { ClauseRow } from "./ClauseRow";
 
-const RING_OFFSET = 14;
+const HOVER_DELAY = 120;
+const LEAVE_DELAY = 160;
 
 function showsClauses(view: InvestigationView, phase: CasePhase | undefined): boolean {
   if (phase || view.clauses.length === 0) return false;
@@ -19,9 +13,9 @@ function showsClauses(view: InvestigationView, phase: CasePhase | undefined): bo
 }
 
 function hintFor(view: InvestigationView, pinnedIndex: number | null, clauses: boolean): string {
-  if (pinnedIndex !== null) return `tracing clause ${pinnedIndex + 1} · other evidence dimmed`;
+  if (pinnedIndex !== null) return `checking clause ${pinnedIndex + 1} · Esc returns here`;
   if (!clauses) return "";
-  return "hover a clause to see its evidence";
+  return "select a clause to check its evidence";
 }
 
 export function WhyZone({
@@ -32,12 +26,10 @@ export function WhyZone({
   marked,
   onHover,
   onPick,
-  onClear,
-  onRings,
   compact,
-  demo = false,
   phase,
   failure,
+  renderEvidence,
 }: {
   view: InvestigationView;
   byId: Map<string, ViewArtifact>;
@@ -46,35 +38,23 @@ export function WhyZone({
   marked: Set<string>;
   onHover: (id: string | null) => void;
   onPick: (id: string) => void;
-  onClear: () => void;
-  onRings: (rings: Map<string, number>) => void;
   compact: boolean;
-  demo?: boolean;
   phase?: CasePhase;
   failure?: ReactNode;
+  renderEvidence?: (clause: ViewClause, id: string) => ReactNode;
 }) {
   const headingId = useId();
-  const listRef = useRef<HTMLOListElement>(null);
+  const evidenceId = useId();
   const buttons = useRef(new Map<string, HTMLButtonElement>());
   const [focusIndex, setFocusIndex] = useState(0);
+  const intent = useRef<number | undefined>(undefined);
+  const later = (fn: () => void, ms: number) => {
+    window.clearTimeout(intent.current);
+    intent.current = window.setTimeout(fn, ms);
+  };
+  useEffect(() => () => window.clearTimeout(intent.current), []);
   const pinnedIndex = view.clauses.findIndex((c) => c.id === pinned);
   const clauses = showsClauses(view, phase);
-
-  useLayoutEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-    const measure = () => {
-      const rings = new Map<string, number>();
-      for (const li of list.querySelectorAll<HTMLLIElement>("li[data-clause]")) {
-        rings.set(li.dataset.clause!, list.offsetTop + li.offsetTop + RING_OFFSET);
-      }
-      onRings(rings);
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(list);
-    return () => observer.disconnect();
-  }, [view.clauses, onRings]);
 
   const move = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
     if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
@@ -95,23 +75,12 @@ export function WhyZone({
           Reconstructed why
         </h2>
         <span className="text-xs text-li-text-subtle">
-          {demo
-            ? "hover a clause to trace its evidence"
-            : hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
+          {hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
         </span>
-        {pinned && !demo && (
-          <button
-            type="button"
-            onClick={onClear}
-            className="ml-auto cursor-pointer rounded-[3px] border border-li-divider px-2 py-0.5 text-[11.5px] text-li-ink hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
-          >
-            Clear · Esc
-          </button>
-        )}
       </div>
       <WhyBody view={view} phase={phase} failure={failure} />
       {clauses && (
-        <ol ref={listRef} className="relative mt-1 flex flex-col gap-1.5">
+        <ol className="relative mt-1 flex flex-col gap-1">
           {view.clauses.map((clause, i) => (
             <ClauseRow
               key={clause.id}
@@ -122,10 +91,14 @@ export function WhyZone({
               marked={!effective && marked.has(clause.id)}
               quiet={effective !== null && effective !== clause.id}
               compact={compact}
-              dense={demo && !compact}
               tabIndex={i === focusIndex ? 0 : -1}
-              onEnter={() => onHover(clause.id)}
-              onLeave={() => onHover(null)}
+              onPointerIn={() => later(() => onHover(clause.id), HOVER_DELAY)}
+              onPointerOut={() => later(() => onHover(null), LEAVE_DELAY)}
+              onFocusIn={() => {
+                window.clearTimeout(intent.current);
+                onHover(clause.id);
+              }}
+              onFocusOut={() => later(() => onHover(null), 0)}
               onPick={() => {
                 setFocusIndex(i);
                 onPick(clause.id);
@@ -135,6 +108,12 @@ export function WhyZone({
                 if (el) buttons.current.set(clause.id, el);
                 else buttons.current.delete(clause.id);
               }}
+              controls={`${evidenceId}-${clause.id}`}
+              evidence={
+                pinned === clause.id && renderEvidence
+                  ? renderEvidence(clause, `${evidenceId}-${clause.id}`)
+                  : null
+              }
             />
           ))}
         </ol>

@@ -4,18 +4,15 @@ import { axeViolations } from "./axe";
 async function open(page: Page, width = 1440, state = "resolved") {
   await page.setViewportSize({ width, height: 900 });
   await page.goto(`/dev/line?state=${state}`);
+  await page.locator(`[data-answer="${width >= 1100 ? "panel" : "strip"}"]`).waitFor();
   await page.locator('ol[aria-label="History, newest first"] button').first().waitFor();
   await page.evaluate(() => document.fonts.ready);
 }
 
-function labelBoxes(page: Page) {
-  return page.evaluate(() =>
-    [...document.querySelectorAll('ol[aria-label="History, newest first"] button')].map((b) => {
-      const r = b.getBoundingClientRect();
-      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
-    }),
-  );
-}
+const clause = (page: Page, n: number) => page.locator(`li[data-clause="c${n}"] > button:visible`);
+const evidence = (page: Page) => page.getByRole("region", { name: /^EVIDENCE · CLAUSE/ });
+const box = async (page: Page, selector: string) =>
+  (await page.locator(selector).first().boundingBox())!;
 
 function overlapping(boxes: Array<{ top: number; bottom: number; left: number; right: number }>) {
   for (let i = 0; i < boxes.length; i++) {
@@ -29,136 +26,131 @@ function overlapping(boxes: Array<{ top: number; bottom: number; left: number; r
   return null;
 }
 
-test("the investigated line's bottom edge and the datum rule are the same pixel row", async ({
-  page,
-}) => {
+test("the answer comes first: code beside the why, the history below both", async ({ page }) => {
   await open(page);
-  const { row, rule } = await page.evaluate(() => {
-    const datum = document.querySelector("li[data-datum]")!.getBoundingClientRect();
-    const line = document.querySelector("svg line.stroke-li-datum")!.getBoundingClientRect();
-    return { row: datum.bottom, rule: (line.top + line.bottom) / 2 };
-  });
-  expect(Math.abs(row - rule)).toBeLessThanOrEqual(1);
+  const code = await box(page, "section[data-datum-y]");
+  const why = (await page.getByRole("region", { name: "Reconstructed why" }).boundingBox())!;
+  const history = await box(page, "section#history");
+  expect(code.x + code.width).toBeLessThan(why.x);
+  expect(history.y).toBeGreaterThan(Math.max(code.y + code.height, why.y + why.height));
+  await expect(page.getByText("select a clause to check its evidence")).toBeVisible();
 });
 
-test("no confidence number, trace or titles in the default view", async ({ page }) => {
+test("a clause opens its evidence under itself and the code does not move", async ({ page }) => {
   await open(page);
-  await expect(page.getByText("0.90")).toHaveCount(0);
-  await expect(page.locator("path.stroke-li-evidence")).toHaveCount(0);
-  await expect(page.getByText("Customers double-billed during Stripe outage")).toHaveCount(0);
+  const before = await box(page, "section[data-datum-y]");
+  await clause(page, 1).click();
+  await expect(clause(page, 1)).toHaveAttribute("aria-expanded", "true");
+  const panel = evidence(page);
+  await expect(panel).toBeVisible();
+  await expect(panel.locator("mark")).toHaveText("212 customers were charged twice");
+  const clauseBox = (await clause(page, 1).boundingBox())!;
+  const panelBox = (await panel.boundingBox())!;
+  expect(panelBox.y).toBeGreaterThanOrEqual(clauseBox.y + clauseBox.height - 1);
+  expect(await box(page, "section[data-datum-y]")).toEqual(before);
 });
 
-test("labels never overlap, collapsed or revealed", async ({ page }) => {
-  await open(page);
-  expect(overlapping(await labelBoxes(page))).toBeNull();
-  await page.locator('li[data-clause="c1"] button').hover();
-  expect(overlapping(await labelBoxes(page))).toBeNull();
-});
-
-test("a long history folds at the code's height; chips and rows never overlap", async ({
-  page,
-}) => {
+test("a source deep in a long history is checked without opening the history", async ({ page }) => {
   await open(page, 1440, "many-owners");
-  const history = page.getByRole("list", { name: "History, newest first" });
-  const more = history.getByRole("button", { name: /^Show \d+ more in the history/ });
-  await expect(more).toBeVisible();
-  await expect(
-    history.getByRole("button", { name: /no review on pull request pr:700/ }),
-  ).toHaveText("∅ review");
-  expect(overlapping(await labelBoxes(page))).toBeNull();
-  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
-
-  await more.click();
-  const less = history.getByRole("button", { name: "Show less of the history" });
-  await expect(less).toBeFocused();
-  expect(overlapping(await labelBoxes(page))).toBeNull();
-  await page.locator('li[data-clause="c0"] button').hover();
-  expect(overlapping(await labelBoxes(page))).toBeNull();
-  expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
-
-  await less.click();
-  await expect(more).toBeVisible();
+  const height = () => page.evaluate(() => document.documentElement.scrollHeight);
+  const start = await height();
+  await clause(page, 3).click();
+  await expect(evidence(page)).toContainText("7be210e");
+  await expect(evidence(page)).toContainText("an earlier change to lines 7–16");
+  await expect(page.getByRole("button", { name: "Show 8" })).toBeVisible();
+  expect((await height()) - start).toBeLessThan(420);
+  expect(await height()).toBeLessThan(2000);
 });
 
-test("hovering clause 2 dims everything but its sources and draws the trace", async ({ page }) => {
+test("show in history lands on the source, and the bar leads back to the clause", async ({
+  page,
+}) => {
   await open(page);
-  await page.locator('li[data-clause="c1"] button').hover();
-  await expect(page.locator("path.stroke-li-evidence")).toHaveCount(1);
-  await expect(page.getByText("Customers double-billed during Stripe outage")).toBeVisible();
-  await expect(page.getByText("Bound retries in chargeCustomer")).toBeVisible();
-  const faded = await page.evaluate(
-    () => [...document.querySelectorAll('svg g[opacity="0.25"]')].length,
-  );
-  expect(faded).toBeGreaterThanOrEqual(4);
+  await clause(page, 1).click();
+  await evidence(page).getByRole("button", { name: "Show in history ↓" }).click();
+  const located = page.locator('[data-artifact="issue:1187"]');
+  await expect(located).toHaveAttribute("data-located", "true");
+  await expect(located).toBeInViewport();
+  const bar = page.locator("section#history > div.sticky");
+  await expect(bar).toContainText("tracing clause 2");
+  await expect(bar).toContainText("at 15 Mar 2023");
+  await bar.getByRole("button", { name: "↑ Back to clause 2" }).click();
+  await expect(clause(page, 1)).toBeInViewport();
+  await expect(clause(page, 1)).toBeFocused();
 });
 
-test("opening the drawer does not move any pixel of the instrument", async ({ page }) => {
+test("quiet years are drawn as short breaks, not as distance", async ({ page }) => {
   await open(page);
-  const before = await labelBoxes(page);
-  const specimen = await page.locator("section[data-datum-y]").boundingBox();
-  await page.getByRole("button", { name: /^E, issue/ }).click();
-  await expect(page.getByRole("dialog", { name: "issue:1187" })).toBeVisible();
-  const positions = (boxes: Array<{ top: number; left: number }>) =>
-    boxes.map((b) => [b.top, b.left]);
-  expect(positions(await labelBoxes(page))).toEqual(positions(before));
-  expect(await page.locator("section[data-datum-y]").boundingBox()).toEqual(specimen);
+  const breaks = page.locator('ol[aria-label="History, newest first"] > li.h-10');
+  await expect(breaks).toHaveCount(2);
+  await expect(breaks.nth(0)).toContainText("unchanged for 3y 6m");
+  await expect(breaks.nth(1)).toContainText("1y 8m with no change to line 9");
+  for (const b of await breaks.all())
+    expect((await b.boundingBox())!.height).toBeLessThanOrEqual(40);
 });
 
-test("keyboard only: preview, pin, open, step, close", async ({ page }) => {
+test("history rows never overlap, folded or opened", async ({ page }) => {
+  await open(page, 1440, "many-owners");
+  const rows = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll("[data-artifact] button[aria-expanded]")].map((b) => {
+        const r = b.getBoundingClientRect();
+        return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
+      }),
+    );
+  expect(overlapping(await rows())).toBeNull();
+  await page.getByRole("button", { name: "Show 8" }).click();
+  await page.locator('[data-artifact="pr:812"] button[aria-expanded]').click();
+  expect(overlapping(await rows())).toBeNull();
+});
+
+test("keyboard only: open a clause, step its sources, close, land back on the clause", async ({
+  page,
+}) => {
   await open(page);
-  await page.locator('li[data-clause="c0"] button').focus();
+  await clause(page, 0).focus();
   await page.keyboard.press("ArrowDown");
+  await expect(clause(page, 1)).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page.locator('li[data-clause="c1"] button')).toHaveAttribute("aria-pressed", "true");
-  const label = page.getByRole("button", { name: /^E, issue/ });
-  await label.focus();
+  await expect(evidence(page)).toBeVisible();
+  await evidence(page).getByRole("button", { name: "Next source" }).focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("dialog", { name: "issue:1187" })).toBeVisible();
-  await page.keyboard.press("ArrowDown");
-  await expect(page.getByRole("dialog", { name: "7be210e" })).toBeVisible();
+  await expect(evidence(page)).toContainText("Bound retries in chargeCustomer");
+  await page.keyboard.press("ArrowLeft");
+  await expect(evidence(page)).toContainText("Customers double-billed during Stripe outage");
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(label).toBeFocused();
-  await page.keyboard.press("Escape");
-  await expect(page.locator('li[data-clause="c1"] button')).toHaveAttribute(
-    "aria-pressed",
-    "false",
-  );
+  await expect(evidence(page)).toHaveCount(0);
+  await expect(clause(page, 1)).toBeFocused();
 });
 
-for (const setup of ["default", "pinned", "drawer"] as const) {
+for (const setup of ["default", "evidence", "located", "long"] as const) {
   test(`axe in Chrome, contrast included: ${setup}`, async ({ page }) => {
-    await open(page);
-    if (setup === "pinned") await page.locator('li[data-clause="c1"] button').click();
-    if (setup === "drawer") await page.getByRole("button", { name: /^E, issue/ }).click();
+    await open(page, 1440, setup === "long" ? "many-owners" : "resolved");
+    if (setup !== "default" && setup !== "long") await clause(page, 1).click();
+    if (setup === "located")
+      await evidence(page).getByRole("button", { name: "Show in history ↓" }).click();
     await page.mouse.move(0, 0);
-    expect(await axeViolations(page, { within: "main" })).toEqual([]);
+    expect(await axeViolations(page, { within: "main", settleMs: 400 })).toEqual([]);
   });
 }
 
 for (const width of [1440, 1280, 960, 390]) {
-  test(`responsive ${width}: no page overflow, bore below the code`, async ({ page }) => {
+  test(`responsive ${width}: no page overflow, evidence in place, history below the code`, async ({
+    page,
+  }) => {
     await open(page, width);
     const overflow = await page.evaluate(() => {
       const main = document.querySelector("main")!;
       return main.scrollWidth - main.clientWidth;
     });
     expect(overflow).toBeLessThanOrEqual(0);
-    const geometry = await page.evaluate(() => {
-      const specimen = document.querySelector("section[data-datum-y]")!.getBoundingClientRect();
-      const first = document
-        .querySelector('ol[aria-label="History, newest first"] button')!
-        .getBoundingClientRect();
-      return {
-        specimenBottom: specimen.bottom,
-        specimenRight: specimen.right,
-        firstTop: first.top,
-        firstLeft: first.left,
-        mode: document.querySelector("section[data-datum-y]")!.getAttribute("data-mode"),
-      };
-    });
-    if (geometry.mode === "strip")
-      expect(geometry.firstTop).toBeGreaterThan(geometry.specimenBottom);
-    else expect(geometry.firstLeft).toBeGreaterThan(geometry.specimenRight);
+    await clause(page, 1).click();
+    const clauseBox = (await clause(page, 1).boundingBox())!;
+    const panelBox = (await evidence(page).boundingBox())!;
+    expect(panelBox.y).toBeGreaterThanOrEqual(clauseBox.y + clauseBox.height - 1);
+    expect(panelBox.x + panelBox.width).toBeLessThanOrEqual(width);
+    const code = await box(page, "section[data-datum-y]");
+    const history = await box(page, "section#history");
+    expect(history.y).toBeGreaterThan(code.y + code.height);
   });
 }

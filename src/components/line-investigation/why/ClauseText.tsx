@@ -1,39 +1,48 @@
-import type { ViewClause } from "../model/types";
-import { ClauseLetters } from "./ClauseLetters";
-import { ClauseTally } from "./ClauseTally";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-export function ClauseText({
-  clause,
-  expanded,
-  compact,
-  ink,
-}: {
-  clause: ViewClause;
-  expanded: boolean;
-  compact: boolean;
-  ink: string;
-}) {
+const LINES = 3;
+const REVEAL_MS = 200;
+
+export function ClauseText({ text, open, ink }: { text: string; open: boolean; ink: string }) {
+  const inner = useRef<HTMLSpanElement>(null);
+  const [size, setSize] = useState<{ full: number; clamp: number } | null>(null);
+  const [settled, setSettled] = useState(!open);
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setSettled(false);
+  }
+  const clamped = !open && settled;
+
+  useEffect(() => {
+    if (open) return;
+    const t = window.setTimeout(() => setSettled(true), REVEAL_MS);
+    return () => window.clearTimeout(t);
+  }, [open]);
+
+  useLayoutEffect(() => {
+    const el = inner.current;
+    if (!el) return;
+    const read = () => {
+      const line = Number.parseFloat(getComputedStyle(el).lineHeight) || 24;
+      const full = el.scrollHeight;
+      const clamp = Math.min(full, Math.round(line * LINES));
+      setSize((s) => (s && s.full === full && s.clamp === clamp ? s : { full, clamp }));
+    };
+    read();
+    const observer = new ResizeObserver(read);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [text]);
+
   return (
-    <span className="pointer-events-none relative min-w-0">
-      <span aria-hidden className="invisible block">
-        <span className="block text-base leading-[1.42]">
-          {clause.text} <ClauseLetters clause={clause} />
-        </span>
-        {compact && <ClauseTally clause={clause} layout="below" />}
+    <span
+      className="pointer-events-none block overflow-hidden text-[17px] leading-[1.42] transition-[max-height] duration-200 ease-out motion-reduce:transition-none"
+      style={{ maxHeight: size ? (open ? size.full : size.clamp) : `${LINES}lh` }}
+    >
+      <span ref={inner} className={`${ink} ${clamped ? "line-clamp-3" : "block"}`}>
+        {text}
       </span>
-      {expanded ? (
-        <span className={`absolute inset-x-0 top-0 block text-base leading-[1.42] ${ink}`}>
-          {clause.text} <ClauseLetters clause={clause} />
-          {compact && <ClauseTally clause={clause} layout="below" />}
-        </span>
-      ) : (
-        <span className="absolute inset-x-0 top-0 flex min-w-0 items-baseline gap-1.5">
-          <span className={`truncate text-[17px] leading-[1.42] font-medium ${ink}`}>
-            {clause.text}
-          </span>
-          <ClauseLetters clause={clause} />
-        </span>
-      )}
     </span>
   );
 }

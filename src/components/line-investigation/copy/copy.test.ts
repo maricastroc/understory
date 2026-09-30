@@ -6,7 +6,6 @@ import { artifactName, gapName } from "./accessible-name";
 import { dateLine, depthText, displayId, labelTitle, tickText } from "./artifact-copy";
 import { clauseDescription, tallyText } from "./clause-copy";
 import { artifactStatus, citesText, contextLines, metaLine } from "./drawer-copy";
-import { evidenceEntries } from "./evidence-entries";
 import { gapBody, gapLabel, gapLetter } from "./gap-copy";
 import { checklistText } from "./verdict-copy";
 
@@ -47,18 +46,6 @@ describe("gaps", () => {
     }).gaps;
     expect([gapLetter(unverified), gapLabel(unverified)]).toEqual(["?", "not verified"]);
     expect(gapBody(unverified, art("commit:7be210e"))).toMatch(/not verified/);
-  });
-
-  it("lists every artifact plus gaps in depth order", () => {
-    expect(evidenceEntries(view).map((e) => e.id)).toEqual([
-      "commit:92f6a3f",
-      "review:812-1",
-      "review:812-0",
-      "pr:812",
-      "issue:1187",
-      "commit:7be210e",
-      "gap:pull_request:commit:7be210e",
-    ]);
   });
 });
 

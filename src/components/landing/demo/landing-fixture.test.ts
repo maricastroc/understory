@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { landingBlame, landingLines, landingRejected, landingView } from "./landing-fixture";
+import { datumToken } from "../../line-investigation/specimen/datum-token";
+import {
+  landingBlame,
+  landingLines,
+  landingRejected,
+  landingVersions,
+  landingView,
+} from "./landing-fixture";
 
 describe("landing fixtures", () => {
   it("derive the retry-cap case through the real view model", () => {
@@ -26,6 +33,16 @@ describe("landing fixtures", () => {
 
   it("reject a citation that is not in the evidence with the real check", () => {
     expect(landingRejected).toEqual(["pr:9999"]);
+  });
+
+  it("give line versions only to collected artifacts, aligned on the token's column", () => {
+    const ids = new Set(landingView.artifacts.map((a) => a.id));
+    expect(landingVersions.every((v) => ids.has(v.artifactId))).toBe(true);
+    const token = datumToken(landingView.question, landingLines[8])!;
+    const [revision, origin] = landingVersions;
+    expect(revision.text.slice(0, token.start)).toBe(landingLines[8].slice(0, token.start));
+    expect(revision.text[token.start]).toBe("5");
+    expect(origin.text.length).toBeLessThan(token.start);
   });
 
   it("keep blame spans inside the file and contiguous", () => {

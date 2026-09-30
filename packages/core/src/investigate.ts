@@ -2,6 +2,7 @@ import { getAuditor } from "./auditor";
 import { type CollectInput, collect } from "./collect";
 import { checkEntailment } from "./entail";
 import { type LlmConfig, getModel } from "./llm";
+import { narrativeLanguage } from "./narrative-language";
 import { synthesize } from "./synthesize";
 import type { DigResult, Entailment, Evidence, VerifiedNarrative } from "./types";
 import { verify } from "./verify";
@@ -36,7 +37,10 @@ export async function narrate(
         entailment = undefined;
       }
     }
-    return { narrative: verify(evidence, narrative, entailment) };
+    const verified = verify(evidence, narrative, entailment);
+    const asked = config.language === "en" || config.language === "pt" ? config.language : null;
+    const language = asked ?? narrativeLanguage(verified);
+    return { narrative: language ? { ...verified, language } : verified };
   } catch (e) {
     return { narrative: null, error: synthesisError(e) };
   }

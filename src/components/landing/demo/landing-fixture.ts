@@ -8,6 +8,7 @@ import type {
   Narrative,
 } from "@understory/core/types";
 import { buildInvestigationView } from "../../line-investigation/model/build-investigation-view";
+import type { LineVersion } from "./strata/types";
 
 export const LANDING_NOW = Date.parse("2026-09-27T12:00:00.000Z");
 export const LANDING_PATH = "src/billing/charge.ts";
@@ -158,6 +159,15 @@ export const landingLines = [
   "  }",
   "  throw new ChargeFailed(req.id);",
   "}",
+];
+
+export const landingVersions: LineVersion[] = [
+  {
+    artifactId: "pr:812",
+    text: "  for (let attempt = 0; attempt < 5; attempt++) {",
+    note: "first revision",
+  },
+  { artifactId: "commit:7be210e", text: "  while (true) {", absent: "no bound" },
 ];
 
 const span = (startLine: number, endLine: number, short: string, date: string): BlameSpan => ({

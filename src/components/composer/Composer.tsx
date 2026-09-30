@@ -79,13 +79,18 @@ export function Composer({
     busy: typing || viewer.loading || investigating,
   });
   const [question, setQuestion] = useState("");
+  const [askedPrefill, setAskedPrefill] = useState<number | null>(null);
+  if (prefill && prefill.question !== undefined && prefill.nonce !== askedPrefill) {
+    setAskedPrefill(prefill.nonce);
+    setQuestion(prefill.question);
+  }
 
   const handledPrefill = useRef<number | null>(null);
   useEffect(() => {
     if (!prefill || !repo.ready || handledPrefill.current === prefill.nonce) return;
     handledPrefill.current = prefill.nonce;
     setQuery("");
-    void viewer.open(prefill.path, tokenValue, prefill.line);
+    void viewer.open(prefill.path, tokenValue, prefill.line, prefill.end);
   }, [prefill, repo.ready, viewer, tokenValue]);
 
   const stage: ComposerStage =

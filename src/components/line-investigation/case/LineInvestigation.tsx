@@ -1,21 +1,32 @@
 "use client";
 
 import type { DigResult } from "@understory/core/types";
-import { type ReactNode, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { evidenceEntries } from "../copy/evidence-entries";
-import { EvidenceDrawer } from "../drawer/EvidenceDrawer";
-import { Instrument } from "../instrument/Instrument";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
+import { Answer } from "../answer/Answer";
+import { tickText } from "../copy/artifact-copy";
+import { historyModel } from "../history/history-model";
+import { HistorySection } from "../history/HistorySection";
 import type { SpecimenSlot } from "../instrument/types";
 import { buildInvestigationView } from "../model/build-investigation-view";
+import { cssEscape, reveal } from "../parts/dom";
 import type { ViewArtifact } from "../model/types";
 import type { SpecimenLayout } from "../specimen/types";
-import { caseReducer, drawerOpen, effectiveClause, initialCaseState } from "../state/case-reducer";
+import { caseReducer, initialCaseState } from "../state/case-reducer";
 import { readKeyPreference, writeKeyPreference } from "./key-preference";
 import { TitleRow } from "./TitleRow";
 import { Toolbar } from "./Toolbar";
 import { useCaseKeyboard } from "./use-case-keyboard";
 import type { CasePhase } from "./types";
-import { useFocusReturn } from "./use-focus-return";
+
+const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 
 export function LineInvestigation({
   result,
@@ -25,6 +36,7 @@ export function LineInvestigation({
   renderSpecimen,
   onDrill,
   onFollowUp,
+  onBackToQuestion,
   phase,
   failure,
 }: {
@@ -35,6 +47,7 @@ export function LineInvestigation({
   renderSpecimen: SpecimenSlot;
   onDrill?: (a: ViewArtifact) => void;
   onFollowUp?: () => void;
+  onBackToQuestion?: () => void;
   phase?: CasePhase;
   failure?: ReactNode;
 }) {
@@ -42,16 +55,16 @@ export function LineInvestigation({
     () => buildInvestigationView(result, { now, pending }),
     [result, now, pending],
   );
-  const entries = useMemo(() => evidenceEntries(view), [view]);
-  const order = useMemo(() => entries.map((e) => e.id), [entries]);
+  const model = useMemo(() => historyModel(view, now), [view, now]);
   const [state, dispatch] = useReducer(caseReducer, undefined, () =>
     initialCaseState(readKeyPreference()),
   );
   const firstKey = useRef(true);
+  const answerRef = useRef<HTMLDivElement | null>(null);
+  const lastPinned = useRef<string | null>(null);
   const [collectedHere] = useState(() => phase === "collecting");
 
-  useCaseKeyboard(state, dispatch, order);
-  useFocusReturn(drawerOpen(state));
+  useCaseKeyboard(dispatch);
 
   useEffect(() => {
     if (firstKey.current) {
@@ -61,9 +74,43 @@ export function LineInvestigation({
     writeKeyPreference(state.keyOpen);
   }, [state.keyOpen]);
 
-  const effective = effectiveClause(state);
-  const clause = view.clauses.find((c) => c.id === effective);
-  const active = clause ? new Set(clause.citations) : null;
+  const clauseButton = useCallback(
+    (id: string) =>
+      answerRef.current?.querySelector<HTMLButtonElement>(
+        `[data-clause="${cssEscape(id)}"] > button`,
+      ) ?? null,
+    [],
+  );
+
+  useEffect(() => {
+    const was = lastPinned.current;
+    lastPinned.current = state.pinnedClause;
+    if (!was || state.pinnedClause) return;
+    const focused = document.activeElement;
+    if (!focused || focused === document.body || !focused.isConnected) clauseButton(was)?.focus();
+  }, [state.pinnedClause, clauseButton]);
+
+  const back = useCallback(
+    (clause: string | null, source?: string) => {
+      if (clause && source) dispatch({ type: "trace", clause, source });
+      requestAnimationFrame(() => {
+        const target = clause ? clauseButton(clause) : null;
+        reveal(target ?? answerRef.current, "center");
+        target?.focus({ preventScroll: true });
+      });
+    },
+    [clauseButton],
+  );
+
+  const historyCount = model.strata.length;
+  const hasHistory = !phase && (historyCount > 0 || model.loose.length > 0);
+  const summary = hasHistory
+    ? historyCount > 0
+      ? `History · ${plural(historyCount, "change")}${
+          model.originDays !== null ? ` over ${tickText(model.originDays).replace("−", "")}` : ""
+        }`
+      : `History · ${plural(model.loose.length, "artifact")}`
+    : null;
 
   return (
     <div className="flex flex-col gap-5.5 font-li-body text-li-ink">
@@ -73,40 +120,40 @@ export function LineInvestigation({
         onToggleVerdict={() => dispatch({ type: "toggle-verdict" })}
         onCloseVerdict={() => dispatch({ type: "close-verdict" })}
         onFollowUp={onFollowUp}
+        onBackToQuestion={onBackToQuestion}
         phase={phase}
       />
-      <Instrument
-        view={view}
-        state={state}
-        dispatch={dispatch}
-        layout={layout}
-        now={now}
-        renderSpecimen={renderSpecimen}
-        phase={phase}
-        failure={failure}
-        arrive={collectedHere && !phase}
-      />
+      <div ref={answerRef} className="scroll-mt-20">
+        <Answer
+          view={view}
+          state={state}
+          dispatch={dispatch}
+          layout={layout}
+          renderSpecimen={renderSpecimen}
+          maxDays={model.originDays ?? 0}
+          onDrill={onDrill}
+          phase={phase}
+          failure={failure}
+        />
+      </div>
       {!phase && (
         <Toolbar
-          count={entries.length}
+          history={summary}
           keyOpen={state.keyOpen}
           answer={view.clauses.length && !view.clauses[0].silent ? view.answer : null}
-          onOpenList={() => dispatch({ type: "open-list" })}
+          onHistory={() => reveal(document.getElementById("history"), "start")}
           onToggleKey={() => dispatch({ type: "toggle-key" })}
         />
       )}
-      {drawerOpen(state) && (
-        <EvidenceDrawer
-          entries={entries}
-          artifacts={view.artifacts}
-          clauses={view.clauses}
-          inspected={state.inspected}
-          active={active}
-          onInspect={(id) => dispatch({ type: "inspect", id })}
-          onList={() => dispatch({ type: "open-list" })}
-          onClose={() => dispatch({ type: "close-drawer" })}
-          onStep={(delta) => dispatch({ type: "step", order, delta })}
+      {hasHistory && (
+        <HistorySection
+          model={model}
+          view={view}
+          state={state}
+          dispatch={dispatch}
+          onBack={back}
           onDrill={onDrill}
+          arrive={collectedHere}
         />
       )}
     </div>

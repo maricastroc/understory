@@ -1,8 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { narrativeLanguage } from "@understory/core/narrative-language";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ErrorState } from "../ErrorState";
+import { liButton } from "../line-investigation/parts/button-class";
 import { Composer } from "../composer/Composer";
 import type { ComposerPrefill } from "../composer/composer-prefill";
 import { useRepo } from "../composer/use-repo";
@@ -29,6 +31,8 @@ import { casePaths } from "./case-paths";
 import { recentRepos } from "./recent-repos";
 import { DEFAULT_REPO, DEMO_LINE, type Entry, useInvestigation } from "./use-investigation";
 
+const LANGUAGE_NAME = { en: "English", pt: "Portuguese" } as const;
+
 export function Investigator() {
   const user = useAuth();
   const {
@@ -48,6 +52,7 @@ export function Investigator() {
     investigate,
     drillInto,
     retryDraft,
+    rewrite,
     selectCase,
     backToCode,
     newInvestigation,
@@ -95,6 +100,17 @@ export function Investigator() {
     selectCase(id);
   }, [loaded, params, selectCase]);
 
+  const rewriteTarget = (() => {
+    if (!current || current.pending || current.rewriting || !current.result.narrative) return null;
+    const written = narrativeLanguage(current.result.narrative);
+    if (!written || written === language || current.rewriteError?.language === language)
+      return null;
+    return current.caseId;
+  })();
+  useEffect(() => {
+    if (rewriteTarget) void rewrite(rewriteTarget, language);
+  }, [rewriteTarget, language, rewrite]);
+
   const tokenValue = token.trim() || undefined;
   const collecting = !!draft && !draft.error;
   const busy = loading && !collecting;
@@ -140,6 +156,25 @@ export function Investigator() {
       path: loc.file,
     });
     setPrefill({ path: loc.file, line: loc.startLine, nonce: ++prefillNonce.current });
+    backToCode();
+  }
+
+  function backToQuestion(entry: Entry) {
+    const loc = entry.result.evidence.location;
+    if (!loc) return;
+    const target = entry.form.repoPath;
+    if (target !== repoPath || !repo.ready) {
+      setRepoPath(target);
+      void repo.open(target, tokenValue);
+    }
+    setFollowParent(null);
+    setPrefill({
+      path: loc.file,
+      line: loc.startLine,
+      end: loc.endLine,
+      question: entry.form.question || entry.result.evidence.question,
+      nonce: ++prefillNonce.current,
+    });
     backToCode();
   }
 
@@ -287,15 +322,34 @@ export function Investigator() {
               }
             />
           ) : lineCase && current ? (
-            <LiveLineInvestigation
-              key={current.mountKey ?? current.caseId}
-              result={current.result}
-              repoPath={current.form.repoPath}
-              pending={current.pending ?? false}
-              token={tokenValue}
-              onDrill={drill(current)}
-              onFollowUp={() => followUp(current)}
-            />
+            <>
+              {current.rewriteError?.language === language && (
+                <p
+                  role="status"
+                  className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-li-text-subtle"
+                >
+                  Could not rewrite this analysis in {LANGUAGE_NAME[language]}:{" "}
+                  {current.rewriteError.message}
+                  <button
+                    type="button"
+                    onClick={() => void rewrite(current.caseId, language)}
+                    className={liButton("ghost", "", "sm")}
+                  >
+                    Try again
+                  </button>
+                </p>
+              )}
+              <LiveLineInvestigation
+                key={current.mountKey ?? current.caseId}
+                result={current.rewriting ? { ...current.result, narrative: null } : current.result}
+                repoPath={current.form.repoPath}
+                pending={(current.pending ?? false) || !!current.rewriting}
+                token={tokenValue}
+                onDrill={drill(current)}
+                onFollowUp={() => followUp(current)}
+                onBackToQuestion={() => backToQuestion(current)}
+              />
+            </>
           ) : null}
 
           {!busy && !lineCase && !draftCase && view === "case" && current && (

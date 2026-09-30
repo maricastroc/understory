@@ -11,6 +11,7 @@ export type { Evidence } from "./evidence";
 export type { Claim } from "./claim";
 export type { VerifiedClaim } from "./verified-claim";
 export type { Narrative } from "./narrative";
+export type { NarrativeLanguage } from "./narrative-language";
 export type { Confidence } from "./confidence";
 export type { EntailmentStatus, CitationCheck, Entailment } from "./entailment";
 export type { VerifiedNarrative } from "./verified-narrative";
