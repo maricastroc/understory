@@ -79,13 +79,7 @@ export function ClauseRow({
             <ClauseLetters clause={clause} />
           </span>
         ) : (
-          <ClauseText
-            clause={clause}
-            expanded={expanded}
-            compact={compact}
-            ink={ink}
-            surface={surface}
-          />
+          <ClauseText clause={clause} expanded={expanded} compact={compact} ink={ink} />
         )}
         {dense ? (
           <span className={tallyVisible}>
