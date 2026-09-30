@@ -52,8 +52,8 @@ describe("HeroDemo", () => {
   });
 
   it.each([
-    ["wide", ".min-\\[900px\\]\\:hidden"],
-    ["vertical", ".max-\\[900px\\]\\:hidden"],
+    ["wide", ".min-\\[1200px\\]\\:hidden"],
+    ["stacked", ".max-\\[1200px\\]\\:hidden"],
   ])("passes axe in its %s form", async (_, hiddenByCss) => {
     const { container } = render(<HeroDemo />);
     container.querySelector<HTMLElement>(hiddenByCss)!.style.display = "none";

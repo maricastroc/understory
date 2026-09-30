@@ -15,28 +15,37 @@ const visibleCode = (page: Page) => demo(page).locator('ol[aria-label^="Code, li
 const visibleHistory = (page: Page) =>
   demo(page).locator('ol[aria-label="History, newest first"]:visible');
 
-test("at 1440 the demo is the 1120-wide roots drawing at scale 1 and nothing is clipped", async ({
+test("at 1440 the demo is the 1600-wide strata drawing scaled to fit, nothing clipped", async ({
   page,
 }) => {
   await open(page);
+  await page.waitForFunction(
+    () =>
+      document.querySelector<HTMLElement>(
+        'section[aria-label^="Example investigation"] .origin-top-left',
+      )?.style.transform !== "scale(1)",
+  );
   const frame = await page.evaluate(() => {
     const inner = document.querySelector<HTMLElement>(
       'section[aria-label^="Example investigation"] .origin-top-left',
     )!;
     const outer = inner.parentElement!.getBoundingClientRect();
-    const drawn = [...inner.querySelectorAll("svg *, li")].map(
+    const drawn = [...inner.querySelectorAll("[data-strata] *")].map(
       (e) => e.getBoundingClientRect().bottom - outer.top,
     );
     return {
-      width: inner.getBoundingClientRect().width,
-      transform: inner.style.transform,
+      width: inner.style.width,
+      scale: Number(/scale\(([\d.]+)\)/.exec(inner.style.transform)?.[1]),
+      shown: inner.getBoundingClientRect().width,
+      outer: outer.width,
       height: outer.height,
       lowest: Math.max(...drawn),
     };
   });
-  expect(frame.width).toBe(1120);
-  expect(frame.transform).toBe("scale(1)");
-  expect(frame.lowest).toBeLessThanOrEqual(frame.height);
+  expect(frame.width).toBe("1600px");
+  expect(frame.scale).toBeLessThan(1);
+  expect(Math.abs(frame.shown - frame.outer)).toBeLessThanOrEqual(1);
+  expect(frame.lowest).toBeLessThanOrEqual(frame.height + 1);
   await expect(visibleCode(page)).toBeVisible();
 });
 
@@ -55,29 +64,33 @@ test("the hero reads eyebrow, headline, subheadline, actions, then the preview",
   expect([...order].sort((a, b) => a - b)).toEqual(order);
 });
 
-test("clause 2 is active on load with a green root to E and D; hover moves it", async ({
+test("clause 2 is active on load with a green trace to E and D; hover moves it", async ({
   page,
 }) => {
   await open(page);
   await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "true");
-  const trace = demo(page).locator("svg path.stroke-li-evidence:visible");
-  await expect(trace).toHaveCount(1);
-  await expect(demo(page).locator("svg .fill-li-evidence:visible")).toHaveCount(1);
-  await expect(demo(page).locator("svg .fill-li-evidence-tint:visible")).toHaveCount(1);
-  const labels = visibleHistory(page).locator("li");
-  await expect(
-    labels.filter({ hasText: "Customers double-billed during Stripe outage" }),
-  ).toHaveCount(1);
-  await expect(labels.filter({ hasText: "Bound retries in chargeCustomer" })).toHaveCount(1);
-  await expect(labels.filter({ hasText: "Cap charge retries at 3" })).toHaveCount(0);
+  const records = visibleHistory(page).locator("li");
+  const quoted = records.filter({ hasText: "quoted verbatim" });
+  await expect(quoted).toHaveCount(1);
+  await expect(quoted).toContainText("212 customers were charged twice");
+  await expect(quoted).toContainText("Customers double-billed during Stripe outage");
+  await expect(records.filter({ hasText: "Cap charge retries at 3" })).toHaveCount(1);
+  await expect(records.filter({ hasText: "first revision" })).toContainText(
+    "for (let attempt = 0; attempt < 5; attempt++) {",
+  );
 
   await visibleClause(page, /Review cut/).hover();
   await page.mouse.move(5, 5);
   await expect(visibleClause(page, /Review cut/)).toHaveAttribute("aria-pressed", "true");
   await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "false");
+  await expect(records.filter({ hasText: "quoted verbatim" })).toContainText(
+    "3 gives a 7 s worst case",
+  );
 });
 
-test("orange only on the primary calls to action; no ring, no percentage", async ({ page }) => {
+test("brand orange only on the primary calls to action; no ring, no percentage", async ({
+  page,
+}) => {
   await open(page);
   const found = await page.evaluate(() => {
     const orange = ["rgb(180, 83, 9)", "rgb(143, 64, 8)", "rgb(250, 234, 208)"];
@@ -102,23 +115,15 @@ test("orange only on the primary calls to action; no ring, no percentage", async
   }
 });
 
-test("the demo reads the same tokens as the app: changing --color-li-evidence changes both", async ({
-  page,
-}) => {
-  const traced = async () => {
-    await page.locator("svg path.stroke-li-evidence").first().waitFor({ state: "attached" });
-    await page.evaluate(() =>
-      document.documentElement.style.setProperty("--color-li-evidence", "rgb(1, 2, 3)"),
-    );
-    return page.evaluate(
-      () => getComputedStyle(document.querySelector("svg path.stroke-li-evidence")!).stroke,
-    );
-  };
+test("the demo reads its palette from the strata tokens in globals.css", async ({ page }) => {
   await open(page);
-  expect(await traced()).toBe("rgb(1, 2, 3)");
-  await page.goto("/dev/line?state=resolved");
-  await page.locator("li[data-clause] button").nth(1).hover();
-  expect(await traced()).toBe("rgb(1, 2, 3)");
+  const trace = demo(page).locator("[data-strata]:visible .bg-strata-trace").first();
+  await trace.waitFor({ state: "attached" });
+  await page.evaluate(() =>
+    document.documentElement.style.setProperty("--color-strata-trace", "rgb(1, 2, 3)"),
+  );
+  await expect(trace).toHaveCSS("background-color", "rgb(1, 2, 3)");
+  await expect(demo(page)).toHaveCSS("background-color", "rgb(244, 241, 234)");
 });
 
 test("links resolve: /app and #method", async ({ page }) => {
@@ -132,8 +137,8 @@ test("links resolve: /app and #method", async ({ page }) => {
   ).toBeInViewport();
 });
 
-for (const width of [1440, 1024, 899, 700, 375]) {
-  test(`responsive ${width}: no horizontal overflow, wide or narrow roots, axe clean`, async ({
+for (const width of [1440, 1200, 1199, 700, 375]) {
+  test(`responsive ${width}: no horizontal overflow, wide or stacked strata, axe clean`, async ({
     page,
   }) => {
     await open(page, width);
@@ -143,17 +148,20 @@ for (const width of [1440, 1024, 899, 700, 375]) {
     expect(overflow).toBeLessThanOrEqual(0);
     const code = visibleCode(page);
     await expect(code).toHaveCount(1);
-    await expect(demo(page).locator("[data-roots]:visible")).toHaveAttribute(
-      "data-roots",
-      width < 900 ? "narrow" : "wide",
+    await expect(demo(page).locator("[data-strata]:visible")).toHaveAttribute(
+      "data-strata",
+      width < 1200 ? "stacked" : "wide",
     );
     await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "true");
     await expect(visibleHistory(page)).toHaveCount(1);
-    if (width < 900) {
-      const box = await code.locator("..").boundingBox();
+    if (width < 1200) {
+      const scroller = await code
+        .locator("xpath=ancestor::div[contains(@class, 'overflow-x-auto')][1]")
+        .boundingBox();
+      const codeBox = await code.boundingBox();
       const clauses = await visibleClause(page, /212 customers/).boundingBox();
-      expect(box!.y).toBeGreaterThan(clauses!.y);
-      expect(box!.width).toBeLessThanOrEqual(width);
+      expect(codeBox!.y).toBeGreaterThan(clauses!.y);
+      expect(scroller!.width).toBeLessThanOrEqual(width);
     }
     expect(await axeViolations(page)).toEqual([]);
   });
