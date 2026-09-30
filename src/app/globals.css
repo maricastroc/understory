@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-li-paper: #f2f2f3;
+  --color-li-paper: #f4f1ea;
   --color-li-ink: #1d1f20;
   --color-li-divider: color-mix(in srgb, #1d1f20 16%, transparent);
-  --color-li-neutral-100: #f5f5f8;
-  --color-li-neutral-200: #e7e7ea;
-  --color-li-neutral-300: #d4d4d7;
+  --color-li-neutral-100: #f9f7f2;
+  --color-li-neutral-200: #ece9e1;
+  --color-li-neutral-300: #dcd7cb;
   --color-li-neutral-400: #b7b7ba;
   --color-li-neutral-500: #98989b;
   --color-li-neutral-600: #7a7a7d;
