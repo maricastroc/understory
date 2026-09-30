@@ -117,14 +117,14 @@ export function computeBoreLayout(
   const { labels, leaders } = placeLabels(
     anchors,
     opts.datumY + BORE.firstSegment,
-    opts.labelPitch ?? BORE.labelPitch,
+    BORE.labelPitch,
   );
 
   const height = Math.max(
     ...glyphs.map((g) => g.bottom),
     ...gaps.map((g) => g.top + g.height),
     ...breaks.map((b) => b.top + b.height),
-    ...labels.map((l) => l.top + (opts.labelPitch ?? BORE.labelPitch)),
+    ...labels.map((l) => l.top + BORE.labelPitch),
   );
 
   return { glyphs, gaps, labels, leaders, breaks, ticks, height: height - opts.datumY };

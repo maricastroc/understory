@@ -23,7 +23,6 @@ import { useElementHeight } from "./use-element-height";
 
 const STRIP_GAP = 16;
 const WHY_TO_DATUM = 16;
-const DEMO_LABEL_PITCH = 44;
 
 export function Instrument({
   view,
@@ -35,7 +34,6 @@ export function Instrument({
   phase,
   failure,
   arrive = false,
-  demo = false,
 }: {
   view: InvestigationView;
   state: CaseState;
@@ -46,7 +44,6 @@ export function Instrument({
   phase?: CasePhase;
   failure?: ReactNode;
   arrive?: boolean;
-  demo?: boolean;
 }) {
   const geometry = instrumentGeometry(layout);
   const [whyRef, whyHeight] = useElementHeight();
@@ -68,9 +65,8 @@ export function Instrument({
   const panel = geometry.mode === "panel";
   const specimenTop = panel ? 0 : whyHeight + STRIP_GAP;
   const targetDatumY = panel
-    ? Math.max(demo ? 0 : SPECIMEN.defaultDatumY, whyHeight + WHY_TO_DATUM)
+    ? Math.max(SPECIMEN.defaultDatumY, whyHeight + WHY_TO_DATUM)
     : SPECIMEN.defaultDatumY;
-  const labelPitch = demo ? DEMO_LABEL_PITCH : undefined;
   const datumY = specimenDatum === null ? null : specimenTop + specimenDatum;
   const boreTop =
     datumY === null ? null : panel ? datumY : specimenTop + specimenHeight + STRIP_GAP;
@@ -81,7 +77,6 @@ export function Instrument({
       now,
       datumY: boreTop,
       expandedGroups: userExpanded,
-      labelPitch,
     });
     const forced = new Set(userExpanded);
     for (const g of collapsed.glyphs) {
@@ -93,9 +88,8 @@ export function Instrument({
           now,
           datumY: boreTop,
           expandedGroups: forced,
-          labelPitch,
         });
-  }, [input, now, boreTop, userExpanded, active, labelPitch]);
+  }, [input, now, boreTop, userExpanded, active]);
 
   const drawn = bore && (bore.glyphs.length > 0 || bore.gaps.length > 0) ? bore : null;
   const marks = drawn ? boreMarks(drawn, byId, active) : [];
@@ -160,7 +154,6 @@ export function Instrument({
           onClear={() => dispatch({ type: "clear-pin" })}
           onRings={onRings}
           compact={!panel}
-          demo={demo}
           phase={phase}
           failure={failure}
         />
@@ -222,12 +215,11 @@ export function Instrument({
                 hovered={state.hoverArtifact}
                 inspected={state.inspected}
                 shift={geometry.shift}
-                width={demo ? null : geometry.labelWidth}
+                width={geometry.labelWidth}
                 onHover={(id) => dispatch({ type: "hover-artifact", id })}
                 onInspect={(id) => dispatch({ type: "inspect", id })}
                 onToggleGroup={toggleGroup}
                 arrival={arrival}
-                static={demo}
               />
             </section>
           )}

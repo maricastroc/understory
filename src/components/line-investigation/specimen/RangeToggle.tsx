@@ -4,25 +4,14 @@ export function RangeToggle({
   controls,
   placement,
   onToggle,
-  static: still = false,
 }: {
   label: string;
   expanded: boolean;
   controls: string;
   placement: "top" | "bottom";
   onToggle: () => void;
-  static?: boolean;
 }) {
   const shape = placement === "top" ? "h-6.5" : "h-7.5 border-t border-li-divider";
-  if (still) {
-    return (
-      <div
-        className={`flex w-full shrink-0 items-center pl-23 text-[11px] text-li-text-subtle ${shape}`}
-      >
-        {label}
-      </div>
-    );
-  }
   return (
     <button
       type="button"
