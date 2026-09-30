@@ -1,55 +1,33 @@
 "use client";
 
 import type { ArtifactRef, DigResult } from "@understory/core/types";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { toArtifactRef } from "../../format";
+import { AnchorSpecimen } from "../answer/AnchorSpecimen";
 import type { SpecimenSlot } from "../instrument/types";
-import { LiveCodeSpecimen } from "../specimen/LiveCodeSpecimen";
 import { useSpecimenLayout } from "../specimen/use-specimen-layout";
 import { LineInvestigation } from "./LineInvestigation";
-import type { CasePhase } from "./types";
 
-export function LiveLineInvestigation({
+export function AnchoredInvestigation({
   result,
-  repoPath,
   pending,
-  token,
   onDrill,
-  onFollowUp,
-  onBackToQuestion,
   parent,
-  phase,
-  failure,
 }: {
   result: DigResult;
-  repoPath: string;
   pending: boolean;
-  token?: string;
   onDrill?: (ref: ArtifactRef) => void;
-  onFollowUp?: () => void;
-  onBackToQuestion?: () => void;
   parent?: { id: string; question?: string; onOpen?: () => void };
-  phase?: CasePhase;
-  failure?: ReactNode;
 }) {
   const [now] = useState(() => Date.now());
   const layout = useSpecimenLayout();
   const ev = result.evidence;
-  const loc = ev.location!;
+  const anchor = ev.anchor!;
+  const artifact = ev.artifacts.find((a) => a.id === anchor.id) ?? null;
   const canDrill = !!onDrill && (ev.repo.remoteUrl ?? "").includes("github.com");
 
-  const renderSpecimen: SpecimenSlot = (slot) => (
-    <LiveCodeSpecimen
-      repo={repoPath}
-      path={loc.file}
-      sha={ev.repo.sha ?? null}
-      datum={{ start: loc.startLine, end: loc.endLine }}
-      question={ev.question}
-      now={now}
-      token={token}
-      awaitingSha={phase === "collecting"}
-      {...slot}
-    />
+  const renderSpecimen: SpecimenSlot = () => (
+    <AnchorSpecimen anchor={anchor} artifact={artifact} collected={ev.artifacts.length} now={now} />
   );
 
   return (
@@ -60,11 +38,7 @@ export function LiveLineInvestigation({
       layout={layout}
       renderSpecimen={renderSpecimen}
       onDrill={canDrill ? (a) => onDrill?.(toArtifactRef(a.source)) : undefined}
-      onFollowUp={onFollowUp}
-      onBackToQuestion={onBackToQuestion}
       parent={parent}
-      phase={phase}
-      failure={failure}
     />
   );
 }

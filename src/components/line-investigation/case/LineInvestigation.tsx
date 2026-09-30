@@ -12,6 +12,7 @@ import {
 } from "react";
 import { Answer } from "../answer/Answer";
 import { tickText } from "../copy/artifact-copy";
+import { caseSubject } from "../copy/subject-copy";
 import { historyModel } from "../history/history-model";
 import { HistorySection } from "../history/HistorySection";
 import type { SpecimenSlot } from "../instrument/types";
@@ -37,6 +38,7 @@ export function LineInvestigation({
   onDrill,
   onFollowUp,
   onBackToQuestion,
+  parent,
   phase,
   failure,
 }: {
@@ -48,6 +50,7 @@ export function LineInvestigation({
   onDrill?: (a: ViewArtifact) => void;
   onFollowUp?: () => void;
   onBackToQuestion?: () => void;
+  parent?: { id: string; question?: string; onOpen?: () => void };
   phase?: CasePhase;
   failure?: ReactNode;
 }) {
@@ -56,6 +59,11 @@ export function LineInvestigation({
     [result, now, pending],
   );
   const model = useMemo(() => historyModel(view, now), [view, now]);
+  const subject = useMemo(
+    () => caseSubject(view, result.evidence.anchor),
+    [view, result.evidence.anchor],
+  );
+  const note = result.evidence.note;
   const [state, dispatch] = useReducer(caseReducer, undefined, () =>
     initialCaseState(readKeyPreference()),
   );
@@ -104,18 +112,39 @@ export function LineInvestigation({
 
   const historyCount = model.strata.length;
   const hasHistory = !phase && (historyCount > 0 || model.loose.length > 0);
-  const summary = hasHistory
-    ? historyCount > 0
-      ? `History · ${plural(historyCount, "change")}${
-          model.originDays !== null ? ` over ${tickText(model.originDays).replace("−", "")}` : ""
-        }`
-      : `History · ${plural(model.loose.length, "artifact")}`
-    : null;
+  const artifactCount = model.strata.reduce((n, s) => n + s.members.length, 0) + model.loose.length;
+  const summary = !hasHistory
+    ? null
+    : subject.kind === "anchor"
+      ? `Around ${subject.label} · ${plural(artifactCount, "artifact")}`
+      : historyCount > 0
+        ? `History · ${plural(historyCount, "change")}${
+            model.originDays !== null ? ` over ${tickText(model.originDays).replace("−", "")}` : ""
+          }`
+        : `History · ${plural(model.loose.length, "artifact")}`;
 
   return (
     <div className="flex flex-col gap-5.5 font-li-body text-li-ink">
+      {parent && (
+        <p className="-mb-3 font-li-mono text-[11.5px] text-li-text-subtle">
+          ↳ continues{" "}
+          {parent.onOpen ? (
+            <button
+              type="button"
+              onClick={parent.onOpen}
+              className="cursor-pointer text-li-ink underline decoration-li-neutral-400 underline-offset-2 hover:decoration-li-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
+            >
+              {parent.id}
+            </button>
+          ) : (
+            <span className="text-li-ink">{parent.id}</span>
+          )}
+          {parent.question && <span> · drilled from “{parent.question}”</span>}
+        </p>
+      )}
       <TitleRow
         view={view}
+        subject={subject}
         verdictOpen={state.verdictOpen}
         onToggleVerdict={() => dispatch({ type: "toggle-verdict" })}
         onCloseVerdict={() => dispatch({ type: "close-verdict" })}
@@ -123,6 +152,11 @@ export function LineInvestigation({
         onBackToQuestion={onBackToQuestion}
         phase={phase}
       />
+      {note && !phase && (
+        <p className="-mt-2 max-w-190 border-l-2 border-li-neutral-300 pl-3 text-[13px] leading-normal text-li-text-subtle">
+          {note}
+        </p>
+      )}
       <div ref={answerRef} className="scroll-mt-20">
         <Answer
           view={view}
@@ -130,6 +164,7 @@ export function LineInvestigation({
           dispatch={dispatch}
           layout={layout}
           renderSpecimen={renderSpecimen}
+          subject={subject}
           maxDays={model.originDays ?? 0}
           onDrill={onDrill}
           phase={phase}
@@ -149,6 +184,7 @@ export function LineInvestigation({
         <HistorySection
           model={model}
           view={view}
+          subject={subject}
           state={state}
           dispatch={dispatch}
           onBack={back}

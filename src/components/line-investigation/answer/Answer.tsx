@@ -4,6 +4,7 @@ import type { Dispatch, ReactNode } from "react";
 import { useMemo } from "react";
 import type { CasePhase } from "../case/types";
 import { clauseSources } from "../copy/source-copy";
+import type { CaseSubject } from "../copy/types";
 import type { SpecimenSlot } from "../instrument/types";
 import type { InvestigationView, ViewArtifact } from "../model/types";
 import { SPECIMEN } from "../specimen/specimen-metrics";
@@ -22,6 +23,7 @@ export function Answer({
   dispatch,
   layout,
   renderSpecimen,
+  subject,
   maxDays,
   onDrill,
   phase,
@@ -32,6 +34,7 @@ export function Answer({
   dispatch: Dispatch<CaseAction>;
   layout: SpecimenLayout;
   renderSpecimen: SpecimenSlot;
+  subject: CaseSubject;
   maxDays: number;
   onDrill?: (a: ViewArtifact) => void;
   phase?: CasePhase;
@@ -65,6 +68,7 @@ export function Answer({
             sources={sources}
             sourceId={state.source}
             view={view}
+            subject={subject}
             maxDays={maxDays}
             onShow={(source) => dispatch({ type: "show-source", id: source })}
             onStep={(delta) =>

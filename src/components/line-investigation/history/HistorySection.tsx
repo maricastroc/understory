@@ -4,7 +4,14 @@ import { type Dispatch, useEffect, useId, useMemo, useRef, useState } from "reac
 import { dayDate, displayId, tickText } from "../copy/artifact-copy";
 import { gapName } from "../copy/accessible-name";
 import { gapBody, gapLetter, gapTitle } from "../copy/gap-copy";
-import { lineLabel } from "../copy/source-copy";
+import {
+  breakMargin,
+  breakText,
+  historyTitle,
+  originText,
+  surfaceText,
+} from "../copy/subject-copy";
+import type { CaseSubject } from "../copy/types";
 import { shortAge } from "../format/age";
 import type { InvestigationView, ViewArtifact } from "../model/types";
 import { HATCH_BAND } from "../parts/hatch";
@@ -41,6 +48,7 @@ function span(strata: HistoryStratum[]): string {
 export function HistorySection({
   model,
   view,
+  subject,
   state,
   dispatch,
   onBack,
@@ -49,6 +57,7 @@ export function HistorySection({
 }: {
   model: HistoryModel;
   view: InvestigationView;
+  subject: CaseSubject;
   state: CaseState;
   dispatch: Dispatch<CaseAction>;
   onBack: (clause: string | null, source?: string) => void;
@@ -60,7 +69,6 @@ export function HistorySection({
   const bar = useRef<HTMLDivElement | null>(null);
   const { inside, at } = useHistoryPosition(section, bar);
   const [openRuns, setOpenRuns] = useState<Set<string>>(new Set());
-  const line = lineLabel(view.location);
   const effective = state.hoverClause ?? state.pinnedClause;
   const clause = view.clauses.find((c) => c.id === effective) ?? null;
   const lit = useMemo(() => (clause ? new Set(clause.citations) : null), [clause]);
@@ -99,18 +107,14 @@ export function HistorySection({
             <Margin>
               {shortAge(item.days)}
               <br />
-              {item.first ? "unchanged" : "no change"}
+              {breakMargin(subject, item.first)}
             </Margin>
             <BoreCell line="none">
               <span className="absolute top-0 bottom-0 left-1/2 -ml-[0.75px] border-l-[1.5px] border-li-rule" />
               <BreakMark />
             </BoreCell>
             <div className="flex items-center gap-3 font-li-mono text-[11px] text-li-text-subtle">
-              <span>
-                {item.first
-                  ? `unchanged for ${shortAge(item.days)}`
-                  : `${shortAge(item.days)} with no change to ${line}`}
-              </span>
+              <span>{breakText(subject, item.days, item.first)}</span>
               <span
                 aria-hidden
                 className="h-0 flex-1 border-t border-dashed border-li-neutral-300"
@@ -171,7 +175,7 @@ export function HistorySection({
               clause={effective}
               opened={state.opened === m.artifact.id}
               located={state.located === m.artifact.id}
-              line={line}
+              subject={subject}
               last={i === s.members.length - 1}
               dispatch={dispatch}
               onBack={onBack}
@@ -217,7 +221,7 @@ export function HistorySection({
         className="sticky top-14 z-20 flex flex-wrap items-center gap-x-4 gap-y-1 border-y border-li-divider bg-li-paper py-2.5"
       >
         <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
-          History of {line}
+          {historyTitle(subject)}
         </h2>
         <span className="font-li-mono text-[11px] text-li-text-subtle">
           today ±0 → origin {model.originDays !== null ? tickText(model.originDays) : "—"} ·{" "}
@@ -261,7 +265,7 @@ export function HistorySection({
         <div className="col-span-2 flex items-start gap-3 max-[820px]:col-span-1">
           <span className="mt-3 h-0.5 flex-1 bg-li-datum" />
           <span className="mt-1 font-li-mono text-[11px] text-li-datum-ink">
-            {line} · as it reads now
+            {surfaceText(subject)}
           </span>
         </div>
       </div>
@@ -284,7 +288,7 @@ export function HistorySection({
             <span className="absolute top-2 left-1/2 size-2.5 -translate-x-1/2 rotate-45 bg-li-ink" />
           </BoreCell>
           <p className="col-span-2 pt-1 font-li-mono text-[11px] text-li-text-subtle max-[820px]:col-span-1">
-            oldest recorded change to {line} · {displayId(origin.anchor)}
+            {originText(subject)} · {displayId(origin.anchor)}
             {model.originDays !== null && ` · ${shortAge(model.originDays)} deep`}
           </p>
         </div>

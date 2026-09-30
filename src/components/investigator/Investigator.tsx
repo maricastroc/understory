@@ -8,6 +8,7 @@ import { liButton } from "../line-investigation/parts/button-class";
 import { Composer } from "../composer/Composer";
 import type { ComposerPrefill } from "../composer/composer-prefill";
 import { useRepo } from "../composer/use-repo";
+import { AnchoredInvestigation } from "../line-investigation/case/AnchoredInvestigation";
 import { LiveLineInvestigation } from "../line-investigation/case/LiveLineInvestigation";
 import { CaseDetails } from "../rail/CaseDetails";
 import { RightRail } from "../rail/RightRail";
@@ -116,8 +117,12 @@ export function Investigator() {
   const busy = loading && !collecting;
   const draftCase = view === "case" && !current && draft ? draftResult(draft.form) : null;
   const lineCase = view === "case" && !busy && !draftCase && !!current?.result.evidence.location;
+  const anchoredCase =
+    view === "case" && !busy && !draftCase && !lineCase && !!current?.result.evidence.anchor;
   const railResult =
-    view === "case" && !busy && !lineCase && !draftCase ? (current?.result ?? null) : null;
+    view === "case" && !busy && !lineCase && !anchoredCase && !draftCase
+      ? (current?.result ?? null)
+      : null;
   const activeCaseId = view === "case" ? activeId : null;
 
   const lineItems = useMemo(
@@ -216,6 +221,17 @@ export function Investigator() {
   })();
   const summaryRepoPath = view === "case" && current ? current.form.repoPath : repoPath;
 
+  const parentLink = (entry: Entry) => {
+    const parentId = entry.parentCaseId;
+    if (!parentId) return undefined;
+    const present = history.some((e) => e.caseId === parentId);
+    return {
+      id: parentId,
+      question: entry.parentQuestion,
+      onOpen: present ? () => selectCase(parentId) : undefined,
+    };
+  };
+
   const drill = (entry: Entry) => (anchor: Parameters<typeof drillInto>[2]) =>
     drillInto(
       entry.caseId,
@@ -262,7 +278,7 @@ export function Investigator() {
       <div className="flex">
         <div
           className={
-            lineCase || draftCase || browsing
+            lineCase || anchoredCase || draftCase || browsing
               ? "min-w-0 flex-1 px-8 pt-6 pb-20 max-[820px]:px-4"
               : "mx-auto max-w-270 min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8"
           }
@@ -321,7 +337,7 @@ export function Investigator() {
                 ) : undefined
               }
             />
-          ) : lineCase && current ? (
+          ) : (lineCase || anchoredCase) && current ? (
             <>
               {current.rewriteError?.language === language && (
                 <p
@@ -339,20 +355,35 @@ export function Investigator() {
                   </button>
                 </p>
               )}
-              <LiveLineInvestigation
-                key={current.mountKey ?? current.caseId}
-                result={current.rewriting ? { ...current.result, narrative: null } : current.result}
-                repoPath={current.form.repoPath}
-                pending={(current.pending ?? false) || !!current.rewriting}
-                token={tokenValue}
-                onDrill={drill(current)}
-                onFollowUp={() => followUp(current)}
-                onBackToQuestion={() => backToQuestion(current)}
-              />
+              {lineCase ? (
+                <LiveLineInvestigation
+                  key={current.mountKey ?? current.caseId}
+                  result={
+                    current.rewriting ? { ...current.result, narrative: null } : current.result
+                  }
+                  repoPath={current.form.repoPath}
+                  pending={(current.pending ?? false) || !!current.rewriting}
+                  token={tokenValue}
+                  onDrill={drill(current)}
+                  onFollowUp={() => followUp(current)}
+                  onBackToQuestion={() => backToQuestion(current)}
+                  parent={parentLink(current)}
+                />
+              ) : (
+                <AnchoredInvestigation
+                  key={current.mountKey ?? current.caseId}
+                  result={
+                    current.rewriting ? { ...current.result, narrative: null } : current.result
+                  }
+                  pending={(current.pending ?? false) || !!current.rewriting}
+                  onDrill={drill(current)}
+                  parent={parentLink(current)}
+                />
+              )}
             </>
           ) : null}
 
-          {!busy && !lineCase && !draftCase && view === "case" && current && (
+          {!busy && !lineCase && !anchoredCase && !draftCase && view === "case" && current && (
             <CaseView
               entry={current}
               onBack={backToCode}
