@@ -1,3 +1,4 @@
+import { narrativeLanguage } from "@understory/core/narrative-language";
 import type { DigResult } from "@understory/core/types";
 import { auditClaims } from "./audit-claims";
 import { countLinks } from "./count-links";
@@ -42,6 +43,7 @@ export function buildInvestigationView(
     checklist: deriveChecklist(result, clauses, audited, quotes),
     confidence: narrative?.confidence ?? null,
     answer: narrative?.answer ?? null,
+    language: narrative ? narrativeLanguage(narrative) : null,
     error: result.error ?? null,
   };
 }

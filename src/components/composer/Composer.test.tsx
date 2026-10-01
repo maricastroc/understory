@@ -228,7 +228,7 @@ describe("Composer — choosing lines and asking", () => {
   const line = (n: number) => screen.getByRole("button", { name: new RegExp(`^Line ${n}[,.]`) });
   const selected = () =>
     screen
-      .getAllByRole("button", { pressed: true })
+      .getAllByRole("button", { pressed: true, name: /^Line \d+/ })
       .map((b) => Number(b.getAttribute("aria-label")!.match(/^Line (\d+)/)![1]));
 
   it("investigates with the general question when no question is typed", async () => {
@@ -242,6 +242,18 @@ describe("Composer — choosing lines and asking", () => {
       location: "src/billing/charge.ts:4",
       question: "Why is this line the way it is?",
     });
+  });
+
+  it("picks the language of the answer next to Investigate, and remembers it", async () => {
+    await openCharge();
+    fireEvent.click(line(4));
+    const answerIn = screen.getByRole("group", { name: "Answer in" });
+    const pt = within(answerIn).getByRole("button", { name: "PT" });
+    fireEvent.click(pt);
+    expect(pt.getAttribute("aria-pressed")).toBe("true");
+    expect(window.localStorage.getItem("gi:lang")).toBe("pt");
+    fireEvent.click(within(answerIn).getByRole("button", { name: "EN" }));
+    expect(window.localStorage.getItem("gi:lang")).toBe("en");
   });
 
   it("sends a specific question when one is asked, and can drop it again", async () => {

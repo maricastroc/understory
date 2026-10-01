@@ -7,13 +7,13 @@ import type { SpecimenSlot } from "../instrument/types";
 import { LiveCodeSpecimen } from "../specimen/LiveCodeSpecimen";
 import { useSpecimenLayout } from "../specimen/use-specimen-layout";
 import { LineInvestigation } from "./LineInvestigation";
-import type { CasePhase } from "./types";
+import type { AnalysisLanguage, CasePhase } from "./types";
 
 export function LiveLineInvestigation({
   result,
   repoPath,
   pending,
-  status,
+  analysis,
   token,
   onDrill,
   onFollowUp,
@@ -25,7 +25,7 @@ export function LiveLineInvestigation({
   result: DigResult;
   repoPath: string;
   pending: boolean;
-  status?: string;
+  analysis?: AnalysisLanguage;
   token?: string;
   onDrill?: (ref: ArtifactRef) => void;
   onFollowUp?: () => void;
@@ -58,7 +58,7 @@ export function LiveLineInvestigation({
     <LineInvestigation
       result={result}
       pending={pending}
-      status={status}
+      analysis={analysis}
       now={now}
       layout={layout}
       renderSpecimen={renderSpecimen}

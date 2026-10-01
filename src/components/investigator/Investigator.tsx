@@ -5,6 +5,7 @@ import { narrativeLanguage } from "@understory/core/narrative-language";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ErrorState } from "../ErrorState";
 import { liButton } from "../line-investigation/parts/button-class";
+import { LANGUAGE_NAME } from "../line-investigation/parts/LanguageSwitch";
 import { Composer } from "../composer/Composer";
 import type { ComposerPrefill } from "../composer/composer-prefill";
 import { useRepo } from "../composer/use-repo";
@@ -31,11 +32,6 @@ import { useAuth } from "./use-auth";
 import { casePaths } from "./case-paths";
 import { recentRepos } from "./recent-repos";
 import { DEFAULT_REPO, DEMO_LINE, type Entry, useInvestigation } from "./use-investigation";
-
-const LANGUAGE_NAME = { en: "English", pt: "Portuguese" } as const;
-
-const rewritingStatus = (entry: Entry) =>
-  entry.rewriting ? `rewriting in ${LANGUAGE_NAME[entry.rewriting]}…` : undefined;
 
 export function Investigator() {
   const user = useAuth();
@@ -65,7 +61,7 @@ export function Investigator() {
 
   const repo = useRepo();
   const params = useSearchParams();
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const [token, setToken] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [prefill, setPrefill] = useState<ComposerPrefill | null>(null);
@@ -235,6 +231,11 @@ export function Investigator() {
     };
   };
 
+  const analysisOf = (entry: Entry) =>
+    entry.result.narrative && !entry.pending
+      ? { selected: language, rewriting: !!entry.rewriting, onSelect: setLanguage }
+      : undefined;
+
   const drill = (entry: Entry) => (anchor: Parameters<typeof drillInto>[2]) =>
     drillInto(
       entry.caseId,
@@ -363,7 +364,7 @@ export function Investigator() {
               result={current.result}
               repoPath={current.form.repoPath}
               pending={current.pending ?? false}
-              status={rewritingStatus(current)}
+              analysis={analysisOf(current)}
               token={tokenValue}
               onDrill={drill(current)}
               onFollowUp={() => followUp(current)}
@@ -375,7 +376,7 @@ export function Investigator() {
               key={current.mountKey ?? current.caseId}
               result={current.result}
               pending={current.pending ?? false}
-              status={rewritingStatus(current)}
+              analysis={analysisOf(current)}
               onDrill={drill(current)}
               parent={parentLink(current)}
             />

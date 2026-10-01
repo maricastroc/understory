@@ -6,6 +6,8 @@ import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
 import { SECTION_RULE } from "./composer-classes";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { liButton } from "../line-investigation/parts/button-class";
+import { LanguageSwitch } from "../line-investigation/parts/LanguageSwitch";
+import { useLanguage } from "../use-language";
 import { symbolNoun } from "./symbol-noun";
 
 const SUGGESTIONS = ["Why this value?", "What problem did this fix?", "Why this approach?"];
@@ -28,6 +30,7 @@ export function QuestionForm({
   onRunWider: () => void;
 }) {
   const id = useId();
+  const { language, setLanguage } = useLanguage();
   const [asking, setAsking] = useState(question.trim().length > 0);
 
   return (
@@ -93,6 +96,7 @@ export function QuestionForm({
           <span className="text-li-text-subtle">(optional)</span>
         </button>
       )}
+      <LanguageSwitch label="Answer in" language={language} onChange={setLanguage} />
       <button type="submit" className={liButton("primary", "w-full", "lg")}>
         <BlueprintCorners />
         {runLabel} →

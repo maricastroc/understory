@@ -7,17 +7,18 @@ import { AnchorSpecimen } from "../answer/AnchorSpecimen";
 import type { SpecimenSlot } from "../instrument/types";
 import { useSpecimenLayout } from "../specimen/use-specimen-layout";
 import { LineInvestigation } from "./LineInvestigation";
+import type { AnalysisLanguage } from "./types";
 
 export function AnchoredInvestigation({
   result,
   pending,
-  status,
+  analysis,
   onDrill,
   parent,
 }: {
   result: DigResult;
   pending: boolean;
-  status?: string;
+  analysis?: AnalysisLanguage;
   onDrill?: (ref: ArtifactRef) => void;
   parent?: { id: string; question?: string; onOpen?: () => void };
 }) {
@@ -36,7 +37,7 @@ export function AnchoredInvestigation({
     <LineInvestigation
       result={result}
       pending={pending}
-      status={status}
+      analysis={analysis}
       now={now}
       layout={layout}
       renderSpecimen={renderSpecimen}
