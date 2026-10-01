@@ -1,7 +1,8 @@
 import { type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState } from "react";
-import type { CasePhase } from "../case/types";
+import type { AnalysisLanguage, CasePhase } from "../case/types";
 import { clauseDescription } from "../copy/clause-copy";
 import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types";
+import { LANGUAGE_NAME, LanguageSwitch } from "../parts/LanguageSwitch";
 import { ClauseRow } from "./ClauseRow";
 
 const HOVER_DELAY = 120;
@@ -29,7 +30,7 @@ export function WhyZone({
   compact,
   phase,
   failure,
-  status,
+  analysis,
   renderEvidence,
 }: {
   view: InvestigationView;
@@ -42,7 +43,7 @@ export function WhyZone({
   compact: boolean;
   phase?: CasePhase;
   failure?: ReactNode;
-  status?: string;
+  analysis?: AnalysisLanguage;
   renderEvidence?: (clause: ViewClause, id: string) => ReactNode;
 }) {
   const headingId = useId();
@@ -72,17 +73,28 @@ export function WhyZone({
 
   return (
     <section aria-labelledby={headingId} className="flex flex-col">
-      <div className="flex h-7 items-center gap-2.5 pl-7">
+      <div className="flex min-h-7 flex-wrap items-center gap-x-2.5 gap-y-1 pl-7">
         <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
           Reconstructed why
         </h2>
         <span aria-live="polite" className="text-xs text-li-text-subtle">
-          {status ?? hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
+          {analysis?.rewriting
+            ? `rewriting in ${LANGUAGE_NAME[analysis.selected]}…`
+            : hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
         </span>
+        {analysis && (
+          <div className="ml-auto">
+            <LanguageSwitch
+              label="Analysis"
+              language={analysis.selected}
+              onChange={analysis.onSelect}
+            />
+          </div>
+        )}
       </div>
       <WhyBody view={view} phase={phase} failure={failure} />
       {clauses && (
-        <ol className="relative mt-1 flex flex-col gap-1">
+        <ol lang={view.language ?? undefined} className="relative mt-1 flex flex-col gap-1">
           {view.clauses.map((clause, i) => (
             <ClauseRow
               key={clause.id}
@@ -177,7 +189,9 @@ function WhyBody({
   if (view.verdict === "out-of-scope") {
     return (
       <div className="mt-1 flex flex-col gap-1.5 pl-7">
-        <p className="text-base text-li-ink">{view.answer}</p>
+        <p lang={view.language ?? undefined} className="text-base text-li-ink">
+          {view.answer}
+        </p>
         <p className="text-xs text-li-text-subtle">
           The question is outside what this line&apos;s history can answer. The evidence is still
           shown below.

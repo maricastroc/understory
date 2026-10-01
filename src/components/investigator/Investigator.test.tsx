@@ -69,6 +69,7 @@ describe("Investigator — a deep-linked line case", () => {
     const { container } = render(<Investigator />);
     await screen.findByText("Collecting the line's history…");
     const region = why();
+    expect(within(region).queryByRole("group", { name: "Analysis" })).toBeNull();
     await waitFor(() => expect(code(container)).not.toBeNull());
     const panel = code(container);
 
@@ -99,7 +100,9 @@ describe("Investigator — a deep-linked line case", () => {
     const count = clauses(region).length;
 
     const other = written === "en" ? "pt" : "en";
-    fireEvent.click(screen.getByRole("button", { name: other.toUpperCase() }));
+    expect(within(screen.getByRole("banner")).queryByRole("group")).toBeNull();
+    const analysis = within(region).getByRole("group", { name: "Analysis" });
+    fireEvent.click(within(analysis).getByRole("button", { name: other.toUpperCase() }));
     await within(region).findByText(`rewriting in ${other === "pt" ? "Portuguese" : "English"}…`);
     expect(clauses(region)).toHaveLength(count);
     expect(within(region).queryByRole("status")).toBeNull();

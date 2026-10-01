@@ -13,6 +13,11 @@ describe("narrativeLanguage", () => {
     ).toBe("en");
   });
 
+  it("reads the answer alone in legacy narratives saved without claims", () => {
+    expect(narrativeLanguage({ answer: "O limite foi fixado em 3 tentativas." })).toBe("pt");
+    expect(narrativeLanguage({ answer: "The cap was set at three attempts." })).toBe("en");
+  });
+
   it("tells Portuguese from English in narratives saved before it was recorded", () => {
     expect(narrativeLanguage(of("O histórico não explica por que esta linha está assim."))).toBe(
       "pt",

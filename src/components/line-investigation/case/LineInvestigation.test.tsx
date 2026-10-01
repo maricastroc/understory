@@ -316,6 +316,61 @@ describe("LineInvestigation — going back", () => {
   });
 });
 
+describe("LineInvestigation — the language of the analysis", () => {
+  const why = () => screen.getByRole("region", { name: "Reconstructed why" });
+  const withAnalysis = (analysis: {
+    selected: "en" | "pt";
+    rewriting: boolean;
+    onSelect: (l: "en" | "pt") => void;
+  }) => (
+    <LineInvestigation
+      result={syntheticRetryCap}
+      pending={false}
+      now={NOW}
+      layout={SPECIMEN_LAYOUTS.wide}
+      renderSpecimen={slot}
+      onFollowUp={() => {}}
+      analysis={analysis}
+    />
+  );
+
+  it("marks the clauses with the language they are written in", () => {
+    setup();
+    expect(why().querySelector("ol")!.getAttribute("lang")).toBe("en");
+  });
+
+  it("offers the switch in the answer only when the host can rewrite it", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    const { rerender } = setup();
+    expect(screen.queryByRole("group", { name: "Analysis" })).toBeNull();
+
+    rerender(withAnalysis({ selected: "en", rewriting: false, onSelect }));
+    const group = within(why()).getByRole("group", { name: "Analysis" });
+    expect(within(group).getByRole("button", { name: "EN" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+    await user.click(within(group).getByRole("button", { name: "PT" }));
+    expect(onSelect).toHaveBeenCalledWith("pt");
+  });
+
+  it("says it is rewriting next to the heading and keeps the clauses in place", () => {
+    const { rerender } = setup();
+    const count = why().querySelectorAll("li[data-clause]").length;
+    rerender(withAnalysis({ selected: "pt", rewriting: true, onSelect: () => {} }));
+    expect(within(why()).getByText("rewriting in Portuguese…")).toBeTruthy();
+    expect(why().querySelectorAll("li[data-clause]")).toHaveLength(count);
+    expect(why().querySelector("ol")!.getAttribute("lang")).toBe("en");
+  });
+
+  it("has no axe violations with the switch", async () => {
+    const { container } = render(
+      withAnalysis({ selected: "en", rewriting: false, onSelect: () => {} }),
+    );
+    expect((await axe(container)).violations).toEqual([]);
+  });
+});
+
 describe("LineInvestigation — a drilled case", () => {
   const drilled = syntheticCases.find((c) => !c.result.evidence.location)!.result;
   const anchor = drilled.evidence.anchor!;

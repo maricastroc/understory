@@ -4,11 +4,9 @@ import type { AuthUser } from "../investigator/use-auth";
 import { Menu } from "../icons";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
 import { liButton } from "../line-investigation/parts/button-class";
-import { useLanguage } from "../use-language";
 import { AccountButton } from "./AccountButton";
 import { BrandMark } from "./BrandMark";
 import { HeaderSearch } from "./HeaderSearch";
-import { LanguageSwitch } from "./LanguageSwitch";
 import { RepoSelector } from "./RepoSelector";
 import type { RailItem, RepoSummary } from "./types";
 
@@ -35,7 +33,6 @@ export function AppHeader({
   user: AuthUser | null;
   onMenuClick: () => void;
 }) {
-  const { language, setLanguage } = useLanguage();
   const newLabel = (
     <>
       <BlueprintCorners />
@@ -70,7 +67,6 @@ export function AppHeader({
         onOpenFile={onOpenFile}
       />
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        <LanguageSwitch language={language} onChange={setLanguage} />
         {showNew && (
           <button type="button" onClick={onNewInvestigation} className={liButton("primary")}>
             {newLabel}

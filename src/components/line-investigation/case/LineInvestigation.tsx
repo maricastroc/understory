@@ -25,14 +25,14 @@ import { readKeyPreference, writeKeyPreference } from "./key-preference";
 import { TitleRow } from "./TitleRow";
 import { Toolbar } from "./Toolbar";
 import { useCaseKeyboard } from "./use-case-keyboard";
-import type { CasePhase } from "./types";
+import type { AnalysisLanguage, CasePhase } from "./types";
 
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 
 export function LineInvestigation({
   result,
   pending,
-  status,
+  analysis,
   now,
   layout,
   renderSpecimen,
@@ -45,7 +45,7 @@ export function LineInvestigation({
 }: {
   result: DigResult;
   pending: boolean;
-  status?: string;
+  analysis?: AnalysisLanguage;
   now: number;
   layout: SpecimenLayout;
   renderSpecimen: SpecimenSlot;
@@ -171,7 +171,7 @@ export function LineInvestigation({
           onDrill={onDrill}
           phase={phase}
           failure={failure}
-          status={status}
+          analysis={analysis}
         />
       </div>
       {!phase && (

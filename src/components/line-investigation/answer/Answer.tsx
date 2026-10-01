@@ -2,7 +2,7 @@
 
 import type { Dispatch, ReactNode } from "react";
 import { useMemo } from "react";
-import type { CasePhase } from "../case/types";
+import type { AnalysisLanguage, CasePhase } from "../case/types";
 import { clauseSources } from "../copy/source-copy";
 import type { CaseSubject } from "../copy/types";
 import type { SpecimenSlot } from "../instrument/types";
@@ -28,7 +28,7 @@ export function Answer({
   onDrill,
   phase,
   failure,
-  status,
+  analysis,
 }: {
   view: InvestigationView;
   state: CaseState;
@@ -40,7 +40,7 @@ export function Answer({
   onDrill?: (a: ViewArtifact) => void;
   phase?: CasePhase;
   failure?: ReactNode;
-  status?: string;
+  analysis?: AnalysisLanguage;
 }) {
   const panel = layout.mode === "panel";
   const byId = useMemo(() => new Map(view.artifacts.map((a) => [a.id, a])), [view.artifacts]);
@@ -61,7 +61,7 @@ export function Answer({
       compact={!panel}
       phase={phase}
       failure={failure}
-      status={status}
+      analysis={analysis}
       renderEvidence={(clause, id) => {
         const sources = clauseSources(clause, view);
         return (
