@@ -141,7 +141,12 @@ export function LineInvestigation({
           ) : (
             <span className="text-li-ink">{parent.id}</span>
           )}
-          {parent.question && <span> · drilled from “{parent.question}”</span>}
+          {parent.question && (
+            <span>
+              {" "}
+              · {subject.kind === "anchor" ? "drilled from" : "follow-up to"} “{parent.question}”
+            </span>
+          )}
         </p>
       )}
       <TitleRow

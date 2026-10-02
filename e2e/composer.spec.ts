@@ -106,6 +106,50 @@ test("a deep link investigates in the language the reader picked", async ({ page
   expect((await dig).postDataJSON()).toMatchObject({ language: "pt" });
 });
 
+test("a follow-up starts a new question in the same file and links back as a follow-up", async ({
+  page,
+}) => {
+  await page.route("**/api/dig", async (route) => {
+    const body = route.request().postDataJSON() as { question: string; location: string };
+    const line = Number(body.location.split(":")[1]);
+    const evidence = {
+      question: body.question,
+      repo: { path: ".demo/payments-service", name: "payments-service" },
+      location: { file: "src/billing/charge.ts", startLine: line, endLine: line },
+      artifacts: [],
+      contradictions: [],
+    };
+    await route.fulfill({
+      headers: { "content-type": "application/x-ndjson" },
+      body: `${JSON.stringify({ phase: "evidence", evidence })}\n${JSON.stringify({ phase: "final", narrative: null })}\n`,
+    });
+  });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/app");
+  await page
+    .getByRole("button", { name: /^src\/billing\/charge\.ts, / })
+    .click({ timeout: 60_000 });
+  const go = page.getByLabel(/^Go to line/);
+  await go.fill("8");
+  await go.press("Enter");
+  await page.getByRole("button", { name: /Ask a specific question/ }).click();
+  await page.getByRole("textbox", { name: /Your question/ }).fill("Why exactly 3 retries?");
+  await page.getByRole("button", { name: /^Investigate line 8/ }).click();
+
+  await page.getByRole("button", { name: "Follow up in this file" }).click();
+  await expect(page.getByRole("button", { name: /Ask a specific question/ })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: /Your question/ })).toHaveCount(0);
+  await go.fill("12");
+  await go.press("Enter");
+  await page.getByRole("button", { name: /Ask a specific question/ }).click();
+  await page.getByRole("textbox", { name: /Your question/ }).fill("Why only transient errors?");
+  await page.getByRole("button", { name: /^Investigate line 12/ }).click();
+
+  const link = page.getByText(/^↳ continues/);
+  await expect(link).toContainText("follow-up to “Why exactly 3 retries?”");
+  await expect(link).not.toContainText("drilled from");
+});
+
 test("the first node of the path leads back to the repository stage", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/app");
