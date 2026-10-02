@@ -87,7 +87,7 @@ export function TitleRow({
             </span>
           </span>
           <span aria-hidden className={liButton("secondary", "invisible")}>
-            Ask a follow-up
+            Follow up in this file
           </span>
         </div>
       ) : (
@@ -110,7 +110,7 @@ export function TitleRow({
           )}
           {onFollowUp && (
             <button type="button" onClick={onFollowUp} className={liButton("secondary")}>
-              Ask a follow-up
+              Follow up in this file
             </button>
           )}
         </div>

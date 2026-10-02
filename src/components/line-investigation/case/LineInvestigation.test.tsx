@@ -371,6 +371,26 @@ describe("LineInvestigation — the language of the analysis", () => {
   });
 });
 
+describe("LineInvestigation — a follow-up", () => {
+  it("names its link to the case it follows, not as a drill", () => {
+    render(
+      <LineInvestigation
+        result={syntheticRetryCap}
+        pending={false}
+        now={NOW}
+        layout={SPECIMEN_LAYOUTS.wide}
+        renderSpecimen={slot}
+        onFollowUp={() => {}}
+        parent={{ id: "GI-2049", question: "Why is insertRules the way it is?" }}
+      />,
+    );
+    const link = screen.getByText(/^↳ continues/);
+    expect(link.textContent).toContain("follow-up to “Why is insertRules the way it is?”");
+    expect(link.textContent).not.toContain("drilled from");
+    expect(screen.getByRole("button", { name: "Follow up in this file" })).toBeTruthy();
+  });
+});
+
 describe("LineInvestigation — a drilled case", () => {
   const drilled = syntheticCases.find((c) => !c.result.evidence.location)!.result;
   const anchor = drilled.evidence.anchor!;
@@ -540,7 +560,7 @@ describe("LineInvestigation — before the evidence arrives", () => {
     expect(screen.getByText("Collecting")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Resolved|Reconstructing/ })).toBeNull();
     expect(screen.queryByRole("button", { name: /^History/ })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Ask a follow-up" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Follow up in this file" })).toBeNull();
     expect(screen.queryByRole("list", { name: "History, newest first" })).toBeNull();
     expect((await axe(container)).violations).toEqual([]);
   });

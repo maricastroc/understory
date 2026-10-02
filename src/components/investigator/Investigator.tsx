@@ -159,7 +159,12 @@ export function Investigator() {
       question: entry.form.question || entry.result.evidence.question,
       path: loc.file,
     });
-    setPrefill({ path: loc.file, line: loc.startLine, nonce: ++prefillNonce.current });
+    setPrefill({
+      path: loc.file,
+      line: loc.startLine,
+      question: "",
+      nonce: ++prefillNonce.current,
+    });
     backToCode();
   }
 
