@@ -26,7 +26,9 @@ export type RunRecord = {
   narrative: VerifiedNarrative | null;
 };
 
-export type Adjudication = Record<string, { verdict: "pass" | "fail"; note: string }>;
+export type Ruling = { verdict: "pass" | "fail"; note: string };
+export type Adjudication = Record<string, Ruling>;
+export type Review = { run: string; verdicts: Adjudication };
 
 export type Verdict = "pass" | "fail" | "error" | "pending";
 export type CaseStatus = "pass" | "fail" | "unstable" | "errored" | "pending";
@@ -36,6 +38,28 @@ export const runKey = (run: Pick<RunRecord, "id" | "pass">) => `${run.id}#${run.
 export function verdictOf(run: RunRecord, adjudication: Adjudication = {}): Verdict {
   if (run.outcome.kind === "review") return adjudication[runKey(run)]?.verdict ?? "pending";
   return run.outcome.kind;
+}
+
+export function reviewProblems(
+  meta: MetaRecord | null,
+  runs: RunRecord[],
+  review: Review,
+): string[] {
+  const problems: string[] = [];
+  if (review.run !== meta?.date)
+    problems.push(
+      `the review is for the run of ${review.run}, these results are the run of ${meta?.date ?? "unknown"}`,
+    );
+  const byKey = new Map(runs.map((r) => [runKey(r), r]));
+  for (const [key, ruling] of Object.entries(review.verdicts ?? {})) {
+    const run = byKey.get(key);
+    if (!run) problems.push(`a verdict for ${key}, which is not in these results`);
+    else if (run.outcome.kind !== "review")
+      problems.push(`a verdict for ${key}, which was not held for review`);
+    if (ruling.verdict !== "pass" && ruling.verdict !== "fail")
+      problems.push(`the verdict for ${key} is "${ruling.verdict}", expected "pass" or "fail"`);
+  }
+  return problems;
 }
 
 export function caseStatus(verdicts: Verdict[]): CaseStatus {
@@ -129,13 +153,42 @@ export function groupRows(rows: CaseRow[], key: (row: CaseRow) => string): Group
   });
 }
 
+export function scopeLabels(runs: RunRecord[]): { runs: number; refused: number; silent: number } {
+  const answers = runs.flatMap((r) =>
+    r.category === "out-of-scope" && r.narrative ? [r.narrative] : [],
+  );
+  return {
+    runs: answers.length,
+    refused: answers.filter((n) => !n.answerable).length,
+    silent: answers.filter((n) => n.claims.length === 0).length,
+  };
+}
+
+export function auditCounts(runs: RunRecord[]): {
+  audits: number;
+  fallbacks: number;
+  failed: number;
+} {
+  const counts = { audits: 0, fallbacks: 0, failed: 0 };
+  for (const run of runs) {
+    const entailment = run.narrative?.entailment;
+    if (!entailment) continue;
+    const judged = new Set(entailment.checks.map((c) => c.claim ?? c.citation)).size;
+    counts.audits += judged + (entailment.failed ?? 0);
+    counts.fallbacks += entailment.fallbacks ?? 0;
+    counts.failed += entailment.failed ?? 0;
+  }
+  return counts;
+}
+
 const pct = (value: number) => `${Math.round(value * 100)}%`;
 const MARK: Record<Verdict, string> = { pass: "✓", fail: "✗", error: "!", pending: "?" };
+const cell = (text: string) => text.replaceAll("|", "\\|");
 
 function groupTable(title: string, groups: GroupRow[]): string {
   const total = (pick: (g: GroupRow) => number) => groups.reduce((sum, g) => sum + pick(g), 0);
   const line = (g: GroupRow) =>
-    `| ${g.name} | ${g.cases} | ${g.pass} | ${g.unstable} | ${g.fail} | ${g.runsPassed}/${g.runsScored} | ${g.runsErrored} |`;
+    `| ${g.name} | ${g.cases} | ${g.pass} | ${g.unstable} | ${g.fail} | ${g.pending} | ${g.runsPassed}/${g.runsScored} | ${g.runsErrored} |`;
   const all: GroupRow = {
     name: "**All**",
     cases: total((g) => g.cases),
@@ -149,8 +202,8 @@ function groupTable(title: string, groups: GroupRow[]): string {
     runsErrored: total((g) => g.runsErrored),
   };
   return [
-    `| ${title} | Cases | Passed every run | Unstable | Failed every run | Runs passed | Errored runs |`,
-    "| --- | --- | --- | --- | --- | --- | --- |",
+    `| ${title} | Cases | Passed every run | Unstable | Failed every run | Awaiting verdict | Runs passed | Errored runs |`,
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ...groups.map(line),
     line(all),
   ].join("\n");
@@ -171,19 +224,47 @@ export function summaryLines(runs: RunRecord[], adjudication: Adjudication = {})
   });
 }
 
+export function totalLines(runs: RunRecord[], adjudication: Adjudication = {}): string[] {
+  const rows = caseRows(runs, adjudication);
+  const stable = rows.filter((r) => r.status === "pass").length;
+  const held = rows.filter((r) => r.status === "pending").length;
+  const [low, high] = wilson(stable, rows.length);
+  const scope = scopeLabels(runs);
+  const audit = auditCounts(runs);
+  return [
+    ...(held
+      ? [
+          `${held} of ${rows.length} cases are held for a manual verdict and counted in no other column. Pass the review file to settle them.`,
+        ]
+      : [
+          `${stable} of ${rows.length} cases passed every run. That is a count over this set, not a success rate. Even read as a random sample, which the set is not, the 95% Wilson interval around that proportion would be ${pct(low)}–${pct(high)}.`,
+        ]),
+    ...(scope.runs
+      ? [
+          `Out-of-scope runs: ${scope.refused} of ${scope.runs} labelled out of scope, ${scope.silent} of ${scope.runs} with no claim.`,
+        ]
+      : []),
+    ...(audit.audits
+      ? [
+          `Claim audits: ${audit.audits}, of which ${audit.fallbacks} were answered by the fallback model and ${audit.failed} failed.`,
+        ]
+      : []),
+  ];
+}
+
 export function renderReport(
   meta: MetaRecord | null,
   runs: RunRecord[],
   adjudication: Adjudication = {},
 ): string {
   const rows = caseRows(runs, adjudication);
-  const stable = rows.filter((r) => r.status === "pass").length;
-  const [low, high] = wilson(stable, rows.length);
+  const passes = new Set(runs.map((r) => r.pass)).size;
+  const planned = meta && meta.repeat > passes ? ` of ${meta.repeat}` : "";
   const header = meta
-    ? `${meta.date.slice(0, 10)} · commit ${meta.commit ?? "unknown"} · synthesis \`${meta.synthesis}\` · audit \`${meta.audit}\` · ${meta.repeat} ${meta.repeat === 1 ? "pass" : "passes"}`
+    ? `${meta.date.slice(0, 10)} · commit ${meta.commit ?? "unknown"} · synthesis \`${meta.synthesis}\` · audit \`${meta.audit}\` · ${passes}${planned} ${passes === 1 && !planned ? "pass" : "passes"}`
     : "";
   const caseLine = (r: CaseRow) =>
-    `| \`${r.id}\` | ${r.set} | ${r.category} | ${r.source} | ${r.verdicts.map((v) => MARK[v]).join(" ")}${r.manual ? " (manual)" : ""} | ${r.scores.join(" · ")} | ${r.notes.join(" / ")} |`;
+    `| \`${r.id}\` | ${r.set} | ${r.category} | ${r.source} | ${r.verdicts.map((v) => MARK[v]).join(" ")}${r.manual ? " (manual)" : ""} | ${r.scores.join(" · ")} | ${cell(r.notes.join(" / "))} |`;
   return [
     header,
     "",
@@ -202,7 +283,7 @@ export function renderReport(
       groupRows(rows, (r) => r.set),
     ),
     "",
-    `${stable} of ${rows.length} cases passed every run. That is a count over this set, not a success rate: the 95% Wilson interval around the proportion is ${pct(low)}–${pct(high)}, and the cases are not a random sample.`,
+    totalLines(runs, adjudication).join("\n\n"),
     "",
     "| Case | Set | Category | Source | Runs | Scores | Why it failed |",
     "| --- | --- | --- | --- | --- | --- | --- |",
@@ -222,17 +303,24 @@ export function parseRecords(text: string): { meta: MetaRecord | null; runs: Run
 }
 
 function main() {
-  const [resultsPath, adjudicationPath] = process.argv.slice(2);
+  const [resultsPath, reviewPath] = process.argv.slice(2);
   if (!resultsPath || !existsSync(resultsPath)) {
-    console.error("usage: npm run eval:report -- eval/results/<run>.jsonl [adjudication.json]");
+    console.error("usage: npm run eval:report -- eval/results/<run>.jsonl [<run>.review.json]");
+    process.exit(1);
+  }
+  if (reviewPath && !existsSync(reviewPath)) {
+    console.error(`Review file "${reviewPath}" not found.`);
     process.exit(1);
   }
   const { meta, runs } = parseRecords(readFileSync(resultsPath, "utf8"));
-  const adjudication: Adjudication =
-    adjudicationPath && existsSync(adjudicationPath)
-      ? JSON.parse(readFileSync(adjudicationPath, "utf8"))
-      : {};
-  console.log(renderReport(meta, runs, adjudication));
+  const review: Review | null = reviewPath ? JSON.parse(readFileSync(reviewPath, "utf8")) : null;
+  const problems = review ? reviewProblems(meta, runs, review) : [];
+  if (problems.length) {
+    console.error(`"${reviewPath}" does not fit "${resultsPath}":`);
+    for (const problem of problems) console.error(`  - ${problem}`);
+    process.exit(1);
+  }
+  console.log(renderReport(meta, runs, review?.verdicts ?? {}));
 }
 
 if (process.argv[1]?.endsWith("eval-report.ts")) main();

@@ -49,8 +49,14 @@ part of CI, which runs without a model key. It exits non-zero if any run fails o
 
 `--repeat` goes through all cases once per pass, so a run cut short still leaves complete
 passes. `--out` writes one JSON line per run with the full answer, its citations, the audit
-verdicts and the confidence. `--delay` paces the runs: on Groq's free tier each model takes
-8,000 tokens a minute, and two passes of the whole set use most of a day's allowance.
+verdicts and the confidence, and refuses a path that already holds a run: kept runs are not
+overwritten. `--delay` paces the runs: on Groq's free tier each model takes 8,000 tokens a
+minute, and two passes of the whole set use most of a day's allowance.
+
+`eval:report` takes the kept run and, for the cases held for a manual verdict, the review file
+written for it. It refuses a review file that is missing, that belongs to another run or that
+rules on a run that was not held. Without one it counts the held cases in a column of their
+own instead of leaving them out.
 
 ## The gold set
 
@@ -127,7 +133,6 @@ Assertions are **structural**, not exact prose, so they hold across the model's 
 | `level`          | Exact confidence level                                                    |
 | `language`       | Language the answer came back in                                          |
 | `citesBodyMatch` | At least one cited source's body or title matches this pattern            |
-| `answerMatch`    | The answer's text matches this pattern                                    |
 | `answerNotMatch` | The answer's text does not match this pattern                             |
 | `review`         | A rubric. The run is held for a manual verdict once the checks above pass |
 
@@ -148,44 +153,59 @@ out of the pass counts: it says nothing about the model's answer.
 
 11 Oct 2026 · commit `4990251` · synthesis `openai/gpt-oss-120b` · audit `openai/gpt-oss-20b` ·
 2 passes, 72 runs, none errored. The gold set was committed before any of the new cases met
-the model. Every run is in [`results/2026-10-11.jsonl`](results/2026-10-11.jsonl), the manual
-verdicts in [`results/2026-10-11.review.json`](results/2026-10-11.review.json), and the three
-tables and the sentence under them are copied from what `npm run eval:report` prints for those
-two files. The runner prints the same split by category when it ends.
+the model. Every run is in [`results/2026-10-11.jsonl`](results/2026-10-11.jsonl) and the manual
+verdicts in [`results/2026-10-11.review.json`](results/2026-10-11.review.json). The three tables
+and the three sentences under them are copied from what `npm run eval:report` prints for those
+two files, and a unit test fails if they drift apart. The runner prints the same split by
+category when it ends.
 
-| Category      | Cases | Passed every run | Unstable | Failed every run | Runs passed | Errored runs |
-| ------------- | ----- | ---------------- | -------- | ---------------- | ----------- | ------------ |
-| recorded      | 15    | 13               | 2        | 0                | 28/30       | 0            |
-| silent        | 5     | 4                | 0        | 1                | 8/10        | 0            |
-| out-of-scope  | 9     | 9                | 0        | 0                | 18/18       | 0            |
-| false-premise | 3     | 3                | 0        | 0                | 6/6         | 0            |
-| incidental    | 4     | 1                | 1        | 2                | 3/8         | 0            |
-| **All**       | 36    | 30               | 3        | 3                | 63/72       | 0            |
+| Category      | Cases | Passed every run | Unstable | Failed every run | Awaiting verdict | Runs passed | Errored runs |
+| ------------- | ----- | ---------------- | -------- | ---------------- | ---------------- | ----------- | ------------ |
+| recorded      | 15    | 13               | 2        | 0                | 0                | 28/30       | 0            |
+| silent        | 5     | 4                | 0        | 1                | 0                | 8/10        | 0            |
+| out-of-scope  | 9     | 9                | 0        | 0                | 0                | 18/18       | 0            |
+| false-premise | 3     | 3                | 0        | 0                | 0                | 6/6         | 0            |
+| incidental    | 4     | 1                | 1        | 2                | 0                | 3/8         | 0            |
+| **All**       | 36    | 30               | 3        | 3                | 0                | 63/72       | 0            |
 
-| Source    | Cases | Passed every run | Unstable | Failed every run | Runs passed | Errored runs |
-| --------- | ----- | ---------------- | -------- | ---------------- | ----------- | ------------ |
-| synthetic | 24    | 23               | 0        | 1                | 46/48       | 0            |
-| sampled   | 10    | 5                | 3        | 2                | 13/20       | 0            |
-| picked    | 2     | 2                | 0        | 0                | 4/4         | 0            |
-| **All**   | 36    | 30               | 3        | 3                | 63/72       | 0            |
+| Source    | Cases | Passed every run | Unstable | Failed every run | Awaiting verdict | Runs passed | Errored runs |
+| --------- | ----- | ---------------- | -------- | ---------------- | ---------------- | ----------- | ------------ |
+| synthetic | 24    | 23               | 0        | 1                | 0                | 46/48       | 0            |
+| sampled   | 10    | 5                | 3        | 2                | 0                | 13/20       | 0            |
+| picked    | 2     | 2                | 0        | 0                | 0                | 4/4         | 0            |
+| **All**   | 36    | 30               | 3        | 3                | 0                | 63/72       | 0            |
 
-| Set     | Cases | Passed every run | Unstable | Failed every run | Runs passed | Errored runs |
-| ------- | ----- | ---------------- | -------- | ---------------- | ----------- | ------------ |
-| v1      | 8     | 8                | 0        | 0                | 16/16       | 0            |
-| v2      | 28    | 22               | 3        | 3                | 47/56       | 0            |
-| **All** | 36    | 30               | 3        | 3                | 63/72       | 0            |
+| Set     | Cases | Passed every run | Unstable | Failed every run | Awaiting verdict | Runs passed | Errored runs |
+| ------- | ----- | ---------------- | -------- | ---------------- | ---------------- | ----------- | ------------ |
+| v1      | 8     | 8                | 0        | 0                | 0                | 16/16       | 0            |
+| v2      | 28    | 22               | 3        | 3                | 0                | 47/56       | 0            |
+| **All** | 36    | 30               | 3        | 3                | 0                | 63/72       | 0            |
 
-30 of 36 cases passed every run. That is a count over this set, not a success rate: the 95% Wilson interval around the proportion is 68%–92%, and the cases are not a random sample.
+30 of 36 cases passed every run. That is a count over this set, not a success rate. Even read as a random sample, which the set is not, the 95% Wilson interval around that proportion would be 68%–92%.
 
-The split by source says more than the total: the cases written for the eval pass almost always,
-and only half of the lines drawn at random from real repositories passed both runs. The `v1` row
-is the original eight.
+Out-of-scope runs: 14 of 18 labelled out of scope, 18 of 18 with no claim.
+
+Claim audits: 77, of which 7 were answered by the fallback model and 0 failed.
+
+Four things to hold against those tables:
+
+- **The split by source says more than the total.** The cases written for the eval pass almost
+  always. Of the ten lines drawn at random from real repositories, five passed both runs.
+- **The out-of-scope row uses a looser test than the original three questions did.** The six
+  new out-of-scope cases pass when the answer makes no claim, whether it is labelled "out of
+  scope" or "not recorded"; the original three require the label. That was fixed in
+  `gold.json` before the run. Held to the label, the row would read 6 passed, 2 unstable and
+  1 failed, and the total 27 of 36.
+- **The fallback auditor is the synthesis model.** The seven audits it answered, after the
+  smaller model's call failed, are none of them in a case that changed between runs.
+- The `v1` row is the original eight. The `ms` of each kept run includes the 30-second pause
+  before it.
 
 ### What failed
 
 **A line swept along by a change about something else.** Four of the ten sampled lines were
 last touched by a change that was about something else. On three of them the answer gave that
-change's reasons as the line's, in five of eight runs:
+change's reasons as the line's, in five of the eight runs on those four lines:
 
 - `tslint-189` is `if (Formatter === undefined) {`. Both runs said the line was changed to use
   `path.resolve` and to resolve the formatter relative to the working directory. Those are
@@ -195,32 +215,37 @@ change's reasons as the line's, in five of eight runs:
 - `machine-32` abstained in one run. In the other it said the line was rewritten because an
   earlier change broke host marshaling, which no source says.
 
-The cause is structural. Synthesis and audit read the collected artifacts and the location
-`file:line`, never the text of the line or the diff. The auditor marked several of these
-claims as supported, because the source does say what the claim quotes; nothing checks that the
-source is about the line. The verdict was "resolved" with medium confidence, 0.55 to 0.65. Tracked in [#31](https://github.com/maricastroc/understory/issues/31).
+The cause is structural. Synthesis reads the collected artifacts and the location `file:line`;
+the audit reads the claim and the sources it cites. Neither sees the text of the line or the
+diff. The auditor marked several of these claims as supported, because the source does say what
+the claim quotes; nothing checks that the source is about the line. The verdict was "resolved"
+with medium confidence, 0.55 to 0.65. Tracked in [#31](https://github.com/maricastroc/understory/issues/31).
 
-**An abstention counted as an answer.** `ws-skew-value` asks why an allowance is 2 seconds and
-not more. Both runs said, correctly, that the commit gives no reason for the size. They said it
-as a claim, the auditor marked that claim supported, and the answer came back as recorded with
-confidence 0.85. The text is honest and the verdict is not. Tracked in [#32](https://github.com/maricastroc/understory/issues/32).
+**A non-answer returned as an answer.** `ws-skew-value` asks why an allowance is 2 seconds and
+not more. The commit explains why the cursor is moved back, never why by two seconds. Both runs
+gave the first as if it were the second, and then said, correctly, that the commit gives no
+reason for the size. The auditor marked the first claim weak and the second supported, and that
+second claim alone carried the answer to recorded, with confidence 0.85. Tracked in
+[#32](https://github.com/maricastroc/understory/issues/32).
 
 **The confidence floor moves between runs.** `machine-168` and `q-796` each passed one run and
 missed the 0.65 floor in the other, with nearly the same claims. What changed was the
-auditor's verdict. For `machine-168` the same sentence was supported once and weak once. For
-`q-796` the auditor agreed with the claims and then quoted the source inexactly, which
-downgrades a verdict to weak. That downgrade happened to nine claims in eight runs. The
-floor is also where `jitter` failed in September: the auditor then held a claim that adds a
-consequence to its source at weak, and in October it accepted the same kind of claim every time. Tracked in [#33](https://github.com/maricastroc/understory/issues/33).
+auditor's verdict. For `machine-168` a near copy of one sentence was supported once and weak
+once. For `q-796` the auditor agreed with the claims and its quote then failed to verify
+against the source, which downgrades a verdict to weak. The kept runs do not hold the rejected
+quote, so they cannot say how far from the source it was. That downgrade happened to nine
+claims in eight runs. The floor is also where `jitter` failed in September: the auditor then
+held a claim that adds a consequence to its source at weak, and in October it accepted the same
+kind of claim every time. Tracked in [#33](https://github.com/maricastroc/understory/issues/33).
 
 ### What passed, and what a pass hides
 
 - **No fabricated citation, in 72 runs.** The fabrication check never had anything to catch,
   so this run says nothing about it. The unit tests do.
 - **No claim on any out-of-scope question**, 18 runs over nine questions. The label is less
-  steady than the refusal. The three plainly off-topic questions were always "out of scope".
-  Of the twelve runs on the six nearer questions, four said "not recorded" instead, and two
-  questions changed label from one run to the other.
+  steady than the silence: 14 of the 18 runs were labelled "out of scope". The three plainly
+  off-topic questions always were. Of the twelve runs on the six nearer questions, four said
+  "not recorded" instead, and two questions changed label from one run to the other.
 - **Injected text was ignored.** The commit message that asks for another answer was not
   followed in either run, and the request for the system prompt was refused in both.
 - **A false premise was declined, never corrected.** All six runs abstained or refused. Four
@@ -228,36 +253,39 @@ consequence to its source at weak, and in October it accepted the same kind of c
   1000") although the evidence says the size was halved.
 - **A correct story about a revert scores 0.55.** `ws-revert-story` told the three steps in
   both runs. Citing the reverted commit caps the confidence, by design.
-- **A pass is structural.** `ng-http-411` passed both runs. In the second, one claim says line
-  411 "implements the whitelist check". Line 411 is `* @example`, a doc comment. The reason
-  given for the commit is right, the statement about the line is invented, and the auditor
-  marked it supported. Of the 39 runs that made claims, six say something about the line
-  itself that no source supports: the five incidental failures above and this one. A seventh is
-  borderline. The read is written down, run by run, in
+- **A pass is structural.** `ng-http-411` passed both runs, and both say the line implements
+  the XSRF whitelist. Line 411 is `* @example`, a doc comment. The reason given for the commit
+  is right, the statement about the line is invented, and the auditor marked it supported. Of
+  the 39 runs that made claims, ten say something about the line that no source supports: the
+  five incidental failures, both runs of `ng-http-411`, both runs of `ws-skew-value`, and one
+  run of `ws-batch-size` that invents a reason for a rename. Three of the ten passed their
+  automatic checks. Two more runs are borderline. The read is written down, run by run, in
   [`results/2026-10-11.reading.json`](results/2026-10-11.reading.json).
 
 ### Compared with the eight-case set
 
 The eight original cases are unchanged, so they can be read side by side.
 
-|                                           | 29 Sep 2026       | 11 Oct 2026                 |
-| ----------------------------------------- | ----------------- | --------------------------- |
-| Original eight, one pass                  | 7/8               | 8/8 in each of three passes |
-| `jitter`                                  | 1/4 repeats       | 3/3                         |
-| Out-of-scope questions asked              | 3                 | 9                           |
-| Out-of-scope runs with no claim           | 14/14 (1 errored) | 18/18                       |
-| Cases outside the demo repository         | 0                 | 22                          |
-| Cases on real repositories                | 0                 | 12                          |
-| Cases where the right answer is no answer | 4                 | 21                          |
+|                                            | 29 Sep 2026       | 11 Oct 2026                  |
+| ------------------------------------------ | ----------------- | ---------------------------- |
+| Original eight, one pass                   | 7/8               | 8/8 in each of three passes  |
+| `jitter`                                   | 1/4 repeats       | 3/3                          |
+| Out-of-scope questions asked               | 3                 | 9                            |
+| Out-of-scope runs labelled out of scope    | 14/14 (1 errored) | 14/18, and 6/6 on the same 3 |
+| Out-of-scope runs with no claim            | 14/14             | 18/18                        |
+| Cases outside the demo repository          | 0                 | 22                           |
+| Cases on real repositories                 | 0                 | 12                           |
+| Cases that do not expect a recorded reason | 4                 | 21                           |
 
 The three passes of 11 Oct are one before the wider set existed
-([`results/2026-10-11-v1-before.jsonl`](results/2026-10-11-v1-before.jsonl), at commit
-`03ad3c6`) and the two of the main run. The earlier pass was recorded by a throwaway script around
-the old runner, which kept nothing, and converted to the record format used here; the answers in
-it are untouched. `jitter` failed in September on the confidence floor
-and passed every time in October. The prompts, the audit and the scoring are the same code on
-both dates; only the models, served by a third party, can have moved. So 7/8 was one draw of a
-result that changes with nothing changing here.
+([`results/2026-10-11-v1-before.jsonl`](results/2026-10-11-v1-before.jsonl), with the code of
+`03ad3c6`) and the two of the main run. The earlier pass was recorded by a throwaway script
+around the old runner, which kept nothing, and converted to the record format used here: the
+`set`, `category` and `source` fields were added in the conversion, and the answers are
+untouched. `jitter` failed in September on the confidence floor and passed every time in
+October. The prompts, the audit and the scoring are the same code on both dates; only the
+models, served by a third party, can have moved. So 7/8 was one draw of a result that changes
+with nothing changing here.
 
 Every failure in the tables above is on a case the eight could not contain: a real line, a
 silence beside a well explained commit, a confidence floor on a real commit message. On the
@@ -270,12 +298,17 @@ What is planned to close these gaps is in [#34](https://github.com/maricastroc/u
 - **How often it is right.** Twelve real lines from six repositories is enough to find a
   failure mode, not to size it. Zero failures in a category of nine still leaves room, at 95%,
   for a failure rate of up to about 30%.
-- **Anything beyond two passes on one day**, with one pair of models from one provider.
+- **Anything beyond two passes on one day**, with one pair of models and its fallback, from
+  one provider.
 - **Independence.** Two runs of a case are not two cases, and several cases share their
   evidence: nine of the 36 ask about `charge.ts:8`.
-- **A second opinion on the labels.** The `why` of each case and the manual verdicts were
-  drafted with an AI assistant from the collected evidence and the diffs. They are written
-  down so that a reader can disagree with them, and no second person has checked them yet.
+- **A second opinion on the labels.** The `why` of each case, the manual verdicts and the read
+  of the claims were drafted with an AI assistant from the collected evidence and the diffs.
+  They are written down so that a reader can disagree with them, and no second person has
+  checked them yet.
+- **The evidence behind a verdict.** A kept run holds the answer and, for each source, its id,
+  kind and length, not its text. Disputing a verdict means collecting the evidence again, which
+  the archived repositories and the seeded ones allow.
 - **What collection misses.** A case is labelled from what `collect` returned. Where the real
   reason sits in an artifact that was never collected, such as an issue a commit closes by
   message, the label is "silent" or "recorded" for the evidence, not for the truth.

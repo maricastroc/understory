@@ -94,19 +94,17 @@ describe("checkExpect", () => {
 
   it("holds the score under a ceiling, the answer to its language and its text to a pattern", () => {
     const fails = checkExpect(
-      { maxScore: 0.65, language: "pt", answerMatch: "INC-1187", answerNotMatch: "capped" },
+      { maxScore: 0.65, language: "pt", answerNotMatch: "capped" },
       narrative({ language: "en" }),
       evidence,
     );
     expect(fails).toEqual(["score 0.8 > 0.65", "language en ≠ pt", "answer matches /capped/"]);
-    expect(checkExpect({ answerMatch: "GDPR" }, narrative(), evidence)).toEqual([
-      "answer does not match /GDPR/",
-    ]);
+    expect(checkExpect({ answerNotMatch: "GDPR" }, narrative(), evidence)).toEqual([]);
   });
 });
 
 describe("outcomeOf and tally", () => {
-  it("keeps model errors out of the scored runs and counts refusals", () => {
+  it("keeps model errors out of the scored runs", () => {
     const oos = { answerable: false };
     const runs = [
       {
@@ -130,7 +128,6 @@ describe("outcomeOf and tally", () => {
       failed: 1,
       review: 0,
       errored: 1,
-      refusals: { correct: 1, total: 2 },
     });
   });
 
@@ -153,6 +150,7 @@ describe("parseArgs", () => {
       out: null,
       set: null,
       category: null,
+      problems: [],
     });
     expect(parseArgs([])).toEqual({
       repeat: 1,
@@ -161,6 +159,7 @@ describe("parseArgs", () => {
       out: null,
       set: null,
       category: null,
+      problems: [],
     });
   });
 
@@ -179,6 +178,29 @@ describe("parseArgs", () => {
       set: "v1",
       category: "silent",
     });
+  });
+});
+
+describe("parseArgs problems", () => {
+  const problems = (...argv: string[]) => parseArgs(argv).problems;
+
+  it("names an option it does not know, with or without an equals sign", () => {
+    expect(problems("--sets", "v1")).toEqual(["unknown option --sets"]);
+    expect(problems("--set=v1")).toEqual(["unknown option --set=v1"]);
+    expect(parseArgs(["--sets", "v1"]).only).toEqual(["v1"]);
+  });
+
+  it("refuses an option with no value, or with another option where its value should be", () => {
+    expect(problems("--set")).toEqual(["--set needs a value"]);
+    expect(problems("--out", "--set", "v1")).toEqual(["--out needs a value"]);
+    expect(parseArgs(["--out", "--set", "v1"]).set).toBe("v1");
+  });
+
+  it("refuses an option given twice and a count that is not a number", () => {
+    expect(problems("--set", "v1", "--set", "v2")).toEqual(["--set is given twice"]);
+    expect(problems("--repeat", "two")).toEqual(["--repeat needs a number of at least 1"]);
+    expect(problems("--repeat", "0")).toEqual(["--repeat needs a number of at least 1"]);
+    expect(problems("--delay", "-5")).toEqual(["--delay needs a number of at least 0"]);
   });
 });
 

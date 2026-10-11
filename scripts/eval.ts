@@ -20,6 +20,7 @@ import {
   type MetaRecord,
   type RunRecord,
   caseStatus,
+  scopeLabels,
   summaryLines,
   verdictOf,
 } from "./eval-report";
@@ -45,6 +46,11 @@ const SEEDS: Record<string, string> = {
   ".demo/payments-service": "npm run seed:demo",
   ".demo/warehouse-sync": "npm run seed:eval",
 };
+
+function stop(message: string): never {
+  console.error(red(message));
+  process.exit(1);
+}
 
 async function evidenceFor(repo: string, c: Case): Promise<Evidence | string> {
   try {
@@ -77,21 +83,22 @@ const TAG: Record<string, (s: string) => string> = {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const { repeat, delayMs, out } = args;
+  if (args.problems.length) stop(`Cannot read the arguments: ${args.problems.join("; ")}.`);
 
   const model = getModel();
-  if (!model) {
-    console.error(red("GROQ_API_KEY is not set (.env.local) — the eval needs the model to run."));
-    process.exit(1);
-  }
+  if (!model) stop("GROQ_API_KEY is not set (.env.local) — the eval needs the model to run.");
 
   const gold: Gold = JSON.parse(readFileSync("eval/gold.json", "utf8"));
   const cases = selectCases(gold, args);
+  if (cases.length === 0) stop("No case matches those ids, that set and that category.");
+  if (out && existsSync(out))
+    stop(`"${out}" already holds a run. Kept runs are not overwritten: pick another name.`);
+
   const repoOf = (c: Case) => c.repo ?? gold.repo;
   for (const repo of new Set(cases.map(repoOf))) {
     if (parseGitHubRepo(repo) || existsSync(repo)) continue;
     const seed = SEEDS[repo] ? ` — run \`${SEEDS[repo]}\` first.` : ".";
-    console.error(red(`Local repo "${repo}" not found${seed}`));
-    process.exit(1);
+    stop(`Local repo "${repo}" not found${seed}`);
   }
 
   const auditor = getAuditor();
@@ -123,7 +130,7 @@ async function main() {
   for (let pass = 0; pass < repeat; pass++) {
     for (const c of cases) {
       const ev = evidence.get(c.id)!;
-      const started = Date.now();
+      let started = Date.now();
       let outcome: Outcome;
       let narrative: RunRecord["narrative"] = null;
       if (typeof ev === "string") {
@@ -131,6 +138,7 @@ async function main() {
       } else {
         if (!first && delayMs) await sleep(delayMs);
         first = false;
+        started = Date.now();
         const result = await narrate(ev);
         narrative = result.narrative;
         outcome = outcomeOf(c.expect, result, ev);
@@ -174,6 +182,7 @@ async function main() {
 
   const byCase = new Map(cases.map((c) => [c.id, c]));
   const t = tally(records.map((r) => ({ expect: byCase.get(r.id)!.expect, outcome: r.outcome })));
+  const scope = scopeLabels(records);
   console.log("");
   for (const line of summaryLines(records)) console.log(`  ${line}`);
   console.log(
@@ -181,10 +190,12 @@ async function main() {
       bold(`${t.passed} of ${t.passed + t.failed} automatically scored runs passed`) +
       (t.review ? yellow(` · ${t.review} awaiting manual review`) : "") +
       (t.errored ? yellow(` · ${t.errored} errored (not scored)`) : "") +
-      (t.refusals.total
-        ? ` · out-of-scope refusal ${t.refusals.correct}/${t.refusals.total}`
-        : "") +
       dim("\nA count over this set, by category above. It is not a success rate.") +
+      (scope.runs
+        ? dim(
+            `\nout-of-scope runs: ${scope.refused} of ${scope.runs} labelled out of scope · ${scope.silent} of ${scope.runs} with no claim`,
+          )
+        : "") +
       (out ? dim(`\nraw runs written to ${out}`) : ""),
   );
   process.exit(t.failed === 0 && t.errored === 0 ? 0 : 1);

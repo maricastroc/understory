@@ -1,6 +1,7 @@
 {
-  "what": "A read of every run that made at least one claim, looking for statements about the investigated line itself that no collected source supports. It is separate from the pass or fail of a case: the automatic checks do not read the claims.",
-  "reader": "Drafted with an AI assistant from the raw runs, the collected evidence and the diffs of the commits involved. Not checked by a second person.",
+  "run": "2026-10-11T13:46:29.079Z",
+  "what": "A read of every run that made at least one claim, looking for a statement about the investigated line (what it is, what it does, or why it is the way it is) that no collected source supports. It is separate from the pass or fail of a case: the automatic checks do not read the claims.",
+  "reader": "Drafted with an AI assistant from the raw runs, the collected evidence and the diffs of the commits involved, then widened after an independent review of the same runs. Not checked by a second person.",
   "runsRead": 39,
   "unsupported": {
     "tslint-189#0": "Says the line was changed to use path.resolve and to resolve the formatter relative to the working directory. The line is `if (Formatter === undefined) {`.",
@@ -8,9 +9,14 @@
     "tslint-257#0": "Says the line exists to do less work for disabled rules. The line is `const oldSource = fs.readFileSync(filePath, \"utf-8\");`.",
     "tslint-257#1": "Says the line was added to check a rule's severity and was later removed or modified. Same line.",
     "machine-32#1": "Says the line was rewritten because earlier modifications broke host marshaling. The line is `type StandardSSHClientCreator struct {` and no source says why it exists.",
-    "ng-http-411#1": "Says line 411 \"implements the whitelist check\". The line is `* @example`, a doc comment. This run passed its automatic checks."
+    "ng-http-411#0": "Says the line \"was added to implement the whitelist feature\". The line is `* @example`, a doc comment added with that feature: it documents it. Audited as supported. This run passed its automatic checks.",
+    "ng-http-411#1": "Says line 411 \"implements the whitelist check\". Same doc comment. Audited as supported. This run passed its automatic checks.",
+    "ws-batch-size#1": "Says the constant was renamed \"to reflect its role as the size of each request batch\". The only source for the rename is its subject line, which gives no reason. Audited as weak. This run passed its automatic checks.",
+    "ws-skew-value#0": "Says the allowance \"was set to two seconds because\" rows written in the same second were being skipped. The commit gives that as the reason for moving the cursor back, not for the two seconds, which is what was asked. Audited as weak.",
+    "ws-skew-value#1": "Same claim as the first pass."
   },
   "borderline": {
-    "ng-http-411#0": "Says the line \"was added to implement the whitelist feature\". It is a doc tag added with that feature, so it documents the feature rather than implements it. Read loosely the sentence holds; read strictly it does not."
+    "q-306#0": "Says \"The line implements a shim\". The line is `return i;`, one statement inside the shim the commit adds.",
+    "q-306#1": "Same wording as the first pass."
   }
 }

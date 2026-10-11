@@ -1,14 +1,20 @@
 import { readFileSync } from "node:fs";
+import type { VerifiedNarrative } from "@understory/core/types";
 import { describe, expect, it } from "vitest";
 import type { Outcome } from "./eval-check";
 import {
+  type MetaRecord,
   type RunRecord,
+  auditCounts,
   caseRows,
   caseStatus,
   groupRows,
   parseRecords,
   renderReport,
+  reviewProblems,
+  scopeLabels,
   summaryLines,
+  totalLines,
   verdictOf,
   wilson,
 } from "./eval-report";
@@ -152,22 +158,169 @@ describe("parseRecords and renderReport", () => {
   });
 });
 
+const META: MetaRecord = {
+  type: "meta",
+  date: "2026-10-11T12:00:00.000Z",
+  commit: "abc1234",
+  synthesis: "synth",
+  audit: "judge",
+  repeat: 2,
+  delayMs: 0,
+  cases: 2,
+};
+
+const answer = (over: Partial<VerifiedNarrative>): VerifiedNarrative => ({
+  answer: "",
+  claims: [],
+  citations: [],
+  recorded: false,
+  answerable: true,
+  grounded: true,
+  unknownCitations: [],
+  ungroundedClaims: 0,
+  confidence: { score: 0.3, level: "low", primarySources: 0, corroborating: 0, contradicting: 0 },
+  ...over,
+});
+
+describe("reviewProblems", () => {
+  const runs = [run("held", 0, REVIEW), run("plain", 0, PASS)];
+  const ruling = { verdict: "pass" as const, note: "abstains" };
+
+  it("accepts a review made for this run that only rules on held runs", () => {
+    expect(reviewProblems(META, runs, { run: META.date, verdicts: { "held#0": ruling } })).toEqual(
+      [],
+    );
+  });
+
+  it("refuses a review written for another run", () => {
+    const problems = reviewProblems(META, runs, { run: "2026-01-01T00:00:00.000Z", verdicts: {} });
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain("the review is for the run of 2026-01-01T00:00:00.000Z");
+  });
+
+  it("names a verdict for a run that is missing, was not held, or is not pass or fail", () => {
+    const loose = { verdict: "Pass", note: "" } as unknown as typeof ruling;
+    expect(
+      reviewProblems(META, runs, {
+        run: META.date,
+        verdicts: { "gone#0": ruling, "plain#0": ruling, "held#0": loose },
+      }),
+    ).toEqual([
+      "a verdict for gone#0, which is not in these results",
+      "a verdict for plain#0, which was not held for review",
+      'the verdict for held#0 is "Pass", expected "pass" or "fail"',
+    ]);
+  });
+});
+
+describe("what the report says beyond pass and fail", () => {
+  it("counts out-of-scope runs by their label and by whether they made a claim", () => {
+    const oos = (pass: number, narrative: VerifiedNarrative): RunRecord => ({
+      ...run("oos", pass, PASS, "out-of-scope"),
+      narrative,
+    });
+    const claim = { text: "It is Paris.", citations: [], grounded: false };
+    expect(
+      scopeLabels([
+        oos(0, answer({ answerable: false })),
+        oos(1, answer({})),
+        oos(2, answer({ claims: [claim] })),
+        run("other", 0, PASS),
+      ]),
+    ).toEqual({ runs: 3, refused: 1, silent: 2 });
+  });
+
+  it("counts claim audits, the ones the fallback model answered and the ones that failed", () => {
+    const check = (claim: number) => ({
+      citation: "commit:a",
+      claim,
+      status: "supported" as const,
+      quote: null,
+      reason: "",
+    });
+    const audited: RunRecord = {
+      ...run("a", 0, PASS),
+      narrative: answer({
+        entailment: {
+          checked: true,
+          checks: [check(0), check(0), check(1)],
+          supported: 2,
+          misattributed: 0,
+          failed: 1,
+          fallbacks: 1,
+        },
+      }),
+    };
+    expect(auditCounts([audited, run("b", 0, PASS)])).toEqual({
+      audits: 3,
+      fallbacks: 1,
+      failed: 1,
+    });
+  });
+
+  it("says how many cases are still held instead of counting them as not passed", () => {
+    const runs = [run("a", 0, PASS), run("held", 0, REVIEW, "false-premise")];
+    expect(totalLines(runs)[0]).toBe(
+      "1 of 2 cases are held for a manual verdict and counted in no other column. Pass the review file to settle them.",
+    );
+    const report = renderReport(META, runs);
+    expect(report).toContain("| false-premise | 1 | 0 | 0 | 0 | 1 | 0/0 | 0 |");
+    expect(report).not.toContain("passed every run. That is a count");
+  });
+
+  it("keeps a failure note with a pipe inside its table cell", () => {
+    const failed: Outcome = {
+      kind: "fail",
+      answerable: true,
+      fails: ["no cited source matches /INC-1187|cap/"],
+    };
+    const row = renderReport(META, [run("a", 0, failed)])
+      .split("\n")
+      .find((line) => line.startsWith("| `a`"));
+    expect(row).toContain("/INC-1187\\|cap/");
+    expect(row?.replaceAll("\\|", "").split("|")).toHaveLength(9);
+  });
+
+  it("reports the passes that were run when a run was cut short", () => {
+    expect(renderReport(META, [run("a", 0, PASS)])).toContain("· 1 of 2 passes");
+    expect(renderReport(META, [run("a", 0, PASS), run("a", 1, PASS)])).toContain("· 2 passes");
+  });
+});
+
 describe("the results published in eval/README.md", () => {
-  it("are the tables and the total eval:report prints for the run they link", () => {
+  it("are the tables and the totals eval:report prints for the run they link", () => {
     const readme = readFileSync("eval/README.md", "utf8");
     const results = /\(results\/([\w.-]+\.jsonl)\)/.exec(readme)?.[1];
-    const review = /\(results\/([\w.-]+\.review\.json)\)/.exec(readme)?.[1];
+    const reviewed = /\(results\/([\w.-]+\.review\.json)\)/.exec(readme)?.[1];
     expect(results).toBeDefined();
-    expect(review).toBeDefined();
+    expect(reviewed).toBeDefined();
     const { meta, runs } = parseRecords(readFileSync(`eval/results/${results}`, "utf8"));
-    const adjudication = JSON.parse(readFileSync(`eval/results/${review}`, "utf8"));
+    const review = JSON.parse(readFileSync(`eval/results/${reviewed}`, "utf8"));
+    expect(reviewProblems(meta, runs, review)).toEqual([]);
     const squeeze = (line: string) => line.replace(/-{3,}/g, "---").replace(/\s+/g, " ").trim();
     const published = new Set(readme.split("\n").map(squeeze));
-    const printed = renderReport(meta, runs, adjudication).split("| Case |")[0].split("\n");
-    const expected = printed.filter(
-      (line) => line.startsWith("|") || line.includes("passed every run"),
-    );
-    expect(expected.length).toBeGreaterThan(15);
+    const tables = renderReport(meta, runs, review.verdicts)
+      .split("| Case |")[0]
+      .split("\n")
+      .filter((line) => line.startsWith("|"));
+    const expected = [...tables, ...totalLines(runs, review.verdicts)];
+    expect(tables.length).toBeGreaterThan(15);
     for (const line of expected) expect(published).toContain(squeeze(line));
+  });
+
+  it("is backed by a written read that belongs to the same run", () => {
+    const readme = readFileSync("eval/README.md", "utf8");
+    const results = /\(results\/([\w.-]+\.jsonl)\)/.exec(readme)?.[1];
+    const reading = /\(results\/([\w.-]+\.reading\.json)\)/.exec(readme)?.[1];
+    expect(reading).toBeDefined();
+    const { meta, runs } = parseRecords(readFileSync(`eval/results/${results}`, "utf8"));
+    const read = JSON.parse(readFileSync(`eval/results/${reading}`, "utf8"));
+    const claimed = new Set(
+      runs.filter((r) => (r.narrative?.claims.length ?? 0) > 0).map((r) => `${r.id}#${r.pass}`),
+    );
+    expect(read.run).toBe(meta?.date);
+    expect(read.runsRead).toBe(claimed.size);
+    for (const key of [...Object.keys(read.unsupported), ...Object.keys(read.borderline)])
+      expect(claimed).toContain(key);
   });
 });

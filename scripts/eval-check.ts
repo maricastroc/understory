@@ -10,7 +10,6 @@ export type Expect = {
   level?: "low" | "medium" | "high";
   language?: "en" | "pt";
   citesBodyMatch?: string;
-  answerMatch?: string;
   answerNotMatch?: string;
   review?: string;
 };
@@ -59,8 +58,6 @@ export function checkExpect(e: Expect, n: VerifiedNarrative, ev: Evidence): stri
     if (!cited.some((a) => re.test(a.body) || re.test(a.title)))
       fails.push(`no cited source matches /${e.citesBodyMatch}/`);
   }
-  if (e.answerMatch && !new RegExp(e.answerMatch, "i").test(n.answer))
-    fails.push(`answer does not match /${e.answerMatch}/`);
   if (e.answerNotMatch && new RegExp(e.answerNotMatch, "i").test(n.answer))
     fails.push(`answer matches /${e.answerNotMatch}/`);
   return fails;
@@ -84,28 +81,16 @@ export type Tally = {
   failed: number;
   review: number;
   errored: number;
-  refusals: { correct: number; total: number };
 };
 
 export function tally(runs: { expect: Expect; outcome: Outcome }[]): Tally {
-  const t: Tally = {
-    runs: 0,
-    passed: 0,
-    failed: 0,
-    review: 0,
-    errored: 0,
-    refusals: { correct: 0, total: 0 },
-  };
-  for (const { expect, outcome } of runs) {
+  const t: Tally = { runs: 0, passed: 0, failed: 0, review: 0, errored: 0 };
+  for (const { outcome } of runs) {
     t.runs += 1;
     if (outcome.kind === "pass") t.passed += 1;
     else if (outcome.kind === "fail") t.failed += 1;
     else if (outcome.kind === "review") t.review += 1;
     else t.errored += 1;
-    if (expect.answerable === false && outcome.kind !== "error") {
-      t.refusals.total += 1;
-      if (!outcome.answerable) t.refusals.correct += 1;
-    }
   }
   return t;
 }
@@ -117,28 +102,50 @@ export type Args = {
   out: string | null;
   set: string | null;
   category: string | null;
+  problems: string[];
 };
 
 const VALUE_FLAGS = ["--repeat", "--delay", "--out", "--set", "--category"];
 
 export function parseArgs(argv: string[]): Args {
-  const text = (flag: string) => {
-    const at = argv.indexOf(flag);
-    return at >= 0 ? (argv[at + 1] ?? null) : null;
+  const values = new Map<string, string>();
+  const only: string[] = [];
+  const problems: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (!arg.startsWith("--")) {
+      only.push(arg);
+      continue;
+    }
+    if (!VALUE_FLAGS.includes(arg)) {
+      problems.push(`unknown option ${arg}`);
+      continue;
+    }
+    const value = argv[i + 1];
+    if (value === undefined || value.startsWith("--")) {
+      problems.push(`${arg} needs a value`);
+      continue;
+    }
+    if (values.has(arg)) problems.push(`${arg} is given twice`);
+    values.set(arg, value);
+    i += 1;
+  }
+  const count = (flag: string, least: number) => {
+    const raw = values.get(flag);
+    if (raw === undefined) return least;
+    const n = Number(raw);
+    if (Number.isFinite(n) && n >= least) return n;
+    problems.push(`${flag} needs a number of at least ${least}`);
+    return least;
   };
-  const flagged = new Set(
-    VALUE_FLAGS.flatMap((f) => {
-      const at = argv.indexOf(f);
-      return at >= 0 ? [at, at + 1] : [];
-    }),
-  );
   return {
-    repeat: Math.max(1, Math.floor(Number(text("--repeat"))) || 1),
-    delayMs: Math.max(0, Number(text("--delay")) || 0),
-    only: argv.filter((a, i) => !flagged.has(i) && !a.startsWith("--")),
-    out: text("--out"),
-    set: text("--set"),
-    category: text("--category"),
+    repeat: Math.floor(count("--repeat", 1)),
+    delayMs: count("--delay", 0),
+    only,
+    out: values.get("--out") ?? null,
+    set: values.get("--set") ?? null,
+    category: values.get("--category") ?? null,
+    problems,
   };
 }
 
