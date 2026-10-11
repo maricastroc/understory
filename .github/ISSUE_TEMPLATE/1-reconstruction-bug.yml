@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Understory promises that every claim points to a real artifact, that a quote marked verified is really in its source, and that a silent history is reported as silent. Use this form when that promise broke.
+        Understory is built so that every claim points to a real artifact, a quote marked verified is really in its source, and a silent history is reported as silent. Use this form when it did not.
 
         > **Tip:** open the clause's evidence and use **Show in history** first. Pointing at a clause, a letter (A, B, C…) or a gap is the fastest way to get this fixed.
 
