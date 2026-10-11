@@ -2,16 +2,12 @@ import { generateObject } from "ai";
 import { z } from "zod";
 import { type Auditor, runAudit } from "./auditor";
 import { canonicalCitations } from "./citation-id";
-import { renderCode } from "./collect/code-context";
 import type { Model } from "./llm";
-import { owningCommit } from "./provenance";
 import { verifyQuote } from "./quote";
 import type {
   Artifact,
   CitationCheck,
   Claim,
-  CodeContext,
-  CodeLocation,
   Entailment,
   EntailmentStatus,
   Evidence,
@@ -66,37 +62,6 @@ const CLAIM_SYSTEM = [
   "do NOT answer 'supported'. Keep `reason` to one short line.",
 ].join("\n");
 
-const CODE_RULES = [
-  "",
-  "The answer is about ONE piece of code. After the sources you are given facts about it that do",
-  "not come from the sources: the code itself and, from blame, the change that last touched it.",
-  "Take those facts as true.",
-  "- Judge what the claim adds to them, above all its reasons, against the sources as before.",
-  "  `quote` is always copied from a source, never from the code.",
-  "- A claim that says the code is or does something the code shown contradicts is 'unsupported'.",
-  "- A reason must be the sources' reason for this code, or for the change that touched it as a",
-  "  whole, not for some other, specific part of that change. A reason borrowed from another part",
-  "  is 'unsupported', however exactly it quotes its source.",
-  "- A claim that only restates the given facts, or describes the code with no source behind it,",
-  "  is 'weak'.",
-].join("\n");
-
-export type Subject = {
-  code: CodeContext;
-  location: CodeLocation;
-  lastChange?: { id: string; title: string };
-};
-
-function renderSubject(subject: Subject): string {
-  return [
-    "Facts about the code under investigation (given, not a source; never quote them):",
-    renderCode(subject.code, subject.location),
-    ...(subject.lastChange
-      ? [`Blame: last changed by [${subject.lastChange.id}], "${subject.lastChange.title}".`]
-      : []),
-  ].join("\n");
-}
-
 function clampBody(body: string, cap: number): string {
   if (body.length <= cap) return body;
   return `${body.slice(0, cap).trimEnd()}… [truncated]`;
@@ -135,12 +100,12 @@ export function finalizeClaim(
   return { status: raw.status, quote, quoteSourceId, reason: raw.reason };
 }
 
-export function buildJudgeInput(
+export async function judgeClaim(
   question: string,
   claimText: string,
   sources: Artifact[],
-  subject?: Subject,
-): { system: string; prompt: string } {
+  model: Model,
+): Promise<z.infer<typeof claimSchema>> {
   const rendered = sources
     .map((a) => {
       const who = a.author?.name ? ` · ${a.author.name}` : "";
@@ -159,23 +124,12 @@ export function buildJudgeInput(
     "",
     lead,
     rendered,
-    ...(subject ? ["", "---", "", renderSubject(subject)] : []),
   ].join("\n");
-  return { system: subject ? `${CLAIM_SYSTEM}\n${CODE_RULES}` : CLAIM_SYSTEM, prompt };
-}
 
-export async function judgeClaim(
-  question: string,
-  claimText: string,
-  sources: Artifact[],
-  model: Model,
-  subject?: Subject,
-): Promise<z.infer<typeof claimSchema>> {
-  const { system, prompt } = buildJudgeInput(question, claimText, sources, subject);
   const { object } = await generateObject({
     model,
     schema: claimSchema,
-    system,
+    system: CLAIM_SYSTEM,
     prompt,
     temperature: 0,
     maxOutputTokens: JUDGE_MAX_OUTPUT_TOKENS,
@@ -190,7 +144,6 @@ export async function entailClaims(
   claims: Claim[],
   byId: Map<string, Artifact>,
   auditor: Auditor,
-  subject?: Subject,
 ): Promise<Entailment> {
   const known = new Set(byId.keys());
   const tasks: ClaimTask[] = claims
@@ -207,7 +160,7 @@ export async function entailClaims(
 
   const settled = await Promise.allSettled(
     tasks.map((t) =>
-      runAudit(auditor, (model) => judgeClaim(question, t.text, t.sources, model, subject)).then(
+      runAudit(auditor, (model) => judgeClaim(question, t.text, t.sources, model)).then(
         ({ value, fellBack }) => ({ t, fellBack, verdict: finalizeClaim(t.sources, value) }),
       ),
     ),
@@ -248,20 +201,5 @@ export async function checkEntailment(
   auditor: Auditor,
 ): Promise<Entailment> {
   if (!n.answerable || !n.recorded) return EMPTY;
-  const owner = owningCommit(ev);
-  const subject =
-    ev.code && ev.location
-      ? {
-          code: ev.code,
-          location: ev.location,
-          ...(owner ? { lastChange: { id: owner.id, title: owner.title } } : {}),
-        }
-      : undefined;
-  return entailClaims(
-    ev.question,
-    n.claims,
-    new Map(ev.artifacts.map((a) => [a.id, a])),
-    auditor,
-    subject,
-  );
+  return entailClaims(ev.question, n.claims, new Map(ev.artifacts.map((a) => [a.id, a])), auditor);
 }

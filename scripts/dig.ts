@@ -4,6 +4,7 @@ import { cosmeticOrigin } from "@understory/core/cosmetic";
 import { getAuditor } from "@understory/core/auditor";
 import { getModel } from "@understory/core/llm";
 import { traceProvenance } from "@understory/core/provenance";
+import { checkRelevance, sweptAlong } from "@understory/core/relevance";
 import { buildSynthesisInput, synthesize } from "@understory/core/synthesize";
 import { verify } from "@understory/core/verify";
 import type { Artifact, Evidence, VerifiedNarrative } from "@understory/core/types";
@@ -271,10 +272,15 @@ async function main() {
   if (why) {
     const model = getModel();
     if (!model) keyMissing();
-    const narrative = await synthesize(evidence, model);
-    const auditor = getAuditor() ?? { primary: model, fallback: null };
-    const entailment = await checkEntailment(evidence, narrative, auditor).catch(() => undefined);
-    verified = verify(evidence, narrative, entailment);
+    const swept = sweptAlong(await checkRelevance(evidence, model).catch(() => null));
+    if (swept) {
+      verified = verify(evidence, swept);
+    } else {
+      const narrative = await synthesize(evidence, model);
+      const auditor = getAuditor() ?? { primary: model, fallback: null };
+      const entailment = await checkEntailment(evidence, narrative, auditor).catch(() => undefined);
+      verified = verify(evidence, narrative, entailment);
+    }
   }
 
   if (json) {

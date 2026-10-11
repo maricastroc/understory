@@ -1,6 +1,5 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import { renderCode } from "./collect/code-context";
 import type { Language, Model } from "./llm";
 import type { Evidence, Narrative } from "./types";
 
@@ -73,23 +72,7 @@ const SYSTEM = [
   "- Only cite ids that literally appear in the evidence. Never fabricate an id.",
 ].join("\n");
 
-const CODE_RULES = [
-  "- The prompt shows the code under investigation. It is there so you can tell what the evidence",
-  "  is ABOUT. It is not evidence: never cite it, never spend a claim describing it, and never",
-  "  infer from it what the code is for or why it was written. Reasons come only from the evidence.",
-  "- A commit or pull request usually changes many things. A reason the evidence gives for another",
-  "  part of the change is NOT a reason for this code. Give this code only a reason the evidence",
-  "  gives for it, or for the change as a whole when this code plainly belongs to that purpose.",
-  "- If the evidence gives no such reason, because it is about other parts of the change, do not",
-  "  fill the gap from the code: set recorded=false, leave `claims` empty, and say in `answer`",
-  "  which change last touched the code and that the record does not explain it.",
-  "- When the evidence does give the reason, state it in the evidence's own terms, so that a",
-  "  sentence of the evidence could be quoted for it. You may name what the code is (a doc comment,",
-  "  a condition, a type) so the claim is about the right thing, but never say it does something",
-  "  the code shown does not do.",
-].join("\n");
-
-function languageRule(language: Language): string {
+export function languageRule(language: Language): string {
   if (language === "pt")
     return "- LANGUAGE: write every claim's `text` (and `answer`) in Brazilian Portuguese (pt-BR), no matter what language the question or the evidence is in.";
   if (language === "en")
@@ -146,17 +129,14 @@ export function buildSynthesisInput(
   const targetLine = ev.location
     ? `Code location: ${formatTarget(ev)}`
     : `Anchored on: ${formatTarget(ev)}`;
-  const code = ev.code && ev.location ? renderCode(ev.code, ev.location) : null;
   const prompt = [
     `Question: ${ev.question}`,
     targetLine,
-    ...(code ? ["", code] : []),
     "",
     "Evidence:",
     ev.artifacts.length ? renderEvidence(ev) : "(no evidence was collected)",
   ].join("\n");
-  const rules = code ? `${SYSTEM}\n${CODE_RULES}` : SYSTEM;
-  return { system: `${rules}\n${languageRule(language)}`, prompt };
+  return { system: `${SYSTEM}\n${languageRule(language)}`, prompt };
 }
 
 export function toNarrative(object: z.infer<typeof narrativeSchema>): Narrative {
