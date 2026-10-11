@@ -50,7 +50,7 @@ export function Findings({
       <div className="flex items-start justify-between gap-3">
         <SectionLabel
           title="Findings"
-          meta="Reconstructed conclusion — every claim linked to a primary source"
+          meta="Reconstructed conclusion — each claim linked to the sources it cites"
         />
         {narrative.answer && <CopyButton text={narrative.answer} label="Copy the why" />}
       </div>

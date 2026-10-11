@@ -22,7 +22,10 @@
     "format:check": "prettier --check .",
     "dig": "tsx scripts/dig.ts",
     "eval": "tsx scripts/eval.ts",
+    "eval:report": "tsx scripts/eval-report.ts",
+    "eval:sample": "tsx scripts/eval-sample.ts",
     "seed:demo": "bash scripts/seed-demo.sh",
+    "seed:eval": "bash scripts/seed-eval.sh",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
