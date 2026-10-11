@@ -48,8 +48,8 @@ export function EvidenceStandard() {
             {issue && <QuoteSpecimen artifact={issue} rejected={landingRejected} />}
           </Frame>
           <Frame
-            title="It admits a cold trail"
-            body="When history doesn't explain a line, the gap is shown as a gap, never filled with a plausible story."
+            title="It shows where the trail goes cold"
+            body="A gap counts as silence only when the provider confirms nothing is there. And when no source gives a reason, the answer is built to say so, not to guess."
           >
             {gap && after && <SilentSpecimen gap={gap} after={after} />}
           </Frame>
