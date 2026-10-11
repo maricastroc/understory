@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import {
   getFileContentGitHub,
   getRepoMeta,
@@ -5,11 +6,7 @@ import {
 } from "@understory/core/collect/github";
 
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };
-try {
-  proc.loadEnvFile?.(".env.local");
-} catch {
-  //
-}
+if (existsSync(".env.local")) proc.loadEnvFile?.(".env.local");
 
 export function seedOf(text: string): number {
   let h = 0x811c9dc5;
