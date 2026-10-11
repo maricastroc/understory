@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { entailClaims, finalizeClaim } from "./entail";
+import { buildJudgeInput, checkEntailment, entailClaims, finalizeClaim } from "./entail";
 import { verifyQuote } from "./quote";
 import { TOOL_CALL_ERROR, failingJudge, scriptedJudge } from "./testing/scripted-judge";
 import type { Artifact, Evidence, Narrative } from "./types";
@@ -327,6 +327,76 @@ describe("entailClaims — hybrid auditor (20b, falling back to 120b on a techni
     );
     expect(e).toMatchObject({ checked: true, supported: 1, failed: 1 });
     expect(e.checks.map((c) => c.claim)).toEqual([0]);
+  });
+});
+
+describe("the audit sees the code the answer is about", () => {
+  const source = artifact("pr:3412", "* deprecate `getRelativePath`, use `path.resolve` instead");
+  const subject = {
+    location: { file: "linter.ts", startLine: 189, endLine: 189 },
+    code: {
+      startLine: 188,
+      lines: ["const Formatter = findFormatter(name);", "if (Formatter === undefined) {"],
+    },
+  };
+  const claim = "The line was changed to use path.resolve.";
+
+  it("gives the line and the change blame points at as facts, after the sources", () => {
+    const { system, prompt } = buildJudgeInput("why?", claim, [source], {
+      ...subject,
+      lastChange: { id: "commit:8b853b2", title: "Cleanup of the loaders" },
+    });
+    expect(prompt).toContain("> 189 | if (Formatter === undefined) {");
+    expect(prompt.indexOf("[pr:3412]")).toBeLessThan(prompt.indexOf("Facts about the code"));
+    expect(prompt.indexOf("Facts about the code")).toBeLessThan(prompt.indexOf("> 189 |"));
+    expect(prompt).toContain('Blame: last changed by [commit:8b853b2], "Cleanup of the loaders".');
+    expect(system).toContain("the code shown contradicts is 'unsupported'");
+    expect(system).toContain("A reason borrowed from another part\n  is 'unsupported'");
+    expect(system).toContain("never from the code");
+  });
+
+  it("judges as before when no code was collected", () => {
+    const { system, prompt } = buildJudgeInput("why?", claim, [source]);
+    expect(prompt).not.toContain("The code at that location");
+    expect(system).not.toContain("ONE piece of code");
+  });
+
+  it("hands the collected code to every audit of an answer", async () => {
+    const seen: string[] = [];
+    const judge = scriptedJudge((prompt) => {
+      seen.push(prompt);
+      return { status: "unsupported", quote: "", reason: "about another line" };
+    });
+    const ev: Evidence = {
+      question: "why?",
+      repo: { path: "o/r" },
+      artifacts: [source],
+      contradictions: [],
+      ...subject,
+    };
+    const narrative: Narrative = {
+      answer: claim,
+      claims: [{ text: claim, citations: ["pr:3412"] }],
+      citations: ["pr:3412"],
+      recorded: true,
+      answerable: true,
+    };
+    const e = await checkEntailment(ev, narrative, { primary: judge, fallback: null });
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toContain("> 189 | if (Formatter === undefined) {");
+    expect(seen[0]).toContain("Blame: last changed by [pr:3412]");
+    expect(e).toMatchObject({ checked: true, supported: 0, misattributed: 1 });
+    expect(verify(ev, narrative, e).confidence.level).toBe("low");
+  });
+
+  it("does not let a quote come from the code instead of a source", () => {
+    const r = finalizeClaim([source], {
+      status: "supported",
+      quote: "if (Formatter === undefined) {",
+      reason: "the code shows it",
+    });
+    expect(r.status).toBe("weak");
+    expect(r.quote).toBeNull();
   });
 });
 

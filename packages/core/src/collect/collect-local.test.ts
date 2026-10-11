@@ -52,6 +52,18 @@ describe("collect — local checkout", () => {
     expect(ev.artifacts.every((a) => a.meta?.prLookup === "skipped")).toBe(true);
   });
 
+  it("keeps the investigated line with its neighbours, read at the pinned revision", async () => {
+    const ev = await collect({
+      repoPath: dir,
+      question: "why 3?",
+      location: { file: "charge.ts", startLine: 2, endLine: 2 },
+    });
+    expect(ev.code).toEqual({
+      startLine: 1,
+      lines: ["a", "for (let i = 0; i < 3; i++) {", "c", "d", ""],
+    });
+  });
+
   it("reads line history at a pinned revision, not at the current HEAD", async () => {
     const history = await lineHistory(dir, { file: "charge.ts", startLine: 2, endLine: 2 }, first);
     expect(history.map((c) => c.sha)).toEqual([first]);
