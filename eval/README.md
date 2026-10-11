@@ -190,19 +190,20 @@ change's reasons as the line's, in five of eight runs:
 The cause is structural. Synthesis and audit read the collected artifacts and the location
 `file:line`, never the text of the line or the diff. The auditor marked several of these
 claims as supported, because the source does say what the claim quotes; nothing checks that the
-source is about the line. The verdict was "resolved" with medium confidence, 0.55 to 0.65.
+source is about the line. The verdict was "resolved" with medium confidence, 0.55 to 0.65. Tracked in [#31](https://github.com/maricastroc/understory/issues/31).
 
 **An abstention counted as an answer.** `ws-skew-value` asks why an allowance is 2 seconds and
 not more. Both runs said, correctly, that the commit gives no reason for the size. They said it
 as a claim, the auditor marked that claim supported, and the answer came back as recorded with
-confidence 0.85. The text is honest and the verdict is not.
+confidence 0.85. The text is honest and the verdict is not. Tracked in [#32](https://github.com/maricastroc/understory/issues/32).
 
 **The confidence floor moves between runs.** `machine-168` and `q-796` each passed one run and
 missed the 0.65 floor in the other, with nearly the same claims. What changed was the
 auditor's verdict. For `machine-168` the same sentence was supported once and weak once. For
 `q-796` the auditor agreed with the claims and then quoted the source inexactly, which
-downgrades a verdict to weak. That downgrade happened to nine claims in eight runs. It is the
-mechanism that failed `jitter` in September.
+downgrades a verdict to weak. That downgrade happened to nine claims in eight runs. The
+floor is also where `jitter` failed in September: the auditor then held a claim that adds a
+consequence to its source at weak, and in October it accepted the same kind of claim every time. Tracked in [#33](https://github.com/maricastroc/understory/issues/33).
 
 ### What passed, and what a pass hides
 
@@ -251,6 +252,8 @@ silence beside a well explained commit, a confidence floor on a real commit mess
 eight alone the pipeline looks finished.
 
 ### What this does not show
+
+What is planned to close these gaps is in [#34](https://github.com/maricastroc/understory/issues/34).
 
 - **How often it is right.** Twelve real lines from six repositories is enough to find a
   failure mode, not to size it. Zero failures in a category of nine still leaves room, at 95%,
