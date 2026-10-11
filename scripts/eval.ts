@@ -1,11 +1,22 @@
-import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import { getAuditor } from "@understory/core/auditor";
 import { collect, parseLocation } from "@understory/core/collect";
 import { parseGitHubRepo } from "@understory/core/collect/github";
 import { narrate } from "@understory/core/investigate";
 import { getModel } from "@understory/core/llm";
 import type { Evidence } from "@understory/core/types";
-import { type Case, type Gold, type Outcome, outcomeOf, parseArgs, tally } from "./eval-check";
+import {
+  type Case,
+  type Gold,
+  type Outcome,
+  outcomeOf,
+  parseArgs,
+  selectCases,
+  tally,
+} from "./eval-check";
+import { type MetaRecord, type RunRecord, caseStatus, verdictOf } from "./eval-report";
 
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };
 try {
@@ -25,10 +36,15 @@ const yellow = wrap("33");
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : "—");
 
+const SEEDS: Record<string, string> = {
+  ".demo/payments-service": "npm run seed:demo",
+  ".demo/warehouse-sync": "npm run seed:eval",
+};
+
 async function evidenceFor(repo: string, c: Case): Promise<Evidence | string> {
   try {
     return await collect({
-      repoPath: c.repo ?? repo,
+      repoPath: repo,
       question: c.question,
       location: parseLocation(c.location),
     });
@@ -37,8 +53,25 @@ async function evidenceFor(repo: string, c: Case): Promise<Evidence | string> {
   }
 }
 
+function headCommit(): string | null {
+  try {
+    return execFileSync("git", ["rev-parse", "--short", "HEAD"], { encoding: "utf8" }).trim();
+  } catch {
+    return null;
+  }
+}
+
+const TAG: Record<string, (s: string) => string> = {
+  pass: green,
+  fail: red,
+  unstable: yellow,
+  errored: yellow,
+  pending: yellow,
+};
+
 async function main() {
-  const { repeat, delayMs, only } = parseArgs(process.argv.slice(2));
+  const args = parseArgs(process.argv.slice(2));
+  const { repeat, delayMs, out } = args;
 
   const model = getModel();
   if (!model) {
@@ -47,66 +80,106 @@ async function main() {
   }
 
   const gold: Gold = JSON.parse(readFileSync("eval/gold.json", "utf8"));
-  if (!parseGitHubRepo(gold.repo) && !existsSync(gold.repo)) {
-    console.error(red(`Local repo "${gold.repo}" not found — run \`npm run seed:demo\` first.`));
+  const cases = selectCases(gold, args);
+  const repoOf = (c: Case) => c.repo ?? gold.repo;
+  for (const repo of new Set(cases.map(repoOf))) {
+    if (parseGitHubRepo(repo) || existsSync(repo)) continue;
+    const seed = SEEDS[repo] ? ` — run \`${SEEDS[repo]}\` first.` : ".";
+    console.error(red(`Local repo "${repo}" not found${seed}`));
     process.exit(1);
   }
 
-  const cases = only.length ? gold.cases.filter((c) => only.includes(c.id)) : gold.cases;
   const auditor = getAuditor();
+  const meta: MetaRecord = {
+    type: "meta",
+    date: new Date().toISOString(),
+    commit: headCommit(),
+    synthesis: model.modelId,
+    audit: auditor?.primary.modelId ?? "none",
+    repeat,
+    delayMs,
+    cases: cases.length,
+  };
   console.log(
     bold("\nUnderstory — eval") +
       dim(`  (${cases.length} cases × ${repeat})`) +
-      dim(`\nsynthesis ${model.modelId} · audit ${auditor?.primary.modelId ?? "none"}\n`),
+      dim(`\nsynthesis ${meta.synthesis} · audit ${meta.audit}\n`),
   );
-
-  const runs: { expect: Case["expect"]; outcome: Outcome }[] = [];
-  let first = true;
-
-  for (const c of cases) {
-    const ev = await evidenceFor(gold.repo, c);
-    const outcomes: Outcome[] = [];
-    for (let r = 0; r < repeat; r++) {
-      if (!first && delayMs) await sleep(delayMs);
-      first = false;
-      const outcome: Outcome =
-        typeof ev === "string"
-          ? { kind: "error", message: `collect: ${ev}` }
-          : outcomeOf(c.expect, await narrate(ev), ev);
-      outcomes.push(outcome);
-      runs.push({ expect: c.expect, outcome });
-    }
-
-    const passed = outcomes.filter((o) => o.kind === "pass").length;
-    const errored = outcomes.filter((o) => o.kind === "error").length;
-    const scored = repeat - errored;
-    const tag =
-      scored === 0
-        ? yellow("ERROR")
-        : passed === scored
-          ? green("PASS")
-          : passed === 0
-            ? red("FAIL")
-            : yellow("FLAKY");
-    const ratio =
-      repeat > 1 ? dim(` ${passed}/${scored}${errored ? ` +${errored} errored` : ""}`) : "";
-    console.log(`  ${tag}${ratio}  ${bold(c.id.padEnd(16))} ${dim(c.question)}`);
-    const fail = outcomes.find((o) => o.kind === "fail");
-    if (fail?.kind === "fail") console.log(`         ${red("↳ " + fail.fails.join("; "))}`);
-    const error = outcomes.find((o) => o.kind === "error");
-    if (error?.kind === "error") console.log(`         ${yellow("↳ " + error.message)}`);
+  if (out) {
+    mkdirSync(dirname(out), { recursive: true });
+    writeFileSync(out, `${JSON.stringify(meta)}\n`);
   }
 
-  const t = tally(runs);
+  const evidence = new Map<string, Evidence | string>();
+  for (const c of cases) evidence.set(c.id, await evidenceFor(repoOf(c), c));
+
+  const records: RunRecord[] = [];
+  let first = true;
+  for (let pass = 0; pass < repeat; pass++) {
+    for (const c of cases) {
+      const ev = evidence.get(c.id)!;
+      const started = Date.now();
+      let outcome: Outcome;
+      let narrative: RunRecord["narrative"] = null;
+      if (typeof ev === "string") {
+        outcome = { kind: "error", message: `collect: ${ev}` };
+      } else {
+        if (!first && delayMs) await sleep(delayMs);
+        first = false;
+        const result = await narrate(ev);
+        narrative = result.narrative;
+        outcome = outcomeOf(c.expect, result, ev);
+      }
+      const record: RunRecord = {
+        type: "run",
+        id: c.id,
+        set: c.set,
+        category: c.category,
+        source: c.source,
+        pass,
+        ms: Date.now() - started,
+        outcome,
+        artifacts:
+          typeof ev === "string"
+            ? []
+            : ev.artifacts.map((a) => ({ id: a.id, kind: a.kind, chars: a.body.length })),
+        narrative,
+      };
+      records.push(record);
+      if (out) appendFileSync(out, `${JSON.stringify(record)}\n`);
+      if (repeat > 1) console.log(dim(`  pass ${pass + 1} · ${c.id} · ${outcome.kind}`));
+    }
+  }
+
+  if (repeat > 1) console.log("");
+  for (const c of cases) {
+    const runs = records.filter((r) => r.id === c.id);
+    const status = caseStatus(runs.map((r) => verdictOf(r)));
+    const kinds = runs.map((r) => r.outcome.kind);
+    const label = status === "pending" ? "REVIEW" : status.toUpperCase();
+    const ratio = repeat > 1 ? dim(` ${kinds.join(" ")}`) : "";
+    console.log(
+      `  ${TAG[status](label.padEnd(8))}${ratio}  ${bold(c.id.padEnd(24))} ${dim(c.question)}`,
+    );
+    const fail = runs.find((r) => r.outcome.kind === "fail")?.outcome;
+    if (fail?.kind === "fail") console.log(`           ${red("↳ " + fail.fails.join("; "))}`);
+    const error = runs.find((r) => r.outcome.kind === "error")?.outcome;
+    if (error?.kind === "error") console.log(`           ${yellow("↳ " + error.message)}`);
+  }
+
+  const byCase = new Map(cases.map((c) => [c.id, c]));
+  const t = tally(records.map((r) => ({ expect: byCase.get(r.id)!.expect, outcome: r.outcome })));
   const scored = t.passed + t.failed;
   console.log(
     "\n" +
       bold(`${t.passed}/${scored} scored runs passed`) +
       dim(` (${pct(t.passed, scored)})`) +
+      (t.review ? yellow(`   ${t.review} awaiting manual review`) : "") +
       (t.errored ? yellow(`   ${t.errored} errored (not scored)`) : "") +
       (t.refusals.total
         ? `   ${bold("out-of-scope refusal:")} ${t.refusals.correct}/${t.refusals.total} (${pct(t.refusals.correct, t.refusals.total)})`
-        : ""),
+        : "") +
+      (out ? dim(`\nraw runs written to ${out}`) : ""),
   );
   process.exit(t.failed === 0 && t.errored === 0 ? 0 : 1);
 }
