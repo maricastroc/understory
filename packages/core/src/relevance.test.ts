@@ -39,7 +39,7 @@ describe("buildRelevanceInput", () => {
     const { system, prompt } = buildRelevanceInput(evidence())!;
     const code = prompt.indexOf('> 257 | const oldSource = fs.readFileSync(filePath, "utf-8");');
     const blame = prompt.indexOf(
-      'Blame: last changed by [commit:63fc794], "Rewrite enable/disable logic (#2369)".',
+      'Most recent change to it: [commit:63fc794], "Rewrite enable/disable logic (#2369)".',
     );
     const record = prompt.indexOf("[commit:63fc794] commit · 2017-05-09");
     expect(code).toBeGreaterThan(-1);
@@ -48,6 +48,7 @@ describe("buildRelevanceInput", () => {
     expect(prompt).toContain("Code location: src/linter.ts:257");
     expect(system).toContain("whether that\nhistory is ABOUT this code");
     expect(system).toContain("If in doubt, set belongs=true.");
+    expect(system).toContain("it need not\n  be the most recent");
   });
 
   it("follows the language asked for the line it may write", () => {
