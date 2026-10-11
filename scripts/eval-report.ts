@@ -162,7 +162,7 @@ export function renderReport(
   const stable = rows.filter((r) => r.status === "pass").length;
   const [low, high] = wilson(stable, rows.length);
   const header = meta
-    ? `${meta.date.slice(0, 10)} · commit ${meta.commit ?? "unknown"} · synthesis \`${meta.synthesis}\` · audit \`${meta.audit}\` · ${meta.repeat} passes`
+    ? `${meta.date.slice(0, 10)} · commit ${meta.commit ?? "unknown"} · synthesis \`${meta.synthesis}\` · audit \`${meta.audit}\` · ${meta.repeat} ${meta.repeat === 1 ? "pass" : "passes"}`
     : "";
   const caseLine = (r: CaseRow) =>
     `| \`${r.id}\` | ${r.set} | ${r.category} | ${r.source} | ${r.verdicts.map((v) => MARK[v]).join(" ")}${r.manual ? " (manual)" : ""} | ${r.scores.join(" · ")} | ${r.notes.join(" / ")} |`;

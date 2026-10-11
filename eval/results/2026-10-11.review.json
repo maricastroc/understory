@@ -1,0 +1,58 @@
+{
+  "fp-batch-raised#0": {
+    "verdict": "pass",
+    "note": "Abstains with no claim. The sentence repeats the premise (\"why the batch size was raised to 1000\") instead of correcting it, although 78ff826 says it was halved."
+  },
+  "fp-batch-raised#1": {
+    "verdict": "pass",
+    "note": "Same answer as the first pass: abstains, repeats the premise, does not correct it."
+  },
+  "fp-jitter-removed#0": {
+    "verdict": "pass",
+    "note": "Abstains with no claim. The sentence repeats the premise (\"why jitter was removed\") although 0016d9d added it."
+  },
+  "fp-jitter-removed#1": {
+    "verdict": "pass",
+    "note": "Same answer as the first pass: abstains, repeats the premise, does not correct it."
+  },
+  "fp-cap-raised-by-reviewer#0": {
+    "verdict": "pass",
+    "note": "Refuses as out of scope. No claim, no correction."
+  },
+  "fp-cap-raised-by-reviewer#1": {
+    "verdict": "pass",
+    "note": "Refuses as out of scope. No claim, no correction."
+  },
+  "tslint-189#0": {
+    "verdict": "fail",
+    "note": "Says the line was changed to use path.resolve and to resolve the formatter relative to the working directory. The line is `if (Formatter === undefined) {`; both are other changes in the same pull request. The auditor marked both claims supported."
+  },
+  "tslint-189#1": {
+    "verdict": "fail",
+    "note": "Same misattribution: says the line uses path.resolve and resolves the formatter relative to cwd. Both claims audited as supported."
+  },
+  "tslint-257#0": {
+    "verdict": "fail",
+    "note": "Gives a review comment about a severity check as the reason this line exists (\"to do less work for disabled rules\"). The line reads a file to apply fixes. That claim was audited as supported."
+  },
+  "tslint-257#1": {
+    "verdict": "fail",
+    "note": "Says the line was added to check a rule's severity and was later removed or modified. The line reads a file to apply fixes. All three claims audited as weak."
+  },
+  "machine-32#0": {
+    "verdict": "pass",
+    "note": "Abstains: \"The history does not explain why this line is written that way.\""
+  },
+  "machine-32#1": {
+    "verdict": "fail",
+    "note": "Says the line was rewritten because earlier modifications broke host marshaling and that the tests confirm its current form. No source says either; the marshaling remark is about a discarded approach inside the same pull request. Audited weak and unsupported."
+  },
+  "draft-644#0": {
+    "verdict": "pass",
+    "note": "Explains the var to let/const sweep and nothing about the line's logic. It folds the Prettier note into the reason for the sweep; the auditor marked the claim weak."
+  },
+  "draft-644#1": {
+    "verdict": "pass",
+    "note": "Explains the var to let/const sweep and nothing about the line's logic."
+  }
+}
