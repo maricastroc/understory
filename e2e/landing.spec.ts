@@ -14,17 +14,19 @@ const visibleClause = (page: Page, text: RegExp) =>
 const visibleCode = (page: Page) => demo(page).locator('ol[aria-label^="Code, lines"]:visible');
 const visibleHistory = (page: Page) =>
   demo(page).locator('ol[aria-label="History, newest first"]:visible');
-
-test("at 1440 the demo is the 1600-wide strata drawing scaled to fit, nothing clipped", async ({
-  page,
-}) => {
-  await open(page);
-  await page.waitForFunction(
+const hydrated = (page: Page) =>
+  page.waitForFunction(
     () =>
       document.querySelector<HTMLElement>(
         'section[aria-label^="Example investigation"] .origin-top-left',
       )?.style.transform !== "scale(1)",
   );
+
+test("at 1440 the demo is the 1600-wide strata drawing scaled to fit, nothing clipped", async ({
+  page,
+}) => {
+  await open(page);
+  await hydrated(page);
   const frame = await page.evaluate(() => {
     const inner = document.querySelector<HTMLElement>(
       'section[aria-label^="Example investigation"] .origin-top-left',
@@ -79,6 +81,7 @@ test("clause 2 is active on load with a green trace to E and D; hover moves it",
     "for (let attempt = 0; attempt < 5; attempt++) {",
   );
 
+  await hydrated(page);
   await visibleClause(page, /Review cut/).hover();
   await page.mouse.move(5, 5);
   await expect(visibleClause(page, /Review cut/)).toHaveAttribute("aria-pressed", "true");
@@ -155,13 +158,19 @@ for (const width of [1440, 1200, 1199, 700, 375]) {
     await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "true");
     await expect(visibleHistory(page)).toHaveCount(1);
     if (width < 1200) {
-      const scroller = await code
-        .locator("xpath=ancestor::div[contains(@class, 'overflow-x-auto')][1]")
-        .boundingBox();
+      const scroller = code.locator("xpath=ancestor::div[contains(@class, 'overflow-x-auto')][1]");
+      await expect
+        .poll(() =>
+          scroller.evaluate(
+            (el: HTMLElement) => el.scrollWidth <= el.clientWidth + 1 || el.tabIndex === 0,
+          ),
+        )
+        .toBe(true);
+      const scrollerBox = await scroller.boundingBox();
       const codeBox = await code.boundingBox();
       const clauses = await visibleClause(page, /212 customers/).boundingBox();
       expect(codeBox!.y).toBeGreaterThan(clauses!.y);
-      expect(scroller!.width).toBeLessThanOrEqual(width);
+      expect(scrollerBox!.width).toBeLessThanOrEqual(width);
     }
     expect(await axeViolations(page)).toEqual([]);
   });
