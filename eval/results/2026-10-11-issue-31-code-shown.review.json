@@ -1,0 +1,61 @@
+{
+  "run": "2026-10-11T19:13:49.479Z",
+  "verdicts": {
+    "fp-batch-raised#0": {
+      "verdict": "pass",
+      "note": "Abstains and corrects the premise: no record of a raise to 1000, the last change was a rename."
+    },
+    "fp-batch-raised#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise."
+    },
+    "fp-jitter-removed#0": {
+      "verdict": "pass",
+      "note": "Abstains and corrects the premise: the last change added jitter."
+    },
+    "fp-jitter-removed#1": {
+      "verdict": "pass",
+      "note": "Abstains and corrects the premise: the last change added jitter."
+    },
+    "fp-cap-raised-by-reviewer#0": {
+      "verdict": "pass",
+      "note": "Abstains and corrects the premise: the last change capped retries at 3."
+    },
+    "fp-cap-raised-by-reviewer#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise."
+    },
+    "tslint-189#0": {
+      "verdict": "pass",
+      "note": "Abstains: names PR #3412 as the last change and says the record does not explain the undefined check."
+    },
+    "tslint-189#1": {
+      "verdict": "pass",
+      "note": "Abstains: names commit 8b853b2 and says neither it nor the pull request explains the check."
+    },
+    "tslint-257#0": {
+      "verdict": "pass",
+      "note": "Abstains: \"The history does not explain why this line is written this way.\""
+    },
+    "tslint-257#1": {
+      "verdict": "pass",
+      "note": "Abstains and names commit 63fc794 as the last change."
+    },
+    "machine-32#0": {
+      "verdict": "pass",
+      "note": "Abstains: names PR #2493, which added SSH tests, and says the record does not explain the struct."
+    },
+    "machine-32#1": {
+      "verdict": "pass",
+      "note": "Abstains: names commit aa54a5f and says nothing collected explains the struct."
+    },
+    "draft-644#0": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line's logic. Audited as supported."
+    },
+    "draft-644#1": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line's logic. Audited as supported."
+    }
+  }
+}
