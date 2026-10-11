@@ -1,0 +1,108 @@
+name: "🚦 A check is red or flaky"
+description: A CI job or a test fails, or passes and fails on the same code.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A red main hides the next real failure, so a failing or flaky check is fixed before anything else. A link to the run and the first error in the log are usually enough to start.
+
+        > **Tip:** a merge commit often has the same tree as the pull request it merged. If one passed and the other failed, say so: it rules out a regression.
+
+        ---
+        ### 🚦 The failure
+  - type: dropdown
+    id: check
+    attributes:
+      label: Which check
+      description: Pick every one that applies.
+      multiple: true
+      options:
+        - Format (prettier)
+        - Lint (eslint)
+        - Typecheck, web
+        - Typecheck, extension
+        - Unit tests (vitest)
+        - Build
+        - Seeding the demo repository
+        - E2E and axe (playwright)
+        - Install, or the workflow itself
+    validations:
+      required: true
+  - type: input
+    id: test
+    attributes:
+      label: Test or step that fails
+      description: The spec file and the test title, or the step name when it isn't a test.
+      placeholder: "e2e/landing.spec.ts › clause 2 is active on load with a green trace to E and D; hover moves it"
+    validations:
+      required: true
+  - type: input
+    id: run
+    attributes:
+      label: Failing run
+      placeholder: "https://github.com/maricastroc/understory/actions/runs/…"
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where it fails
+      description: Pick every one that applies.
+      multiple: true
+      options:
+        - main, after a merge
+        - A pull request
+        - Locally
+    validations:
+      required: true
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: How often
+      options:
+        - Every run
+        - Sometimes, on the same code
+        - Once so far
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Error output
+      description: The first failure in the log, with the assertion and what it received.
+      render: shell
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 🔬 What is known
+  - type: input
+    id: since
+    attributes:
+      label: First seen
+      description: Where it first went red, and the last commit or pull request known to be green.
+      placeholder: "Red on the merge of #26 (4894330) · green on #24 (afa8ad4)"
+  - type: textarea
+    id: cause
+    attributes:
+      label: Suspected cause
+      description: A regression, a race in the test, the runner, a dependency. A guess is fine, as long as it says it is one.
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The command, and whatever makes it fail on demand. Timing failures usually show up under a CPU throttle or with the JS chunks delayed.
+      placeholder: |
+        npx playwright test e2e/landing.spec.ts --workers=1
+        With a 6x CPU throttle it fails 3 runs out of 3.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked that no open issue already covers this failure.
+          required: true
+        - label: I re-ran the job or reproduced it locally, and said how often it fails.
