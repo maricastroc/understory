@@ -36,6 +36,6 @@ export function stageCopy(input: {
       : `this ${input.subject}`);
   return {
     title: `Ask about ${about}`,
-    lead: "The answer follows its history through commits, pull requests and issues, and cites each source. When the record is silent, it says so.",
+    lead: "The answer follows its history through commits, pull requests and issues, and cites each source. When the record is silent, it is built to say so.",
   };
 }
