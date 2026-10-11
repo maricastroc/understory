@@ -39,6 +39,41 @@ describe("buildSynthesisInput", () => {
   });
 });
 
+describe("buildSynthesisInput — the code under investigation", () => {
+  const plain = evidence([mk("commit:a", "cleanup of the loaders")]);
+  const shown: Evidence = {
+    ...plain,
+    location: { file: "a.ts", startLine: 10, endLine: 10 },
+    code: {
+      startLine: 9,
+      lines: ["const found = find(name);", "if (found === undefined) {", "  throw new Error();"],
+    },
+  };
+
+  it("shows the line and its neighbours before the evidence", () => {
+    const { prompt } = buildSynthesisInput(shown);
+    expect(prompt).toContain("> 10 | if (found === undefined) {");
+    expect(prompt).toContain("   9 | const found = find(name);");
+    expect(prompt.indexOf("> 10 |")).toBeLessThan(prompt.indexOf("Evidence:"));
+  });
+
+  it("tells the model the code is not evidence and not to borrow another part's reasons", () => {
+    const { system } = buildSynthesisInput(shown);
+    expect(system).toContain("It is not evidence: never cite it");
+    expect(system).toContain("is NOT a reason for this code");
+    expect(system).toContain("the record does not explain it");
+  });
+
+  it("leaves the prompt and the rules as they were when no code was collected", () => {
+    const { system, prompt } = buildSynthesisInput(plain);
+    expect(prompt).not.toContain("The code at that location");
+    expect(system).not.toContain("It is not evidence");
+    expect(buildSynthesisInput({ ...shown, location: undefined }).prompt).not.toContain(
+      "The code at that location",
+    );
+  });
+});
+
 describe("buildSynthesisInput — language", () => {
   const ev = evidence([mk("commit:a", "x")]);
 
