@@ -281,6 +281,14 @@ describe("what the report says beyond pass and fail", () => {
     expect(row?.replaceAll("\\|", "").split("|")).toHaveLength(9);
   });
 
+  it("says which route the model calls took, when they did not go straight to Groq", () => {
+    const routed = { ...META, via: "OpenRouter, pinned to Groq" };
+    expect(renderReport(routed, [run("a", 0, PASS)])).toContain(
+      "audit `judge` · via OpenRouter, pinned to Groq · 1 of 2 passes",
+    );
+    expect(renderReport(META, [run("a", 0, PASS)])).not.toContain("via");
+  });
+
   it("reports the passes that were run when a run was cut short", () => {
     expect(renderReport(META, [run("a", 0, PASS)])).toContain("· 1 of 2 passes");
     expect(renderReport(META, [run("a", 0, PASS), run("a", 1, PASS)])).toContain("· 2 passes");

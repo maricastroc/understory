@@ -150,6 +150,7 @@ describe("parseArgs", () => {
       out: null,
       set: null,
       category: null,
+      via: null,
       problems: [],
     });
     expect(parseArgs([])).toEqual({
@@ -159,6 +160,7 @@ describe("parseArgs", () => {
       out: null,
       set: null,
       category: null,
+      via: null,
       problems: [],
     });
   });
@@ -201,6 +203,16 @@ describe("parseArgs problems", () => {
     expect(problems("--repeat", "two")).toEqual(["--repeat needs a number of at least 1"]);
     expect(problems("--repeat", "0")).toEqual(["--repeat needs a number of at least 1"]);
     expect(problems("--delay", "-5")).toEqual(["--delay needs a number of at least 0"]);
+  });
+});
+
+describe("parseArgs — the route", () => {
+  it("takes the one route it knows and refuses any other", () => {
+    expect(parseArgs(["--via", "openrouter"])).toMatchObject({ via: "openrouter", problems: [] });
+    expect(parseArgs(["--via", "gemini"])).toMatchObject({
+      via: null,
+      problems: ['--via only knows "openrouter"'],
+    });
   });
 });
 

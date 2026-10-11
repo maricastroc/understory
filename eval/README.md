@@ -40,10 +40,11 @@ npm run eval -- --repeat 2 --delay 30000 --out eval/results/run.jsonl
 npm run eval -- --set v1              # only the original eight cases
 npm run eval -- --category silent     # one category
 npm run eval -- retry-cap jitter      # some cases by id
+npm run eval -- --repeat 2 --via openrouter --out eval/results/run.jsonl
 npm run eval:report -- eval/results/run.jsonl eval/results/run.review.json
 ```
 
-Needs `GROQ_API_KEY` and `GITHUB_TOKEN` in `.env.local`; the cases on real repositories read
+Needs `GROQ_API_KEY` and `GITHUB_TOKEN` in `.env.local` or `.env`; the cases on real repositories read
 GitHub. It calls the core directly, so the web app's daily AI limit does not apply. It is not
 part of CI, which runs without a model key. It exits non-zero if any run fails or errors.
 
@@ -52,6 +53,13 @@ passes. `--out` writes one JSON line per run with the full answer, its citations
 verdicts and the confidence, and refuses a path that already holds a run: kept runs are not
 overwritten. `--delay` paces the runs: on Groq's free tier each model takes 8,000 tokens a
 minute, and two passes of the whole set use most of a day's allowance.
+
+`--via openrouter` is for when the free tier's daily allowance is spent. It sends each model
+call through OpenRouter, pinned to Groq with no fallback, so the run reaches the same two models
+on the same host and is billed to `OPEN_ROUTER_API_KEY` instead. That key is read from `.env` or
+`.env.local` and used by this script only. A reply that came through another host is refused.
+The run's metadata names the route, and the runner prints and keeps the tokens and the cost per
+model.
 
 `eval:report` takes the kept run and, for the cases held for a manual verdict, the review file
 written for it. It refuses a review file that is missing, that belongs to another run or that
@@ -291,6 +299,34 @@ with nothing changing here.
 Every failure in the tables above is on a case the eight could not contain: a real line, a
 silence beside a well explained commit, a confidence floor on a real commit message. On the
 eight alone the pipeline looks finished.
+
+### The same set through OpenRouter
+
+When the free tier is spent, a run can go through OpenRouter pinned to Groq (see [Run](#run)).
+To check that this route measures the same thing, the whole set was run twice through it on the
+same day, on the same pipeline:
+[`results/2026-10-11-via-openrouter.jsonl`](results/2026-10-11-via-openrouter.jsonl), with its
+manual verdicts in
+[`results/2026-10-11-via-openrouter.review.json`](results/2026-10-11-via-openrouter.review.json).
+
+|                             | Straight to Groq | Through OpenRouter |
+| --------------------------- | ---------------- | ------------------ |
+| Cases that passed every run | 30               | 31                 |
+| Unstable                    | 3                | 1                  |
+| Failed every run            | 3                | 4                  |
+| Runs passed                 | 63/72            | 63/72              |
+| Out-of-scope runs labelled  | 14/18            | 13/18              |
+| Claim audits                | 77, 7 fell back  | 83, 12 fell back   |
+
+Thirty-four of the 36 cases ended in the same place, and 30 of the 72 routed answers are word
+for word an answer of the direct run. The two that moved, `machine-168` and `machine-32`, were
+already unstable in the direct run. Every reply was served by Groq: the runner refuses any
+other. So the route is taken as equivalent, within what two runs of the same thing already
+differ by. The read of the claims was not repeated for this run.
+
+It is also the first run whose use was measured: 84 calls and 148,000 tokens on the synthesis
+model (72 answers and 12 audits that fell back to it), 83 calls and 115,000 tokens on the audit
+model, US$ 0.047 in all.
 
 ### What this does not show
 

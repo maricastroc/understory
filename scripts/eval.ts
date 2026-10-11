@@ -16,6 +16,7 @@ import {
   selectCases,
   tally,
 } from "./eval-check";
+import { routeThroughOpenRouter, usageLines } from "./eval-route";
 import {
   type MetaRecord,
   type RunRecord,
@@ -26,10 +27,12 @@ import {
 } from "./eval-report";
 
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };
-try {
-  proc.loadEnvFile?.(".env.local");
-} catch {
-  //
+for (const file of [".env.local", ".env"]) {
+  try {
+    proc.loadEnvFile?.(file);
+  } catch {
+    //
+  }
 }
 
 const color = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -88,6 +91,12 @@ async function main() {
   const model = getModel();
   if (!model) stop("GROQ_API_KEY is not set (.env.local) — the eval needs the model to run.");
 
+  const routerKey = process.env.OPEN_ROUTER_API_KEY;
+  if (args.via && !routerKey)
+    stop("--via openrouter needs OPEN_ROUTER_API_KEY in .env or .env.local.");
+  const route = args.via && routerKey ? routeThroughOpenRouter(routerKey) : null;
+  if (route) globalThis.fetch = route.fetch;
+
   const gold: Gold = JSON.parse(readFileSync("eval/gold.json", "utf8"));
   const cases = selectCases(gold, args);
   if (cases.length === 0) stop("No case matches those ids, that set and that category.");
@@ -111,11 +120,14 @@ async function main() {
     repeat,
     delayMs,
     cases: cases.length,
+    ...(route ? { via: "OpenRouter, pinned to Groq" } : {}),
   };
   console.log(
     bold("\nUnderstory — eval") +
       dim(`  (${cases.length} cases × ${repeat})`) +
-      dim(`\nsynthesis ${meta.synthesis} · audit ${meta.audit}\n`),
+      dim(
+        `\nsynthesis ${meta.synthesis} · audit ${meta.audit}${meta.via ? ` · via ${meta.via}` : ""}\n`,
+      ),
   );
   if (out) {
     mkdirSync(dirname(out), { recursive: true });
@@ -198,6 +210,11 @@ async function main() {
         : "") +
       (out ? dim(`\nraw runs written to ${out}`) : ""),
   );
+  if (route) {
+    const usage = route.usage();
+    if (out) appendFileSync(out, `${JSON.stringify({ type: "usage", models: usage })}\n`);
+    for (const line of usageLines(usage)) console.log(dim(line));
+  }
   process.exit(t.failed === 0 && t.errored === 0 ? 0 : 1);
 }
 
