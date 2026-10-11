@@ -16,7 +16,13 @@ import {
   selectCases,
   tally,
 } from "./eval-check";
-import { type MetaRecord, type RunRecord, caseStatus, verdictOf } from "./eval-report";
+import {
+  type MetaRecord,
+  type RunRecord,
+  caseStatus,
+  summaryLines,
+  verdictOf,
+} from "./eval-report";
 
 const proc = process as NodeJS.Process & { loadEnvFile?: (path?: string) => void };
 try {
@@ -34,7 +40,6 @@ const green = wrap("32");
 const yellow = wrap("33");
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : "—");
 
 const SEEDS: Record<string, string> = {
   ".demo/payments-service": "npm run seed:demo",
@@ -169,16 +174,17 @@ async function main() {
 
   const byCase = new Map(cases.map((c) => [c.id, c]));
   const t = tally(records.map((r) => ({ expect: byCase.get(r.id)!.expect, outcome: r.outcome })));
-  const scored = t.passed + t.failed;
+  console.log("");
+  for (const line of summaryLines(records)) console.log(`  ${line}`);
   console.log(
     "\n" +
-      bold(`${t.passed}/${scored} scored runs passed`) +
-      dim(` (${pct(t.passed, scored)})`) +
-      (t.review ? yellow(`   ${t.review} awaiting manual review`) : "") +
-      (t.errored ? yellow(`   ${t.errored} errored (not scored)`) : "") +
+      bold(`${t.passed} of ${t.passed + t.failed} automatically scored runs passed`) +
+      (t.review ? yellow(` · ${t.review} awaiting manual review`) : "") +
+      (t.errored ? yellow(` · ${t.errored} errored (not scored)`) : "") +
       (t.refusals.total
-        ? `   ${bold("out-of-scope refusal:")} ${t.refusals.correct}/${t.refusals.total} (${pct(t.refusals.correct, t.refusals.total)})`
+        ? ` · out-of-scope refusal ${t.refusals.correct}/${t.refusals.total}`
         : "") +
+      dim("\nA count over this set, by category above. It is not a success rate.") +
       (out ? dim(`\nraw runs written to ${out}`) : ""),
   );
   process.exit(t.failed === 0 && t.errored === 0 ? 0 : 1);

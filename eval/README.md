@@ -149,29 +149,37 @@ out of the pass counts: it says nothing about the model's answer.
 11 Oct 2026 · commit `4990251` · synthesis `openai/gpt-oss-120b` · audit `openai/gpt-oss-20b` ·
 2 passes, 72 runs, none errored. The gold set was committed before any of the new cases met
 the model. Every run is in [`results/2026-10-11.jsonl`](results/2026-10-11.jsonl), the manual
-verdicts in [`results/2026-10-11.review.json`](results/2026-10-11.review.json), and the tables
-are what `npm run eval:report` prints from those two files.
+verdicts in [`results/2026-10-11.review.json`](results/2026-10-11.review.json), and the three
+tables and the sentence under them are copied from what `npm run eval:report` prints for those
+two files. The runner prints the same split by category when it ends.
 
-| Category        | Cases | Passed both runs | Unstable | Failed both runs | Runs passed |
-| --------------- | ----- | ---------------- | -------- | ---------------- | ----------- |
-| `recorded`      | 15    | 13               | 2        | 0                | 28/30       |
-| `silent`        | 5     | 4                | 0        | 1                | 8/10        |
-| `out-of-scope`  | 9     | 9                | 0        | 0                | 18/18       |
-| `false-premise` | 3     | 3                | 0        | 0                | 6/6         |
-| `incidental`    | 4     | 1                | 1        | 2                | 3/8         |
-| **All**         | 36    | 30               | 3        | 3                | 63/72       |
+| Category      | Cases | Passed every run | Unstable | Failed every run | Runs passed | Errored runs |
+| ------------- | ----- | ---------------- | -------- | ---------------- | ----------- | ------------ |
+| recorded      | 15    | 13               | 2        | 0                | 28/30       | 0            |
+| silent        | 5     | 4                | 0        | 1                | 8/10        | 0            |
+| out-of-scope  | 9     | 9                | 0        | 0                | 18/18       | 0            |
+| false-premise | 3     | 3                | 0        | 0                | 6/6         | 0            |
+| incidental    | 4     | 1                | 1        | 2                | 3/8         | 0            |
+| **All**       | 36    | 30               | 3        | 3                | 63/72       | 0            |
 
-| Source      | Cases | Passed both runs | Unstable | Failed both runs | Runs passed |
-| ----------- | ----- | ---------------- | -------- | ---------------- | ----------- |
-| `synthetic` | 24    | 23               | 0        | 1                | 46/48       |
-| `sampled`   | 10    | 5                | 3        | 2                | 13/20       |
-| `picked`    | 2     | 2                | 0        | 0                | 4/4         |
+| Source    | Cases | Passed every run | Unstable | Failed every run | Runs passed | Errored runs |
+| --------- | ----- | ---------------- | -------- | ---------------- | ----------- | ------------ |
+| synthetic | 24    | 23               | 0        | 1                | 46/48       | 0            |
+| sampled   | 10    | 5                | 3        | 2                | 13/20       | 0            |
+| picked    | 2     | 2                | 0        | 0                | 4/4         | 0            |
+| **All**   | 36    | 30               | 3        | 3                | 63/72       | 0            |
 
-Thirty of the 36 cases passed both runs. The 95% interval around that proportion runs from 68%
-to 92%, and the set as a whole is not a random sample of anything, so the number describes this set and
-nothing wider. The split by source says more than the total: the cases written for the eval
-pass almost always, and only half of the lines drawn at random from real repositories passed
-both runs.
+| Set     | Cases | Passed every run | Unstable | Failed every run | Runs passed | Errored runs |
+| ------- | ----- | ---------------- | -------- | ---------------- | ----------- | ------------ |
+| v1      | 8     | 8                | 0        | 0                | 16/16       | 0            |
+| v2      | 28    | 22               | 3        | 3                | 47/56       | 0            |
+| **All** | 36    | 30               | 3        | 3                | 63/72       | 0            |
+
+30 of 36 cases passed every run. That is a count over this set, not a success rate: the 95% Wilson interval around the proportion is 68%–92%, and the cases are not a random sample.
+
+The split by source says more than the total: the cases written for the eval pass almost always,
+and only half of the lines drawn at random from real repositories passed both runs. The `v1` row
+is the original eight.
 
 ### What failed
 
@@ -224,7 +232,9 @@ consequence to its source at weak, and in October it accepted the same kind of c
   411 "implements the whitelist check". Line 411 is `* @example`, a doc comment. The reason
   given for the commit is right, the statement about the line is invented, and the auditor
   marked it supported. Of the 39 runs that made claims, six say something about the line
-  itself that no source supports: the five incidental failures above and this one.
+  itself that no source supports: the five incidental failures above and this one. A seventh is
+  borderline. The read is written down, run by run, in
+  [`results/2026-10-11.reading.json`](results/2026-10-11.reading.json).
 
 ### Compared with the eight-case set
 
@@ -242,7 +252,9 @@ The eight original cases are unchanged, so they can be read side by side.
 
 The three passes of 11 Oct are one before the wider set existed
 ([`results/2026-10-11-v1-before.jsonl`](results/2026-10-11-v1-before.jsonl), at commit
-`03ad3c6`) and the two of the main run. `jitter` failed in September on the confidence floor
+`03ad3c6`) and the two of the main run. The earlier pass was recorded by a throwaway script around
+the old runner, which kept nothing, and converted to the record format used here; the answers in
+it are untouched. `jitter` failed in September on the confidence floor
 and passed every time in October. The prompts, the audit and the scoring are the same code on
 both dates; only the models, served by a third party, can have moved. So 7/8 was one draw of a
 result that changes with nothing changing here.

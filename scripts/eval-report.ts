@@ -101,7 +101,8 @@ export type GroupRow = {
   pass: number;
   unstable: number;
   fail: number;
-  other: number;
+  pending: number;
+  errored: number;
   runsPassed: number;
   runsScored: number;
   runsErrored: number;
@@ -119,7 +120,8 @@ export function groupRows(rows: CaseRow[], key: (row: CaseRow) => string): Group
       pass: count("pass"),
       unstable: count("unstable"),
       fail: count("fail"),
-      other: count("errored") + count("pending"),
+      pending: count("pending"),
+      errored: count("errored"),
       runsPassed: verdicts.filter((v) => v === "pass").length,
       runsScored: verdicts.filter((v) => v === "pass" || v === "fail").length,
       runsErrored: verdicts.filter((v) => v === "error").length,
@@ -140,7 +142,8 @@ function groupTable(title: string, groups: GroupRow[]): string {
     pass: total((g) => g.pass),
     unstable: total((g) => g.unstable),
     fail: total((g) => g.fail),
-    other: total((g) => g.other),
+    pending: total((g) => g.pending),
+    errored: total((g) => g.errored),
     runsPassed: total((g) => g.runsPassed),
     runsScored: total((g) => g.runsScored),
     runsErrored: total((g) => g.runsErrored),
@@ -151,6 +154,21 @@ function groupTable(title: string, groups: GroupRow[]): string {
     ...groups.map(line),
     line(all),
   ].join("\n");
+}
+
+export function summaryLines(runs: RunRecord[], adjudication: Adjudication = {}): string[] {
+  const groups = groupRows(caseRows(runs, adjudication), (r) => r.category || "uncategorised");
+  const width = Math.max(0, ...groups.map((g) => g.name.length));
+  return groups.map((g) => {
+    const parts = [
+      `${g.pass} passed every run`,
+      `${g.unstable} unstable`,
+      `${g.fail} failed every run`,
+      ...(g.pending ? [`${g.pending} awaiting manual review`] : []),
+      ...(g.errored ? [`${g.errored} errored`] : []),
+    ];
+    return `${g.name.padEnd(width)}  ${g.cases} ${g.cases === 1 ? "case" : "cases"} · ${parts.join(" · ")}`;
+  });
 }
 
 export function renderReport(
@@ -184,7 +202,7 @@ export function renderReport(
       groupRows(rows, (r) => r.set),
     ),
     "",
-    `${stable} of ${rows.length} cases passed every run. With ${rows.length} cases the 95% Wilson interval for that proportion is ${pct(low)}–${pct(high)}.`,
+    `${stable} of ${rows.length} cases passed every run. That is a count over this set, not a success rate: the 95% Wilson interval around the proportion is ${pct(low)}–${pct(high)}, and the cases are not a random sample.`,
     "",
     "| Case | Set | Category | Source | Runs | Scores | Why it failed |",
     "| --- | --- | --- | --- | --- | --- | --- |",

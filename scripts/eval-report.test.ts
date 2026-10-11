@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { Outcome } from "./eval-check";
 import {
@@ -7,6 +8,7 @@ import {
   groupRows,
   parseRecords,
   renderReport,
+  summaryLines,
   verdictOf,
   wilson,
 } from "./eval-report";
@@ -107,6 +109,24 @@ describe("caseRows and groupRows", () => {
   });
 });
 
+describe("summaryLines", () => {
+  it("gives one line per category, with cases held for review named apart", () => {
+    const lines = summaryLines([
+      run("a", 0, PASS),
+      run("a", 1, PASS),
+      run("b", 0, PASS, "silent"),
+      run("b", 1, FAIL, "silent"),
+      run("c", 0, REVIEW, "false-premise"),
+      run("d", 0, ERROR, "false-premise"),
+    ]);
+    expect(lines).toEqual([
+      "recorded       1 case · 1 passed every run · 0 unstable · 0 failed every run",
+      "silent         1 case · 0 passed every run · 1 unstable · 0 failed every run",
+      "false-premise  2 cases · 0 passed every run · 0 unstable · 0 failed every run · 1 awaiting manual review · 1 errored",
+    ]);
+  });
+});
+
 describe("parseRecords and renderReport", () => {
   it("reads a results file back and reports how many cases passed every run", () => {
     const meta = {
@@ -127,7 +147,27 @@ describe("parseRecords and renderReport", () => {
     expect(parsed.runs).toHaveLength(4);
     const report = renderReport(parsed.meta, parsed.runs);
     expect(report).toContain("2026-10-11 · commit abc1234");
-    expect(report).toContain("1 of 2 cases passed every run");
+    expect(report).toContain("1 of 2 cases passed every run. That is a count over this set");
     expect(report).toContain("| `b` | v2 | recorded | synthetic | ✗ ✗ |");
+  });
+});
+
+describe("the results published in eval/README.md", () => {
+  it("are the tables and the total eval:report prints for the run they link", () => {
+    const readme = readFileSync("eval/README.md", "utf8");
+    const results = /\(results\/([\w.-]+\.jsonl)\)/.exec(readme)?.[1];
+    const review = /\(results\/([\w.-]+\.review\.json)\)/.exec(readme)?.[1];
+    expect(results).toBeDefined();
+    expect(review).toBeDefined();
+    const { meta, runs } = parseRecords(readFileSync(`eval/results/${results}`, "utf8"));
+    const adjudication = JSON.parse(readFileSync(`eval/results/${review}`, "utf8"));
+    const squeeze = (line: string) => line.replace(/-{3,}/g, "---").replace(/\s+/g, " ").trim();
+    const published = new Set(readme.split("\n").map(squeeze));
+    const printed = renderReport(meta, runs, adjudication).split("| Case |")[0].split("\n");
+    const expected = printed.filter(
+      (line) => line.startsWith("|") || line.includes("passed every run"),
+    );
+    expect(expected.length).toBeGreaterThan(15);
+    for (const line of expected) expect(published).toContain(squeeze(line));
   });
 });

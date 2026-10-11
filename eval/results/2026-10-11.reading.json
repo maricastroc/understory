@@ -1,0 +1,16 @@
+{
+  "what": "A read of every run that made at least one claim, looking for statements about the investigated line itself that no collected source supports. It is separate from the pass or fail of a case: the automatic checks do not read the claims.",
+  "reader": "Drafted with an AI assistant from the raw runs, the collected evidence and the diffs of the commits involved. Not checked by a second person.",
+  "runsRead": 39,
+  "unsupported": {
+    "tslint-189#0": "Says the line was changed to use path.resolve and to resolve the formatter relative to the working directory. The line is `if (Formatter === undefined) {`.",
+    "tslint-189#1": "Says the line uses path.resolve and resolves the formatter module relative to cwd. Same line, same misattribution.",
+    "tslint-257#0": "Says the line exists to do less work for disabled rules. The line is `const oldSource = fs.readFileSync(filePath, \"utf-8\");`.",
+    "tslint-257#1": "Says the line was added to check a rule's severity and was later removed or modified. Same line.",
+    "machine-32#1": "Says the line was rewritten because earlier modifications broke host marshaling. The line is `type StandardSSHClientCreator struct {` and no source says why it exists.",
+    "ng-http-411#1": "Says line 411 \"implements the whitelist check\". The line is `* @example`, a doc comment. This run passed its automatic checks."
+  },
+  "borderline": {
+    "ng-http-411#0": "Says the line \"was added to implement the whitelist feature\". It is a doc tag added with that feature, so it documents the feature rather than implements it. Read loosely the sentence holds; read strictly it does not."
+  }
+}
