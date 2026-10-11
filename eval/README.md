@@ -219,7 +219,8 @@ The cause is structural. Synthesis reads the collected artifacts and the locatio
 the audit reads the claim and the sources it cites. Neither sees the text of the line or the
 diff. The auditor marked several of these claims as supported, because the source does say what
 the claim quotes; nothing checks that the source is about the line. The verdict was "resolved"
-with medium confidence, 0.55 to 0.65. Tracked in [#31](https://github.com/maricastroc/understory/issues/31).
+with medium confidence, 0.55 to 0.65. Tracked in [#31](https://github.com/maricastroc/understory/issues/31). That is the pipeline as it ran on
+11 Oct; what has changed since is [further down](#after-showing-the-code-to-the-model-a-partial-run).
 
 **A non-answer returned as an answer.** `ws-skew-value` asks why an allowance is 2 seconds and
 not more. The commit explains why the cursor is moved back, never why by two seconds. Both runs
@@ -317,6 +318,47 @@ What is planned to close these gaps is in [#34](https://github.com/maricastroc/u
   of a local clone with a GitHub remote. On GitHub a single line yields only the last change
   that touched it, while a local repository yields the line's whole history; every real case
   here is the first kind and every synthetic one the second.
+
+## After showing the code to the model: a partial run
+
+[#31](https://github.com/maricastroc/understory/issues/31) is the failure where an answer gives a change's reasons to a line the change only
+happened to touch. Synthesis and audit are now shown the investigated code with three lines on
+each side, and are told not to hand it a reason the history gives for another part of the same
+change. This section records what could be measured of that on 11 Oct, and what could not.
+
+Five cases, two passes, none errored: the four `incidental` lines and `ng-http-411`. The runs
+are in [`results/2026-10-11-issue-31.jsonl`](results/2026-10-11-issue-31.jsonl), the manual
+verdicts in [`results/2026-10-11-issue-31.review.json`](results/2026-10-11-issue-31.review.json)
+and the read of the claims in
+[`results/2026-10-11-issue-31.reading.json`](results/2026-10-11-issue-31.reading.json).
+
+| Case          | Main run of 11 Oct                                      | With the code shown                                |
+| ------------- | ------------------------------------------------------- | -------------------------------------------------- |
+| `tslint-189`  | Failed both: said the line uses `path.resolve`          | Passed both: abstains and names the last change    |
+| `tslint-257`  | Failed both: a review comment about another line        | Passed both: abstains                              |
+| `machine-32`  | Passed one, failed one                                  | Passed both: abstains                              |
+| `draft-644`   | Passed both, confidence 0.55                            | Passed both, confidence 0.85 with a verified quote |
+| `ng-http-411` | Passed both, saying a doc line "implements" the feature | Failed both: abstains, where a reason is expected  |
+
+What that does and does not establish:
+
+- **On the four incidental lines no run borrowed a reason** or said anything about the line
+  that the line contradicts.
+- **`ng-http-411` stopped saying something false and stopped passing.** The line is a doc tag,
+  and the commit explains the feature it documents. The answer now treats the line as
+  unexplained. Its label was fixed before the first run and is unchanged. This is the price of
+  the stricter rule seen so far: an abstention where a reason was recorded.
+- **The other 31 cases were not run again.** Groq's free tier ran out of tokens for the
+  synthesis model before a wider run could finish. So it is not known whether the cases that
+  passed on 11 Oct still pass, and the over-abstention seen on `ng-http-411` may reach other
+  `recorded` cases. #31 stays open until a full two-pass run is kept here.
+- **Provenance.** These runs were made from the working tree before the change was committed,
+  so their metadata names the parent commit, `8f71ded`. The prompts were the committed ones.
+  Two things differed and neither is part of a prompt: the audit's output cap was 2,000 tokens
+  instead of the committed 1,000, and collection still fetched the commit's diff, which no
+  prompt used.
+- **Cost.** Measured on six cases, the synthesis prompt grows by 340 to 380 tokens and each
+  audit's by about 300. On GitHub, collection makes one more request per investigation.
 
 ## Why it exists
 
