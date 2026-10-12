@@ -267,9 +267,68 @@ async function main() {
     });
   }
 
+  const facts = [];
+  for (const c of gold.cases) {
+    const repo = c.repo ?? gold.repo;
+    if (!evidence.has(c.id))
+      evidence.set(
+        c.id,
+        await collect({
+          repoPath: repo,
+          question: c.question,
+          location: parseLocation(c.location),
+        }),
+      );
+    const ev = evidence.get(c.id)!;
+    const byId = new Map<string, Artifact>(ev.artifacts.map((a) => [a.id, a]));
+    const last = ev.artifacts
+      .filter((a) => a.kind === "commit")
+      .reduce<Artifact | null>((a, b) => (!a || b.date > a.date ? b : a), null);
+    const sha = last?.meta?.sha;
+    const file = ev.location?.file ?? "";
+    const line =
+      ev.code && ev.location
+        ? (ev.code.lines[ev.location.startLine - ev.code.startLine] ?? "")
+        : "";
+    if (typeof sha === "string" && !commits.has(`${repo}@${sha}`))
+      commits.set(`${repo}@${sha}`, await commitInfo(repo, sha));
+    const info = typeof sha === "string" ? commits.get(`${repo}@${sha}`)! : null;
+    const block = blockAround(info?.patches[file] ?? "", line);
+    const pulls = repo.startsWith(".") ? [] : ev.artifacts.filter((a) => a.kind === "pull_request");
+    for (const pull of pulls)
+      if (!reviews.has(`${repo}#${pull.id}`))
+        reviews.set(
+          `${repo}#${pull.id}`,
+          await reviewComments(repo, Number(pull.id.replace("pr:", ""))),
+        );
+    const placedIn = pulls.flatMap((pull) => reviews.get(`${repo}#${pull.id}`) ?? []);
+    facts.push({
+      id: c.id,
+      granularity: ev.coverage?.granularity ?? null,
+      lastChange: last?.id ?? null,
+      alone: !!info && !!block && info.files === 1 && info.lines === block.length,
+      sources: Object.fromEntries(
+        ev.artifacts.map((a) => [
+          a.id,
+          {
+            kind: a.kind,
+            link: linkOf(a, last?.id ?? null, byId),
+            comments:
+              a.kind === "review"
+                ? commentsOf(a, placedIn).map((comment) => ({
+                    placement: placementOf(comment, file, line),
+                    outdated: comment.outdated,
+                  }))
+                : [],
+          },
+        ]),
+      ),
+    });
+  }
+
   writeFileSync(
     out,
-    `${JSON.stringify({ date: new Date().toISOString(), replay: replayFile, judge: replay.meta?.commit ?? null, controls: rows, reviewComments: census }, null, 2)}\n`,
+    `${JSON.stringify({ date: new Date().toISOString(), replay: replayFile, judge: replay.meta?.commit ?? null, controls: rows, reviewComments: census, cases: facts }, null, 2)}\n`,
   );
 
   console.log("review comments with a position, by where they sit against the investigated line:");
