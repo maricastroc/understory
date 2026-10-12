@@ -6,6 +6,7 @@ import type {
   ArtifactRef,
   DigResult,
   InvestigateInput,
+  Lineage,
   NarrativeLanguage,
 } from "@understory/core/types";
 import { readJson } from "@/lib/read-json";
@@ -38,7 +39,14 @@ export type View = "browse" | "case";
 
 type StreamMessage =
   | { phase: "evidence"; evidence: DigResult["evidence"] }
-  | { phase: "final"; narrative: DigResult["narrative"]; error?: string };
+  | { phase: "final"; narrative: DigResult["narrative"]; error?: string }
+  | { phase: "lineage"; lineage: Lineage };
+
+function forTheWriter(evidence: DigResult["evidence"]): DigResult["evidence"] {
+  const sent = { ...evidence };
+  delete sent.lineage;
+  return sent;
+}
 
 async function readNdjson(
   body: ReadableStream<Uint8Array>,
@@ -146,9 +154,15 @@ export function useInvestigation(user: AuthUser | null) {
         }).catch(() => {});
       };
       const settle = (narrative: NonNullable<DigResult["narrative"]>) => {
-        const result = { ...entry.result, narrative };
-        patch((e) => ({ ...e, result, alternates, rewriting: null, rewriteError: null }));
-        save(result);
+        const latest = historyRef.current.find((e) => e.caseId === caseId)?.result ?? entry.result;
+        patch((e) => ({
+          ...e,
+          result: { ...e.result, narrative },
+          alternates,
+          rewriting: null,
+          rewriteError: null,
+        }));
+        save({ ...latest, narrative });
       };
 
       const cached = entry.alternates?.[language];
@@ -163,7 +177,7 @@ export function useInvestigation(user: AuthUser | null) {
         const res = await fetch("/api/narrate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ evidence: entry.result.evidence, language }),
+          body: JSON.stringify({ evidence: forTheWriter(entry.result.evidence), language }),
         });
         const data = await readJson<{ narrative: DigResult["narrative"]; error?: string }>(res);
         if (!res.ok || !data.narrative) {
@@ -250,6 +264,7 @@ export function useInvestigation(user: AuthUser | null) {
 
       let caseId: string | null = null;
       let evidence: DigResult["evidence"] | null = null;
+      let answered: DigResult | null = null;
 
       await readNdjson(res.body!, (msg) => {
         if (msg.phase === "evidence") {
@@ -270,10 +285,25 @@ export function useInvestigation(user: AuthUser | null) {
             narrative: msg.narrative,
             ...(msg.error ? { error: msg.error } : {}),
           };
+          answered = full;
           setHistory((h) =>
             h.map((e) => (e.caseId === id ? { ...e, ...buildEntry(id, full), pending: false } : e)),
           );
           persist(id, full);
+        } else if (msg.phase === "lineage") {
+          const id = caseId;
+          const kept = historyRef.current.find((e) => e.caseId === id);
+          const base = kept && !kept.pending && kept.result.narrative ? kept.result : answered;
+          if (!id || !base || !msg.lineage) return;
+          const lineage = msg.lineage;
+          setHistory((h) =>
+            h.map((e) =>
+              e.caseId === id
+                ? { ...e, result: { ...e.result, evidence: { ...e.result.evidence, lineage } } }
+                : e,
+            ),
+          );
+          persist(id, { ...base, evidence: { ...base.evidence, lineage } });
         }
       });
 
