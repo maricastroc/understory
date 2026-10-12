@@ -74,6 +74,7 @@ async function lastChange(
   base: BaseEvidence,
   line: string | undefined,
   patchOf: PatchOf,
+  today: string,
 ): Promise<LineChange | null> {
   const { location } = base;
   const owner = owningCommit(base);
@@ -81,7 +82,7 @@ async function lastChange(
   if (!location || location.startLine !== location.endLine) return null;
   if (!owner || typeof sha !== "string" || line === undefined) return null;
   try {
-    const found = lineChange((await patchOf(sha)) ?? "", line);
+    const found = lineChange((await patchOf(sha)) ?? "", line, today);
     return found ? { artifactId: owner.id, ...found } : null;
   } catch {
     return null;
@@ -96,9 +97,15 @@ async function withCode(
   const { location } = base;
   if (!location || base.coverage?.granularity === "file") return base;
   try {
-    const code = codeWindow(await source(), location);
+    const today = await source();
+    const code = codeWindow(today, location);
     if (!code) return base;
-    const change = await lastChange(base, code.lines[location.startLine - code.startLine], patchOf);
+    const change = await lastChange(
+      base,
+      code.lines[location.startLine - code.startLine],
+      patchOf,
+      today,
+    );
     return { ...base, code: change ? { ...code, change } : code };
   } catch {
     return base;

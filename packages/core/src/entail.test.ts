@@ -470,7 +470,7 @@ describe("auditSubject — what the history settles before the judge reads a wor
     expect(subject?.sited).toBe(true);
   });
 
-  it("shows the part of the patch the line sits in, to the audit and not to the writer", () => {
+  it("shows the lines the change added around the line, to the audit and not to the writer", () => {
     const sited = ev({
       code: {
         startLine: 167,
@@ -485,9 +485,9 @@ describe("auditSubject — what the history settles before the judge reads a wor
           added: 3,
           block: {
             rows: [
-              "+func (h *Host) DockerVersion() (string, error) {",
-              "+\turl, err := h.Driver.GetURL()",
-              "+}",
+              "func (h *Host) DockerVersion() (string, error) {",
+              "\turl, err := h.Driver.GetURL()",
+              "}",
             ],
             at: 0,
           },
@@ -495,13 +495,13 @@ describe("auditSubject — what the history settles before the judge reads a wor
       },
     });
     const established = auditSubject(sited)?.established ?? "";
-    expect(established).toContain("The part of [commit:d3ee30b]'s patch the marked line sits in");
-    expect(established).toContain("> +func (h *Host) DockerVersion() (string, error) {");
-    expect(established).toContain("  +}");
-    expect(buildSynthesisInput(sited).prompt).not.toContain("patch the marked line sits in");
+    expect(established).toContain("The lines [commit:d3ee30b] added around the marked line");
+    expect(established).toContain("> func (h *Host) DockerVersion() (string, error) {");
+    expect(established).toContain("  }");
+    expect(buildSynthesisInput(sited).prompt).not.toContain("added around the marked line");
   });
 
-  it("shows no patch for a range of lines", () => {
+  it("shows no such lines for a range", () => {
     const range = ev({
       location: { file: "libmachine/host/host.go", startLine: 168, endLine: 169 },
       code: {
@@ -514,11 +514,11 @@ describe("auditSubject — what the history settles before the judge reads a wor
           artifactId: "commit:d3ee30b",
           before: null,
           added: 3,
-          block: { rows: ["+a", "+b", "+c"], at: 0 },
+          block: { rows: ["a", "b", "c"], at: 0 },
         },
       },
     });
-    expect(auditSubject(range)?.established).not.toContain("patch the marked line sits in");
+    expect(auditSubject(range)?.established).not.toContain("added around the marked line");
   });
 
   it("shows no code when none was collected", () => {

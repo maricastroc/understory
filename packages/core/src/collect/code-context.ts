@@ -40,27 +40,56 @@ const MAX_BLOCK_ROWS = 40;
 const BLOCK_HEAD_ROWS = 10;
 const BLOCK_ROW_CHARS = 160;
 
-const skipped = (count: number) => `… ${count} more changed ${count === 1 ? "line" : "lines"} …`;
+const skipped = (count: number) => `… ${count} more ${count === 1 ? "line" : "lines"} …`;
+const changedSince = (count: number) =>
+  `… ${count} ${count === 1 ? "line" : "lines"} changed since …`;
 
-function changedBlock(rows: string[], at: number): LineChange["block"] {
-  if (rows.length < 3) return undefined;
-  const short = rows.map((row) =>
-    row.length > BLOCK_ROW_CHARS ? `${row.slice(0, BLOCK_ROW_CHARS)}…` : row,
-  );
-  if (short.length <= MAX_BLOCK_ROWS) return { rows: short, at };
+function standingRows(
+  rows: string[],
+  at: number,
+  today: Set<string> | null,
+): { rows: string[]; at: number } {
+  const kept: string[] = [];
+  let mark = 0;
+  let gone = 0;
+  rows.forEach((row, i) => {
+    if (!isAdded(row)) return;
+    const text = row.slice(1);
+    if (i !== at && today && !today.has(text.trim())) {
+      gone++;
+      return;
+    }
+    if (gone) kept.push(changedSince(gone));
+    gone = 0;
+    if (i === at) mark = kept.length;
+    kept.push(text.length > BLOCK_ROW_CHARS ? `${text.slice(0, BLOCK_ROW_CHARS)}…` : text);
+  });
+  if (gone) kept.push(changedSince(gone));
+  return { rows: kept, at: mark };
+}
+
+function changedBlock(rows: string[], hit: number, today: Set<string> | null): LineChange["block"] {
+  const { rows: standing, at } = standingRows(rows, hit, today);
+  if (standing.length < 3) return undefined;
+  if (standing.length <= MAX_BLOCK_ROWS) return { rows: standing, at };
   const around = Math.floor((MAX_BLOCK_ROWS - BLOCK_HEAD_ROWS) / 2);
   const from = Math.max(BLOCK_HEAD_ROWS, at - around);
-  const to = Math.min(short.length, Math.max(at + around + 1, from + 2 * around));
-  const kept = from > BLOCK_HEAD_ROWS ? short.slice(0, BLOCK_HEAD_ROWS) : short.slice(0, from);
+  const to = Math.min(standing.length, Math.max(at + around + 1, from + 2 * around));
+  const kept =
+    from > BLOCK_HEAD_ROWS ? standing.slice(0, BLOCK_HEAD_ROWS) : standing.slice(0, from);
   const gap = from > BLOCK_HEAD_ROWS ? [skipped(from - BLOCK_HEAD_ROWS)] : [];
-  const tail = to < short.length ? [skipped(short.length - to)] : [];
+  const tail = to < standing.length ? [skipped(standing.length - to)] : [];
   return {
-    rows: [...kept, ...gap, ...short.slice(from, to), ...tail],
+    rows: [...kept, ...gap, ...standing.slice(from, to), ...tail],
     at: kept.length + gap.length + (at - from),
   };
 }
 
-export function lineChange(patch: string, line: string): Omit<LineChange, "artifactId"> | null {
+export function lineChange(
+  patch: string,
+  line: string,
+  today?: string,
+): Omit<LineChange, "artifactId"> | null {
   const wanted = line.trim();
   if (!wanted) return null;
   const rows = patch.replace(/\r\n/g, "\n").split("\n");
@@ -85,7 +114,16 @@ export function lineChange(patch: string, line: string): Omit<LineChange, "artif
           (removed.length === added.length && alike.find((c) => c.at === added.findIndex(same))) ||
           alike.sort((x, y) => y.score - x.score)[0]
         )?.row;
-  const shown = changedBlock(block, hits[0] - from);
+  const standing =
+    today === undefined
+      ? null
+      : new Set(
+          today
+            .replace(/\r\n/g, "\n")
+            .split("\n")
+            .map((text) => text.trim()),
+        );
+  const shown = changedBlock(block, hits[0] - from, standing);
   return {
     before: paired === undefined ? null : clamp(paired.trim()),
     added: added.length,
@@ -97,7 +135,7 @@ export function renderBlock(change: LineChange): string[] {
   if (!change.block) return [];
   const { rows, at } = change.block;
   return [
-    `The part of [${change.artifactId}]'s patch the marked line sits in (+ added, - removed, the marked line flagged with >):`,
+    `The lines [${change.artifactId}] added around the marked line that still read the same today (the marked line is flagged with >):`,
     ...rows.map((row, i) => `${i === at ? ">" : " "} ${row}`),
   ];
 }

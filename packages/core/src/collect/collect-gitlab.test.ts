@@ -136,6 +136,40 @@ describe("collect — GitLab shows the investigated code", () => {
     expect(auditSubject(ev)?.established).toContain(fact);
   });
 
+  it("hands the audit the lines the change added around the line, less the ones changed since", async () => {
+    const added = [
+      "@@ -1,2 +1,8 @@",
+      "+export async function poll(cursor: Cursor) {",
+      "+  const rows = [];",
+      "+  for (;;) {",
+      "+    const page = await fetchPage(cursor, PAGE_SIZE);",
+      "+    if (page.length === 0) return rows;",
+      "+    rows.push(...page);",
+      "+  }",
+      " ",
+    ].join("\n");
+    stub(routes("acme/code5", [{ new_path: "src/sync/poll.ts", diff: added }]));
+    const ev = await dig("acme/code5");
+
+    expect(ev.code?.change?.block).toEqual({
+      rows: [
+        "export async function poll(cursor: Cursor) {",
+        "  const rows = [];",
+        "  for (;;) {",
+        "    const page = await fetchPage(cursor, PAGE_SIZE);",
+        "… 1 line changed since …",
+        "    rows.push(...page);",
+        "  }",
+      ],
+      at: 3,
+    });
+    const established = auditSubject(ev)?.established ?? "";
+    expect(established).toContain("added around the marked line that still read the same today");
+    expect(established).toContain(">     const page = await fetchPage(cursor, PAGE_SIZE);");
+    expect(established).not.toContain("return rows;\n    rows.push");
+    expect(buildSynthesisInput(ev).prompt).not.toContain("added around the marked line");
+  });
+
   it("says so when a change only re-indented the line", async () => {
     const reindent = [
       "@@ -4 +4 @@",

@@ -143,27 +143,26 @@ describe("lineChange — what a patch did to one line", () => {
   });
 });
 
-describe("lineChange — the part of the patch the line sits in", () => {
+describe("lineChange — the lines the change added around the line", () => {
   const doc = (count: number) =>
-    Array.from({ length: count }, (_, i) => `+   * line ${i + 1} of the comment`);
+    Array.from({ length: count }, (_, i) => `   * line ${i + 1} of the comment`);
   const patch = (count: number, marked: number) =>
     [
       "@@ -10,2 +10,60 @@",
       "   unchanged();",
-      ...doc(count).map((row, i) => (i === marked ? "+   * @example" : row)),
+      ...doc(count).map((row, i) => `+${i === marked ? "   * @example" : row}`),
       "   unchanged();",
     ].join("\n");
 
   it("keeps a short block whole, and says which row is the line", () => {
-    const change = lineChange(patch(6, 3), "* @example");
-    expect(change?.block).toEqual({
+    expect(lineChange(patch(6, 3), "* @example")?.block).toEqual({
       rows: [
-        "+   * line 1 of the comment",
-        "+   * line 2 of the comment",
-        "+   * line 3 of the comment",
-        "+   * @example",
-        "+   * line 5 of the comment",
-        "+   * line 6 of the comment",
+        "   * line 1 of the comment",
+        "   * line 2 of the comment",
+        "   * line 3 of the comment",
+        "   * @example",
+        "   * line 5 of the comment",
+        "   * line 6 of the comment",
       ],
       at: 3,
     });
@@ -174,25 +173,63 @@ describe("lineChange — the part of the patch the line sits in", () => {
     expect(rows.some((row) => row.includes("unchanged"))).toBe(false);
   });
 
-  it("keeps the removed lines of a rewrite beside the added ones", () => {
+  it("leaves out the lines the change removed", () => {
     const rewrite = [
-      "@@ -3,3 +3,2 @@",
+      "@@ -3,3 +3,4 @@",
       "-  if (found !== undefined) {",
       "-    use(found);",
       "-  } else {",
       "+  const found = find(name);",
       "+  if (found === undefined) {",
+      "+    report(name);",
+      "+    return;",
       "     fail();",
     ].join("\n");
     expect(lineChange(rewrite, "if (found === undefined) {")?.block).toEqual({
       rows: [
-        "-  if (found !== undefined) {",
-        "-    use(found);",
-        "-  } else {",
-        "+  const found = find(name);",
-        "+  if (found === undefined) {",
+        "  const found = find(name);",
+        "  if (found === undefined) {",
+        "    report(name);",
+        "    return;",
       ],
-      at: 4,
+      at: 1,
+    });
+  });
+
+  it("leaves out an added line that no longer reads the same today, and says so", () => {
+    const added = [
+      "@@ -1,0 +1,5 @@",
+      "+import {",
+      "+  checkFetcher,",
+      "+  createSignal,",
+      "+  fallbackConfig,",
+      "+} from 'link-utilities';",
+    ].join("\n");
+    const today = [
+      "import {",
+      "  checkFetcher,",
+      "  createSignal,",
+      "  fallbackConfig,",
+      "} from 'link-http-common';",
+    ];
+    expect(lineChange(added, "createSignal,", today.join("\n"))?.block).toEqual({
+      rows: [
+        "import {",
+        "  checkFetcher,",
+        "  createSignal,",
+        "  fallbackConfig,",
+        "… 1 line changed since …",
+      ],
+      at: 2,
+    });
+    expect(lineChange(added, "createSignal,")?.block?.rows.at(-1)).toBe("} from 'link-utilities';");
+  });
+
+  it("always keeps the line itself, and counts runs of changed lines together", () => {
+    const added = ["@@ -1,0 +1,5 @@", "+a();", "+b();", "+marked();", "+c();", "+d();"].join("\n");
+    expect(lineChange(added, "marked();", "x();\nmarked();\nd();")?.block).toEqual({
+      rows: ["… 2 lines changed since …", "marked();", "… 1 line changed since …", "d();"],
+      at: 1,
     });
   });
 
@@ -212,20 +249,20 @@ describe("lineChange — the part of the patch the line sits in", () => {
     const block = lineChange(patch(90, 60), "* @example")?.block;
     expect(block?.rows.length).toBeLessThanOrEqual(43);
     expect(block?.rows.slice(0, 10)).toEqual(doc(10));
-    expect(block?.rows[10]).toBe("… 35 more changed lines …");
-    expect(block?.rows[block.at]).toBe("+   * @example");
-    expect(block?.rows.at(-1)).toBe("… 14 more changed lines …");
-    expect(block?.rows).toContain("+   * line 46 of the comment");
-    expect(block?.rows).toContain("+   * line 76 of the comment");
+    expect(block?.rows[10]).toBe("… 35 more lines …");
+    expect(block?.rows[block.at]).toBe("   * @example");
+    expect(block?.rows.at(-1)).toBe("… 14 more lines …");
+    expect(block?.rows).toContain("   * line 46 of the comment");
+    expect(block?.rows).toContain("   * line 76 of the comment");
   });
 
   it("keeps the line in view when it is near either end of a long block", () => {
     const first = lineChange(patch(90, 2), "* @example")?.block;
-    expect(first?.rows[first.at]).toBe("+   * @example");
+    expect(first?.rows[first.at]).toBe("   * @example");
     expect(first?.at).toBe(2);
     const last = lineChange(patch(90, 88), "* @example")?.block;
-    expect(last?.rows[last.at]).toBe("+   * @example");
-    expect(last?.rows.at(-1)).toBe("+   * line 90 of the comment");
+    expect(last?.rows[last.at]).toBe("   * @example");
+    expect(last?.rows.at(-1)).toBe("   * line 90 of the comment");
     expect(last?.rows.length).toBeLessThanOrEqual(43);
   });
 
@@ -240,13 +277,13 @@ describe("lineChange — the part of the patch the line sits in", () => {
   it("renders the block with the line flagged, and nothing when there is no block", () => {
     const change = lineChange(patch(6, 3), "* @example");
     expect(renderBlock({ artifactId: "commit:1e90d03", ...change! })).toEqual([
-      "The part of [commit:1e90d03]'s patch the marked line sits in (+ added, - removed, the marked line flagged with >):",
-      "  +   * line 1 of the comment",
-      "  +   * line 2 of the comment",
-      "  +   * line 3 of the comment",
-      "> +   * @example",
-      "  +   * line 5 of the comment",
-      "  +   * line 6 of the comment",
+      "The lines [commit:1e90d03] added around the marked line that still read the same today (the marked line is flagged with >):",
+      "     * line 1 of the comment",
+      "     * line 2 of the comment",
+      "     * line 3 of the comment",
+      ">    * @example",
+      "     * line 5 of the comment",
+      "     * line 6 of the comment",
     ]);
     expect(renderBlock({ artifactId: "commit:1e90d03", before: null, added: 1 })).toEqual([]);
   });
