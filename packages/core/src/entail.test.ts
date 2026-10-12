@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { entailClaims, finalizeClaim } from "./entail";
+import { auditSubject, checkEntailment, entailClaims, finalizeClaim } from "./entail";
 import { verifyQuote } from "./quote";
 import { TOOL_CALL_ERROR, failingJudge, scriptedJudge } from "./testing/scripted-judge";
 import type { Artifact, Evidence, Narrative } from "./types";
@@ -23,7 +23,7 @@ describe("finalizeClaim — the judge cannot vouch for itself", () => {
   it("keeps the unverified-quote note even when the judge gave no reason", () => {
     const r = finalizeClaim([source], {
       status: "supported",
-      quote: "invented",
+      quotes: ["invented"],
       reason: "",
     });
     expect(r.status).toBe("weak");
@@ -33,34 +33,102 @@ describe("finalizeClaim — the judge cannot vouch for itself", () => {
   it("downgrades 'supported' with no quote at all to 'weak'", () => {
     const r = finalizeClaim([source], {
       status: "supported",
-      quote: "",
+      quotes: [],
       reason: "stated",
     });
     expect(r.status).toBe("weak");
-    expect(r.quote).toBeNull();
-    expect(r.quoteSourceId).toBeNull();
+    expect(r.quotes).toEqual([]);
   });
 
   it("keeps 'weak' as-is and only surfaces a verified quote", () => {
     const r = finalizeClaim([source], {
       status: "weak",
-      quote: "no such text",
+      quotes: ["no such text"],
       reason: "on topic, does not state it",
     });
     expect(r.status).toBe("weak");
-    expect(r.quote).toBeNull();
-    expect(r.quoteSourceId).toBeNull();
+    expect(r.quotes).toEqual([]);
   });
 
   it("passes 'unsupported' through with no quote", () => {
     const r = finalizeClaim([source], {
       status: "unsupported",
-      quote: "the upstream gateway rate-limits",
+      quotes: ["the upstream gateway rate-limits"],
       reason: "unrelated",
     });
     expect(r.status).toBe("unsupported");
-    expect(r.quote).toBeNull();
-    expect(r.quoteSourceId).toBeNull();
+    expect(r.quotes).toEqual([]);
+  });
+});
+
+describe("finalizeClaim — what the judge quoted is kept on the record", () => {
+  const source = artifact(
+    "commit:a4a868e",
+    'Make all promises inspectable by default\n\nCustom promises have a state of "unknown" by default.  All custom\npromises have an "inspect" method, regardless of whether one is\nspecified.',
+  );
+
+  it("keeps the passage it rejected, so the downgrade can be read later", () => {
+    const r = finalizeClaim([source], {
+      status: "supported",
+      quotes: ["Every promise can now be inspected."],
+      reason: "stated",
+    });
+    expect(r.status).toBe("weak");
+    expect(r.rejectedQuotes).toEqual(["Every promise can now be inspected."]);
+  });
+
+  it("accepts the source's words when only the quotation marks differ, and stores the source's own", () => {
+    const r = finalizeClaim([source], {
+      status: "supported",
+      quotes: [
+        "All custom promises have an 'inspect' method, regardless of whether one is specified.",
+      ],
+      reason: "stated",
+    });
+    expect(r.status).toBe("supported");
+    expect(r.rejectedQuotes).toEqual([]);
+    expect(r.quotes[0].text).toBe(
+      'All custom promises have an "inspect" method, regardless of whether one is specified.',
+    );
+  });
+
+  it("stands on the passages that are in the source and records the one that is not", () => {
+    const r = finalizeClaim([source], {
+      status: "supported",
+      quotes: [
+        "Make all promises inspectable by default",
+        'Custom promises have an state of "unknown" by default.',
+      ],
+      reason: "stated",
+    });
+    expect(r.status).toBe("supported");
+    expect(r.quotes.map((q) => q.text)).toEqual(["Make all promises inspectable by default"]);
+    expect(r.rejectedQuotes).toEqual(['Custom promises have an state of "unknown" by default.']);
+  });
+
+  it("reads an item of several whole sentences one sentence at a time", () => {
+    const r = finalizeClaim([source], {
+      status: "supported",
+      quotes: [
+        "Make all promises inspectable by default. Custom promises have a state of 'unknown' by default.",
+      ],
+      reason: "stated",
+    });
+    expect(r.status).toBe("supported");
+    expect(r.quotes.map((q) => q.text)).toEqual([
+      "Make all promises inspectable by default",
+      'Custom promises have a state of "unknown" by default',
+    ]);
+  });
+
+  it("refuses the item when one of its sentences is not the source's", () => {
+    const r = finalizeClaim([source], {
+      status: "supported",
+      quotes: ["Make all promises inspectable by default. Every promise can now be inspected."],
+      reason: "stated",
+    });
+    expect(r.status).toBe("weak");
+    expect(r.rejectedQuotes).toHaveLength(1);
   });
 });
 
@@ -74,35 +142,34 @@ describe("finalizeClaim — a claim judged against several sources", () => {
   it("verifies the quote against whichever source contains it and tags that source", () => {
     const r = finalizeClaim([retry, outage], {
       status: "supported",
-      quote: "duplicate charges during the outage",
+      quotes: ["duplicate charges during the outage"],
       reason: "outage motivated the change",
     });
     expect(r.status).toBe("supported");
-    expect(r.quote).toBe("duplicate charges during the outage");
-    expect(r.quoteSourceId).toBe("issue:7");
+    expect(r.quotes).toEqual([
+      { sourceId: "issue:7", text: "duplicate charges during the outage" },
+    ]);
   });
 
   it("demotes 'supported' to 'weak' when no source contains the quote", () => {
     const r = finalizeClaim([retry, outage], {
       status: "supported",
-      quote: "because the database was slow",
+      quotes: ["because the database was slow"],
       reason: "invented link",
     });
     expect(r.status).toBe("weak");
-    expect(r.quote).toBeNull();
-    expect(r.quoteSourceId).toBeNull();
+    expect(r.quotes).toEqual([]);
     expect(r.reason).toBe("invented link (the cited quote was not found in the source)");
   });
 
   it("keeps 'weak' without requiring a quote — an asserted link the sources don't prove", () => {
     const r = finalizeClaim([retry, outage], {
       status: "weak",
-      quote: "",
+      quotes: [],
       reason: "both facts present, link not stated",
     });
     expect(r.status).toBe("weak");
-    expect(r.quote).toBeNull();
-    expect(r.quoteSourceId).toBeNull();
+    expect(r.quotes).toEqual([]);
   });
 });
 
@@ -119,11 +186,11 @@ describe("regression P2 — a truthful quote the judge abbreviated with '...'", 
   it("lands on weak with the unverified note, not on a misattribution", () => {
     const r = finalizeClaim([artifact("pr:4011", PR_4011_BODY)], {
       status: "supported",
-      quote: abbreviated,
+      quotes: [abbreviated],
       reason: "the PR states the bump and that it is not a security update",
     });
     expect(r.status).toBe("weak");
-    expect(r.quote).toBeNull();
+    expect(r.quotes).toEqual([]);
     expect(r.reason).toMatch(/the cited quote was not found in the source/);
   });
 });
@@ -156,21 +223,21 @@ describe("regression L7 — a claim the release PR does not substantiate", () =>
   it("an invented quote leaves the claim weak instead of misattributed", () => {
     const r = finalizeClaim([RELEASE_PR], {
       status: "supported",
-      quote: INVENTED_LIST_ITEM,
+      quotes: [INVENTED_LIST_ITEM],
       reason: "the PR lists the fix",
     });
     expect(r.status).toBe("weak");
-    expect(r.quote).toBeNull();
+    expect(r.quotes).toEqual([]);
   });
 
   it("a verbatim but irrelevant quote still passes — the gate checks integrity, the judge owns relevance", () => {
     const r = finalizeClaim([RELEASE_PR], {
       status: "supported",
-      quote: "This is a tracking issue for release 4.7.",
+      quotes: ["This is a tracking issue for release 4.7."],
       reason: "the PR lists the fix",
     });
     expect(r.status).toBe("supported");
-    expect(r.quoteSourceId).toBe("pr:2236");
+    expect(r.quotes[0].sourceId).toBe("pr:2236");
   });
 
   it("an unverifiable quote on a secondary claim no longer blocks the owning commit's HIGH", async () => {
@@ -204,12 +271,16 @@ describe("regression L7 — a claim the release PR does not substantiate", () =>
     };
     const judge = scriptedJudge((prompt) =>
       prompt.includes("4.7 release")
-        ? { status: "supported", quote: INVENTED_LIST_ITEM, reason: "the PR lists the fix" }
+        ? { status: "supported", quotes: [INVENTED_LIST_ITEM], reason: "the PR lists the fix" }
         : prompt.includes("stop reassigning")
-          ? { status: "weak", quote: "", reason: "the file and line are not in the commit text" }
+          ? {
+              status: "unproven",
+              quotes: [],
+              reason: "the file and line are not in the commit text",
+            }
           : {
               status: "supported",
-              quote: "fix arguments reassign deopt in some res methods",
+              quotes: ["fix arguments reassign deopt in some res methods"],
               reason: "stated",
             },
     );
@@ -231,7 +302,7 @@ describe("regression L7 — a claim the release PR does not substantiate", () =>
 describe("entailClaims — bare commit shas", () => {
   const commit = artifact("commit:c319fe2", "Ship the Object.setPrototypeOf polyfill.");
   const byId = new Map([[commit.id, commit]]);
-  const verdict = { status: "weak", quote: "", reason: "on topic" };
+  const verdict = { status: "unproven", quotes: [], reason: "on topic" };
 
   it("audits a claim that cites a collected commit by its bare sha, under the canonical id", async () => {
     const judge = scriptedJudge(() => verdict);
@@ -262,7 +333,7 @@ describe("entailClaims — hybrid auditor (20b, falling back to 120b on a techni
   const claims = [{ text: "Retries were bounded to three attempts.", citations: ["commit:c1"] }];
   const supported = {
     status: "supported",
-    quote: "Bound the charge retries to three attempts.",
+    quotes: ["Bound the charge retries to three attempts."],
     reason: "stated",
   };
 
@@ -275,9 +346,9 @@ describe("entailClaims — hybrid auditor (20b, falling back to 120b on a techni
   });
 
   it.each([
-    ["weak", { status: "weak", quote: "", reason: "thin" }],
-    ["unsupported", { status: "unsupported", quote: "", reason: "off-topic" }],
-    ["an unverifiable quote", { status: "supported", quote: "invented text", reason: "x" }],
+    ["unproven", { status: "unproven", quotes: [], reason: "thin" }],
+    ["unrelated", { status: "unrelated", quotes: [], reason: "off-topic" }],
+    ["an unverifiable quote", { status: "supported", quotes: ["invented text"], reason: "x" }],
   ])("does not fall back on %s — only a technical failure does", async (_, verdict) => {
     const primary = scriptedJudge(() => verdict);
     const fallback = scriptedJudge(() => supported);
@@ -294,7 +365,7 @@ describe("entailClaims — hybrid auditor (20b, falling back to 120b on a techni
     expect(primary.doGenerateCalls).toHaveLength(1);
     expect(fallback.doGenerateCalls).toHaveLength(1);
     expect(e).toMatchObject({ checked: true, supported: 1, failed: 0, fallbacks: 1 });
-    expect(e.checks[0]).toMatchObject({ status: "supported", quote: supported.quote });
+    expect(e.checks[0]).toMatchObject({ status: "supported", quote: supported.quotes[0] });
   });
 
   it("records the failure instead of dropping it when both judges fail", async () => {
@@ -331,15 +402,185 @@ describe("entailClaims — hybrid auditor (20b, falling back to 120b on a techni
 });
 
 describe("entailClaims — output budget", () => {
-  it("caps each audit's output at 1,000 tokens", async () => {
+  it("caps each audit's output at 2,000 tokens", async () => {
     const source = artifact("commit:c1", "Bound the charge retries to three attempts.");
-    const judge = scriptedJudge(() => ({ status: "weak", quote: "", reason: "thin" }));
+    const judge = scriptedJudge(() => ({ status: "unproven", quotes: [], reason: "thin" }));
     await entailClaims(
       "q",
       [{ text: "Retries were bounded.", citations: ["commit:c1"] }],
       new Map([[source.id, source]]),
       { primary: judge, fallback: null },
     );
-    expect(judge.doGenerateCalls[0].maxOutputTokens).toBe(1_000);
+    expect(judge.doGenerateCalls[0].maxOutputTokens).toBe(2_000);
+  });
+});
+
+describe("auditSubject — what the history settles before the judge reads a word", () => {
+  const ev = (over: Partial<Evidence> = {}): Evidence => ({
+    question: "Why is this line the way it is?",
+    repo: { path: "." },
+    location: { file: "libmachine/host/host.go", startLine: 168, endLine: 168 },
+    artifacts: [],
+    contradictions: [],
+    coverage: { granularity: "line" },
+    ...over,
+  });
+
+  it("names the code and gives as settled that the cited changes touched it", () => {
+    const subject = auditSubject(ev());
+    expect(subject?.exact).toBe(true);
+    expect(subject?.established).toContain("libmachine/host/host.go:168");
+    expect(subject?.established).toContain(
+      "That a\ncited commit or pull request changed this code is given.",
+    );
+  });
+
+  it("does not give that away when only the file's history could be read", () => {
+    const subject = auditSubject(ev({ coverage: { granularity: "file" } }));
+    expect(subject?.exact).toBe(false);
+    expect(subject?.established).toContain("That they changed the file is given.");
+    expect(subject?.established).toContain("changed this exact code is not.");
+  });
+
+  it("says nothing when the investigation is not anchored on a code location", () => {
+    expect(auditSubject(ev({ location: undefined }))).toBeNull();
+  });
+
+  it("gives the code and what the last change did to the line, when they were collected", () => {
+    const subject = auditSubject(
+      ev({
+        code: {
+          startLine: 167,
+          lines: [
+            "",
+            "func (h *Host) DockerVersion() (string, error) {",
+            "\turl, err := h.Driver.GetURL()",
+          ],
+          change: { artifactId: "commit:d3ee30b", before: null, added: 18 },
+        },
+      }),
+    );
+    expect(subject?.established).toContain(
+      "> 168 | func (h *Host) DockerVersion() (string, error) {",
+    );
+    expect(subject?.established).toContain(
+      "[commit:d3ee30b] added it, together with 17 other new lines around it.",
+    );
+    expect(subject?.established).toContain("is given too");
+    expect(subject?.established).toContain("the code shown contradicts is unrelated");
+  });
+
+  it("shows no code when none was collected", () => {
+    expect(auditSubject(ev())?.established).not.toContain("The code at that location");
+  });
+});
+
+describe("the judge's request", () => {
+  const source = artifact("commit:d3ee30b", "Add support for upgrade to new CE edition");
+  const claim = {
+    text: "The line at libmachine/host/host.go:168 was added to support upgrading to the CE edition.",
+    citations: ["commit:d3ee30b"],
+  };
+  const supported = {
+    status: "supported",
+    quotes: ["Add support for upgrade to new CE edition"],
+    reason: "stated",
+  };
+  const evidence: Evidence = {
+    question: "Why is this line the way it is?",
+    repo: { path: "." },
+    location: { file: "libmachine/host/host.go", startLine: 168, endLine: 168 },
+    artifacts: [source],
+    contradictions: [],
+    coverage: { granularity: "line" },
+  };
+  const narrative: Narrative = {
+    answerable: true,
+    recorded: true,
+    answer: "",
+    citations: ["commit:d3ee30b"],
+    claims: [claim],
+  };
+  const sent = (judge: ReturnType<typeof scriptedJudge>) =>
+    JSON.stringify(judge.doGenerateCalls[0].prompt);
+
+  it("tells the judge which code is under investigation and what its history settles", async () => {
+    const judge = scriptedJudge(() => supported);
+    const e = await checkEntailment(evidence, narrative, { primary: judge, fallback: null });
+    expect(sent(judge)).toContain("Established by the repository's history, not under review:");
+    expect(sent(judge)).toContain("libmachine/host/host.go:168");
+    expect(sent(judge)).toContain("a commit that changed the code under investigation:");
+    expect(e.supported).toBe(1);
+  });
+
+  it("says of each source what it is to that code", async () => {
+    const pr = {
+      ...artifact("pr:4002", "Add support for upgrade to new CE edition"),
+      kind: "pull_request" as const,
+      parentId: "commit:d3ee30b",
+    };
+    const review = {
+      ...artifact("review:4002-0", "A little scary, but seems generally sane"),
+      kind: "review" as const,
+      parentId: "pr:4002",
+    };
+    const judge = scriptedJudge(() => supported);
+    await checkEntailment(
+      { ...evidence, artifacts: [source, pr, review] },
+      { ...narrative, claims: [{ ...claim, citations: ["pr:4002", "review:4002-0"] }] },
+      { primary: judge, fallback: null },
+    );
+    expect(sent(judge)).toContain(
+      "the pull request that merged commit:d3ee30b, so it changed the code under investigation too:",
+    );
+    expect(sent(judge)).toContain("a review comment on pr:4002:");
+  });
+
+  it("claims only the file for the sources when the line's history could not be read", async () => {
+    const judge = scriptedJudge(() => supported);
+    await checkEntailment({ ...evidence, coverage: { granularity: "file" } }, narrative, {
+      primary: judge,
+      fallback: null,
+    });
+    expect(sent(judge)).toContain("a commit that changed the file under investigation:");
+  });
+
+  it("leaves that section out when no code location is known", async () => {
+    const judge = scriptedJudge(() => supported);
+    await entailClaims("q", [claim], new Map([[source.id, source]]), {
+      primary: judge,
+      fallback: null,
+    });
+    expect(sent(judge)).not.toContain("Established by the repository's history");
+    expect(sent(judge)).not.toContain("under investigation:");
+  });
+
+  it("reads the judge's 'unproven' as weak and 'unrelated' as a misattribution", async () => {
+    const reply = (status: string) => scriptedJudge(() => ({ status, quotes: [], reason: "x" }));
+    const run = (status: string) =>
+      entailClaims("q", [claim], new Map([[source.id, source]]), {
+        primary: reply(status),
+        fallback: null,
+      });
+    expect((await run("unproven")).checks[0].status).toBe("weak");
+    expect(await run("unrelated")).toMatchObject({ misattributed: 1 });
+    expect((await run("unrelated")).checks[0].status).toBe("unsupported");
+  });
+
+  it("writes the rejected passage into the check it downgraded", async () => {
+    const judge = scriptedJudge(() => ({
+      status: "supported",
+      quotes: ["Added to support the CE upgrade path."],
+      reason: "stated",
+    }));
+    const e = await entailClaims("q", [claim], new Map([[source.id, source]]), {
+      primary: judge,
+      fallback: null,
+    });
+    expect(e.checks[0]).toMatchObject({
+      status: "weak",
+      quote: null,
+      rejectedQuotes: ["Added to support the CE upgrade path."],
+    });
   });
 });

@@ -1,5 +1,6 @@
 import { generateObject } from "ai";
 import { z } from "zod";
+import { renderCode } from "./collect/code-context";
 import type { Language, Model } from "./llm";
 import type { Evidence, Narrative } from "./types";
 
@@ -72,6 +73,36 @@ const SYSTEM = [
   "- Only cite ids that literally appear in the evidence. Never fabricate an id.",
 ].join("\n");
 
+const CODE_RULES = [
+  "- The prompt shows the code under investigation and, when it is known, what the last change did",
+  "  to the marked line: added it, or rewrote it from what it read before. This is there so you can",
+  "  tell what the evidence is ABOUT. It is not evidence: never cite it, and never infer from it why",
+  "  the code was written. Reasons come only from the evidence.",
+  "- First ask: is this code part of the thing the evidence describes?",
+  "  YES when the evidence describes a feature, a fix, a shim, a refactor or a rename and this code",
+  "  is a piece of it: a line the change added to build it, in its implementation, its tests, its",
+  "  documentation or examples, or a line the change rewrote in the way the evidence describes. A",
+  "  line with no decision of its own (a doc-comment line, a tag, a signature, an import, a brace)",
+  "  is still a piece of it, and is explained by the thing it belongs to. No source singles out one",
+  "  line or explains its exact wording, so do not look for that and do not abstain for lack of it.",
+  "  The recorded reason the code exists is then the reason for that thing: set recorded=true and",
+  "  write the claims.",
+  "  NO when the evidence is about something else and this code was only moved, renamed,",
+  "  reformatted or adjusted on the way, or when what the change did to the line is not what the",
+  "  evidence talks about. A reason the evidence gives for another part of the change is NOT a",
+  "  reason for this code. Then do not fill the gap from the code: set recorded=false, leave",
+  "  `claims` empty, and say in `answer` which change last touched the code, what it did to the line",
+  "  if the prompt says so, and that the record does not explain it.",
+  "- A claim says what the EVIDENCE says about the change: what it did and why, in the evidence's",
+  "  own terms, so that a sentence of the evidence could be quoted for the whole claim. Do NOT",
+  "  explain the code. Never write what it does, checks, returns, loops over or is for, neither as",
+  "  a claim nor as a clause added to one ('..., providing a way to ...', '..., so that it can",
+  "  ...'), unless the evidence says exactly that. The reader can see the code; the audit rejects a",
+  "  claim for any part that is not in the evidence.",
+  "- Point at the code only to say which code you mean, in a few words: 'this line', 'this method',",
+  "  'this doc-comment line'. Never say it is something the code shown is not.",
+].join("\n");
+
 function languageRule(language: Language): string {
   if (language === "pt")
     return "- LANGUAGE: write every claim's `text` (and `answer`) in Brazilian Portuguese (pt-BR), no matter what language the question or the evidence is in.";
@@ -109,7 +140,7 @@ function renderEvidence(ev: Evidence): string {
     .join("\n\n---\n\n");
 }
 
-function formatTarget(ev: Evidence): string {
+export function formatTarget(ev: Evidence): string {
   if (ev.location) {
     const { file, startLine, endLine } = ev.location;
     return endLine !== startLine ? `${file}:${startLine}-${endLine}` : `${file}:${startLine}`;
@@ -129,14 +160,17 @@ export function buildSynthesisInput(
   const targetLine = ev.location
     ? `Code location: ${formatTarget(ev)}`
     : `Anchored on: ${formatTarget(ev)}`;
+  const code = ev.code && ev.location ? renderCode(ev.code, ev.location) : null;
   const prompt = [
     `Question: ${ev.question}`,
     targetLine,
+    ...(code ? ["", code] : []),
     "",
     "Evidence:",
     ev.artifacts.length ? renderEvidence(ev) : "(no evidence was collected)",
   ].join("\n");
-  return { system: `${SYSTEM}\n${languageRule(language)}`, prompt };
+  const rules = code ? `${SYSTEM}\n${CODE_RULES}` : SYSTEM;
+  return { system: `${rules}\n${languageRule(language)}`, prompt };
 }
 
 export function toNarrative(object: z.infer<typeof narrativeSchema>): Narrative {

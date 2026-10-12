@@ -1,0 +1,46 @@
+{
+  "run": "2026-10-12T05:14:19.300Z",
+  "what": "A read of every run that made at least one claim, looking for a statement about the investigated line (what it is, what it does, or why it is the way it is) that no collected source supports. It is separate from the pass or fail of a case: the automatic checks do not read the claims. In this run the writer was shown the line and what the last change did to it, so a statement about the line can also come from there. Those are listed apart, under fromTheCode, after checking each against the code and the patch.",
+  "reader": "Drafted with an AI assistant from the raw runs, the collected evidence, the code shown to the model and the patches of the commits involved. Not checked by a second person.",
+  "runsRead": 60,
+  "unsupported": {
+    "ws-revert-story#2": "Says dropping the zero rows made the storefront hide the last positive stock for sold-out items. The revert says the opposite: the storefront kept showing it. Audited unsupported in the first of these runs and supported in the second. The misreading is of the commit message, not of the line.",
+    "ws-revert-story#3": "Says dropping the zero rows made the storefront hide the last positive stock for sold-out items. The revert says the opposite: the storefront kept showing it. Audited unsupported in the first of these runs and supported in the second. The misreading is of the commit message, not of the line."
+  },
+  "fromTheCode": {
+    "q-306#0": "Says the line returns the index when the element matches. True of the code shown. The commit says only that it adds an indexOf shim for IE<9.",
+    "q-306#1": "Says the line returns the index when the element matches. True of the code shown. The commit says only that it adds an indexOf shim for IE<9.",
+    "q-306#2": "Says the line returns the index when the element matches. True of the code shown. The commit says only that it adds an indexOf shim for IE<9.",
+    "q-306#3": "Says the line returns the index when the element matches. True of the code shown. The commit says only that it adds an indexOf shim for IE<9.",
+    "q-796#0": "Says the line tests whether an inspect function was supplied and falls back to one that reports an unknown state. True of the code shown. The commit states the behaviour, not the test.",
+    "q-796#1": "Says the line tests whether an inspect function was supplied and falls back to one that reports an unknown state. True of the code shown. The commit states the behaviour, not the test.",
+    "q-796#2": "Says the line tests whether an inspect function was supplied and falls back to one that reports an unknown state. True of the code shown. The commit states the behaviour, not the test.",
+    "q-796#3": "Says the line tests whether an inspect function was supplied and falls back to one that reports an unknown state. True of the code shown. The commit states the behaviour, not the test.",
+    "ng-http-114#0": "Says the line was rewritten to take an index argument in the callback. True of the patch. The commit says the serializer follows jQuery for the index of arrays of objects.",
+    "ng-http-114#1": "Says the line was rewritten to take an index argument in the callback. True of the patch. The commit says the serializer follows jQuery for the index of arrays of objects.",
+    "ng-http-114#2": "Says the line was rewritten to take an index argument in the callback. True of the patch. The commit says the serializer follows jQuery for the index of arrays of objects.",
+    "ng-http-114#3": "Says the line was rewritten to take an index argument in the callback. True of the patch. The commit says the serializer follows jQuery for the index of arrays of objects.",
+    "ng-http-411#0": "Says the line was added as part of a documentation block for the XSRF whitelist feature. True of the code and the patch: the line is `* @example` in a doc comment the commit added. No run says it implements anything.",
+    "ng-http-411#2": "Says the line was added as part of a documentation block for the XSRF whitelist feature. True of the code and the patch: the line is `* @example` in a doc comment the commit added. No run says it implements anything.",
+    "machine-168#2": "Says the line defines the DockerVersion method. True of the code shown.",
+    "apollo-http-10#0": "Says the commit added the import of this helper to HttpLink. True of the patch.",
+    "apollo-http-10#2": "Says the commit added the import of this helper to HttpLink. True of the patch.",
+    "apollo-http-10#3": "Says the commit added the import of this helper to HttpLink. True of the patch.",
+    "draft-644#0": "Says the declaration was rewritten from var to const. True of the patch, and what the commit message describes for the whole sweep.",
+    "draft-644#1": "Says the declaration was rewritten from var to const. True of the patch, and what the commit message describes for the whole sweep.",
+    "draft-644#2": "Says the declaration was rewritten from var to const. True of the patch, and what the commit message describes for the whole sweep.",
+    "draft-644#3": "Says the declaration was rewritten from var to const. True of the patch, and what the commit message describes for the whole sweep.",
+    "tslint-189#2": "Says the condition was rewritten to check for `Formatter === undefined`. True of the patch.",
+    "ws-batch-size#0": "Says the rename kept the value at 250. True of the patch. The commit message is only the rename.",
+    "ws-batch-size#1": "Says the rename kept the value at 250. True of the patch. The commit message is only the rename.",
+    "ws-batch-size#2": "Says the rename kept the value at 250. True of the patch. The commit message is only the rename."
+  },
+  "borderline": {
+    "tslint-260#0": "Says path.resolve turns the path into an absolute one. That is what the function does and no source says it.",
+    "tslint-260#2": "Says path.resolve turns the path into an absolute one. That is what the function does and no source says it.",
+    "tslint-260#3": "Says path.resolve turns the path into an absolute one. That is what the function does and no source says it.",
+    "retry-cap#0": "Names the earlier loop as `while (true)`. The source says only \"the unbounded loop\", and the earlier code was not shown.",
+    "retry-cap#2": "Same wording as the first pass.",
+    "pt-retry-cap#2": "Same detail, in Portuguese."
+  }
+}

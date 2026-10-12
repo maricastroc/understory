@@ -255,7 +255,39 @@ describe("what the report says beyond pass and fail", () => {
       audits: 3,
       fallbacks: 1,
       failed: 1,
+      supported: 2,
+      lostToQuote: 0,
     });
+  });
+
+  it("counts the supported verdicts set back to weak by a quote the source does not contain", () => {
+    const check = (claim: number, status: "supported" | "weak", reason: string) => ({
+      citation: "commit:a",
+      claim,
+      status,
+      quote: null,
+      reason,
+    });
+    const audited: RunRecord = {
+      ...run("a", 0, PASS),
+      narrative: answer({
+        entailment: {
+          checked: true,
+          checks: [
+            check(0, "supported", "stated"),
+            check(1, "weak", "stated (the cited quote was not found in the source)"),
+            check(1, "weak", "stated (the cited quote was not found in the source)"),
+            check(2, "weak", "the link is not stated"),
+          ],
+          supported: 1,
+          misattributed: 0,
+        },
+      }),
+    };
+    expect(auditCounts([audited])).toMatchObject({ audits: 3, supported: 1, lostToQuote: 1 });
+    expect(totalLines([audited]).at(-1)).toBe(
+      "Claim audits: 3, of which 0 were answered by the fallback model and 0 failed. The judge called 2 claims supported, and 1 of those were set back to weak because the passage it quoted is not in the source.",
+    );
   });
 
   it("says how many cases are still held instead of counting them as not passed", () => {
@@ -330,5 +362,54 @@ describe("the results published in eval/README.md", () => {
     expect(read.runsRead).toBe(claimed.size);
     for (const key of [...Object.keys(read.unsupported), ...Object.keys(read.borderline)])
       expect(claimed).toContain(key);
+  });
+});
+
+describe("the case amended after it met the model", () => {
+  type Reread = {
+    case: string;
+    rubric: string;
+    runs: Record<string, { then: string; now: string; note: string }>;
+  };
+  const reread: Reread = JSON.parse(
+    readFileSync("eval/results/2026-10-12-ng-http-411.reread.json", "utf8"),
+  );
+  const files = [...new Set(Object.keys(reread.runs).map((key) => key.split("#")[0]))];
+  const runsOf = (file: string) => parseRecords(readFileSync(`eval/results/${file}`, "utf8")).runs;
+
+  it("is read against the rubric the gold set now holds", () => {
+    const gold = JSON.parse(readFileSync("eval/gold.json", "utf8"));
+    const amended = gold.cases.find((c: { id: string }) => c.id === reread.case);
+    expect(amended.category).toBe("recorded");
+    expect(reread.rubric).toBe(amended.expect.review);
+  });
+
+  it("covers every stored run of the case and never turns a failure into a pass", () => {
+    for (const file of files) {
+      const stored = runsOf(file).filter((r) => r.id === reread.case);
+      expect(stored.length).toBeGreaterThan(0);
+      for (const run of stored) {
+        const read = reread.runs[`${file}#${run.pass}`];
+        expect(read.then).toBe(run.outcome.kind);
+        if (run.outcome.kind !== "pass") expect(read.now).toBe("fail");
+        expect(read.note.length).toBeGreaterThan(20);
+      }
+    }
+  });
+
+  it("gives the counts eval/README.md publishes for each kept run", () => {
+    const readme = readFileSync("eval/README.md", "utf8");
+    const rows = readme.split("\n").map((line) => line.replace(/\s+/g, " ").trim());
+    for (const file of files) {
+      const recorded = runsOf(file).filter((r) => r.category === "recorded");
+      const scored = recorded.filter((r) => r.outcome.kind !== "error").length;
+      const passed = recorded.filter((r) => r.outcome.kind === "pass").length;
+      const mine = Object.entries(reread.runs).filter(([key]) => key.startsWith(`${file}#`));
+      const before = mine.filter(([, r]) => r.then === "pass").length;
+      const after = mine.filter(([, r]) => r.now === "pass").length;
+      expect(rows).toContain(
+        `| \`${file}\` | ${passed}/${scored} | ${passed - before + after}/${scored} | ${before}/${mine.length} to ${after}/${mine.length} |`,
+      );
+    }
   });
 });
