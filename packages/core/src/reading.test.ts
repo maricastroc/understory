@@ -75,6 +75,7 @@ type Told = {
   cites: string[];
   status: CitationCheck["status"] | null;
   quote?: string;
+  quotes?: Record<string, string | null>;
 };
 
 const narrative = (claims: Told[]): VerifiedNarrative =>
@@ -95,7 +96,7 @@ const narrative = (claims: Told[]): VerifiedNarrative =>
               citation,
               claim,
               status: c.status as CitationCheck["status"],
-              quote: c.quote ?? null,
+              quote: c.quotes ? (c.quotes[citation] ?? null) : (c.quote ?? null),
               reason: "",
             })),
       ),
@@ -278,6 +279,180 @@ describe("readAnswer — the sequence and what each change records", () => {
       expect(reading.changes.every((c) => c.reasons.length === 0)).toBe(true);
       expect(reading.unsustained).toEqual([]);
     }
+  });
+});
+
+describe("readAnswer — the direct link belongs to the source that carries it", () => {
+  const issue = artifact("issue:3", "issue", "2024-03-01T00:00:00Z", { parentId: pull.id });
+  const SAID = "skip them only when discontinued";
+  const placed = (comment: { path: string; diffHunk?: string; line?: number }) =>
+    artifact("review:7-0", "review", "2024-03-17T00:00:00Z", {
+      parentId: pull.id,
+      body: `@someone: ${SAID}`,
+      comments: [
+        {
+          body: SAID,
+          path: comment.path,
+          diffHunk: comment.diffHunk ?? HUNK,
+          outdated: false,
+          line: comment.line ?? null,
+        },
+      ],
+    });
+  const alone = (...more: Artifact[]) => evidence({ artifacts: [first, revert, last, ...more] });
+  const among = (...more: Artifact[]) => {
+    const ev = alone(...more);
+    ev.code!.change!.scope = { files: 9, lines: 157, block: 2 };
+    return ev;
+  };
+  const one = (cites: string[], quotes: Record<string, string | null>): Told[] => [
+    { text: "Because of this.", cites, status: "supported", quotes },
+  ];
+  const BORROWED = {
+    specificity: "the change that last changed the line",
+    state: "recorded for the change, no specific link shown",
+  };
+
+  it("keeps the commit's own message linked to the line when the commit is the block alone", () => {
+    const reading = readAnswer(alone(pull), narrative(one([last.id], { [last.id]: "body" })))!;
+    expect(reading.changes[2].reasons).toEqual([
+      {
+        claim: 0,
+        scope: "line",
+        sentence: "Because of this.",
+        passages: [{ source: last.id, text: "body" }],
+      },
+    ]);
+    expect(reading.claims[0]).toMatchObject({
+      specificity: "direct: the change is this block alone",
+      state: "directly linked to the line",
+    });
+  });
+
+  it("does not lend that link to the pull request's description or to a linked issue", () => {
+    for (const source of [pull, issue]) {
+      const reading = readAnswer(
+        alone(pull, issue),
+        narrative(one([source.id], { [source.id]: "body" })),
+      )!;
+      expect(reading.changes[2].reasons).toEqual([
+        { claim: 0, scope: "change", passages: [{ source: source.id, text: "body" }] },
+      ]);
+      expect(reading.claims[0]).toMatchObject(BORROWED);
+      expect(reading.unsustained).toEqual([]);
+    }
+  });
+
+  it("does not lend it to a review comment made near the line, elsewhere or in another file", () => {
+    const places = [
+      [{ path: "src/dedupe.ts", line: 7 }, "in its hunk"],
+      [
+        { path: "src/dedupe.ts", diffHunk: "@@ -9 +9 @@\n+other();", line: 9 },
+        "same file, elsewhere",
+      ],
+      [{ path: "src/other.ts", line: 4 }, "another file"],
+    ] as const;
+    for (const [comment, placement] of places) {
+      const reading = readAnswer(
+        alone(pull, placed(comment)),
+        narrative(one(["review:7-0"], { "review:7-0": SAID })),
+      )!;
+      expect(reading.changes[2].reasons).toEqual([
+        {
+          claim: 0,
+          scope: "change",
+          passages: [{ source: "review:7-0", text: SAID, placement, outdated: false }],
+        },
+      ]);
+      expect(reading.claims[0]).toMatchObject(BORROWED);
+    }
+  });
+
+  it("keeps a review comment made on the line linked to it, whatever the size of the commit", () => {
+    for (const ev of [alone, among]) {
+      const reading = readAnswer(
+        ev(pull, placed({ path: "src/dedupe.ts", line: 4 })),
+        narrative(one(["review:7-0"], { "review:7-0": SAID })),
+      )!;
+      expect(reading.changes[2].reasons[0]).toMatchObject({
+        scope: "line",
+        sentence: "Because of this.",
+        passages: [{ source: "review:7-0", placement: "on the line" }],
+      });
+      expect(reading.claims[0]).toMatchObject({
+        specificity: "direct: a review comment on the line",
+        state: "directly linked to the line",
+      });
+    }
+  });
+
+  it("splits what one claim quotes by the link of each source", () => {
+    const reading = readAnswer(
+      alone(pull),
+      narrative(one([last.id, pull.id], { [last.id]: "body of commit", [pull.id]: "body of pr" })),
+    )!;
+    expect(reading.changes[2].reasons).toEqual([
+      {
+        claim: 0,
+        scope: "line",
+        sentence: "Because of this.",
+        passages: [{ source: last.id, text: "body of commit" }],
+      },
+      { claim: 0, scope: "change", passages: [{ source: pull.id, text: "body of pr" }] },
+    ]);
+    expect(reading.claims[0].state).toBe("directly linked to the line");
+  });
+
+  it("does not call a claim linked to the line when its commit is cited and only the pull request is quoted", () => {
+    const reading = readAnswer(
+      alone(pull),
+      narrative(one([last.id, pull.id], { [last.id]: null, [pull.id]: "body of pr" })),
+    )!;
+    expect(reading.changes[2].reasons).toEqual([
+      { claim: 0, scope: "change", passages: [{ source: pull.id, text: "body of pr" }] },
+    ]);
+    expect(reading.claims[0]).toMatchObject(BORROWED);
+  });
+
+  it("does not let a comment on the line lend its link to the description quoted beside it", () => {
+    const reading = readAnswer(
+      among(pull, placed({ path: "src/dedupe.ts", line: 4 })),
+      narrative(one(["review:7-0", pull.id], { "review:7-0": SAID, [pull.id]: "body of pr" })),
+    )!;
+    expect(
+      reading.changes[2].reasons.map((r) => [r.scope, r.passages.map((p) => p.source)]),
+    ).toEqual([
+      ["line", ["review:7-0"]],
+      ["change", [pull.id]],
+    ]);
+    expect(reading.changes[2].reasons[1].sentence).toBeUndefined();
+    expect(reading.claims[0].specificity).toBe("direct: a review comment on the line");
+  });
+
+  it("links nothing to the line through a change that is not the last", () => {
+    const earlier = { ...pull, id: "pr:5", parentId: first.id };
+    const old = artifact("review:5-0", "review", "2024-03-04T00:00:00Z", {
+      parentId: earlier.id,
+      body: `@someone: ${SAID}`,
+      comments: [{ body: SAID, path: "src/dedupe.ts", diffHunk: HUNK, outdated: false, line: 4 }],
+    });
+    const reading = readAnswer(
+      alone(earlier, old),
+      narrative(one(["review:5-0"], { "review:5-0": SAID })),
+    )!;
+    expect(reading.changes[0].reasons[0].scope).toBe("earlier change");
+    expect(reading.claims[0]).toMatchObject({
+      specificity: "another change in the line's history",
+      state: "recorded for the change, no specific link shown",
+    });
+  });
+
+  it("grades a cited source the same way, before any passage is read", () => {
+    const facts = factsOf(alone(pull, issue, placed({ path: "src/other.ts", line: 4 })));
+    expect(specificityOf(facts, [last.id])).toBe("direct: the change is this block alone");
+    for (const id of [pull.id, issue.id, "review:7-0"])
+      expect(specificityOf(facts, [id])).toBe("the change that last changed the line");
+    expect(specificityOf(facts, [pull.id, last.id])).toBe("direct: the change is this block alone");
   });
 });
 
