@@ -344,13 +344,14 @@
       "repo": "angular/angular.js",
       "location": "src/ng/http.js:411",
       "question": "Why is this line the way it is?",
-      "why": "`* @example`, a doc line added by 1e90d03, which explains the feature it documents: sending the XSRF token to whitelisted origins.",
+      "why": "`* @example`, a doc line added by 1e90d03, which explains the feature it documents: sending the XSRF token to whitelisted origins. Held for a manual verdict since 12 Oct 2026: the automatic checks alone passed answers that say the line implements that feature.",
       "expect": {
         "answerable": true,
         "recorded": true,
         "grounded": true,
         "minScore": 0.65,
-        "citesBodyMatch": "XSRF"
+        "citesBodyMatch": "XSRF",
+        "review": "Pass if it ties the line to commit 1e90d03 and to the feature that commit added, sending the XSRF token to whitelisted origins, without saying the line does anything. It may say the line is documentation. Fail if it presents the line as part of the mechanism: says it implements, performs, checks, sends or supports the sending. The line is `* @example`, a doc comment. Fail if it gives the tag a reason that no source gives."
       }
     },
     {

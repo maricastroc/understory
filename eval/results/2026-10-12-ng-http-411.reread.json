@@ -1,0 +1,149 @@
+{
+  "case": "ng-http-411",
+  "amended": "2026-10-12",
+  "rubric": "Pass if it ties the line to commit 1e90d03 and to the feature that commit added, sending the XSRF token to whitelisted origins, without saying the line does anything. It may say the line is documentation. Fail if it presents the line as part of the mechanism: says it implements, performs, checks, sends or supports the sending. The line is `* @example`, a doc comment. Fail if it gives the tag a reason that no source gives.",
+  "what": "Every kept run of this case, read against the rubric it was given on 12 Oct 2026. `then` is the outcome stored in the run when it was made, under automatic checks only. `now` is what the same answer gets with the rubric. The kept runs and their review files are not rewritten.",
+  "reader": "Drafted with an AI assistant from the kept runs, the code at the line and the patch of commit 1e90d03. Not checked by a second person.",
+  "runs": {
+    "2026-10-11-audit-first-fix.jsonl#0": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was introduced to implement support for sending the XSRF token to whitelisted origins\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-audit-first-fix.jsonl#1": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was added to implement support for sending the XSRF token to whitelisted origins\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-audit-first-fix.jsonl#2": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was introduced to implement support for sending the XSRF token to whitelisted origins\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-audit-first-fix.jsonl#3": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was added to implement support for sending the XSRF token to whitelisted origins\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-audit-fix.jsonl#0": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was introduced to implement support for sending the XSRF token to whitelisted origins\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-audit-fix.jsonl#1": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"implements a whitelist check so that the XSRF token header is added to requests targeting origins that have been explicitly allowed\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-audit-fix.jsonl#2": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was added to implement support for sending the XSRF token to whitelisted origins\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-audit-fix.jsonl#3": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was introduced to implement support for sending the XSRF token to whitelisted origins\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-recorded-before-evening.jsonl#0": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was introduced to check a whitelist of origins\" and to include the XSRF token header when a request matches one. The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-recorded-before-evening.jsonl#1": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was added to implement the new whitelist feature for XSRF tokens\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-recorded-before-evening.jsonl#2": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was written to include the XSRF token header for requests whose target origin is in the newly added whitelist\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-recorded-before-evening.jsonl#3": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was added to support sending the XSRF token to whitelisted origins\". The mildest of these wordings, and still the line as part of the mechanism: it is a doc comment. That claim was audited as weak and a second one as supported, confidence 0.85."
+    },
+    "2026-10-11-via-openrouter.jsonl#0": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"implements a check that sends the XSRF token header only when the request’s target origin is listed in the whitelist\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11-via-openrouter.jsonl#1": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"implements the logic added in commit 1e90d03 to only send the XSRF token when the request’s target origin is in the configured whitelist\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11.jsonl#0": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was added to implement the whitelist feature for XSRF tokens\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-11.jsonl#1": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"implements the whitelist check\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-12-line-attribution-before-on-audit-fix.jsonl#0": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was added to implement the new feature that sends the XSRF token header for requests targeting origins that have been added to a whitelist\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-12-line-attribution-before-on-audit-fix.jsonl#1": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was introduced to implement support for sending the XSRF token to whitelisted origins\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-12-line-attribution-before-on-audit-fix.jsonl#2": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"implements a check that only adds the XSRF token header when the request’s target origin is either same‑origin or listed in a whitelist\". The line is a doc comment. Audited as supported, confidence 0.9."
+    },
+    "2026-10-12-line-attribution-before-on-audit-fix.jsonl#3": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was added to implement the XSRF‑token whitelist feature that allows the $http service to send the XSRF token header to origins listed in a whitelist\". The line is a doc comment. Audited as supported, confidence 0.85."
+    },
+    "2026-10-12-line-attribution-before-on-main.jsonl#0": {
+      "then": "fail",
+      "now": "fail",
+      "note": "Abstains without naming the commit or the feature."
+    },
+    "2026-10-12-line-attribution-before-on-main.jsonl#1": {
+      "then": "fail",
+      "now": "fail",
+      "note": "Abstains without naming the commit or the feature."
+    },
+    "2026-10-12-line-attribution-before-on-main.jsonl#2": {
+      "then": "fail",
+      "now": "fail",
+      "note": "Says the line \"was added or changed to implement the XSRF-token whitelist check\". Failed before the rubric applies: the audit ruled the claim unsupported, confidence 0.35."
+    },
+    "2026-10-12-line-attribution-before-on-main.jsonl#3": {
+      "then": "pass",
+      "now": "fail",
+      "note": "Says the line \"was added to implement the new logic that sends the XSRF token header when the request target matches a whitelisted origin\". The line is a doc comment. Audited as supported, confidence 0.9."
+    },
+    "2026-10-12-line-attribution.jsonl#0": {
+      "then": "fail",
+      "now": "fail",
+      "note": "Says the line was added as documentation of the XSRF whitelist feature, which is true. Failed before the rubric applies: the audit held the claim at weak, confidence 0.55."
+    },
+    "2026-10-12-line-attribution.jsonl#1": {
+      "then": "fail",
+      "now": "fail",
+      "note": "Abstains, naming the commit that added the line but not the feature it documents."
+    },
+    "2026-10-12-line-attribution.jsonl#2": {
+      "then": "fail",
+      "now": "fail",
+      "note": "Says the line was added as documentation of the XSRF whitelist feature, which is true. Failed before the rubric applies: the audit held the claim at weak, confidence 0.55."
+    },
+    "2026-10-12-line-attribution.jsonl#3": {
+      "then": "fail",
+      "now": "fail",
+      "note": "Abstains, naming the commit that added the line but not the feature it documents."
+    }
+  }
+}

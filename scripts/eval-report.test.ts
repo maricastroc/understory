@@ -364,3 +364,52 @@ describe("the results published in eval/README.md", () => {
       expect(claimed).toContain(key);
   });
 });
+
+describe("the case amended after it met the model", () => {
+  type Reread = {
+    case: string;
+    rubric: string;
+    runs: Record<string, { then: string; now: string; note: string }>;
+  };
+  const reread: Reread = JSON.parse(
+    readFileSync("eval/results/2026-10-12-ng-http-411.reread.json", "utf8"),
+  );
+  const files = [...new Set(Object.keys(reread.runs).map((key) => key.split("#")[0]))];
+  const runsOf = (file: string) => parseRecords(readFileSync(`eval/results/${file}`, "utf8")).runs;
+
+  it("is read against the rubric the gold set now holds", () => {
+    const gold = JSON.parse(readFileSync("eval/gold.json", "utf8"));
+    const amended = gold.cases.find((c: { id: string }) => c.id === reread.case);
+    expect(amended.category).toBe("recorded");
+    expect(reread.rubric).toBe(amended.expect.review);
+  });
+
+  it("covers every stored run of the case and never turns a failure into a pass", () => {
+    for (const file of files) {
+      const stored = runsOf(file).filter((r) => r.id === reread.case);
+      expect(stored.length).toBeGreaterThan(0);
+      for (const run of stored) {
+        const read = reread.runs[`${file}#${run.pass}`];
+        expect(read.then).toBe(run.outcome.kind);
+        if (run.outcome.kind !== "pass") expect(read.now).toBe("fail");
+        expect(read.note.length).toBeGreaterThan(20);
+      }
+    }
+  });
+
+  it("gives the counts eval/README.md publishes for each kept run", () => {
+    const readme = readFileSync("eval/README.md", "utf8");
+    const rows = readme.split("\n").map((line) => line.replace(/\s+/g, " ").trim());
+    for (const file of files) {
+      const recorded = runsOf(file).filter((r) => r.category === "recorded");
+      const scored = recorded.filter((r) => r.outcome.kind !== "error").length;
+      const passed = recorded.filter((r) => r.outcome.kind === "pass").length;
+      const mine = Object.entries(reread.runs).filter(([key]) => key.startsWith(`${file}#`));
+      const before = mine.filter(([, r]) => r.then === "pass").length;
+      const after = mine.filter(([, r]) => r.now === "pass").length;
+      expect(rows).toContain(
+        `| \`${file}\` | ${passed}/${scored} | ${passed - before + after}/${scored} | ${before}/${mine.length} to ${after}/${mine.length} |`,
+      );
+    }
+  });
+});
