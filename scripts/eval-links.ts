@@ -6,16 +6,20 @@ import { parseControls, parseReplay } from "./eval-audit-claims";
 import type { Case, Gold } from "./eval-check";
 import {
   type Outcome,
+  type Placement,
+  type ReviewComment,
   type Signals,
   type SourceLink,
   blockAround,
   byStructureAlone,
   changedTerms,
   closest,
+  commentsOf,
   elsewhereTerms,
   judgeThenStructure,
   linkOf,
   patchRows,
+  placementOf,
   shared,
   structureAsProof,
   terms,
@@ -41,6 +45,7 @@ type Row = {
     namesLine: string[];
     namesBlock: string[];
     namesElsewhere: string[];
+    comments: Placed[];
   }>;
   signals: Signals;
   judge: { supported: number; judged: number };
@@ -86,6 +91,32 @@ async function commitInfo(repo: string, sha: string): Promise<CommitInfo> {
   };
 }
 
+async function reviewComments(repo: string, number: number): Promise<ReviewComment[]> {
+  const [owner, name] = repo.split("/");
+  const query =
+    "query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){pullRequest(number:$n){reviews(first:50){nodes{comments(first:50){nodes{body path outdated diffHunk}}}}}}}";
+  const res = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${process.env.GITHUB_TOKEN ?? ""}`,
+    },
+    body: JSON.stringify({ query, variables: { o: owner, r: name, n: number } }),
+  });
+  if (!res.ok)
+    throw new Error(`GitHub answered ${res.status} for the reviews of ${repo}#${number}`);
+  const body = (await res.json()) as {
+    data?: {
+      repository?: {
+        pullRequest?: { reviews: { nodes: Array<{ comments: { nodes: ReviewComment[] } }> } };
+      };
+    };
+  };
+  return (body.data?.repository?.pullRequest?.reviews.nodes ?? []).flatMap((r) => r.comments.nodes);
+}
+
+type Placed = { placement: Placement; outdated: boolean; says: string };
+
 const GROUPS: Array<[string, (kind: string, expect: string) => boolean]> = [
   ["should be credited", (_, expect) => expect === "supported"],
   [
@@ -110,6 +141,8 @@ async function main() {
   const replay = parseReplay(readFileSync(replayFile, "utf8"));
   const evidence = new Map<string, Evidence>();
   const commits = new Map<string, CommitInfo>();
+  const reviews = new Map<string, ReviewComment[]>();
+  const census: Array<{ id: string; pull: string; comments: Placed[] }> = [];
   const rows: Row[] = [];
 
   for (const control of controls) {
@@ -161,6 +194,32 @@ async function main() {
         )
         .join("\n"),
     );
+    const pulls = repo.startsWith(".") ? [] : ev.artifacts.filter((a) => a.kind === "pull_request");
+    for (const pull of pulls) {
+      const key = `${repo}#${pull.id}`;
+      if (reviews.has(key)) continue;
+      reviews.set(key, await reviewComments(repo, Number(pull.id.replace("pr:", ""))));
+      census.push({
+        id: c.id,
+        pull: pull.id,
+        comments: reviews.get(key)!.map((comment) => ({
+          placement: placementOf(comment, file, line),
+          outdated: comment.outdated,
+          says: comment.body.replace(/\s+/g, " ").slice(0, 100),
+        })),
+      });
+    }
+    const placed = (a: Artifact): Placed[] =>
+      a.kind !== "review"
+        ? []
+        : commentsOf(
+            a,
+            pulls.flatMap((pull) => reviews.get(`${repo}#${pull.id}`) ?? []),
+          ).map((comment) => ({
+            placement: placementOf(comment, file, line),
+            outdated: comment.outdated,
+            says: comment.body.replace(/\s+/g, " ").slice(0, 100),
+          }));
     const cited = control.citations.map((id) => byId.get(id)).filter((a): a is Artifact => !!a);
     const sources = cited.map((a) => {
       const link = linkOf(a, last?.id ?? null, byId);
@@ -174,6 +233,7 @@ async function main() {
         namesLine: link === "this change" ? shared(said, onLine) : [],
         namesBlock: link === "this change" ? shared(said, inBlock) : [],
         namesElsewhere: link === "this change" ? elsewhereTerms(said, blockTerms, rest) : [],
+        comments: placed(a),
       };
     });
     const signals: Signals = {
@@ -209,8 +269,22 @@ async function main() {
 
   writeFileSync(
     out,
-    `${JSON.stringify({ date: new Date().toISOString(), replay: replayFile, judge: replay.meta?.commit ?? null, controls: rows }, null, 1)}\n`,
+    `${JSON.stringify({ date: new Date().toISOString(), replay: replayFile, judge: replay.meta?.commit ?? null, controls: rows, reviewComments: census }, null, 2)}\n`,
   );
+
+  console.log("review comments with a position, by where they sit against the investigated line:");
+  for (const { id, pull, comments } of census) {
+    const at = (placement: Placement) => comments.filter((c) => c.placement === placement).length;
+    console.log(
+      `  ${id} ${pull}: ${comments.length} comments · on the line ${at("on the line")} · in its hunk ${at("in its hunk")} · same file, elsewhere ${at("same file, elsewhere")} · another file ${at("another file")}`,
+    );
+  }
+  console.log("controls that cite a review comment:");
+  for (const r of rows)
+    for (const source of r.sources.filter((x) => x.kind === "review"))
+      console.log(
+        `  ${r.id} [${r.expect}] ${source.id}: ${source.comments.map((c) => c.placement).join(", ") || "no placed comment"} · judge ${r.judge.supported} of ${r.judge.judged}`,
+      );
 
   const count = (list: Outcome[]) =>
     `${list.filter((o) => o === "credit").length} credited · ${list.filter((o) => o === "reject").length} refused · ${list.filter((o) => o === "inconclusive").length} inconclusive`;

@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-12T15:49:58.020Z",
+  "date": "2026-10-12T16:08:13.609Z",
   "replay": "eval/results/2026-10-12-patch-context-replay-one-question.jsonl",
   "judge": "b798b88",
   "controls": [
@@ -21,7 +21,8 @@
           "passage": "feat($http): support sending XSRF token to whitelisted origins",
           "namesLine": [],
           "namesBlock": ["http", "xsrf", "token", "whitelisted", "origin"],
-          "namesElsewhere": ["support"]
+          "namesElsewhere": ["support"],
+          "comments": []
         }
       ],
       "signals": {
@@ -61,7 +62,8 @@
           "passage": "feat($http): support sending XSRF token to whitelisted origins",
           "namesLine": [],
           "namesBlock": ["http", "xsrf", "token", "whitelisted", "origin"],
-          "namesElsewhere": ["support"]
+          "namesElsewhere": ["support"],
+          "comments": []
         }
       ],
       "signals": {
@@ -101,7 +103,8 @@
           "passage": "Add support for upgrade to new CE edition",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["upgrade"]
+          "namesElsewhere": ["upgrade"],
+          "comments": []
         },
         {
           "id": "commit:d3ee30b",
@@ -110,7 +113,8 @@
           "passage": "Add support for upgrade to new CE edition",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["upgrade"]
+          "namesElsewhere": ["upgrade"],
+          "comments": []
         }
       ],
       "signals": {
@@ -150,7 +154,8 @@
           "passage": "Add Array.prototype.indexOf shim for IE<9.",
           "namesLine": [],
           "namesBlock": ["array", "prototype", "indexof", "index", "shim"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -190,7 +195,8 @@
           "passage": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects",
           "namesLine": ["index"],
           "namesBlock": ["index", "object"],
-          "namesElsewhere": ["array"]
+          "namesElsewhere": ["array"],
+          "comments": []
         }
       ],
       "signals": {
@@ -230,7 +236,8 @@
           "passage": "promises have an \"inspect\" method, regardless of whether one is",
           "namesLine": ["inspect"],
           "namesBlock": ["inspect"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -270,7 +277,8 @@
           "passage": "fix: writeFileSync can not write to temp files on macOS 10.15",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         },
         {
           "id": "commit:8c2ac95",
@@ -279,7 +287,8 @@
           "passage": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -319,7 +328,8 @@
           "passage": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of fil",
           "namesLine": ["var"],
           "namesBlock": ["var"],
-          "namesElsewhere": ["draft"]
+          "namesElsewhere": ["draft"],
+          "comments": []
         }
       ],
       "signals": {
@@ -359,7 +369,8 @@
           "passage": "Cleanup and refactoring of (rule|formatter)Loader",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         },
         {
           "id": "commit:8b853b2",
@@ -368,7 +379,8 @@
           "passage": "Cleanup and refactoring of (rule|formatter)Loader (#3412)",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -408,7 +420,8 @@
           "passage": "Stops recovering clients from retrying in lockstep after an outage.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -448,7 +461,8 @@
           "passage": "feat($http): support sending XSRF token to whitelisted origins",
           "namesLine": [],
           "namesBlock": ["http", "xsrf", "token", "whitelisted", "origin"],
-          "namesElsewhere": ["support"]
+          "namesElsewhere": ["support"],
+          "comments": []
         }
       ],
       "signals": {
@@ -488,7 +502,8 @@
           "passage": "feat($http): support sending XSRF token to whitelisted origins",
           "namesLine": [],
           "namesBlock": ["http", "xsrf", "token", "whitelisted", "origin"],
-          "namesElsewhere": ["support"]
+          "namesElsewhere": ["support"],
+          "comments": []
         }
       ],
       "signals": {
@@ -528,7 +543,8 @@
           "passage": "* deprecate `getRelativePath`, use `path.resolve` instead",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["getrelativepath", "relative", "resolve", "instead"]
+          "namesElsewhere": ["getrelativepath", "relative", "resolve", "instead"],
+          "comments": []
         },
         {
           "id": "commit:8b853b2",
@@ -537,7 +553,8 @@
           "passage": "Cleanup and refactoring of (rule|formatter)Loader (#3412)",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -577,7 +594,14 @@
           "passage": "@andy-hanson: It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["ruleseverity", "severity", "isenabled", "enabled"]
+          "namesElsewhere": ["ruleseverity", "severity", "isenabled", "enabled"],
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true,
+              "says": "It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too."
+            }
+          ]
         }
       ],
       "signals": {
@@ -617,7 +641,8 @@
           "passage": "Add Array.prototype.indexOf shim for IE<9.",
           "namesLine": [],
           "namesBlock": ["array", "prototype", "indexof", "index", "shim"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -657,7 +682,8 @@
           "passage": "Add support for upgrade to new CE edition",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["upgrade"]
+          "namesElsewhere": ["upgrade"],
+          "comments": []
         },
         {
           "id": "commit:d3ee30b",
@@ -666,7 +692,8 @@
           "passage": "Add support for upgrade to new CE edition",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["upgrade"]
+          "namesElsewhere": ["upgrade"],
+          "comments": []
         }
       ],
       "signals": {
@@ -706,7 +733,8 @@
           "passage": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of fil",
           "namesLine": ["var"],
           "namesBlock": ["var"],
-          "namesElsewhere": ["draft"]
+          "namesElsewhere": ["draft"],
+          "comments": []
         }
       ],
       "signals": {
@@ -746,7 +774,8 @@
           "passage": "fix: writeFileSync can not write to temp files on macOS 10.15",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         },
         {
           "id": "commit:8c2ac95",
@@ -755,7 +784,8 @@
           "passage": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -795,7 +825,8 @@
           "passage": "With this commit, it is possible to whitelist additional origins, so that requests to these origins",
           "namesLine": [],
           "namesBlock": ["possible", "whitelist", "origin", "request"],
-          "namesElsewhere": ["additional"]
+          "namesElsewhere": ["additional"],
+          "comments": []
         }
       ],
       "signals": {
@@ -835,7 +866,8 @@
           "passage": "Add Array.prototype.indexOf shim for IE<9.",
           "namesLine": [],
           "namesBlock": ["array", "prototype", "indexof", "index", "shim"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -875,7 +907,8 @@
           "passage": "But this is the start of the code to be able to migrate from <=1.13.1 to the new CE versions.",
           "namesLine": ["version"],
           "namesBlock": ["version"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         },
         {
           "id": "commit:d3ee30b",
@@ -884,7 +917,8 @@
           "passage": "Add support for upgrade to new CE edition",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["upgrade"]
+          "namesElsewhere": ["upgrade"],
+          "comments": []
         }
       ],
       "signals": {
@@ -924,7 +958,8 @@
           "passage": "Custom promises have a state of \"unknown\" by default.",
           "namesLine": [],
           "namesBlock": ["state", "unknown"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -964,7 +999,8 @@
           "passage": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of …",
           "namesLine": ["index"],
           "namesBlock": ["index"],
-          "namesElsewhere": ["array"]
+          "namesElsewhere": ["array"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1004,7 +1040,8 @@
           "passage": "Add `path.resolve` when`fs.writeFileSync` called with temp file path.",
           "namesLine": ["resolve"],
           "namesBlock": ["resolve"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         },
         {
           "id": "commit:8c2ac95",
@@ -1013,7 +1050,8 @@
           "passage": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1053,7 +1091,8 @@
           "passage": "billing: add jitter to retry backoff",
           "namesLine": ["jitter"],
           "namesBlock": ["jitter"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1093,7 +1132,8 @@
           "passage": "refactor: rename PAGE_SIZE to BATCH_SIZE",
           "namesLine": ["page_size", "page", "batch_size", "batch"],
           "namesBlock": ["page_size", "page", "batch_size", "batch"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1133,7 +1173,8 @@
           "passage": "@nathanleclaire: It does break the marshaling of a host.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1173,7 +1214,8 @@
           "passage": "Rules are not responsible for disabling theirselves.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         },
         {
           "id": "commit:63fc794",
@@ -1182,7 +1224,8 @@
           "passage": "Rewrite enable/disable logic (#2369)",
           "namesLine": [],
           "namesBlock": ["disable"],
-          "namesElsewhere": ["enable"]
+          "namesElsewhere": ["enable"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1222,7 +1265,8 @@
           "passage": "Make all promises inspectable by default",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1262,7 +1306,8 @@
           "passage": "Rewrite enable/disable logic (#2369)",
           "namesLine": [],
           "namesBlock": ["disable"],
-          "namesElsewhere": ["enable"]
+          "namesElsewhere": ["enable"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1302,7 +1347,8 @@
           "passage": "With this commit, it is possible to whitelist additional origins, so that requests to these origins",
           "namesLine": [],
           "namesBlock": ["possible", "whitelist", "origin", "request"],
-          "namesElsewhere": ["additional"]
+          "namesElsewhere": ["additional"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1342,7 +1388,8 @@
           "passage": "- While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["filterfailure", "filter", "duplicate"]
+          "namesElsewhere": ["filterfailure", "filter", "duplicate"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1382,7 +1429,14 @@
           "passage": "@andy-hanson: It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["ruleseverity", "severity", "isenabled", "enabled"]
+          "namesElsewhere": ["ruleseverity", "severity", "isenabled", "enabled"],
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true,
+              "says": "It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too."
+            }
+          ]
         }
       ],
       "signals": {
@@ -1422,7 +1476,8 @@
           "passage": "* allow uncompiled custom formatters (we already allow uncompiled rules)",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["allow", "custom"]
+          "namesElsewhere": ["allow", "custom"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1462,7 +1517,8 @@
           "passage": "* try resolve formatter module relative to current directory first",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["resolve", "module", "relative", "first"]
+          "namesElsewhere": ["resolve", "module", "relative", "first"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1502,7 +1558,8 @@
           "passage": "@nathanleclaire: It does break the marshaling of a host.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1542,7 +1599,8 @@
           "passage": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of fil",
           "namesLine": ["var"],
           "namesBlock": ["var"],
-          "namesElsewhere": ["draft"]
+          "namesElsewhere": ["draft"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1582,7 +1640,8 @@
           "passage": "This PR also add the ability to change a query's batch with the `batchKey` constructor option.",
           "namesLine": [],
           "namesBlock": ["batch", "option"],
-          "namesElsewhere": ["change", "query", "batchkey", "constructor"]
+          "namesElsewhere": ["change", "query", "batchkey", "constructor"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1622,7 +1681,8 @@
           "passage": "This PR found and fixes a bug in apollo-link-batch for multiple subscribers on a single request.",
           "namesLine": [],
           "namesBlock": ["batch"],
-          "namesElsewhere": ["found", "multiple", "single"]
+          "namesElsewhere": ["found", "multiple", "single"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1662,7 +1722,8 @@
           "passage": "billing: add jitter to retry backoff",
           "namesLine": ["jitter"],
           "namesBlock": ["jitter"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         },
         {
           "id": "commit:c038fb3",
@@ -1671,7 +1732,8 @@
           "passage": "INC-1187: the unbounded loop resubmitted charges during a Stripe",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1711,7 +1773,8 @@
           "passage": "billing: bound charge retries with exponential backoff",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["charge"]
+          "namesElsewhere": ["charge"],
+          "comments": []
         }
       ],
       "signals": {
@@ -1751,7 +1814,8 @@
           "passage": "refactor: rename PAGE_SIZE to BATCH_SIZE",
           "namesLine": ["page_size", "page", "batch_size", "batch"],
           "namesBlock": ["page_size", "page", "batch_size", "batch"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         },
         {
           "id": "commit:78ff826",
@@ -1760,7 +1824,8 @@
           "passage": "rows comes back as 413 Payload Too Large.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1800,7 +1865,8 @@
           "passage": "The vendor emits a zero-quantity row for every discontinued SKU on every",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         },
         {
           "id": "commit:05a16a3",
@@ -1809,7 +1875,8 @@
           "passage": "WH-2402: zero is also what the vendor sends when a SKU sells out, so the",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1849,7 +1916,8 @@
           "passage": "Wraps the Stripe call in a retry loop so transient network blips",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1889,7 +1957,8 @@
           "passage": "Skipping them saves one write per discontinued SKU per run.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1929,7 +1998,8 @@
           "passage": "storefront kept showing the last positive stock for sold-out items.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -1969,7 +2039,8 @@
           "passage": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -2009,7 +2080,8 @@
           "passage": "so a charge resolves inside Stripe's 10s webhook ACK window.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -2049,7 +2121,8 @@
           "passage": "Wraps the Stripe call in a retry loop so transient network blips",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -2089,7 +2162,8 @@
           "passage": "storefront kept showing the last positive stock for sold-out items.",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -2129,7 +2203,8 @@
           "passage": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -2169,7 +2244,8 @@
           "passage": "This PR contains code to remove the logic shared across all http links from apollo-link-http and put it into a publicly accessible `apollo-link-http-common` mod",
           "namesLine": [],
           "namesBlock": [],
-          "namesElsewhere": ["contain", "shared", "acros", "module"]
+          "namesElsewhere": ["contain", "shared", "acros", "module"],
+          "comments": []
         }
       ],
       "signals": {
@@ -2209,7 +2285,8 @@
           "passage": "WH-2310: most failed pages are 502s from the vendor's load balancer and",
           "namesLine": ["page"],
           "namesBlock": ["page"],
-          "namesElsewhere": []
+          "namesElsewhere": [],
+          "comments": []
         }
       ],
       "signals": {
@@ -2230,6 +2307,290 @@
         "judgeThenStructure": ["credit", "credit", "credit", "credit"],
         "judgeThenHints": ["credit", "credit", "credit", "credit"]
       }
+    }
+  ],
+  "reviewComments": [
+    {
+      "id": "machine-168",
+      "pull": "pr:4002",
+      "comments": []
+    },
+    {
+      "id": "tslint-260",
+      "pull": "pr:4887",
+      "comments": []
+    },
+    {
+      "id": "tslint-189",
+      "pull": "pr:3412",
+      "comments": []
+    },
+    {
+      "id": "tslint-257",
+      "pull": "pr:2369",
+      "comments": [
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "This method was never necessary to have here."
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too."
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "This conflicts with an assertion in `ruleLoaderTests.ts` that it \"loads disabled rules if rule in en"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "technically you are right, but this check was added to do less work for disabled rules. With your ch"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "The behaviour to not load disabled rules was added recently. Even though the rule was loaded, it wou"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Isn't the real problem that we re-load every rule for every file? (Cached, but still.) The only Sour"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "What if someone wants a rule disabled by default but enabled in a particular file?"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "If you use tslint as a library, you can pass different rule configs for every call to `Linter.lint`."
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "I though about that too. That's a valid use case. But the problem with the missing severity still st"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "I have a test case `enable-via-comment` where a rule is turned off, but is enabled in the file and g"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "On that topic: All of the custom implementations of `isEnabled()` I see are just turning it off in t"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "What I'm actually trying to say: You disable a rule by setting `severity: off`. Now you turn it on v"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "you could directly return the failure now that `applyWithFunction` doesn't modify the result anymore"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "This changes the behavior of the rule, which should at least be documented. Before this change the r"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "OK, added the check back."
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Moved error to the bottom, so a `tslint:disable` anywhere should work. Presumably no one uses `tslin"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "I like this better than constructing `new Lint.RuleFailure` directly because I don't have to pass in"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "here too"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "breaking change. keep this method, just return the input unchanged and deprecate it"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "that's a duplicate of `RuleConstructor`?"
+        },
+        {
+          "placement": "another file",
+          "outdated": false,
+          "says": "this should be kept and deprecated for backwards compatibility"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "same as above"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "should also not be removed for now"
+        },
+        {
+          "placement": "another file",
+          "outdated": false,
+          "says": "another breaking change"
+        },
+        {
+          "placement": "another file",
+          "outdated": false,
+          "says": "I don't think this is public. (#2446)"
+        },
+        {
+          "placement": "same file, elsewhere",
+          "outdated": true,
+          "says": "needs error text"
+        },
+        {
+          "placement": "same file, elsewhere",
+          "outdated": false,
+          "says": "not that we should optimize on the --fix code path, but wouldn't it be more efficient to do: - call "
+        },
+        {
+          "placement": "same file, elsewhere",
+          "outdated": false,
+          "says": "Well, the way the enable/disable logic is done here, it's better to handle disables for all rules at"
+        },
+        {
+          "placement": "same file, elsewhere",
+          "outdated": false,
+          "says": "you _could_ reuse the disable map and reload it when the file is overwritten. I'm ok with how it is "
+        },
+        {
+          "placement": "same file, elsewhere",
+          "outdated": false,
+          "says": "I would hold off on that until #1330 is implemented, since that will need to know all the uses of th"
+        }
+      ]
+    },
+    {
+      "id": "machine-32",
+      "pull": "pr:2493",
+      "comments": []
+    },
+    {
+      "id": "apollo-http-10",
+      "pull": "pr:364",
+      "comments": [
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Is overriding `request` in the constructor a common thing? Instead of replacing `request` here, woul"
+        },
+        {
+          "placement": "another file",
+          "outdated": false,
+          "says": "![hotline bling](https://media.giphy.com/media/Gt1IikDkRnLe8/giphy.gif)"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "I'm a bit confused as to why we need to replace the `request` function here at all - what is the `ba"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "We probably don't want these in the PR"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Hmm should we have a general thing that makes sure the number of nexts equals the number of results?"
+        },
+        {
+          "placement": "same file, elsewhere",
+          "outdated": true,
+          "says": "Hmmm, I think I would have been expecting something that doesn't go through the batching code path a"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Yep it's a count of how many arguments the function has. It's how we determine if a link is terminat"
+        },
+        {
+          "placement": "same file, elsewhere",
+          "outdated": true,
+          "says": "Yeah @jaydenseric had similar sentiments! I think that `batchLink.concat(httpLink)` would complicate"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Ah duh, thank you! I think the reasonable thing to do is propagate an error with the `result` field "
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Why won't `apollo-link-utilities` versions follow semver?"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "I know it has always been `*/*`, but shouldn't it really be `application/json`, since that is what i"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Could this be merged into `checkFetcher` above, as it's not used anywhere else?"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "I think we should get rid of checking fetch and instead document that it needs to be polyfilled in r"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "https://www.npmjs.com/package/invariant might be an option, if we retain dev errors."
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Typo: `utilities`."
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "The `apollo-link-utilities` dependency has been added, but it does not seem to be used yet in `apoll"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "My mistake! The diff was hidden."
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "Would it not be better to export everything in this `LinkUtils` namespace separately? At the moment "
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "That makes sense. I wasn't aware of the lack of tree-shaking. Thanks! You also bring up a good point"
+        },
+        {
+          "placement": "another file",
+          "outdated": true,
+          "says": "\"or\" the server"
+        }
+      ]
     }
   ]
 }

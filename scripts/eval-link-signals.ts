@@ -144,3 +144,31 @@ export function judgeThenStructure(s: Signals, judge: Verdicts, hintsRefute = fa
     return pointed ? "credit" : "inconclusive";
   });
 }
+
+export type Placement = "on the line" | "in its hunk" | "same file, elsewhere" | "another file";
+
+export type ReviewComment = { path: string; diffHunk: string; body: string; outdated: boolean };
+
+const hunkText = (row: string) => row.replace(/^[+\- ]/, "").trim();
+
+export function placementOf(comment: ReviewComment, file: string, line: string): Placement {
+  if (comment.path !== file) return "another file";
+  const rows = comment.diffHunk
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .filter((row) => !row.startsWith("@@"));
+  const wanted = line.trim();
+  if (!wanted) return "same file, elsewhere";
+  if (hunkText(rows.at(-1) ?? "") === wanted) return "on the line";
+  return rows.some((row) => !row.startsWith("-") && hunkText(row) === wanted)
+    ? "in its hunk"
+    : "same file, elsewhere";
+}
+
+export function commentsOf(source: Artifact, all: ReviewComment[]): ReviewComment[] {
+  const body = source.body.replace(/\s+/g, " ");
+  return all.filter((c) => {
+    const said = c.body.replace(/\s+/g, " ").trim();
+    return said.length > 0 && body.includes(said.slice(0, 80));
+  });
+}

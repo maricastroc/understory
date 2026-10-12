@@ -6,10 +6,12 @@ import {
   byStructureAlone,
   changedTerms,
   closest,
+  commentsOf,
   elsewhereTerms,
   judgeThenStructure,
   linkOf,
   patchRows,
+  placementOf,
   structureAsProof,
   terms,
   whatItDid,
@@ -172,5 +174,50 @@ describe("three ways of using the structure", () => {
     expect(judgeThenStructure(elsewhere, judge)).toEqual(["inconclusive"]);
     expect(judgeThenStructure(elsewhere, judge, true)).toEqual(["reject"]);
     expect(judgeThenStructure({ ...elsewhere, namesLine: true }, judge, true)).toEqual(["credit"]);
+  });
+});
+
+describe("where a review comment was placed", () => {
+  const hunk = ["@@ -10,3 +10,4 @@", " keep();", "+const a = read(file);", "+apply(a);"].join("\n");
+  const comment = (path: string, diffHunk = hunk) => ({
+    path,
+    diffHunk,
+    body: "It is not necessary to check the severity here.",
+    outdated: false,
+  });
+
+  it("is on the line when the hunk it was made on ends there", () => {
+    expect(placementOf(comment("src/linter.ts"), "src/linter.ts", "  apply(a);")).toBe(
+      "on the line",
+    );
+  });
+
+  it("is in the line's hunk when the line is shown above the commented one", () => {
+    expect(placementOf(comment("src/linter.ts"), "src/linter.ts", "const a = read(file);")).toBe(
+      "in its hunk",
+    );
+  });
+
+  it("is elsewhere in the file, or in another file", () => {
+    expect(placementOf(comment("src/linter.ts"), "src/linter.ts", "return source;")).toBe(
+      "same file, elsewhere",
+    );
+    expect(placementOf(comment("src/ruleLoader.ts"), "src/linter.ts", "apply(a);")).toBe(
+      "another file",
+    );
+  });
+
+  it("does not take a removed row for the line as it stands", () => {
+    const removed = ["@@ -1,2 +1,2 @@", "-apply(a);", "+applyAll(a);"].join("\n");
+    expect(placementOf(comment("a.ts", removed), "a.ts", "apply(a);")).toBe("same file, elsewhere");
+  });
+
+  it("finds the comments a collected review holds, by their text", () => {
+    const review = {
+      ...artifact("review:7-0", "review", "pr:7"),
+      body: "@someone: It is not necessary to check the severity here.",
+    };
+    const other = { ...comment("b.ts"), body: "Why not reuse the map?" };
+    expect(commentsOf(review, [comment("a.ts"), other])).toEqual([comment("a.ts")]);
   });
 });
