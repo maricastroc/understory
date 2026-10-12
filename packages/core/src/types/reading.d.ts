@@ -1,6 +1,12 @@
 export type ChangeScope = { files: number; lines: number; block: number };
 
-export type PlacedComment = { body: string; path: string; diffHunk: string; outdated: boolean };
+export type PlacedComment = {
+  body: string;
+  path: string;
+  diffHunk: string;
+  outdated: boolean;
+  line?: number | null;
+};
 
 export type LineageStop =
   | "the line was added"
@@ -66,6 +72,7 @@ export type Unsustained = {
 };
 
 export type Reading = {
+  history: "the line" | "the file";
   changes: ChangeEntry[];
   earlier: LineageStop | "not read" | null;
   unsustained: Unsustained[];

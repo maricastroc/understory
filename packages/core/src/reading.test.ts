@@ -28,11 +28,26 @@ const last = artifact("commit:ccc3333", "commit", "2024-03-18T00:00:00Z", {
 });
 const pull = artifact("pr:7", "pull_request", "2024-03-17T00:00:00Z", { parentId: last.id });
 const HUNK = ["@@ -1,2 +1,3 @@", " keep();", "+return row.quantity > 0;"].join("\n");
-const review = (path: string, diffHunk = HUNK) =>
+const review = (path: string, placed: { line?: number; outdated?: boolean } = {}) =>
   artifact("review:7-0", "review", "2024-03-17T00:00:00Z", {
     parentId: pull.id,
-    body: "@someone: skip them only when discontinued",
-    comments: [{ body: "skip them only when discontinued", path, diffHunk, outdated: true }],
+    body: "@someone: skip them only when discontinued\n@other: and say so in the log",
+    comments: [
+      {
+        body: "skip them only when discontinued",
+        path,
+        diffHunk: HUNK,
+        outdated: placed.outdated ?? true,
+        line: placed.line ?? null,
+      },
+      {
+        body: "and say so in the log",
+        path: "src/log.ts",
+        diffHunk: "@@ -1 +1 @@\n+log();",
+        outdated: false,
+        line: 9,
+      },
+    ],
   });
 
 const evidence = (over: Partial<Evidence> = {}): Evidence => ({
@@ -169,9 +184,7 @@ describe("readAnswer — the sequence and what each change records", () => {
     ]);
   });
 
-  it("ties a reason to the line when the review comment sits on it", () => {
-    const ev = evidence({ artifacts: [first, revert, last, pull, review("src/dedupe.ts")] });
-    ev.code!.change!.scope = { files: 9, lines: 157, block: 2 };
+  it("ties a reason to the line only when the comment was made on that line, and is current", () => {
     const told = [
       {
         text: "Because reviewers asked.",
@@ -180,9 +193,62 @@ describe("readAnswer — the sequence and what each change records", () => {
         quote: "skip them only when discontinued",
       },
     ];
-    const reason = readAnswer(ev, narrative(told))!.changes[2].reasons[0];
-    expect(reason).toMatchObject({ scope: "line", sentence: "Because reviewers asked." });
-    expect(reason.passages[0].placement).toBe("on the line");
+    const wide = (placed: { line?: number; outdated?: boolean }) => {
+      const ev = evidence({
+        artifacts: [first, revert, last, pull, review("src/dedupe.ts", placed)],
+      });
+      ev.code!.change!.scope = { files: 9, lines: 157, block: 2 };
+      return readAnswer(ev, narrative(told))!;
+    };
+    const on = wide({ line: 4, outdated: false });
+    expect(on.changes[2].reasons[0]).toMatchObject({
+      scope: "line",
+      sentence: "Because reviewers asked.",
+    });
+    expect(on.changes[2].reasons[0].passages[0].placement).toBe("on the line");
+    expect(on.claims[0].specificity).toBe("direct: a review comment on the line");
+    for (const placed of [{}, { line: 4, outdated: true }, { line: 7, outdated: false }]) {
+      const near = wide(placed);
+      expect(near.changes[2].reasons[0].scope).toBe("change");
+      expect(near.changes[2].reasons[0].sentence).toBeUndefined();
+      expect(near.changes[2].reasons[0].passages[0].placement).toBe("in its hunk");
+      expect(near.claims[0].state).toBe("recorded for the change, no specific link shown");
+    }
+  });
+
+  it("leaves the place unknown when the passage is not one comment's own words", () => {
+    const ev = evidence({
+      artifacts: [first, revert, last, pull, review("src/dedupe.ts", { line: 4, outdated: false })],
+    });
+    ev.code!.change!.scope = { files: 9, lines: 157, block: 2 };
+    const read = (quote: string) =>
+      readAnswer(
+        ev,
+        narrative([
+          { text: "Because reviewers asked.", cites: ["review:7-0"], status: "supported", quote },
+        ]),
+      )!;
+    const summary = read("a sentence of the review's summary");
+    expect(summary.changes[2].reasons[0].passages).toEqual([
+      { source: "review:7-0", text: "a sentence of the review's summary" },
+    ]);
+    expect(summary.changes[2].reasons[0].scope).toBe("change");
+    expect(summary.claims[0].specificity).toBe("the change that last changed the line");
+    const both = review("src/dedupe.ts", { line: 4, outdated: false });
+    both.comments!.push({ ...both.comments![0], path: "src/other.ts", line: 30 });
+    const twice = readAnswer(
+      { ...ev, artifacts: [first, revert, last, pull, both] },
+      narrative([
+        {
+          text: "Because reviewers asked.",
+          cites: ["review:7-0"],
+          status: "supported",
+          quote: "skip them only when discontinued",
+        },
+      ]),
+    )!;
+    expect(twice.changes[2].reasons[0].passages[0].placement).toBeUndefined();
+    expect(twice.changes[2].reasons[0].scope).toBe("change");
   });
 
   it("keeps what no source sustains apart, by kind, and out of every change", () => {
@@ -225,10 +291,12 @@ describe("readAnswer — evidence that says less", () => {
     expect(reading.claims.some((c) => c.state === "directly linked to the line")).toBe(false);
   });
 
-  it("gives the file's history its own scope", () => {
+  it("gives the file's history its own scope, and does not call it the line's", () => {
     const reading = readAnswer(evidence({ coverage: { granularity: "file" } }), narrative(STORY))!;
+    expect(reading.history).toBe("the file");
     expect(reading.changes[2].reasons[0].scope).toBe("file");
     expect(reading.claims[1].specificity).toBe("the file's history");
+    expect(readAnswer(evidence(), narrative(STORY))!.history).toBe("the line");
   });
 
   it("lists a change found by walking back as a fact, with no reason of its own", () => {
@@ -289,11 +357,15 @@ describe("the two readings of a claim, kept apart", () => {
     );
   });
 
-  it("places a review comment against the line", () => {
-    const comment = { body: "", path: "a.ts", diffHunk: HUNK, outdated: false };
-    expect(placementOf(comment, "a.ts", "return row.quantity > 0;")).toBe("on the line");
-    expect(placementOf(comment, "a.ts", "keep();")).toBe("in its hunk");
-    expect(placementOf(comment, "a.ts", "other();")).toBe("same file, elsewhere");
-    expect(placementOf(comment, "b.ts", "keep();")).toBe("another file");
+  it("places a review comment on the line by its line number, never by its text alone", () => {
+    const comment = { body: "", path: "a.ts", diffHunk: HUNK, outdated: false, line: 4 };
+    expect(placementOf(comment, "a.ts", "return row.quantity > 0;", 4)).toBe("on the line");
+    expect(placementOf(comment, "a.ts", "return row.quantity > 0;")).toBe("in its hunk");
+    expect(placementOf(comment, "a.ts", "return row.quantity > 0;", 12)).toBe("in its hunk");
+    expect(placementOf({ ...comment, outdated: true }, "a.ts", "return row.quantity > 0;", 4)).toBe(
+      "in its hunk",
+    );
+    expect(placementOf(comment, "a.ts", "other();", 12)).toBe("same file, elsewhere");
+    expect(placementOf(comment, "b.ts", "keep();", 4)).toBe("another file");
   });
 });

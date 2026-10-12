@@ -39,22 +39,37 @@ export const qualityOf = (status: EntailmentStatus | null | undefined): Quality 
 
 const hunkText = (row: string) => row.replace(/^[+\- ]/, "").trim();
 
-export function placementOf(comment: PlacedComment, file: string, line: string): Placement {
+export function placementOf(
+  comment: PlacedComment,
+  file: string,
+  line: string,
+  lineNumber?: number,
+): Placement {
   if (comment.path !== file) return "another file";
+  if (!comment.outdated && lineNumber !== undefined && comment.line === lineNumber)
+    return "on the line";
+  const wanted = line.trim();
   const rows = comment.diffHunk
     .replace(/\r\n/g, "\n")
     .split("\n")
     .filter((row) => !row.startsWith("@@"));
-  const wanted = line.trim();
-  if (!wanted) return "same file, elsewhere";
-  if (hunkText(rows.at(-1) ?? "") === wanted) return "on the line";
-  return rows.some((row) => !row.startsWith("-") && hunkText(row) === wanted)
+  return wanted !== "" && rows.some((row) => !row.startsWith("-") && hunkText(row) === wanted)
     ? "in its hunk"
     : "same file, elsewhere";
 }
 
-const anchored = (placement: Placement) =>
-  placement === "on the line" || placement === "in its hunk";
+const anchored = (placement: Placement) => placement === "on the line";
+
+const oneLine = (ev: Evidence): number | undefined =>
+  ev.location && ev.location.startLine === ev.location.endLine ? ev.location.startLine : undefined;
+
+const flat = (text: string) => text.replace(/\s+/g, " ").trim();
+
+function commentOf(source: Artifact, quote: string): PlacedComment | undefined {
+  const wanted = flat(quote);
+  const holding = (source.comments ?? []).filter((c) => flat(c.body).includes(wanted));
+  return holding.length === 1 ? holding[0] : undefined;
+}
 
 const ORDER: Specificity[] = [
   "direct: a review comment on the line",
@@ -121,7 +136,7 @@ export function factsOf(ev: Evidence): CaseFacts {
           kind: a.kind,
           link: relation(a),
           comments: (a.comments ?? []).map((comment) => ({
-            placement: placementOf(comment, file, line),
+            placement: placementOf(comment, file, line, oneLine(ev)),
             outdated: comment.outdated,
           })),
         },
@@ -185,7 +200,14 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
   const file = ev.location.file;
   const line = markedLine(ev);
   const changes = changesOf(ev);
+  const plain: CaseFacts = {
+    ...facts,
+    sources: Object.fromEntries(
+      Object.entries(facts.sources).map(([id, source]) => [id, { ...source, comments: [] }]),
+    ),
+  };
   const reading: Reading = {
+    history: facts.granularity === "file" ? "the file" : "the line",
     changes,
     earlier: ev.lineage
       ? ev.lineage.stopped === "the line was added"
@@ -201,9 +223,14 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
     const status = mine[0]?.status ?? null;
     const quality = qualityOf(status);
     const cited = mine.length ? mine.map((check) => check.citation) : claim.citations;
-    const specificity = specificityOf(facts, cited);
-    reading.claims.push({ claim: at, quality, specificity, state: stateOf(quality, specificity) });
     if (quality !== "stated by a cited source") {
+      const specificity = specificityOf(plain, cited);
+      reading.claims.push({
+        claim: at,
+        quality,
+        specificity,
+        state: stateOf(quality, specificity),
+      });
       reading.unsustained.push({ claim: at, text: claim.text, quality });
       return;
     }
@@ -213,19 +240,29 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
       const commit = source ? commitOf(source, byId) : null;
       if (!source || !commit || !check.quote) continue;
       const quote = check.quote;
-      const comment =
-        source.comments?.find((c) => c.body.includes(quote.slice(0, 60))) ?? source.comments?.[0];
+      const comment = commentOf(source, quote);
       byChange.set(commit.id, [
         ...(byChange.get(commit.id) ?? []),
         {
           source: source.id,
           text: quote,
           ...(comment
-            ? { placement: placementOf(comment, file, line), outdated: comment.outdated }
+            ? {
+                placement: placementOf(comment, file, line, oneLine(ev)),
+                outdated: comment.outdated,
+              }
             : {}),
         },
       ]);
     }
+    const onTheLine = [...byChange.values()]
+      .flat()
+      .some((p) => p.placement !== undefined && anchored(p.placement));
+    const specificity =
+      onTheLine && facts.granularity !== "file"
+        ? "direct: a review comment on the line"
+        : specificityOf(plain, cited);
+    reading.claims.push({ claim: at, quality, specificity, state: stateOf(quality, specificity) });
     for (const [commitId, passages] of byChange) {
       const entry = changes.find((change) => change.id === commitId);
       if (!entry) continue;

@@ -27,7 +27,7 @@ const facts = (over: Partial<CaseFacts> = {}): CaseFacts => ({
     "review:7-1": {
       kind: "review",
       link: "this change",
-      comments: [{ placement: "in its hunk", outdated: false }],
+      comments: [{ placement: "on the line", outdated: false }],
     },
     "review:7-2": { kind: "review", link: "this change", comments: [] },
   },
@@ -54,8 +54,11 @@ describe("the specificity of the link", () => {
     );
   });
 
-  it("is direct when a cited review comment sits in the line's hunk", () => {
+  it("is direct when a cited review comment was made on the line itself", () => {
     expect(specificityOf(facts(), ["review:7-1"])).toBe("direct: a review comment on the line");
+    const near = facts();
+    near.sources["review:7-1"].comments = [{ placement: "in its hunk", outdated: false }];
+    expect(specificityOf(near, ["review:7-1"])).toBe("the change that last changed the line");
   });
 
   it("does not drop a review comment made in another file below the change it belongs to", () => {
