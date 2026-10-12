@@ -129,6 +129,28 @@ export function useInvestigation(user: AuthUser | null) {
     historyRef.current = history;
   }, [history]);
 
+  const latest = useRef(new Map<string, DigResult>());
+  const saving = useRef(new Map<string, Promise<void>>());
+  const saveCase = useCallback(
+    (saved: SavedCase) => {
+      if (!user) return;
+      const send = () =>
+        fetch("/api/investigations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(saved),
+        }).then(
+          () => {},
+          () => {},
+        );
+      saving.current.set(
+        saved.caseId,
+        (saving.current.get(saved.caseId) ?? Promise.resolve()).then(send),
+      );
+    },
+    [user],
+  );
+
   const rewrite = useCallback(
     async (caseId: string, language: NarrativeLanguage) => {
       const entry = historyRef.current.find((e) => e.caseId === caseId);
@@ -138,23 +160,18 @@ export function useInvestigation(user: AuthUser | null) {
       const alternates = { ...entry.alternates, ...(from ? { [from]: previous } : {}) };
       const patch = (fn: (e: Entry) => Entry) =>
         setHistory((h) => h.map((e) => (e.caseId === caseId ? fn(e) : e)));
-      const save = (result: DigResult) => {
-        if (!user) return;
-        void fetch("/api/investigations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            caseId,
-            question: entry.form.question,
-            repoPath: entry.form.repoPath,
-            location: entry.form.location,
-            result,
-            ...(entry.parentCaseId ? { parentCaseId: entry.parentCaseId } : {}),
-          } satisfies SavedCase),
-        }).catch(() => {});
-      };
+      const save = (result: DigResult) =>
+        saveCase({
+          caseId,
+          question: entry.form.question,
+          repoPath: entry.form.repoPath,
+          location: entry.form.location,
+          result,
+          ...(entry.parentCaseId ? { parentCaseId: entry.parentCaseId } : {}),
+        });
       const settle = (narrative: NonNullable<DigResult["narrative"]>) => {
-        const latest = historyRef.current.find((e) => e.caseId === caseId)?.result ?? entry.result;
+        const result = { ...(latest.current.get(caseId) ?? entry.result), narrative };
+        latest.current.set(caseId, result);
         patch((e) => ({
           ...e,
           result: { ...e.result, narrative },
@@ -162,7 +179,7 @@ export function useInvestigation(user: AuthUser | null) {
           rewriting: null,
           rewriteError: null,
         }));
-        save({ ...latest, narrative });
+        save(result);
       };
 
       const cached = entry.alternates?.[language];
@@ -189,7 +206,7 @@ export function useInvestigation(user: AuthUser | null) {
         failed(err instanceof Error ? err.message : String(err));
       }
     },
-    [user],
+    [saveCase],
   );
 
   async function submit(
@@ -221,14 +238,7 @@ export function useInvestigation(user: AuthUser | null) {
       setView("browse");
     };
 
-    const persist = (caseId: string, data: DigResult) => {
-      if (!user) return;
-      void fetch("/api/investigations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildSave(caseId, data)),
-      }).catch(() => {});
-    };
+    const persist = (caseId: string, data: DigResult) => saveCase(buildSave(caseId, data));
 
     try {
       const res = await fetch("/api/dig", {
@@ -255,6 +265,7 @@ export function useInvestigation(user: AuthUser | null) {
           return;
         }
         const caseId = `GI-${counter.current++}`;
+        latest.current.set(caseId, data);
         setHistory((h) => [{ ...buildEntry(caseId, data), mountKey: key }, ...h]);
         setActiveId(caseId);
         settleDraft();
@@ -264,7 +275,6 @@ export function useInvestigation(user: AuthUser | null) {
 
       let caseId: string | null = null;
       let evidence: DigResult["evidence"] | null = null;
-      let answered: DigResult | null = null;
 
       await readNdjson(res.body!, (msg) => {
         if (msg.phase === "evidence") {
@@ -285,17 +295,18 @@ export function useInvestigation(user: AuthUser | null) {
             narrative: msg.narrative,
             ...(msg.error ? { error: msg.error } : {}),
           };
-          answered = full;
+          latest.current.set(id, full);
           setHistory((h) =>
             h.map((e) => (e.caseId === id ? { ...e, ...buildEntry(id, full), pending: false } : e)),
           );
           persist(id, full);
         } else if (msg.phase === "lineage") {
           const id = caseId;
-          const kept = historyRef.current.find((e) => e.caseId === id);
-          const base = kept && !kept.pending && kept.result.narrative ? kept.result : answered;
+          const base = id ? latest.current.get(id) : undefined;
           if (!id || !base || !msg.lineage) return;
           const lineage = msg.lineage;
+          const full = { ...base, evidence: { ...base.evidence, lineage } };
+          latest.current.set(id, full);
           setHistory((h) =>
             h.map((e) =>
               e.caseId === id
@@ -303,7 +314,7 @@ export function useInvestigation(user: AuthUser | null) {
                 : e,
             ),
           );
-          persist(id, { ...base, evidence: { ...base.evidence, lineage } });
+          persist(id, full);
         }
       });
 
@@ -403,10 +414,14 @@ export function useInvestigation(user: AuthUser | null) {
 
   function removeCase(id: string) {
     setHistory((h) => h.filter((e) => e.caseId !== id));
+    latest.current.delete(id);
     if (user) {
-      void fetch(`/api/investigations/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(
-        () => {},
-      );
+      const remove = () =>
+        fetch(`/api/investigations/${encodeURIComponent(id)}`, { method: "DELETE" }).then(
+          () => {},
+          () => {},
+        );
+      saving.current.set(id, (saving.current.get(id) ?? Promise.resolve()).then(remove));
     }
     if (activeId === id) {
       setActiveId(null);
