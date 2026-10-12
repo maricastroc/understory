@@ -935,7 +935,8 @@ Read with these:
   constant was renamed from PAGE_SIZE to BATCH_SIZE, preserving the same value of 250" in three
   runs of four, where it was credited in one before. The answer then has two credited claims,
   which the scoring caps at 0.55 because the line's last change is cosmetic. With one credited
-  claim the same answer scores 0.65. The case passes either way. The scoring is unchanged here.
+  claim the same answer scores 0.65. The case passes either way. The scoring is unchanged here, and tracked in
+  [#48](https://github.com/maricastroc/understory/issues/48).
 - **The read of the claims** is in
   [`results/2026-10-12-code-facts.reading.json`](results/2026-10-12-code-facts.reading.json):
   61 runs of the change made a claim. In none is a credited claim contradicted by the code or
