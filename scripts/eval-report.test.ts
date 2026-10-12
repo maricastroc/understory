@@ -435,6 +435,66 @@ describe("the two runs published for the audit's two records", () => {
   });
 });
 
+describe("the targeted runs published beside the six versions of the audit", () => {
+  const load = (name: string, reviewed = true) => {
+    const { meta, runs } = parseRecords(readFileSync(`eval/results/${name}.jsonl`, "utf8"));
+    const review = reviewed
+      ? JSON.parse(readFileSync(`eval/results/${name}.review.json`, "utf8"))
+      : { run: meta?.date, verdicts: {} };
+    expect(reviewProblems(meta, runs, review)).toEqual([]);
+    const cell = (of: (r: RunRecord) => boolean) => {
+      const mine = runs.filter(of);
+      const errored = mine.filter((r) => r.outcome.kind === "error").length;
+      const passed = mine.filter((r) => verdictOf(r, review.verdicts) === "pass").length;
+      return `${passed}/${mine.length - errored}${errored ? `, ${errored} errored` : ""}`;
+    };
+    return { meta, runs, cell };
+  };
+  const readme = readFileSync("eval/README.md", "utf8");
+  const rows = readme.split("\n").map((line) => line.replace(/\s+/g, " ").trim());
+
+  it("give the counts by category the table publishes", () => {
+    const before = load("2026-10-12-patch-context-before");
+    const after = load("2026-10-12-patch-context");
+    expect(before.meta?.commit).toBe("c43094c");
+    expect(after.meta?.commit).toBe("67f7922");
+    expect(new Set(after.runs.map((r) => r.id))).toEqual(new Set(before.runs.map((r) => r.id)));
+    const row = (label: string, of: (r: RunRecord) => boolean) =>
+      `| ${label} | ${before.cell(of)} | ${after.cell(of)} |`;
+    expect(rows).toContain(
+      row("recorded, synthetic", (r) => r.category === "recorded" && r.source === "synthetic"),
+    );
+    expect(rows).toContain(
+      row("recorded, real lines", (r) => r.category === "recorded" && r.source !== "synthetic"),
+    );
+    expect(rows).toContain(row("incidental", (r) => r.category === "incidental"));
+  });
+
+  it("give the twelve runs of ng-http-411 the write-up counts", () => {
+    const twelve = (names: string[]) =>
+      names.flatMap((name) => load(name, false).runs.filter((r) => r.id === "ng-http-411"));
+    const before = twelve([
+      "2026-10-12-patch-context-before",
+      "2026-10-12-patch-context-ng-http-411-before",
+    ]);
+    const after = twelve(["2026-10-12-patch-context", "2026-10-12-patch-context-ng-http-411"]);
+    const count = (runs: RunRecord[], of: (r: RunRecord) => boolean) => runs.filter(of).length;
+    const abstained = (r: RunRecord) => r.narrative?.recorded === false;
+    const heldWeak = (r: RunRecord) =>
+      r.narrative?.recorded === true && r.narrative.entailment?.supported === 0;
+    const passed = (r: RunRecord) => r.outcome.kind === "pass";
+    expect(before).toHaveLength(12);
+    expect(after).toHaveLength(12);
+    expect(rows).toContain(
+      `| The writer abstained | ${count(before, abstained)} | ${count(after, abstained)} |`,
+    );
+    expect(rows).toContain(
+      `| It answered and the claim was held weak | ${count(before, heldWeak)} | ${count(after, heldWeak)} |`,
+    );
+    expect(rows).toContain(`| Passed | ${count(before, passed)} | ${count(after, passed)} |`);
+  });
+});
+
 describe("the case amended after it met the model", () => {
   type Reread = {
     case: string;

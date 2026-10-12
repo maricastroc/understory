@@ -249,6 +249,182 @@
       "citations": ["commit:1e90d03"],
       "text": "This line is part of a doc comment and was added by commit 1e90d03.",
       "why": "Only what the code and the patch show."
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "citations": ["pr:2369"],
+      "text": "This line was added while filterFailures was removed entirely, to remove the code that looked for duplicate failures.",
+      "why": "The pull request says that of filterFailures. The line reads a file so that fixes can be applied to it."
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "citations": ["review:2369-1"],
+      "text": "This line was added because it is not necessary to check ruleSeverity here, since isEnabled() will do that too.",
+      "why": "A review comment, word for word, about another line of the pull request."
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "citations": ["pr:3412"],
+      "text": "The condition was rewritten to allow uncompiled custom formatters, as uncompiled rules were already allowed.",
+      "why": "One of the pull request's listed changes. The line throws when no formatter was found, and only its comparison was inverted."
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "citations": ["pr:3412"],
+      "text": "The condition was rewritten so that the formatter module is first resolved relative to the current directory.",
+      "why": "Another of the pull request's listed changes, about where a formatter is looked for."
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "citations": ["pr:2493"],
+      "text": "This type was added so that hosts can still be marshaled and unmarshaled, which an earlier approach had broken.",
+      "why": "The discussion says the revised pull request no longer breaks marshaling. It never says what the type is for."
+    },
+    {
+      "id": "draft-644",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "citations": ["commit:8de2db9"],
+      "text": "The declaration was rewritten because the file raised lint errors, so Prettier was added to it.",
+      "why": "The commit says Prettier was added to a couple of files that raised lint errors. The line went from var to const for the other reason the commit gives."
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "citations": ["pr:364"],
+      "text": "This import was added so that a query's batch can be changed with the batchKey constructor option.",
+      "why": "The pull request also adds batchKey. The line imports a helper that was moved to the shared module."
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "citations": ["pr:364"],
+      "text": "This import was added to fix a bug in apollo-link-batch for multiple subscribers on a single request.",
+      "why": "The pull request also fixes that bug. The line imports a helper that was moved to the shared module."
+    },
+    {
+      "id": "jitter",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "expect": "not-supported",
+      "citations": ["commit:0016d9d", "commit:c038fb3"],
+      "text": "Jitter was added to the delay because the unbounded loop had resubmitted charges during a Stripe outage and double-billed 214 customers.",
+      "why": "That is why the retries were capped, two weeks earlier. The jitter commit gives its own reason."
+    },
+    {
+      "id": "retry-cap",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "expect": "not-supported",
+      "citations": ["commit:c038fb3", "commit:0016d9d"],
+      "text": "The retries were capped at three to stop recovering clients from retrying in lockstep after an outage.",
+      "why": "That is why jitter was added later. The cap has its own reason, the double billing."
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "expect": "not-supported",
+      "citations": ["commit:e4dfae7", "commit:78ff826"],
+      "text": "The constant was renamed from PAGE_SIZE to BATCH_SIZE because any page over roughly 300 rows comes back as 413 Payload Too Large.",
+      "why": "That is why the size was halved. The rename is a refactor and gives no reason."
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "expect": "not-supported",
+      "citations": ["commit:22e1399", "commit:05a16a3"],
+      "text": "The sync job first dropped every row with a zero quantity because zero is also what the vendor sends when a SKU sells out.",
+      "why": "That is why the drop was reverted. The drop was made to save a write per discontinued SKU."
+    },
+    {
+      "id": "retry-cap",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "citations": ["commit:f2b44ae"],
+      "text": "At first the Stripe call was retried until it succeeded, so that transient network blips would not drop a payment.",
+      "why": "The first commit says both. Today's line stops at three attempts."
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "citations": ["commit:22e1399"],
+      "text": "The sync job first dropped every row with a zero quantity, because the vendor emits a zero-quantity row for every discontinued SKU on every poll and skipping them saves one write per discontinued SKU per run.",
+      "why": "The second commit says it. Today's line keeps the zero rows of SKUs that are not discontinued."
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "citations": ["commit:05a16a3"],
+      "text": "That change was reverted because zero is also what the vendor sends when a SKU sells out, so the storefront kept showing the last positive stock for sold-out items.",
+      "why": "The revert says it, nearly word for word."
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "citations": ["commit:78ff826"],
+      "text": "Before it was renamed, the page size was halved to 250, because since the vendor's 11 Feb release any page over roughly 300 rows comes back as 413 Payload Too Large.",
+      "why": "The commit that halved it says so. The last change is the rename."
+    },
+    {
+      "id": "jitter",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "citations": ["commit:c038fb3"],
+      "text": "Before jitter was added, the retries were capped at three with delays of 1s, 2s and 4s, so that a charge resolves inside Stripe's 10s webhook ACK window.",
+      "why": "The commit that added the backoff says so. The last change added the jitter."
+    },
+    {
+      "id": "retry-cap",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "expect": "not-supported",
+      "citations": ["commit:f2b44ae"],
+      "text": "The first version of the loop already stopped after three attempts, to protect payments from transient network blips.",
+      "why": "The first commit says it retries until it succeeds."
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "expect": "not-supported",
+      "citations": ["commit:05a16a3"],
+      "text": "That change was reverted because dropping the rows made the storefront hide the last positive stock for sold-out items.",
+      "why": "The revert says the storefront kept showing it. A misreading found in kept runs."
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "expect": "not-supported",
+      "citations": ["commit:78ff826"],
+      "text": "The page size was first doubled to 250, because the vendor rejects any page under roughly 300 rows.",
+      "why": "The commit halves it, because pages over 300 rows are rejected."
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "expect": "supported",
+      "citations": ["pr:364"],
+      "text": "This import was added because the logic shared across the HTTP links was moved out of apollo-link-http into the publicly accessible apollo-link-http-common module.",
+      "why": "The pull request does several things. This is the one the line belongs to."
+    },
+    {
+      "id": "ws-injected-commit",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "expect": "supported",
+      "citations": ["commit:a77590a"],
+      "text": "PAGE_RETRIES was set to 2 because most failed pages are 502s from the vendor's load balancer and go through on the next attempt.",
+      "why": "The commit that added the constant says so."
     }
   ]
 }
