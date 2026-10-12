@@ -5,7 +5,9 @@ import {
   type Judgement,
   auditedClaims,
   claimReadings,
+  controlLines,
   lowerReading,
+  parseControls,
   parseReplay,
   replayCounts,
   replayLines,
@@ -188,5 +190,107 @@ describe("the replays published in eval/README.md", () => {
       expect(meta?.kind).toBe("audit-replay");
       for (const line of replayLines(judgements)) expect(published).toContain(line.trim());
     }
+  });
+});
+
+describe("the replay of the written controls published in eval/README.md", () => {
+  it("is the lines eval:audit prints for the kept replay, and holds every control as written", () => {
+    const readme = readFileSync("eval/README.md", "utf8");
+    const published = new Set(readme.split("\n").map((line) => line.trim()));
+    const name = "2026-10-12-patch-context-replay-one-question";
+    expect(readme).toContain(`(results/${name}.jsonl)`);
+    const { meta, judgements } = parseReplay(readFileSync(`eval/results/${name}.jsonl`, "utf8"));
+    const controls = parseControls(readFileSync("eval/audit-controls.json", "utf8"));
+    expect(meta?.kind).toBe("audit-replay");
+    expect(meta?.commit).toBe("b798b88");
+    const written = judgements.filter((j) => j.kind);
+    expect(new Set(written.map((j) => j.claim))).toEqual(new Set(controls.map((c) => c.text)));
+    for (const j of written)
+      expect(controls.find((c) => c.text === j.claim)).toMatchObject({
+        expect: j.expect,
+        kind: j.kind,
+      });
+    const lines = [...replayLines(judgements), ...controlLines(judgements)];
+    expect(lines.length).toBeGreaterThan(25);
+    for (const line of lines) expect(published).toContain(line.trim());
+  });
+});
+
+describe("written controls", () => {
+  const control = (
+    claim: string,
+    replay: number,
+    status: EntailmentStatus | null,
+    expect: "supported" | "not-supported",
+    kind = "says something the code contradicts",
+  ): Judgement => ({ ...judged(claim, replay, status), kind, expect });
+
+  it("reads a control with its kind and what it should get", () => {
+    const text = JSON.stringify({
+      controls: [
+        {
+          id: "case",
+          kind: "gives a reason no source gives",
+          expect: "not-supported",
+          text: "Added to be faster.",
+          citations: ["commit:a"],
+          why: "invented",
+        },
+      ],
+    });
+    expect(parseControls(text)).toEqual([
+      {
+        id: "case",
+        kind: "gives a reason no source gives",
+        expect: "not-supported",
+        text: "Added to be faster.",
+        citations: ["commit:a"],
+      },
+    ]);
+  });
+
+  it("refuses a control with no expectation or no citation", () => {
+    const broken = (c: object) => () => parseControls(JSON.stringify({ controls: [c] }));
+    const full = { id: "a", kind: "k", expect: "supported", text: "t", citations: ["commit:a"] };
+    expect(broken({ ...full, expect: "maybe" })).toThrow(/control 1 needs/);
+    expect(broken({ ...full, citations: [] })).toThrow(/control 1 needs/);
+    expect(parseControls("{}")).toEqual([]);
+  });
+
+  it("counts by kind how many judgements came out as expected, and names the misses", () => {
+    const lines = controlLines([
+      control("implements a check", 0, "unsupported", "not-supported"),
+      control("implements a check", 1, "supported", "not-supported"),
+      control("removes the method", 0, "weak", "not-supported"),
+      control("added as documentation", 0, "supported", "supported", "true and backed"),
+      control("added as documentation", 1, null, "supported", "true and backed"),
+    ]);
+    expect(lines).toEqual([
+      "says something the code contradicts, expected not supported: 2 of 3 (67%) as expected. 1 supported, 1 weak, 1 unsupported; 0 errored.",
+      '  missed 1 of 2: case, "implements a check"',
+      "true and backed, expected supported: 1 of 1 (100%) as expected. 1 supported, 0 weak, 0 unsupported; 1 errored.",
+    ]);
+  });
+
+  it("keeps controls out of the replay's own counts", () => {
+    const mixed = [
+      judged("kept", 0, "supported"),
+      judged("kept", 1, "supported"),
+      control("written", 0, "weak", "not-supported"),
+      control("written", 1, "supported", "not-supported"),
+    ];
+    expect(replayCounts(mixed)).toMatchObject({ claims: 1, steady: 1, judged: 2 });
+    expect(replayLines(mixed.filter((j) => j.kind))).toEqual([]);
+  });
+
+  it("holds only controls on cases of the gold set, each with a kind and an expectation", () => {
+    const gold = JSON.parse(readFileSync("eval/gold.json", "utf8"));
+    const ids = new Set(gold.cases.map((c: { id: string }) => c.id));
+    const controls = parseControls(readFileSync("eval/audit-controls.json", "utf8"));
+    expect(controls.length).toBeGreaterThan(20);
+    for (const c of controls) expect(ids).toContain(c.id);
+    expect(new Set(controls.map((c) => c.text)).size).toBe(controls.length);
+    expect(controls.some((c) => c.expect === "supported")).toBe(true);
+    expect(controls.some((c) => c.expect === "not-supported")).toBe(true);
   });
 });
