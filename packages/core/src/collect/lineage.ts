@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import type { Evidence, Lineage, LineageEntry, LineageStop } from "../types";
 import { lineBefore, lineChange } from "./code-context";
 import { commitAt, ownerAt } from "./git";
@@ -168,12 +169,15 @@ export async function lineageOf(
   const text = ev.code.lines[location.startLine - ev.code.startLine];
   if (text === undefined) return null;
   const gh = parseGitHubRepo(ev.repo.remoteUrl ?? ev.repo.path);
-  const local = !/^https?:\/\//.test(ev.repo.path) && !/^[\w.-]+\/[\w.-]+$/.test(ev.repo.path);
+  const local = !/^https?:\/\//.test(ev.repo.path) && existsSync(ev.repo.path);
   const provider = local
     ? localLineage(ev.repo.path)
     : gh
       ? githubLineage(gh.owner, gh.repo)
       : null;
   if (!provider) return null;
-  return walkLineage({ sha, path: location.file, text }, provider, options.limits, options.signal);
+  const limits =
+    options.limits ??
+    (local ? { ...LINEAGE_LIMITS, requests: Number.POSITIVE_INFINITY } : LINEAGE_LIMITS);
+  return walkLineage({ sha, path: location.file, text }, provider, limits, options.signal);
 }

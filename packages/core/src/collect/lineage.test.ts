@@ -231,4 +231,16 @@ describe("the walk on a real local repository", () => {
     expect(lineage?.entries).toHaveLength(3);
     expect(await lineageOf(await at(1, 2))).toBeNull();
   });
+
+  it("knows a local repository by its folder, whatever its path looks like", async () => {
+    const ev = await collect({
+      repoPath: dir,
+      question: "why?",
+      location: { file: "cap.ts", startLine: 2, endLine: 2 },
+    });
+    const short = path.relative(process.cwd(), dir);
+    const lineage = await lineageOf({ ...ev, repo: { ...ev.repo, path: short } });
+    expect(lineage?.entries).toHaveLength(3);
+    expect(lineage?.stopped).toBe("the line was added");
+  });
 });
