@@ -3,7 +3,7 @@ import { z } from "zod";
 import { type Auditor, runAudit } from "./auditor";
 import { canonicalCitations } from "./citation-id";
 import type { Model } from "./llm";
-import { sourceQuote } from "./quote";
+import { sourcePassages } from "./quote";
 import { formatTarget } from "./synthesize";
 import type {
   Artifact,
@@ -56,9 +56,10 @@ const CLAIM_SYSTEM = [
   "alone: never outside knowledge, never what merely seems plausible.",
   "",
   "WHAT IS GIVEN. When the request has an 'Established' section, what it states comes from the",
-  "repository's own history and is not under review. If it says the sources are the changes that",
-  "touched the code under investigation, then that a cited commit or pull request changed that code",
-  "is a fact. The claim may call that code 'the line', 'this code', or name it by file and line",
+  "repository's own history and is not under review, and neither is what each source's heading says",
+  "the source is. If a heading says a commit or pull request changed the code under investigation,",
+  "then 'the line was added, introduced or changed in' that commit or pull request is a fact, not a",
+  "claim to check. The claim may call that code 'the line', 'this code', or name it by file and line",
   "number. Do NOT expect a source to mention the line, the file or a line number, and do NOT mark a",
   "claim down because the sources do not.",
   "",
@@ -100,10 +101,10 @@ export type ClaimVerdict = {
   reason: string;
 };
 
-function inSources(sources: Artifact[], offered: string): SourcedQuote | null {
+function inSources(sources: Artifact[], offered: string): SourcedQuote[] | null {
   for (const s of sources) {
-    const text = sourceQuote(s.body, offered);
-    if (text) return { sourceId: s.id, text };
+    const passages = sourcePassages(s.body, offered);
+    if (passages) return passages.map((text) => ({ sourceId: s.id, text }));
   }
   return null;
 }
@@ -115,7 +116,7 @@ export function finalizeClaim(sources: Artifact[], raw: RawVerdict): ClaimVerdic
   const rejectedQuotes: string[] = [];
   for (const offered of raw.quotes.map((q) => q.trim()).filter(Boolean)) {
     const found = inSources(sources, offered);
-    if (found) quotes.push(found);
+    if (found) quotes.push(...found);
     else rejectedQuotes.push(offered);
   }
   if (raw.status === "supported" && quotes.length === 0)
@@ -123,21 +124,40 @@ export function finalizeClaim(sources: Artifact[], raw: RawVerdict): ClaimVerdic
   return { status: raw.status, quotes, rejectedQuotes, reason: raw.reason };
 }
 
-export function auditSubject(ev: Evidence): string | null {
+export type AuditSubject = { established: string; exact: boolean };
+
+export function auditSubject(ev: Evidence): AuditSubject | null {
   if (!ev.location) return null;
   const where = formatTarget(ev);
   if (ev.coverage?.granularity === "file")
-    return [
-      `The code under investigation is ${where}. Its line history could not be read, so the sources`,
-      `shown come from the history of the whole file ${ev.location.file}: its commits and the pull`,
-      "requests, reviews and issues attached to them. That they changed the file is given. That they",
-      "changed this exact code is not.",
-    ].join("\n");
-  return [
-    `The code under investigation is ${where}. The sources shown come from that code's own history:`,
-    "the commits that changed it and the pull requests, reviews and issues attached to them. That a",
-    "cited commit or pull request changed this code is given.",
-  ].join("\n");
+    return {
+      exact: false,
+      established: [
+        `The code under investigation is ${where}. Its line history could not be read, so the sources`,
+        `shown come from the history of the whole file ${ev.location.file}: its commits and the pull`,
+        "requests, reviews and issues attached to them. That they changed the file is given. That they",
+        "changed this exact code is not.",
+      ].join("\n"),
+    };
+  return {
+    exact: true,
+    established: [
+      `The code under investigation is ${where}. The sources shown come from that code's own history:`,
+      "the commits that changed it and the pull requests, reviews and issues attached to them. That a",
+      "cited commit or pull request changed this code is given.",
+    ].join("\n"),
+  };
+}
+
+function standing(a: Artifact, subject: AuditSubject): string {
+  const target = subject.exact ? "the code under investigation" : "the file under investigation";
+  if (a.kind === "commit") return `a commit that changed ${target}`;
+  if (a.kind === "pull_request")
+    return a.parentId
+      ? `the pull request that merged ${a.parentId}, so it changed ${target} too`
+      : "a pull request";
+  if (a.kind === "issue") return a.parentId ? `an issue linked to ${a.parentId}` : "an issue";
+  return a.parentId ? `a review comment on ${a.parentId}` : "a review comment";
 }
 
 export async function judgeClaim(
@@ -145,12 +165,13 @@ export async function judgeClaim(
   claimText: string,
   sources: Artifact[],
   model: Model,
-  subject: string | null = null,
+  subject: AuditSubject | null = null,
 ): Promise<RawVerdict> {
   const rendered = sources
     .map((a) => {
       const who = a.author?.name ? ` · ${a.author.name}` : "";
-      return `[${a.id}] ${a.kind} · ${a.date.slice(0, 10)}${who}:\n${clampBody(a.body, JUDGE_BODY_CAP)}`;
+      const what = subject ? ` · ${standing(a, subject)}` : "";
+      return `[${a.id}] ${a.kind} · ${a.date.slice(0, 10)}${who}${what}:\n${clampBody(a.body, JUDGE_BODY_CAP)}`;
     })
     .join("\n\n---\n\n");
   const lead =
@@ -160,7 +181,9 @@ export async function judgeClaim(
   const prompt = [
     `Question: ${question}`,
     "",
-    ...(subject ? ["Established by the repository's history, not under review:", subject, ""] : []),
+    ...(subject
+      ? ["Established by the repository's history, not under review:", subject.established, ""]
+      : []),
     "Claim under review:",
     claimText,
     "",
@@ -184,7 +207,7 @@ export async function auditClaim(
   claimText: string,
   sources: Artifact[],
   auditor: Auditor,
-  subject: string | null = null,
+  subject: AuditSubject | null = null,
 ): Promise<{ raw: RawVerdict; verdict: ClaimVerdict; fellBack: boolean }> {
   const { value, fellBack } = await runAudit(auditor, (model) =>
     judgeClaim(question, claimText, sources, model, subject),
@@ -199,7 +222,7 @@ export async function entailClaims(
   claims: Claim[],
   byId: Map<string, Artifact>,
   auditor: Auditor,
-  subject: string | null = null,
+  subject: AuditSubject | null = null,
 ): Promise<Entailment> {
   const known = new Set(byId.keys());
   const tasks: ClaimTask[] = claims

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { locateQuote, sourceQuote, verifyQuote } from "./quote";
+import { locateQuote, sourcePassages, sourceQuote, verifyQuote } from "./quote";
 
 const BODY = "Bound retries in chargeCustomer to 3 attempts\nwith 1s/2s/4s backoff. Fixes #1187.";
 
@@ -120,5 +120,58 @@ describe("sourceQuote — what is kept is the source's own text", () => {
 
   it("returns null for a passage the source does not contain", () => {
     expect(sourceQuote(COMMIT, "promises are always inspectable")).toBeNull();
+  });
+});
+
+describe("sourcePassages — an item of several sentences is checked one sentence at a time", () => {
+  const COMMIT =
+    'Make all promises inspectable by default\n\nCustom promises have a state of "unknown" by default.  All custom\npromises have an "inspect" method, regardless of whether one is\nspecified.';
+
+  it("returns a continuous passage whole", () => {
+    expect(sourcePassages(COMMIT, "a state of 'unknown' by default. All custom promises")).toEqual([
+      'a state of "unknown" by default. All custom promises',
+    ]);
+  });
+
+  it("accepts whole sentences of the source strung together with a full stop it does not have", () => {
+    expect(
+      sourcePassages(
+        COMMIT,
+        "Make all promises inspectable by default. All custom promises have an 'inspect' method, regardless of whether one is specified.",
+      ),
+    ).toEqual([
+      "Make all promises inspectable by default",
+      'All custom promises have an "inspect" method, regardless of whether one is specified',
+    ]);
+  });
+
+  it("accepts lines of the source given without the lines between them", () => {
+    const list =
+      "* formatterLoader\n  * allow uncompiled custom formatters\n  * try resolve formatter module relative to current directory first";
+    expect(
+      sourcePassages(
+        list,
+        "* formatterLoader\n  * try resolve formatter module relative to current directory first",
+      ),
+    ).toHaveLength(2);
+  });
+
+  it("rejects the item when any sentence is not in the source", () => {
+    expect(
+      sourcePassages(COMMIT, "Make all promises inspectable by default. Promises are now faster."),
+    ).toBeNull();
+  });
+
+  it("does not take '...' for a sentence end, so an abbreviated passage is still rejected", () => {
+    expect(
+      sourcePassages(
+        COMMIT,
+        "Custom promises have a state... regardless of whether one is specified.",
+      ),
+    ).toBeNull();
+  });
+
+  it("rejects an item with a sentence too short to check", () => {
+    expect(sourcePassages(COMMIT, "Make all promises inspectable by default. Done.")).toBeNull();
   });
 });

@@ -106,12 +106,25 @@ describe("finalizeClaim — what the judge quoted is kept on the record", () => 
     expect(r.rejectedQuotes).toEqual(['Custom promises have an state of "unknown" by default.']);
   });
 
-  it("still refuses two real passages joined into one", () => {
+  it("reads an item of several whole sentences one sentence at a time", () => {
     const r = finalizeClaim([source], {
       status: "supported",
       quotes: [
-        'Make all promises inspectable by default. All custom promises have an "inspect" method',
+        "Make all promises inspectable by default. Custom promises have a state of 'unknown' by default.",
       ],
+      reason: "stated",
+    });
+    expect(r.status).toBe("supported");
+    expect(r.quotes.map((q) => q.text)).toEqual([
+      "Make all promises inspectable by default",
+      'Custom promises have a state of "unknown" by default',
+    ]);
+  });
+
+  it("refuses the item when one of its sentences is not the source's", () => {
+    const r = finalizeClaim([source], {
+      status: "supported",
+      quotes: ["Make all promises inspectable by default. Every promise can now be inspected."],
       reason: "stated",
     });
     expect(r.status).toBe("weak");
@@ -415,14 +428,18 @@ describe("auditSubject — what the history settles before the judge reads a wor
 
   it("names the code and gives as settled that the cited changes touched it", () => {
     const subject = auditSubject(ev());
-    expect(subject).toContain("libmachine/host/host.go:168");
-    expect(subject).toContain("That a\ncited commit or pull request changed this code is given.");
+    expect(subject?.exact).toBe(true);
+    expect(subject?.established).toContain("libmachine/host/host.go:168");
+    expect(subject?.established).toContain(
+      "That a\ncited commit or pull request changed this code is given.",
+    );
   });
 
   it("does not give that away when only the file's history could be read", () => {
     const subject = auditSubject(ev({ coverage: { granularity: "file" } }));
-    expect(subject).toContain("That they changed the file is given.");
-    expect(subject).toContain("changed this exact code is not.");
+    expect(subject?.exact).toBe(false);
+    expect(subject?.established).toContain("That they changed the file is given.");
+    expect(subject?.established).toContain("changed this exact code is not.");
   });
 
   it("says nothing when the investigation is not anchored on a code location", () => {
@@ -464,7 +481,40 @@ describe("the judge's request", () => {
     const e = await checkEntailment(evidence, narrative, { primary: judge, fallback: null });
     expect(sent(judge)).toContain("Established by the repository's history, not under review:");
     expect(sent(judge)).toContain("libmachine/host/host.go:168");
+    expect(sent(judge)).toContain("a commit that changed the code under investigation:");
     expect(e.supported).toBe(1);
+  });
+
+  it("says of each source what it is to that code", async () => {
+    const pr = {
+      ...artifact("pr:4002", "Add support for upgrade to new CE edition"),
+      kind: "pull_request" as const,
+      parentId: "commit:d3ee30b",
+    };
+    const review = {
+      ...artifact("review:4002-0", "A little scary, but seems generally sane"),
+      kind: "review" as const,
+      parentId: "pr:4002",
+    };
+    const judge = scriptedJudge(() => supported);
+    await checkEntailment(
+      { ...evidence, artifacts: [source, pr, review] },
+      { ...narrative, claims: [{ ...claim, citations: ["pr:4002", "review:4002-0"] }] },
+      { primary: judge, fallback: null },
+    );
+    expect(sent(judge)).toContain(
+      "the pull request that merged commit:d3ee30b, so it changed the code under investigation too:",
+    );
+    expect(sent(judge)).toContain("a review comment on pr:4002:");
+  });
+
+  it("claims only the file for the sources when the line's history could not be read", async () => {
+    const judge = scriptedJudge(() => supported);
+    await checkEntailment({ ...evidence, coverage: { granularity: "file" } }, narrative, {
+      primary: judge,
+      fallback: null,
+    });
+    expect(sent(judge)).toContain("a commit that changed the file under investigation:");
   });
 
   it("leaves that section out when no code location is known", async () => {
@@ -474,6 +524,7 @@ describe("the judge's request", () => {
       fallback: null,
     });
     expect(sent(judge)).not.toContain("Established by the repository's history");
+    expect(sent(judge)).not.toContain("under investigation:");
   });
 
   it("reads the judge's 'unproven' as weak and 'unrelated' as a misattribution", async () => {

@@ -3,7 +3,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 import { dirname } from "node:path";
 import { getAuditor } from "@understory/core/auditor";
 import { collect, parseLocation } from "@understory/core/collect";
-import { auditClaim, auditSubject } from "@understory/core/entail";
+import { type AuditSubject, auditClaim, auditSubject } from "@understory/core/entail";
 import type { Artifact } from "@understory/core/types";
 import {
   type AuditedClaim,
@@ -46,7 +46,7 @@ async function pooled<T>(items: T[], work: (item: T) => Promise<void>): Promise<
 type Task = {
   claim: AuditedClaim;
   question: string;
-  subject: string | null;
+  subject: AuditSubject | null;
   sources: Artifact[];
   replay: number;
 };
@@ -92,7 +92,7 @@ async function main() {
   const repoOf = (c: Case) => c.repo ?? gold.repo;
   const ids = [...new Set(claims.map((c) => c.id))];
   const artifacts = new Map<string, Artifact[]>();
-  const subjects = new Map<string, string | null>();
+  const subjects = new Map<string, AuditSubject | null>();
   for (const id of ids) {
     const c = cases.get(id)!;
     const ev = await collect({

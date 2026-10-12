@@ -54,3 +54,18 @@ export function sourceQuote(body: string, quote: string): string | null {
   const range = locateQuote(body, quote);
   return range ? body.slice(range.start, range.end).replace(/\s+/g, " ").trim() : null;
 }
+
+const SENTENCE_BREAK = /(?<=[^.][.!?])\s+|\n+/;
+const SENTENCE_END = /(?<=[^.])[.!?]$/;
+
+export function sourcePassages(body: string, quote: string): string[] | null {
+  const whole = sourceQuote(body, quote);
+  if (whole) return [whole];
+  const sentences = quote
+    .split(SENTENCE_BREAK)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (sentences.length < 2) return null;
+  const found = sentences.map((s) => sourceQuote(body, s.replace(SENTENCE_END, "")));
+  return found.every((text): text is string => text !== null) ? found : null;
+}
