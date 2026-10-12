@@ -969,6 +969,160 @@ not credited, and what is missing there is narrower than the issue says. The jud
 asks a source to say the line is a comment. It asks one to say what the comment is about, which
 only the rest of the patch shows.
 
+### What the audit does with a borrowed reason, and with more of the patch
+
+The change measured in the section above left two things open. The true sentence about
+`ng-http-411` was still held at weak. And a control that gives `tslint-257` the reason of
+another part of its pull request was credited three times in four. This section looks at both.
+It measures and changes nothing in the pipeline: the versions it compares are commits of the
+branch `experiment/audit-patch-context`. Everything ran on 12 Oct between 14:11 and 15:00 UTC,
+through OpenRouter pinned to Groq.
+
+**More controls, written first.** Twenty-two claims were added to
+[`audit-controls.json`](audit-controls.json) with their expected verdicts, before any version
+below was run (commit `c43094c`). Eight give a line, in the source's own words, the reason of
+another part of the same change. Four give the last change the reason of another change in the
+line's history. Five are true of an earlier version of the code and backed by the commit that
+wrote it, and three say of an earlier version what its commit contradicts. Two give a line the
+reason the source gives for the very part of a change it belongs to.
+
+**Six versions of the audit**, each given the same 93 kept claims and 53 controls four times:
+
+- **One question**
+  ([`replay-one-question`](results/2026-10-12-patch-context-replay-one-question.jsonl), commit
+  `b798b88`): the audit as it was before #47. It is shown the line and its last change and asks
+  whether the sources substantiate the claim.
+- **Two questions**
+  ([`replay-before`](results/2026-10-12-patch-context-replay-before.jsonl), commit `c43094c`):
+  the audit of #47. What a claim says of the code is checked against the code, the rest against
+  the sources.
+- **With the patch** ([`replay-block`](results/2026-10-12-patch-context-replay-block.jsonl),
+  commit `8517aae`): the two questions, shown also the run of changed lines the marked line sits
+  in, in the owning commit's patch. Whole up to 40 rows, otherwise its first ten rows and the
+  rows around the line.
+- **Lines still standing**
+  ([`replay-standing`](results/2026-10-12-patch-context-replay-standing.jsonl), commit
+  `61178e3`): the same, less the lines the commit removed and the added lines that no longer
+  read the same in today's file.
+- **Whose reason** ([`replay-bearing`](results/2026-10-12-patch-context-replay-bearing.jsonl)
+  and [`again`](results/2026-10-12-patch-context-replay-bearing-again.jsonl), commit `8cc5fda`):
+  the same, with a third question. Is the marked line part of what the reason describes, is the
+  reason about another part of the change, or can that not be told? A reason the sources state
+  and the judge places elsewhere becomes a misattribution.
+- **The same, larger judge**
+  ([`replay-bearing-120b`](results/2026-10-12-patch-context-replay-bearing-120b.jsonl)): that
+  version with `openai/gpt-oss-120b` as the judge, on the controls alone.
+
+|                                                               | One question | Two questions | With the patch | Lines still standing | Whose reason  | The same, again | The same, larger judge |
+| ------------------------------------------------------------- | ------------ | ------------- | -------------- | -------------------- | ------------- | --------------- | ---------------------- |
+| Kept claims: supported · weak · misattributed                 | 298 · 72 · 0 | 318 · 52 · 0  | 321 · 35 · 15  | 334 · 37 · 1         | 306 · 50 · 14 | 304 · 44 · 18   | not run                |
+| Claims that should be credited: credited                      | 50 of 68     | 57 of 68      | 60 of 68       | 59 of 68             | 65 of 68      | 64 of 68        | 56 of 67               |
+| A reason borrowed from elsewhere: credited                    | 19 of 56     | 35 of 56      | 27 of 56       | 30 of 56             | 17 of 55      | 16 of 56        | 9 of 52                |
+| A false statement about an earlier version: credited          | 0 of 12      | 4 of 12       | 7 of 12        | 2 of 12              | 4 of 12       | 6 of 12         | 5 of 12                |
+| Contradicted by the code or the patch: credited               | 0 of 32      | 0 of 32       | 0 of 32        | 0 of 32              | 0 of 32       | 0 of 32         | 0 of 32                |
+| A reason no source gives: credited                            | 0 of 32      | 3 of 32       | 0 of 32        | 0 of 32              | 2 of 32       | 4 of 32         | 2 of 32                |
+| Only reads the code back: credited                            | 0 of 12      | 1 of 12       | 0 of 12        | 2 of 12              | 0 of 12       | 0 of 12         | 0 of 12                |
+| The true sentence about `ng-http-411`: credited               | 0 of 16      | 0 of 16       | 12 of 16       | 8 of 16              | 8 of 16       | 11 of 16        | 0 of 7                 |
+| "The line implements the feature", of `ng-http-411`: credited | 0 of 8       | 0 of 8        | 0 of 8         | 0 of 8               | 0 of 8        | 0 of 8          | 0 of 8                 |
+| The borrowed reasons of `tslint-257`: credited                | 4 of 12      | 11 of 12      | 4 of 12        | 8 of 12              | 0 of 12       | 2 of 12         | 0 of 12                |
+| The borrowed reasons of `tslint-189`: credited                | 8 of 8       | 6 of 8        | 7 of 8         | 6 of 8               | 5 of 8        | 4 of 8          | 4 of 8                 |
+
+A unit test rebuilds these rows from the kept files. "Claims that should be credited" are the
+three kinds of control expected to be supported, 68 judgements. "A reason borrowed from
+elsewhere" is the three kinds of borrowed reason, 56 judgements. The true sentence about
+`ng-http-411` is its two wordings, each judged four times as a kept claim and four times as a
+control.
+
+Read with these:
+
+- **Splitting the question made the audit easier on borrowed reasons.** Asked one question, the
+  judge credits a borrowed reason in 19 judgements of 56. Asked two, in 35. The one question
+  was whether the sources substantiate the claim, and the judge refused a claim whose source
+  did not tie its reason to the line. That strictness is what #43 reports, and it is also what
+  kept borrowed reasons out. With two questions the line is settled by the code and the reason
+  by the sources, and nothing asks whether the reason is the line's. A false statement about an
+  earlier version of the code goes the same way: none of 12 credited, then four. What the two
+  questions bought is on the other rows: 57 of the claims that should be credited against 50,
+  and 318 of the kept judgements against 298.
+- **More of the patch lets the audit credit the true sentence about `ng-http-411`, about half
+  the time.** Never in the first two versions, then 12, 8, 8 and 11 judgements of 16. When it
+  still refuses, the reason is the one it gave before: "commit introduces feature but does not
+  state comment documents it". The false sentence, that the line implements the feature, is
+  credited by no version.
+- **The patch as the commit left it misled the judge.** On `apollo-http-10` the owning commit
+  took the import from `apollo-link-utilities`, a module renamed later. Shown that, the judge
+  read it as today's code and counted 13 of the case's 24 kept judgements as misattributions,
+  and all four of a control that is true. Keeping only the lines that still read the same today
+  removed it: one misattribution in 372 kept judgements.
+- **Asking whose reason it is halves the credit a borrowed reason gets, and costs true claims.**
+  17 judgements of 55 and 16 of 56 against 30 of 56, with 65 and 64 of the 68 that should be
+  credited, the widest gap of the six. On `tslint-257`, none and two of 12 against eight. But 14
+  and 18 kept judgements become misattributions, mostly on the same claims both times. About
+  half are claims about the earlier state of a line, which the judge now reads against today's
+  code: a claim that the loop without a limit resubmitted charges is refused because "the code
+  shows a bounded loop, contradicting the claim that it was unbounded". The rest are true claims
+  that give the line no reason of its own and that the judge places elsewhere: "During a Stripe
+  outage this unbounded retry loop caused double‑billing of 214 customers."
+- **A larger judge refuses more borrowed reasons, and the true sentence with them.** Nine of 52
+  credited, and the sentence about `ng-http-411` in none of seven.
+- **No version refuses the borrowed reasons of `tslint-189`.** "The condition was rewritten to
+  allow uncompiled custom formatters" is credited in four to eight judgements of eight by every
+  version. What tells that reason from the line's own is in other files of the pull request,
+  and no version is shown them.
+- **Cost.** An audit call reads about 1,380 tokens with one question, 1,870 with two, 1,950 with
+  the lines still standing and 2,330 with the third question. These runs cost US$ 1.82 together.
+
+**End to end, on 17 cases.** `ng-http-411`, the four incidental cases, the six other recorded
+real lines and the six synthetic cases whose history has more than one commit, four passes
+each, on the two questions
+([`results/2026-10-12-patch-context-before.jsonl`](results/2026-10-12-patch-context-before.jsonl),
+commit `c43094c`) and on the lines still standing
+([`results/2026-10-12-patch-context.jsonl`](results/2026-10-12-patch-context.jsonl), commit
+`67f7922`, the same code as `61178e3`), started in the same second. Then `ng-http-411` eight
+more times on each
+([`before`](results/2026-10-12-patch-context-ng-http-411-before.jsonl),
+[`after`](results/2026-10-12-patch-context-ng-http-411.jsonl)).
+
+| Runs passed          | Two questions | Lines still standing |
+| -------------------- | ------------- | -------------------- |
+| recorded, synthetic  | 24/24         | 22/22, 2 errored     |
+| recorded, real lines | 21/28         | 19/27, 1 errored     |
+| incidental           | 16/16         | 16/16                |
+
+| The twelve runs of `ng-http-411`        | Two questions | Lines still standing |
+| --------------------------------------- | ------------- | -------------------- |
+| The writer abstained                    | 8             | 12                   |
+| It answered and the claim was held weak | 4             | 0                    |
+| Passed                                  | 0             | 0                    |
+
+- **Nothing moves end to end.** The three errored runs are synthesis calls that failed.
+  `machine-168` and `q-306` lose runs in both columns, to the writer abstaining and to a true
+  claim held at weak.
+- **`ng-http-411` did not reach the audit once with the patch in view.** The writer, which is
+  not shown the patch and is the same in both columns, abstained in all twelve runs there and in
+  eight of twelve on the other side: "The line was added by commit 1e90d03, which introduced
+  documentation for the XSRF token whitelist feature, but the commit message provides no
+  explanation for why the @example line is written as it is." The four answers it gave all say
+  the line is documentation or an example for the feature, none says it implements anything, and
+  all four were held at weak. So what fails this case end to end is the writer first, in 20 runs
+  of 24 ([#39](https://github.com/maricastroc/understory/issues/39)), and the audit after it.
+- **The four incidental cases pass all 32 runs.** In each column twelve runs abstain and four
+  explain the `var` to `const` sweep. With the three runs kept before, that is 80 runs of 80
+  since the writer is shown the line.
+
+**What this leaves.**
+
+- The audit does not check whose reason it is. With one question it credited a borrowed reason
+  in about a third of the judgements, by being strict with every claim. With the two questions
+  of #47 it credits one in about six judgements of ten. What keeps a borrowed reason out of an
+  answer is the writer abstaining, and nothing behind it.
+- A third question brings that back to about three in ten and keeps the gain on true claims in
+  the controls, at the price of true claims counted as misattributions, four or five in a
+  hundred kept judgements, in both replays. It is not in the pipeline.
+- More of the patch is what the true sentence about `ng-http-411` needed, and it is credited
+  half the time with it. The case still fails every run, because the writer abstains on it.
+  Showing the audit the lines still standing is not in the pipeline either.
+
 ### What this does not show
 
 What is planned to close these gaps is in [#34](https://github.com/maricastroc/understory/issues/34).

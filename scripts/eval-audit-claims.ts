@@ -224,6 +224,51 @@ export function controlLines(all: Judgement[]): string[] {
   });
 }
 
+const BORROWED = [
+  "gives the line a reason the source gives for another part of the change",
+  "gives the line, in the source's words, the reason of another part of the same change",
+  "gives the last change the reason of another change in the line's history",
+];
+
+const COMPARED: Array<[string, (j: Judgement) => boolean]> = [
+  ["Claims that should be credited: credited", (j) => j.expect === "supported"],
+  ["A reason borrowed from elsewhere: credited", (j) => BORROWED.includes(j.kind ?? "")],
+  [
+    "A false statement about an earlier version: credited",
+    (j) => j.kind === "says of an earlier version what the commit that wrote it contradicts",
+  ],
+  [
+    "Contradicted by the code or the patch: credited",
+    (j) => j.kind === "says something the code or the patch contradicts",
+  ],
+  ["A reason no source gives: credited", (j) => j.kind === "gives a reason no source gives"],
+  [
+    "Only reads the code back: credited",
+    (j) => j.kind === "true of the code, with no reason given",
+  ],
+];
+
+export function credited(judgements: Judgement[], of: (j: Judgement) => boolean): string {
+  const mine = judgements.filter((j) => !j.control && j.status && of(j));
+  return `${mine.filter((j) => j.status === "supported").length} of ${mine.length}`;
+}
+
+export function comparisonRows(replays: Judgement[][]): string[] {
+  const kept = (all: Judgement[]) => {
+    const mine = all.filter((j) => !j.kind && !j.control && j.status);
+    const having = (status: EntailmentStatus) => mine.filter((j) => j.status === status).length;
+    return mine.length
+      ? `${having("supported")} · ${having("weak")} · ${having("unsupported")}`
+      : "not run";
+  };
+  const row = (label: string, cell: (all: Judgement[]) => string) =>
+    `| ${label} | ${replays.map(cell).join(" | ")} |`;
+  return [
+    row("Kept claims: supported · weak · misattributed", kept),
+    ...COMPARED.map(([label, of]) => row(label, (all) => credited(all, of))),
+  ];
+}
+
 export function parseReplay(text: string): { meta: ReplayMeta | null; judgements: Judgement[] } {
   const records = text
     .split("\n")

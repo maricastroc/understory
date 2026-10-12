@@ -5,7 +5,9 @@ import {
   type Judgement,
   auditedClaims,
   claimReadings,
+  comparisonRows,
   controlLines,
+  credited,
   lowerReading,
   parseControls,
   parseReplay,
@@ -217,6 +219,117 @@ describe("the replays of the written controls published in eval/README.md", () =
       expect(lines.length).toBeGreaterThan(15);
       for (const line of lines) expect(published).toContain(line.trim());
     }
+  });
+});
+
+describe("the six versions of the audit compared in eval/README.md", () => {
+  const names = [
+    "one-question",
+    "before",
+    "block",
+    "standing",
+    "bearing",
+    "bearing-again",
+    "bearing-120b",
+  ];
+  const replays = names.map((name) =>
+    parseReplay(readFileSync(`eval/results/2026-10-12-patch-context-replay-${name}.jsonl`, "utf8")),
+  );
+  const readme = readFileSync("eval/README.md", "utf8");
+  const published = new Set(readme.split("\n").map((line) => line.replace(/\s+/g, " ").trim()));
+  const borrowedOn = (id: string) => (j: Judgement) =>
+    j.id === id && /another part of the (same )?change/.test(j.kind ?? "");
+  const cells = (of: (j: Judgement) => boolean) =>
+    replays.map((r) => credited(r.judgements, of)).join(" | ");
+
+  it("were given the same controls, with the expectations the file holds", () => {
+    const controls = parseControls(readFileSync("eval/audit-controls.json", "utf8"));
+    expect(controls).toHaveLength(53);
+    for (const [at, { meta, judgements }] of replays.entries()) {
+      expect(meta?.kind).toBe("audit-replay");
+      expect(readme).toContain(`(results/2026-10-12-patch-context-replay-${names[at]}.jsonl)`);
+      const written = judgements.filter((j) => j.kind);
+      expect(new Set(written.map((j) => j.claim))).toEqual(new Set(controls.map((c) => c.text)));
+      for (const j of written)
+        expect(controls.find((c) => c.text === j.claim)).toMatchObject({
+          expect: j.expect,
+          kind: j.kind,
+        });
+    }
+    expect(replays.map((r) => r.meta?.commit)).toEqual([
+      "b798b88",
+      "c43094c",
+      "8517aae",
+      "61178e3",
+      "8cc5fda",
+      "8cc5fda",
+      "8cc5fda",
+    ]);
+    expect(replays.at(-1)?.meta?.audit).toBe("openai/gpt-oss-120b");
+  });
+
+  it("give the rows the table publishes", () => {
+    for (const row of comparisonRows(replays.map((r) => r.judgements)))
+      expect(published).toContain(row);
+    const doc = (j: Judgement) =>
+      j.id === "ng-http-411" &&
+      /JSDoc comment documenting|documentation block that provides/.test(j.claim);
+    const implement = (j: Judgement) =>
+      j.id === "ng-http-411" && j.kind === "says something the code or the patch contradicts";
+    expect(published).toContain(
+      `| The true sentence about \`ng-http-411\`: credited | ${cells(doc)} |`,
+    );
+    expect(published).toContain(
+      `| "The line implements the feature", of \`ng-http-411\`: credited | ${cells(implement)} |`,
+    );
+    for (const id of ["tslint-257", "tslint-189"])
+      expect(published).toContain(
+        `| The borrowed reasons of \`${id}\`: credited | ${cells(borrowedOn(id))} |`,
+      );
+  });
+});
+
+describe("credited and comparisonRows", () => {
+  const judged = (
+    kind: string | undefined,
+    expect: "supported" | "not-supported" | undefined,
+    status: EntailmentStatus | null,
+    control = false,
+  ): Judgement => ({
+    type: "judgement",
+    id: "a",
+    claim: "c",
+    citations: ["commit:1"],
+    replay: 0,
+    control,
+    raw: null,
+    status,
+    quote: null,
+    fellBack: false,
+    ...(kind ? { kind } : {}),
+    ...(expect ? { expect } : {}),
+  });
+
+  it("counts the judged ones only, and leaves out the foreign-source control", () => {
+    const all = [
+      judged("gives a reason no source gives", "not-supported", "supported"),
+      judged("gives a reason no source gives", "not-supported", "weak"),
+      judged("gives a reason no source gives", "not-supported", null),
+      judged(undefined, undefined, "supported", true),
+    ];
+    expect(credited(all, (j) => j.kind === "gives a reason no source gives")).toBe("1 of 2");
+  });
+
+  it("puts each replay in its own column, and says when the kept claims were not replayed", () => {
+    const first = [
+      judged(undefined, undefined, "supported"),
+      judged(undefined, undefined, "unsupported"),
+      judged("true of the code and backed by a source", "supported", "supported"),
+    ];
+    const second = [judged("true of the code and backed by a source", "supported", "weak")];
+    const rows = comparisonRows([first, second]);
+    expect(rows[0]).toBe("| Kept claims: supported · weak · misattributed | 1 · 0 · 1 | not run |");
+    expect(rows[1]).toBe("| Claims that should be credited: credited | 1 of 1 | 0 of 1 |");
   });
 });
 
