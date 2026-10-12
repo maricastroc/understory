@@ -1,5 +1,6 @@
 import type { ArtifactKind } from "./artifact-kind";
 import type { Person } from "./person";
+import type { PlacedComment } from "./reading";
 
 export type Artifact = {
   id: string;
@@ -12,4 +13,5 @@ export type Artifact = {
   ref?: string;
   meta?: Record<string, string | number>;
   parentId?: string;
+  comments?: PlacedComment[];
 };

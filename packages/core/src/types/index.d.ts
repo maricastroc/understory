@@ -16,6 +16,24 @@ export type { NarrativeLanguage } from "./narrative-language";
 export type { Confidence } from "./confidence";
 export type { EntailmentStatus, CitationCheck, Entailment } from "./entailment";
 export type { VerifiedNarrative } from "./verified-narrative";
+export type {
+  ChangeEntry,
+  ChangeScope,
+  Lineage,
+  LineageEntry,
+  LineageStop,
+  Passage,
+  PlacedComment,
+  Placement,
+  Quality,
+  Reading,
+  Reason,
+  ReasonScope,
+  Relation,
+  Specificity,
+  State,
+  Unsustained,
+} from "./reading";
 export type { DigResult } from "./dig-result";
 export type { InvestigateInput } from "./investigate-input";
 export type { PrLookup } from "./pr-lookup";

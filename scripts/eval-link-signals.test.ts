@@ -186,9 +186,11 @@ describe("where a review comment was placed", () => {
     outdated: false,
   });
 
-  it("is on the line when the hunk it was made on ends there", () => {
+  it("is on the line only by the comment's own line number", () => {
+    const made = { ...comment("src/linter.ts"), line: 12 };
+    expect(placementOf(made, "src/linter.ts", "  apply(a);", 12)).toBe("on the line");
     expect(placementOf(comment("src/linter.ts"), "src/linter.ts", "  apply(a);")).toBe(
-      "on the line",
+      "in its hunk",
     );
   });
 
