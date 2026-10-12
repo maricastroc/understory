@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type { EntailmentStatus, VerifiedNarrative } from "@understory/core/types";
 import { describe, expect, it } from "vitest";
 import {
@@ -174,5 +175,18 @@ describe("parseReplay", () => {
     const { meta, judgements } = parseReplay(text);
     expect(meta?.kind).toBe("audit-replay");
     expect(judgements).toHaveLength(1);
+  });
+});
+
+describe("the replays published in eval/README.md", () => {
+  it("are the lines eval:audit prints for the two kept replays", () => {
+    const readme = readFileSync("eval/README.md", "utf8");
+    const published = new Set(readme.split("\n").map((line) => line.trim()));
+    for (const name of ["2026-10-11-audit-replay-before", "2026-10-11-audit-replay-after"]) {
+      expect(readme).toContain(`(results/${name}.jsonl)`);
+      const { meta, judgements } = parseReplay(readFileSync(`eval/results/${name}.jsonl`, "utf8"));
+      expect(meta?.kind).toBe("audit-replay");
+      for (const line of replayLines(judgements)) expect(published).toContain(line.trim());
+    }
   });
 });
