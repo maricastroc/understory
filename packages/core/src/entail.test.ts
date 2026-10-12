@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auditSubject, checkEntailment, entailClaims, finalizeClaim } from "./entail";
+import { auditSubject, checkEntailment, entailClaims, finalizeClaim, sitedStatus } from "./entail";
 import { verifyQuote } from "./quote";
 import { TOOL_CALL_ERROR, failingJudge, scriptedJudge } from "./testing/scripted-judge";
 import type { Artifact, Evidence, Narrative } from "./types";
@@ -466,12 +466,224 @@ describe("auditSubject — what the history settles before the judge reads a wor
     expect(subject?.established).toContain(
       "[commit:d3ee30b] added it, together with 17 other new lines around it.",
     );
-    expect(subject?.established).toContain("is given too");
-    expect(subject?.established).toContain("the code shown contradicts is unrelated");
+    expect(subject?.sited).toBe(true);
   });
 
   it("shows no code when none was collected", () => {
-    expect(auditSubject(ev())?.established).not.toContain("The code at that location");
+    const subject = auditSubject(ev());
+    expect(subject?.established).not.toContain("The code at that location");
+    expect(subject?.sited).toBe(false);
+  });
+
+  it("does not put the code on the record when only the file's history could be read", () => {
+    const subject = auditSubject(
+      ev({
+        coverage: { granularity: "file" },
+        code: { startLine: 168, lines: ["func (h *Host) DockerVersion() (string, error) {"] },
+      }),
+    );
+    expect(subject?.sited).toBe(false);
+    expect(subject?.established).not.toContain("DockerVersion");
+  });
+});
+
+describe("sitedStatus — one verdict out of the two records", () => {
+  it("credits a claim only when the sources back what it says of the change", () => {
+    expect(sitedStatus("agrees", "supported")).toBe("supported");
+    expect(sitedStatus("nothing", "supported")).toBe("supported");
+  });
+
+  it("refuses a claim the code contradicts, whatever the sources say", () => {
+    expect(sitedStatus("contradicts", "supported")).toBe("unsupported");
+    expect(sitedStatus("contradicts", "unproven")).toBe("unsupported");
+    expect(sitedStatus("contradicts", "nothing")).toBe("unsupported");
+  });
+
+  it("refuses a claim whose sources are about something else, however true of the code", () => {
+    expect(sitedStatus("agrees", "unrelated")).toBe("unsupported");
+  });
+
+  it("leaves a reason the sources do not give unproven, however true of the code", () => {
+    expect(sitedStatus("agrees", "unproven")).toBe("weak");
+    expect(sitedStatus("nothing", "unproven")).toBe("weak");
+  });
+
+  it("gives no credit to a claim that only reads the code back", () => {
+    expect(sitedStatus("agrees", "nothing")).toBe("weak");
+    expect(sitedStatus("nothing", "nothing")).toBe("weak");
+  });
+});
+
+describe("the audit of a claim about code that is shown", () => {
+  const source = artifact(
+    "commit:1e90d03",
+    "feat(http): allow sending XSRF token to whitelisted cross-origin domains",
+  );
+  const evidence: Evidence = {
+    question: "Why is this line the way it is?",
+    repo: { path: "." },
+    location: { file: "src/ng/http.js", startLine: 411, endLine: 411 },
+    artifacts: [source],
+    contradictions: [],
+    coverage: { granularity: "line" },
+    code: {
+      startLine: 410,
+      lines: ["   *", "   * @example", "   *"],
+      change: { artifactId: "commit:1e90d03", before: null, added: 30 },
+    },
+  };
+  const narrative = (text: string): Narrative => ({
+    answerable: true,
+    recorded: true,
+    answer: "",
+    citations: ["commit:1e90d03"],
+    claims: [{ text, citations: ["commit:1e90d03"] }],
+  });
+  const QUOTE = "allow sending XSRF token to whitelisted cross-origin domains";
+  const audit = (reply: object, text = "The line was added as an example tag.") => {
+    const judge = scriptedJudge(() => reply);
+    return checkEntailment(evidence, narrative(text), { primary: judge, fallback: null }).then(
+      (e) => ({ e, sent: JSON.stringify(judge.doGenerateCalls[0].prompt) }),
+    );
+  };
+
+  it("asks for the code and the record separately, and shows the code and its change", async () => {
+    const { sent } = await audit({ code: "agrees", record: "nothing", quotes: [], reason: "x" });
+    expect(sent).toContain("PART 1, `code`");
+    expect(sent).toContain("PART 2, `record`");
+    expect(sent).toContain("> 411 |    * @example");
+    expect(sent).toContain("[commit:1e90d03] added it, together with 29 other new lines");
+  });
+
+  it("keeps the single question when no code was collected", async () => {
+    const judge = scriptedJudge(() => ({ status: "supported", quotes: [QUOTE], reason: "x" }));
+    const e = await checkEntailment({ ...evidence, code: undefined }, narrative("x"), {
+      primary: judge,
+      fallback: null,
+    });
+    expect(JSON.stringify(judge.doGenerateCalls[0].prompt)).not.toContain("PART 1");
+    expect(e.supported).toBe(1);
+    expect(e.checks[0].code).toBeUndefined();
+  });
+
+  it("credits a claim true of the code whose reason the source states, on the source's words", async () => {
+    const { e } = await audit({
+      code: "agrees",
+      record: "supported",
+      quotes: [QUOTE],
+      reason: "the commit states the feature",
+    });
+    expect(e).toMatchObject({ supported: 1, misattributed: 0 });
+    expect(e.checks[0]).toMatchObject({ status: "supported", code: "agrees", quote: QUOTE });
+  });
+
+  it("does not ask the source to repeat what the code shows", async () => {
+    const { e } = await audit({
+      code: "agrees",
+      record: "supported",
+      quotes: [QUOTE],
+      reason: "the tag is in the code, the feature is in the commit",
+    });
+    expect(source.body).not.toContain("@example");
+    expect(e.checks[0].status).toBe("supported");
+  });
+
+  it("counts a claim the code contradicts as a misattribution, even with a true quote", async () => {
+    const { e } = await audit(
+      { code: "contradicts", record: "supported", quotes: [QUOTE], reason: "the line is a tag" },
+      "The line implements the XSRF check for whitelisted domains.",
+    );
+    expect(e).toMatchObject({ supported: 0, misattributed: 1 });
+    expect(e.checks[0]).toMatchObject({ status: "unsupported", code: "contradicts", quote: null });
+    expect(e.checks[0].reason).toContain("the code shown contradicts the claim");
+  });
+
+  it("leaves a reason no source gives unproven, however true the claim is of the code", async () => {
+    const { e } = await audit(
+      { code: "agrees", record: "unproven", quotes: [], reason: "no source gives that reason" },
+      "The example tag was added because users kept misreading the option.",
+    );
+    expect(e).toMatchObject({ supported: 0, misattributed: 0 });
+    expect(e.checks[0]).toMatchObject({ status: "weak", code: "agrees" });
+  });
+
+  it("gives no credit to a claim that only reads the code back, and says why", async () => {
+    const { e } = await audit({ code: "agrees", record: "nothing", quotes: [], reason: "" });
+    expect(e).toMatchObject({ supported: 0, misattributed: 0 });
+    expect(e.checks[0].status).toBe("weak");
+    expect(e.checks[0].reason).toBe(
+      "the claim says only what the code and the change show, which no source has to back",
+    );
+  });
+
+  it("still needs the source's own words for the reason it credits", async () => {
+    const { e } = await audit({
+      code: "agrees",
+      record: "supported",
+      quotes: ["added to document the whitelist option"],
+      reason: "stated",
+    });
+    expect(e.checks[0]).toMatchObject({
+      status: "weak",
+      quote: null,
+      rejectedQuotes: ["added to document the whitelist option"],
+    });
+  });
+
+  it("does not take a line of the code as the proof of a reason", async () => {
+    const { e } = await audit({
+      code: "agrees",
+      record: "supported",
+      quotes: ["* @example"],
+      reason: "stated",
+    });
+    expect(e.checks[0].status).toBe("weak");
+  });
+
+  it("does not hold today's code against a claim that cites only an earlier change", async () => {
+    const first = {
+      ...artifact("commit:aaa1111", "sync: drop rows with a zero quantity"),
+      date: "2018-01-01T00:00:00Z",
+    };
+    const last = { ...source, date: "2018-04-04T00:00:00Z" };
+    const pr = {
+      ...artifact("pr:16000", "feat(http): allow sending XSRF token"),
+      kind: "pull_request" as const,
+      parentId: last.id,
+    };
+    const history = { ...evidence, artifacts: [first, last, pr] };
+    expect(auditSubject(history)?.shown).toEqual([last.id, pr.id]);
+
+    const judge = scriptedJudge(() => ({
+      code: "contradicts",
+      record: "supported",
+      quotes: ["drop rows with a zero quantity"],
+      reason: "today's line does not drop them",
+    }));
+    const cited = (id: string): Narrative => ({
+      ...narrative("At first every row with a zero quantity was dropped."),
+      claims: [{ text: "At first every row with a zero quantity was dropped.", citations: [id] }],
+    });
+    const earlier = await checkEntailment(history, cited(first.id), {
+      primary: judge,
+      fallback: null,
+    });
+    expect(earlier).toMatchObject({ supported: 1, misattributed: 0 });
+    expect(earlier.checks[0].code).toBeUndefined();
+    expect(earlier.checks[0].reason).toContain("cites only changes made before the one shown");
+
+    const current = await checkEntailment(history, cited(pr.id), {
+      primary: judge,
+      fallback: null,
+    });
+    expect(current).toMatchObject({ supported: 0, misattributed: 1 });
+    expect(current.checks[0].code).toBe("contradicts");
+  });
+
+  it("counts a claim whose sources are about something else as a misattribution", async () => {
+    const { e } = await audit({ code: "agrees", record: "unrelated", quotes: [], reason: "x" });
+    expect(e.misattributed).toBe(1);
+    expect(e.checks[0]).toMatchObject({ status: "unsupported", code: "agrees" });
   });
 });
 

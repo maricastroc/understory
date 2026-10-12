@@ -15,7 +15,14 @@ export type RawVerdict = {
   quote?: string;
   quotes?: string[];
   reason: string;
+  code?: string;
+  record?: string;
+  earlier?: boolean;
 };
+
+export type Expectation = "supported" | "not-supported";
+
+export type WrittenClaim = AuditedClaim & { kind: string; expect: Expectation };
 
 export type ReplayMeta = {
   type: "meta";
@@ -45,6 +52,8 @@ export type Judgement = {
   quote: string | null;
   fellBack: boolean;
   error?: string;
+  kind?: string;
+  expect?: Expectation;
 };
 
 export const claimKey = (c: { id: string; citations: string[]; text?: string; claim?: string }) =>
@@ -128,7 +137,8 @@ export type ReplayCounts = {
   controlSupported: number;
 };
 
-export function replayCounts(judgements: Judgement[]): ReplayCounts {
+export function replayCounts(all: Judgement[]): ReplayCounts {
+  const judgements = all.filter((j) => !j.kind);
   const real = judgements.filter((j) => !j.control);
   const judged = real.filter((j) => j.status);
   const controls = judgements.filter((j) => j.control && j.status);
@@ -154,7 +164,9 @@ export function replayCounts(judgements: Judgement[]): ReplayCounts {
 const share = (part: number, whole: number) =>
   whole ? `${part} of ${whole} (${Math.round((part / whole) * 100)}%)` : "0 of 0";
 
-export function replayLines(judgements: Judgement[]): string[] {
+export function replayLines(all: Judgement[]): string[] {
+  const judgements = all.filter((j) => !j.kind);
+  if (judgements.length === 0) return [];
   const c = replayCounts(judgements);
   const groups = new Map<string, Judgement[]>();
   for (const j of judgements) {
@@ -172,6 +184,44 @@ export function replayLines(judgements: Judgement[]): string[] {
     `Judgements answered by the fallback model: ${share(c.fellBack, c.judged)}.`,
     `Control, each claim against another repository's sources: ${share(c.controlSupported, c.controls)} came back supported.`,
   ];
+}
+
+export function parseControls(text: string): WrittenClaim[] {
+  const file = JSON.parse(text) as { controls?: Array<Partial<WrittenClaim>> };
+  return (file.controls ?? []).map((c, at) => {
+    const known = c.expect === "supported" || c.expect === "not-supported";
+    if (!c.id || !c.text || !c.kind || !known || !c.citations?.length)
+      throw new Error(`control ${at + 1} needs id, kind, expect, text and citations`);
+    return {
+      id: c.id,
+      kind: c.kind,
+      expect: c.expect as Expectation,
+      text: c.text,
+      citations: c.citations,
+    };
+  });
+}
+
+const met = (j: Judgement) => (j.status === "supported") === (j.expect === "supported");
+
+export function controlLines(all: Judgement[]): string[] {
+  const written = all.filter((j) => j.kind);
+  const kinds = [...new Set(written.map((j) => j.kind as string))];
+  return kinds.flatMap((kind) => {
+    const rows = written.filter((j) => j.kind === kind);
+    const judged = rows.filter((j) => j.status);
+    const count = (status: EntailmentStatus) => judged.filter((j) => j.status === status).length;
+    const claims = new Map<string, Judgement[]>();
+    for (const j of judged) claims.set(claimKey(j), [...(claims.get(claimKey(j)) ?? []), j]);
+    const missed = [...claims.values()].filter((group) => group.some((j) => !met(j)));
+    return [
+      `${kind}, expected ${rows[0].expect === "supported" ? "supported" : "not supported"}: ${share(judged.filter(met).length, judged.length)} as expected. ${count("supported")} supported, ${count("weak")} weak, ${count("unsupported")} unsupported; ${rows.length - judged.length} errored.`,
+      ...missed.map(
+        (group) =>
+          `  missed ${group.filter((j) => !met(j)).length} of ${group.length}: ${group[0].id}, "${group[0].claim.slice(0, 80)}"`,
+      ),
+    ];
+  });
 }
 
 export function parseReplay(text: string): { meta: ReplayMeta | null; judgements: Judgement[] } {

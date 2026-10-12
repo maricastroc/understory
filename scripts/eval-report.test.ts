@@ -365,6 +365,76 @@ describe("the results published in eval/README.md", () => {
   });
 });
 
+describe("the two runs published for the audit's two records", () => {
+  const load = (name: string) => {
+    const { meta, runs } = parseRecords(readFileSync(`eval/results/${name}.jsonl`, "utf8"));
+    const review = JSON.parse(readFileSync(`eval/results/${name}.review.json`, "utf8"));
+    expect(reviewProblems(meta, runs, review)).toEqual([]);
+    const passed = (of: (r: RunRecord) => boolean) => {
+      const mine = runs.filter(of);
+      const ok = mine.filter((r) => verdictOf(r, review.verdicts) === "pass").length;
+      return `${ok}/${mine.length}`;
+    };
+    return { meta, runs, passed };
+  };
+  const before = load("2026-10-12-code-facts-before");
+  const after = load("2026-10-12-code-facts");
+  const readme = readFileSync("eval/README.md", "utf8");
+  const rows = readme.split("\n").map((line) => line.replace(/\s+/g, " ").trim());
+  const row = (label: string, of: (r: RunRecord) => boolean) =>
+    `| ${label} | ${before.passed(of)} | ${after.passed(of)} |`;
+
+  it("ran the same cases four times each, and none of them errored", () => {
+    expect(readme).toContain("(results/2026-10-12-code-facts-before.jsonl)");
+    expect(readme).toContain("(results/2026-10-12-code-facts.jsonl)");
+    const ids = (runs: RunRecord[]) => [...new Set(runs.map((r) => r.id))].sort();
+    expect(ids(after.runs)).toEqual(ids(before.runs));
+    expect(ids(after.runs)).toHaveLength(27);
+    for (const { meta, runs } of [before, after]) {
+      expect(meta?.repeat).toBe(4);
+      expect(runs).toHaveLength(108);
+      expect(runs.filter((r) => r.outcome.kind === "error")).toEqual([]);
+      expect(runs.filter((r) => r.category === "out-of-scope")).toEqual([]);
+    }
+  });
+
+  it("give the counts by category the table publishes", () => {
+    const real = (r: RunRecord) => r.category === "recorded" && r.source !== "synthetic";
+    expect(rows).toContain(
+      row("recorded, synthetic", (r) => r.category === "recorded" && r.source === "synthetic"),
+    );
+    expect(rows).toContain(row("recorded, real lines", real));
+    for (const category of ["incidental", "false-premise", "silent"])
+      expect(rows).toContain(row(category, (r) => r.category === category));
+    for (const id of new Set(after.runs.filter(real).map((r) => r.id)))
+      expect(rows).toContain(row(`\`${id}\``, (r) => r.id === id));
+  });
+
+  it("is backed by a written read of every run of the change that made a claim", () => {
+    const read = JSON.parse(
+      readFileSync("eval/results/2026-10-12-code-facts.reading.json", "utf8"),
+    );
+    const claimed = new Set(
+      after.runs
+        .filter((r) => (r.narrative?.claims.length ?? 0) > 0)
+        .map((r) => `${r.id}#${r.pass}`),
+    );
+    expect(read.run).toBe(after.meta?.date);
+    expect(read.runsRead).toBe(claimed.size);
+    for (const list of [
+      read.contradictedByTheCode,
+      read.reasonNoSourceGives,
+      read.reasonOfAnotherPart,
+      read.trueAndNotCredited,
+      read.heldAtWeakDefensibly,
+      read.borderline,
+      read.setAside,
+      read.answeredWhereTheRecordIsSilent,
+    ])
+      for (const key of Object.keys(list)) expect(claimed).toContain(key);
+  });
+});
+
 describe("the case amended after it met the model", () => {
   type Reread = {
     case: string;

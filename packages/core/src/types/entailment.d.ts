@@ -6,6 +6,7 @@ export type CitationCheck = {
   status: EntailmentStatus;
   quote: string | null;
   rejectedQuotes?: string[];
+  code?: "agrees" | "contradicts";
   reason: string;
 };
 
