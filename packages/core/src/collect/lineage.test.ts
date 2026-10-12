@@ -91,7 +91,7 @@ describe("walkLineage — back through the changes to one line", () => {
   });
 
   it("stops at its time limit and when it is cancelled, keeping what it has", async () => {
-    const clock = [0, 0, 5_000, 5_000, 5_000];
+    const clock = [0, 0, 0, 5_000, 5_000, 5_000];
     const slow = await walkLineage(
       START,
       history(THREE, OWNERS).provider,
@@ -110,6 +110,28 @@ describe("walkLineage — back through the changes to one line", () => {
       stopped: "cancelled",
     });
     expect(calls).toEqual([]);
+  });
+
+  it("does not wait for a request in flight past its time limit or its cancellation", async () => {
+    const stuck: LineageProvider = {
+      commit: () => new Promise<CommitAt>(() => {}),
+      owner: async () => null,
+    };
+    const began = Date.now();
+    const late = await walkLineage(START, stuck, { ...LINEAGE_LIMITS, ms: 40 });
+    expect(late).toEqual({ entries: [], stopped: "time limit" });
+    expect(Date.now() - began).toBeLessThan(1_000);
+
+    const gone = new AbortController();
+    const hanging: LineageProvider = {
+      commit: async () => THREE.c3,
+      owner: () => new Promise<string | null>(() => {}),
+    };
+    const walking = walkLineage(START, hanging, LINEAGE_LIMITS, gone.signal);
+    setTimeout(() => gone.abort(), 20);
+    const cut = await walking;
+    expect(cut.stopped).toBe("cancelled");
+    expect(cut.entries.map((e) => e.sha)).toEqual(["c3"]);
   });
 
   it("says so when the patch is missing, the commit cannot be read or the line cannot be followed", async () => {

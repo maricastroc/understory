@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   collect: vi.fn(),
+  lineageOf: vi.fn(),
   narrate: vi.fn(),
   getModel: vi.fn(),
   consumeAiDailyLimit: vi.fn(),
@@ -11,6 +12,7 @@ vi.mock("@understory/core/collect", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@understory/core/collect")>()),
   collect: mocks.collect,
 }));
+vi.mock("@understory/core/collect/lineage", () => ({ lineageOf: mocks.lineageOf }));
 vi.mock("@understory/core/investigate", () => ({ narrate: mocks.narrate }));
 vi.mock("@understory/core/llm", () => ({ getModel: mocks.getModel }));
 vi.mock("@/lib/ratelimit", () => ({
@@ -104,5 +106,92 @@ describe("/api/dig — global daily AI limit", () => {
     expect(status).toBe(400);
     expect(mocks.consumeAiDailyLimit).not.toHaveBeenCalled();
     expect(mocks.narrate).not.toHaveBeenCalled();
+  });
+});
+
+describe("/api/dig — the line's earlier history, behind its flag", () => {
+  const lineage = {
+    stopped: "the line was added",
+    entries: [
+      { sha: "c038fb3", date: "2023-11-27T00:00:00Z", title: "bound retries", did: "added" },
+    ],
+  };
+
+  beforeEach(() => {
+    for (const m of Object.values(mocks)) m.mockReset();
+    mocks.collect.mockResolvedValue(evidence);
+    mocks.narrate.mockResolvedValue({ narrative: null, error: "narrated" });
+    mocks.getModel.mockReturnValue(null);
+    vi.unstubAllEnvs();
+  });
+
+  it("sends the two lines it always sent, and does not walk, when the flag is off", async () => {
+    mocks.lineageOf.mockResolvedValue(lineage);
+    const { phases } = await dig();
+    expect(phases.map((p) => p.phase)).toEqual(["evidence", "final"]);
+    expect(mocks.lineageOf).not.toHaveBeenCalled();
+  });
+
+  it("adds the history as a third line, after the answer, when the flag is on", async () => {
+    vi.stubEnv("UNDERSTORY_LINEAGE", "1");
+    mocks.lineageOf.mockResolvedValue(lineage);
+    const { phases } = await dig();
+    expect(phases.map((p) => p.phase)).toEqual(["evidence", "final", "lineage"]);
+    expect(phases[2].lineage).toEqual(lineage);
+    expect(typeof phases[2].ms).toBe("number");
+    expect(phases[0].evidence).not.toHaveProperty("lineage");
+    expect(mocks.narrate.mock.calls[0][0]).not.toHaveProperty("lineage");
+  });
+
+  it("sends the answer without waiting for the walk", async () => {
+    vi.stubEnv("UNDERSTORY_LINEAGE", "1");
+    let finish: (value: unknown) => void = () => {};
+    mocks.lineageOf.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+    const res = await POST(
+      new Request("http://localhost/api/dig", {
+        method: "POST",
+        body: JSON.stringify({
+          repoPath: "https://github.com/acme/payments-service",
+          location: "src/billing/charge.ts:8",
+          question: "Why cap retries at 3?",
+        }),
+      }),
+    );
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let seen = "";
+    while (seen.split("\n").filter(Boolean).length < 2)
+      seen += decoder.decode((await reader.read()).value);
+    expect(
+      seen
+        .trim()
+        .split("\n")
+        .map((l) => JSON.parse(l).phase),
+    ).toEqual(["evidence", "final"]);
+    finish(lineage);
+    let rest = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      rest += decoder.decode(value);
+    }
+    expect(JSON.parse(rest.trim()).phase).toBe("lineage");
+  });
+
+  it("closes with two lines when the walk fails or has nothing to give", async () => {
+    vi.stubEnv("UNDERSTORY_LINEAGE", "1");
+    mocks.lineageOf.mockRejectedValue(new Error("rate limited"));
+    expect((await dig()).phases.map((p) => p.phase)).toEqual(["evidence", "final"]);
+    mocks.lineageOf.mockResolvedValue(null);
+    expect((await dig()).phases.map((p) => p.phase)).toEqual(["evidence", "final"]);
+  });
+
+  it("hands the walk a signal that the request's own abort triggers", async () => {
+    vi.stubEnv("UNDERSTORY_LINEAGE", "1");
+    mocks.lineageOf.mockResolvedValue(lineage);
+    await dig();
+    const options = mocks.lineageOf.mock.calls[0][1] as { signal: AbortSignal };
+    expect(options.signal).toBeInstanceOf(AbortSignal);
+    expect(options.signal.aborted).toBe(false);
   });
 });

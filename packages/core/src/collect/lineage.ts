@@ -46,18 +46,32 @@ export async function walkLineage(
         : requests + needed > limits.requests
           ? "request limit"
           : null;
-  const done = (stopped: LineageStop): Lineage => ({ entries, stopped });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const cut = new Promise<LineageStop>((resolve) => {
+    timer = setTimeout(() => resolve("time limit"), Math.max(0, limits.ms - (now() - began)));
+    signal?.addEventListener("abort", () => resolve("cancelled"), { once: true });
+  });
+  const within = <T>(work: Promise<T>): Promise<{ got: T } | { stop: LineageStop } | null> =>
+    Promise.race([
+      work.then(
+        (got) => ({ got }),
+        () => null,
+      ),
+      cut.then((stop) => ({ stop })),
+    ]);
+  const done = (stopped: LineageStop): Lineage => {
+    clearTimeout(timer);
+    return { entries, stopped };
+  };
 
   for (;;) {
     const before = blocked(1);
     if (before) return done(before);
-    let commit: CommitAt;
-    try {
-      requests++;
-      commit = await provider.commit(sha, path);
-    } catch {
-      return done("no patch");
-    }
+    requests++;
+    const read = await within(provider.commit(sha, path));
+    if (!read) return done("no patch");
+    if ("stop" in read) return done(read.stop);
+    const commit = read.got;
     const entry: LineageEntry = {
       sha,
       date: commit.date,
@@ -80,15 +94,11 @@ export async function walkLineage(
     if (entries.length > limits.earlier) return done("depth limit");
     const next = blocked(2);
     if (next) return done(next);
-    let owner: string | null;
-    try {
-      requests++;
-      owner = await provider.owner(commit.parent, commit.previousPath ?? path, earlier);
-    } catch {
-      return done("line not located");
-    }
-    if (!owner) return done("line not located");
-    sha = owner;
+    requests++;
+    const owned = await within(provider.owner(commit.parent, commit.previousPath ?? path, earlier));
+    if (owned && "stop" in owned) return done(owned.stop);
+    if (!owned?.got) return done("line not located");
+    sha = owned.got;
     path = commit.previousPath ?? path;
     text = change.before;
   }
