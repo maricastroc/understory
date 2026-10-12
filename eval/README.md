@@ -71,12 +71,16 @@ control. It keeps the judge's raw answer next to the final verdict. Given a kept
 instead of a run, it prints that replay's summary and calls no model.
 
 Given a `.json` file of written controls as well, it replays those too.
-[`audit-controls.json`](audit-controls.json) holds 31 claims about cases of the gold set, each
-with the verdict it should get: claims that are true of the code and backed by a source, claims
-the code or the patch contradicts, claims that give a reason no source gives, claims that give
-a line the reason a source gives for another part of the change, and claims that only read the
-code back. The expectations were fixed before any of them met the audit. The summary counts
-them by kind, apart from the kept claims, and names the ones that missed.
+[`audit-controls.json`](audit-controls.json) holds 53 claims about cases of the gold set, each
+with the verdict it should get. The first 31: claims that are true of the code and backed by a
+source, claims the code or the patch contradicts, claims that give a reason no source gives,
+claims that give a line the reason a source gives for another part of the change, and claims
+that only read the code back. Then 22 added on 12 Oct: reasons borrowed in the source's own
+words from another part of the same change, reasons borrowed from another change in the line's
+history, claims about an earlier version of the code that its commit backs or contradicts, and
+reasons a source gives for the very part of a change a line belongs to. The expectations of each
+batch were fixed before any of its claims met the audit. The summary counts them by kind, apart
+from the kept claims, and names the ones that missed.
 
 `eval:report` takes the kept run and, for the cases held for a manual verdict, the review file
 written for it. It refuses a review file that is missing, that belongs to another run or that

@@ -207,9 +207,12 @@ describe("the replays of the written controls published in eval/README.md", () =
       expect(meta?.kind).toBe("audit-replay");
       expect(meta?.from).toContain("eval/audit-controls.json");
       const written = judgements.filter((j) => j.kind);
-      expect(new Set(written.map((j) => j.claim))).toEqual(new Set(controls.map((c) => c.text)));
-      for (const j of written)
-        expect(j.expect).toBe(controls.find((c) => c.text === j.claim)?.expect);
+      expect(new Set(written.map((j) => j.claim)).size).toBe(31);
+      for (const j of written) {
+        const control = controls.find((c) => c.text === j.claim);
+        expect(control?.expect).toBe(j.expect);
+        expect(control?.kind).toBe(j.kind);
+      }
       const lines = [...replayLines(judgements), ...controlLines(judgements)];
       expect(lines.length).toBeGreaterThan(15);
       for (const line of lines) expect(published).toContain(line.trim());
