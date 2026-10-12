@@ -42,6 +42,7 @@ npm run eval -- --category silent     # one category
 npm run eval -- retry-cap jitter      # some cases by id
 npm run eval -- --repeat 2 --via openrouter --out eval/results/run.jsonl
 npm run eval:report -- eval/results/run.jsonl eval/results/run.review.json
+npm run eval:audit -- eval/results/run.jsonl --repeat 4 --via openrouter --out eval/results/replay.jsonl
 ```
 
 Needs `GROQ_API_KEY` and `GITHUB_TOKEN` in `.env.local` or `.env`; the cases on real repositories read
@@ -60,6 +61,13 @@ on the same host and is billed to `OPEN_ROUTER_API_KEY` instead. That key is rea
 `.env.local` and used by this script only. A reply that came through another host is refused.
 The run's metadata names the route, and the runner prints and keeps the tokens and the cost per
 model.
+
+`eval:audit` measures the audit alone. Two runs of a case rarely write the same claims, so a
+run of the whole pipeline cannot say whether the audit gives one claim one verdict. It takes
+the claims that kept runs audited, collects the evidence again and asks the audit about each
+claim `--repeat` times, plus once against the sources of a case from another repository as a
+control. It keeps the judge's raw answer next to the final verdict. Given a kept replay
+instead of a run, it prints that replay's summary and calls no model.
 
 `eval:report` takes the kept run and, for the cases held for a manual verdict, the review file
 written for it. It refuses a review file that is missing, that belongs to another run or that
@@ -193,7 +201,7 @@ category when it ends.
 
 Out-of-scope runs: 14 of 18 labelled out of scope, 18 of 18 with no claim.
 
-Claim audits: 77, of which 7 were answered by the fallback model and 0 failed.
+Claim audits: 77, of which 7 were answered by the fallback model and 0 failed. The judge called 59 claims supported, and 9 of those were set back to weak because the passage it quoted is not in the source.
 
 Four things to hold against those tables:
 
@@ -245,6 +253,8 @@ quote, so they cannot say how far from the source it was. That downgrade happene
 claims in eight runs. The floor is also where `jitter` failed in September: the auditor then
 held a claim that adds a consequence to its source at weak, and in October it accepted the same
 kind of claim every time. Tracked in [#33](https://github.com/maricastroc/understory/issues/33).
+What was changed for it, and what it did and did not settle, is under
+[The audit after #33](#the-audit-after-33).
 
 ### What passed, and what a pass hides
 
@@ -326,6 +336,192 @@ differ by. The read of the claims was not repeated for this run.
 It is also the first run whose use was measured: 84 calls and 148,000 tokens on the synthesis
 model (72 answers and 12 audits that fell back to it), 83 calls and 115,000 tokens on the audit
 model, US$ 0.047 in all.
+
+### The audit after #33
+
+The tables above describe the pipeline of 11 Oct. This section describes the audit as it is
+now. Everything in it was run on the evening of 11 Oct, local time, through OpenRouter pinned
+to Groq. The kept files are dated 12 Oct inside, in UTC.
+
+**What changed in the audit.**
+
+- The judge is told what the repository's history already settles. The sources it reads are
+  the changes that touched the investigated code, and each one is headed with what it is to
+  that code: a commit that changed it, the pull request that merged that commit, an issue
+  linked to the pull request, a review comment on it. A claim that says "the line was added in
+  this pull request" is no longer held to a proof no commit message gives. Everything else a
+  claim asserts still needs proof.
+- The quote check ignores four differences between the judge's copy and the source: letter
+  case, spacing, the kind of dash, and quotation or code marks. Nothing else. A changed word, a
+  corrected typo or a passage shortened with "..." is still refused.
+- The judge returns its proof as separate passages. A passage that strings whole sentences or
+  lines of one source together is checked sentence by sentence. A supported verdict stands on
+  the passages that are in the source, and needs at least one. What is kept and shown is the
+  source's own text. What is refused is kept in the result as `rejectedQuotes`.
+- The judge answers `supported`, `unproven` or `unrelated`, stored as supported, weak and
+  unsupported. Under the name "unsupported" it filed claims the source left unproven as
+  misattributions.
+- Its output budget went from 1,000 to 2,000 tokens. At 1,000 the model spent the whole budget
+  reasoning about hard claims and returned nothing, which sent the claim to the fallback model.
+
+**The audit alone.** The 145 claims audited in the two runs of 11 Oct, each judged four times
+on the same evidence, before the change
+([`results/2026-10-11-audit-replay-before.jsonl`](results/2026-10-11-audit-replay-before.jsonl),
+commit `cc3574a`) and after
+([`results/2026-10-11-audit-replay-after.jsonl`](results/2026-10-11-audit-replay-after.jsonl),
+commit `c29525d`). These are the lines `npm run eval:audit` prints for each file, and a unit
+test fails if they drift apart.
+
+Before:
+
+```text
+Claims given the same verdict on every replay: 126 of 145 (87%).
+  recorded, synthetic: 50 of 52 (96%)
+  silent, synthetic: 7 of 7 (100%)
+  recorded, sampled: 26 of 26 (100%)
+  incidental, sampled: 25 of 33 (76%)
+  recorded, picked: 18 of 27 (67%)
+Verdicts: 376 supported, 173 weak, 26 unsupported over 575 judgements; 5 errored.
+Supported verdicts lost to a quote the source does not contain: 53 of 429 (12%).
+Judgements answered by the fallback model: 70 of 575 (12%).
+Control, each claim against another repository's sources: 0 of 145 (0%) came back supported.
+```
+
+After:
+
+```text
+Claims given the same verdict on every replay: 132 of 145 (91%).
+  recorded, synthetic: 49 of 52 (94%)
+  silent, synthetic: 7 of 7 (100%)
+  recorded, sampled: 24 of 26 (92%)
+  incidental, sampled: 30 of 33 (91%)
+  recorded, picked: 22 of 27 (81%)
+Verdicts: 434 supported, 144 weak, 1 unsupported over 579 judgements; 1 errored.
+Supported verdicts lost to a quote the source does not contain: 6 of 440 (1%).
+Judgements answered by the fallback model: 10 of 579 (2%).
+Control, each claim against another repository's sources: 1 of 145 (1%) came back supported.
+```
+
+Read with these:
+
+- **The two mechanical causes are gone. The rest of the instability is not.** Of the claims
+  that changed verdict between replays, six did so before only because a quote was refused in
+  some replays and accepted in others, and one does now. Thirteen before and twelve now changed
+  because the judge itself answered differently. Those twelve are claims that add an inference
+  to their source ("which implies", "so that"), and on them one judgement is a weighted coin.
+  Six more claims are steady out of 145, which is within what two replays of the same audit
+  differ by.
+- **Of the 53 quotes refused before, 45 were the source's own words** in other quotation marks,
+  another dash, without code marks or with repaired spacing. Five joined two real passages and
+  three were not in the source. Of the six refused now, four are one claim on `tslint-257` whose
+  passages correct a typo of the source and change its list markers, and two are a stack trace
+  the judge copied up to the point where the request cuts a long source, cut mark included.
+- **The control that came back supported** is a claim that says the commit gives no reason for
+  something. That is true of any unrelated commit, so the control cannot tell it apart.
+- **What moved, by where the claim comes from.** Judgements that ended supported went from 124
+  to 157 of 211 on recorded real lines, from 182 to 174 of 208 on recorded synthetic lines,
+  and from 50 of 128 to 83 of 132 on the lines of the incidental cases. The claims the old
+  audit always supported and the new one does not are claims that add a motive, a detail or a
+  benefit the source does not state, and one that says the opposite of its source, which the
+  old audit supported four times in four and the new one once.
+- **It costs more.** A judgement now reads about 1,230 tokens and writes about 630, against
+  840 and 480: the request is longer and hard claims are reasoned to the end. Over both audit
+  models the replay used 1.37 million tokens where it had used 1.06 million, US$ 0.184
+  against US$ 0.138.
+
+A first version of the change, without the sentence-by-sentence check and the headings, was
+measured the same way and is kept:
+[`results/2026-10-11-audit-replay-first-fix.jsonl`](results/2026-10-11-audit-replay-first-fix.jsonl),
+[`results/2026-10-11-audit-first-fix.jsonl`](results/2026-10-11-audit-first-fix.jsonl) and
+[`results/2026-10-11-two-cases-first-fix.jsonl`](results/2026-10-11-two-cases-first-fix.jsonl).
+Its rejected quotes are what showed the two things the final version adds.
+
+**The whole pipeline.** Four passes of the 36 cases on the changed audit:
+[`results/2026-10-11-audit-fix.jsonl`](results/2026-10-11-audit-fix.jsonl), with the manual
+verdicts in [`results/2026-10-11-audit-fix.review.json`](results/2026-10-11-audit-fix.review.json).
+"Before" is the two runs of 11 Oct read as four passes.
+
+|                                             | Before, 11 Oct | After    |
+| ------------------------------------------- | -------------- | -------- |
+| recorded, runs passed                       | 57/60          | 54/60    |
+| silent, runs passed                         | 16/20          | 16/20    |
+| out-of-scope, runs passed                   | 36/36          | 36/36    |
+| false-premise, runs passed                  | 12/12          | 12/12    |
+| incidental, runs passed                     | 5/16           | 7/16     |
+| Supported verdicts set back by their quote  | 13 of 119      | 1 of 109 |
+| Claim audits answered by the fallback model | 19 of 160      | 6 of 151 |
+
+The two incidental runs gained are runs in which the writer abstained on `machine-32`. The
+answers on `tslint-189` and `tslint-257` fail as before.
+
+The recorded row went down, and the audit is not why. Three of the six failed runs are runs in
+which the writer abstained on `machine-168` and `q-306`: "The history does not explain why this
+line is the way it is", on evidence it had explained in every earlier run of the day, 38 runs
+on real recorded lines with no abstention. The writer was not changed. To tell the two apart,
+the 15 recorded cases were run four times on the unchanged audit the same evening
+([`results/2026-10-11-recorded-before-evening.jsonl`](results/2026-10-11-recorded-before-evening.jsonl),
+commit `cc3574a`):
+
+| Recorded cases, four passes the same evening | Unchanged audit | Changed audit |
+| -------------------------------------------- | --------------- | ------------- |
+| Runs passed                                  | 52/60           | 54/60         |
+| on synthetic lines                           | 30/32           | 31/32         |
+| on real lines                                | 22/28           | 23/28         |
+| Failed: the writer abstained                 | 2               | 3             |
+| Failed: a supported verdict lost its quote   | 2               | 0             |
+| Failed: no claim was judged supported        | 3               | 3             |
+| Failed: answered in the wrong language       | 1               | 0             |
+| Supported verdicts set back by their quote   | 8 of 88         | 0 of 83       |
+| Claim audits answered by the fallback model  | 14 of 109       | 5 of 109      |
+| Claim audits that failed                     | 2               | 0             |
+
+So the change did not cost recorded cases, and it did not win any that these counts can show.
+The three runs that failed with no supported claim are single-claim answers to `jitter`,
+`q-306` and `q-796` whose one claim adds something to its source, such as "reducing the risk of
+synchronized spikes in traffic". The writer abstaining on a line it explained an hour before is
+a separate failure. From 21:20 on it happened in 17 of 117 runs on real recorded lines, 13 of
+them on `machine-168`, and in 5 of the 38 of those runs that used the unchanged audit. It is
+tracked in [#39](https://github.com/maricastroc/understory/issues/39).
+
+**The two cases the issue names**, five repeats each, before and after. The first "before" run
+was taken at 21:18 and the second at 21:49, either side of the "after" run.
+
+| `machine-168` and `q-796`, 10 runs         | Before, 21:18 | After  | Before, 21:49 |
+| ------------------------------------------ | ------------- | ------ | ------------- |
+| Runs passed                                | 6             | 5      | 3             |
+| Failed: the writer abstained               | 0             | 5      | 3             |
+| Failed: a supported verdict lost its quote | 3             | 0      | 4             |
+| Failed: no claim was judged supported      | 1             | 0      | 0             |
+| Runs in which the writer answered, passed  | 6 of 10       | 5 of 5 | 3 of 7        |
+
+Files: [`before`](results/2026-10-11-two-cases-before.jsonl),
+[`after`](results/2026-10-11-two-cases-after.jsonl),
+[`before again`](results/2026-10-11-two-cases-before-again.jsonl). Neither case stays on one
+side of the 0.65 floor over five repeats, before or after, so that criterion of #33 is not met.
+What changed is why: every failure the audit caused on these two cases is gone, and every
+failure left is the writer abstaining.
+
+**What the change made worse.** The old audit marked down some claims about a line swept along
+by a change because no source named the line. That was the wrong reason, applied to some
+phrasings and not to others, and it was also the only brake on those claims. With it gone, the
+audit confirms more of them. On `tslint-257`, where every answer gives the enable/disable
+rewrite as the reason for a line that reads a file, the confidence was 0.55 to 0.65 in the four
+runs of 11 Oct and is 0.9 in three of the four runs now. The answers were wrong before and are
+wrong now; the audit agrees with them more. The audit cannot see this without the code, and
+the fix belongs to [#31](https://github.com/maricastroc/understory/issues/31).
+
+**What was tried and left out.** Asking the model for low reasoning effort removed every failed
+call and cut the audit's output to a quarter, and it also made the judge accept motives no
+source states, such as a rename "to reflect its role". A fixed seed changed nothing that four
+replays can show. Asking the judge again when its quote was refused recovered 2 of 16. A second
+judgement per claim, to keep the lower of two readings, was not built: it doubles the audit's
+tokens, and on a claim the judge supports three times in four it would fail more runs, not
+fewer.
+
+Four cases were also run once straight to Groq, to check that the changed request works on the
+route the product uses
+([`results/2026-10-11-audit-fix-direct-check.jsonl`](results/2026-10-11-audit-fix-direct-check.jsonl)):
+four of four passed, with no failed and no fallback audit.
 
 ### What this does not show
 

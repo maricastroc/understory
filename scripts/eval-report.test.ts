@@ -255,7 +255,39 @@ describe("what the report says beyond pass and fail", () => {
       audits: 3,
       fallbacks: 1,
       failed: 1,
+      supported: 2,
+      lostToQuote: 0,
     });
+  });
+
+  it("counts the supported verdicts set back to weak by a quote the source does not contain", () => {
+    const check = (claim: number, status: "supported" | "weak", reason: string) => ({
+      citation: "commit:a",
+      claim,
+      status,
+      quote: null,
+      reason,
+    });
+    const audited: RunRecord = {
+      ...run("a", 0, PASS),
+      narrative: answer({
+        entailment: {
+          checked: true,
+          checks: [
+            check(0, "supported", "stated"),
+            check(1, "weak", "stated (the cited quote was not found in the source)"),
+            check(1, "weak", "stated (the cited quote was not found in the source)"),
+            check(2, "weak", "the link is not stated"),
+          ],
+          supported: 1,
+          misattributed: 0,
+        },
+      }),
+    };
+    expect(auditCounts([audited])).toMatchObject({ audits: 3, supported: 1, lostToQuote: 1 });
+    expect(totalLines([audited]).at(-1)).toBe(
+      "Claim audits: 3, of which 0 were answered by the fallback model and 0 failed. The judge called 2 claims supported, and 1 of those were set back to weak because the passage it quoted is not in the source.",
+    );
   });
 
   it("says how many cases are still held instead of counting them as not passed", () => {

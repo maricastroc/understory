@@ -23,6 +23,7 @@
     "dig": "tsx scripts/dig.ts",
     "eval": "tsx scripts/eval.ts",
     "eval:report": "tsx scripts/eval-report.ts",
+    "eval:audit": "tsx scripts/eval-audit.ts",
     "eval:sample": "tsx scripts/eval-sample.ts",
     "seed:demo": "bash scripts/seed-demo.sh",
     "seed:eval": "bash scripts/seed-eval.sh",

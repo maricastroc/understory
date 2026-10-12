@@ -165,19 +165,28 @@ export function scopeLabels(runs: RunRecord[]): { runs: number; refused: number;
   };
 }
 
+const QUOTE_NOT_FOUND = "the cited quote was not found in the source";
+
 export function auditCounts(runs: RunRecord[]): {
   audits: number;
   fallbacks: number;
   failed: number;
+  supported: number;
+  lostToQuote: number;
 } {
-  const counts = { audits: 0, fallbacks: 0, failed: 0 };
+  const counts = { audits: 0, fallbacks: 0, failed: 0, supported: 0, lostToQuote: 0 };
   for (const run of runs) {
     const entailment = run.narrative?.entailment;
     if (!entailment) continue;
-    const judged = new Set(entailment.checks.map((c) => c.claim ?? c.citation)).size;
-    counts.audits += judged + (entailment.failed ?? 0);
+    const verdicts = new Map(entailment.checks.map((c) => [c.claim ?? c.citation, c]));
+    counts.audits += verdicts.size + (entailment.failed ?? 0);
     counts.fallbacks += entailment.fallbacks ?? 0;
     counts.failed += entailment.failed ?? 0;
+    for (const check of verdicts.values()) {
+      if (check.status === "supported") counts.supported += 1;
+      else if (check.status === "weak" && check.reason.includes(QUOTE_NOT_FOUND))
+        counts.lostToQuote += 1;
+    }
   }
   return counts;
 }
@@ -247,7 +256,7 @@ export function totalLines(runs: RunRecord[], adjudication: Adjudication = {}): 
       : []),
     ...(audit.audits
       ? [
-          `Claim audits: ${audit.audits}, of which ${audit.fallbacks} were answered by the fallback model and ${audit.failed} failed.`,
+          `Claim audits: ${audit.audits}, of which ${audit.fallbacks} were answered by the fallback model and ${audit.failed} failed. The judge called ${audit.supported + audit.lostToQuote} claims supported, and ${audit.lostToQuote} of those were set back to weak because the passage it quoted is not in the source.`,
         ]
       : []),
   ];
