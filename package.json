@@ -24,6 +24,7 @@
     "eval": "tsx scripts/eval.ts",
     "eval:report": "tsx scripts/eval-report.ts",
     "eval:audit": "tsx scripts/eval-audit.ts",
+    "eval:links": "tsx scripts/eval-links.ts",
     "eval:sample": "tsx scripts/eval-sample.ts",
     "seed:demo": "bash scripts/seed-demo.sh",
     "seed:eval": "bash scripts/seed-eval.sh",
