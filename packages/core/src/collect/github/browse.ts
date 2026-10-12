@@ -158,6 +158,18 @@ export async function getFileContentGitHub(
   return restRaw(`/repos/${owner}/${repo}/contents/${encoded}?ref=${encodeURIComponent(branch)}`);
 }
 
+export async function commitFilePatch(
+  owner: string,
+  repo: string,
+  oid: string,
+  path: string,
+): Promise<string | null> {
+  const d = await rest<{ files?: Array<{ filename: string; patch?: string }> }>(
+    `/repos/${owner}/${repo}/commits/${encodeURIComponent(oid)}`,
+  );
+  return d.files?.find((f) => f.filename === path)?.patch ?? null;
+}
+
 export async function getFileSizeGitHub(
   owner: string,
   repo: string,

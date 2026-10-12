@@ -1,6 +1,6 @@
 import type { Artifact, Evidence, Provenance } from "./types";
 
-export function owningCommit(ev: Evidence): Artifact | null {
+export function owningCommit(ev: Pick<Evidence, "location" | "artifacts">): Artifact | null {
   if (!ev.location) return null;
   const commits = ev.artifacts.filter((a) => a.kind === "commit");
   if (commits.length === 0) return null;

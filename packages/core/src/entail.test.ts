@@ -445,6 +445,34 @@ describe("auditSubject — what the history settles before the judge reads a wor
   it("says nothing when the investigation is not anchored on a code location", () => {
     expect(auditSubject(ev({ location: undefined }))).toBeNull();
   });
+
+  it("gives the code and what the last change did to the line, when they were collected", () => {
+    const subject = auditSubject(
+      ev({
+        code: {
+          startLine: 167,
+          lines: [
+            "",
+            "func (h *Host) DockerVersion() (string, error) {",
+            "\turl, err := h.Driver.GetURL()",
+          ],
+          change: { artifactId: "commit:d3ee30b", before: null, added: 18 },
+        },
+      }),
+    );
+    expect(subject?.established).toContain(
+      "> 168 | func (h *Host) DockerVersion() (string, error) {",
+    );
+    expect(subject?.established).toContain(
+      "[commit:d3ee30b] added it, together with 17 other new lines around it.",
+    );
+    expect(subject?.established).toContain("is given too");
+    expect(subject?.established).toContain("the code shown contradicts is unrelated");
+  });
+
+  it("shows no code when none was collected", () => {
+    expect(auditSubject(ev())?.established).not.toContain("The code at that location");
+  });
 });
 
 describe("the judge's request", () => {
