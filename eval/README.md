@@ -43,6 +43,7 @@ npm run eval -- retry-cap jitter      # some cases by id
 npm run eval -- --repeat 2 --via openrouter --out eval/results/run.jsonl
 npm run eval:report -- eval/results/run.jsonl eval/results/run.review.json
 npm run eval:audit -- eval/results/run.jsonl --repeat 4 --via openrouter --out eval/results/replay.jsonl
+npm run eval:audit -- eval/results/run.jsonl eval/audit-controls.json --repeat 4 --via openrouter --out eval/results/replay.jsonl
 ```
 
 Needs `GROQ_API_KEY` and `GITHUB_TOKEN` in `.env.local` or `.env`; the cases on real repositories read
@@ -68,6 +69,14 @@ the claims that kept runs audited, collects the evidence again and asks the audi
 claim `--repeat` times, plus once against the sources of a case from another repository as a
 control. It keeps the judge's raw answer next to the final verdict. Given a kept replay
 instead of a run, it prints that replay's summary and calls no model.
+
+Given a `.json` file of written controls as well, it replays those too.
+[`audit-controls.json`](audit-controls.json) holds 31 claims about cases of the gold set, each
+with the verdict it should get: claims that are true of the code and backed by a source, claims
+the code or the patch contradicts, claims that give a reason no source gives, claims that give
+a line the reason a source gives for another part of the change, and claims that only read the
+code back. The expectations were fixed before any of them met the audit. The summary counts
+them by kind, apart from the kept claims, and names the ones that missed.
 
 `eval:report` takes the kept run and, for the cases held for a manual verdict, the review file
 written for it. It refuses a review file that is missing, that belongs to another run or that
@@ -220,12 +229,14 @@ last kind apart, under `fromTheCode`, so that it can be counted and checked.
 Two parts of the system do not work to this rule, and a result has to be read knowing it:
 
 - The automatic checks see the answer's structure and the audit's verdict, never the claims.
-- The audit applies the rule only in part. Since the line and its last change are shown to it,
-  it is told they are established, and it still asks a source for some of what they show. On
-  `ng-http-411` it held "this line was added as part of a JSDoc comment documenting the new
-  XSRF-token-whitelisting feature" at weak, in both runs that said it, because no commit message
-  says a line is documentation. Tracked in
-  [#43](https://github.com/maricastroc/understory/issues/43).
+- The audit applies the rule in most judgements, not in all. Until 12 Oct it was told the code
+  and its last change were established and still asked a source for some of what they show.
+  Since then it checks a claim in two parts, one against the code and one against the sources
+  ([The audit, the code and the record after #43](#the-audit-the-code-and-the-record-after-43)).
+  It still holds some true statements at weak. On `ng-http-411` it holds "this line was added as
+  part of a JSDoc comment documenting the new XSRF-token-whitelisting feature" at weak in every
+  replay: it accepts that the line is a doc comment and asks a source to say what the comment
+  documents. Tracked in [#43](https://github.com/maricastroc/understory/issues/43).
 
 ## Results
 
@@ -706,6 +717,252 @@ Read with these:
 
 So what #31 reports, a change's reasons given to a line it only touched, is gone in these
 runs. What keeps one recorded case from passing is narrower and has its own issue.
+
+### The audit, the code and the record after #43
+
+Since #31 the audit is shown the investigated line and what the last change did to it. It was
+told both were established, and it still asked a commit message for what they show
+([#43](https://github.com/maricastroc/understory/issues/43)). This section measures a change to
+that. Everything in it ran on 12 Oct between 13:03 and 13:40 UTC, through OpenRouter pinned to
+Groq.
+
+**What changed in the audit.**
+
+- When the code was collected, the judge answers two questions about a claim instead of one.
+  `code`: what the claim says that the lines shown or the stated change can settle. It answers
+  nothing, agrees or contradicts, from those lines and that change alone, and no source has to
+  repeat it. `record`: everything else the claim says, the reason above all. It answers
+  nothing, supported, unproven or unrelated, from the cited sources alone, and copies its proof
+  from them as before.
+- The two answers are combined by rule, not by the model. A claim the code contradicts is a
+  misattribution, whatever the sources say. A claim is credited only when the sources back what
+  it says beyond the code, with a passage found in one of them. Everything else is weak. So a
+  claim that only reads the code back earns nothing: there is no reason in it to substantiate.
+- The lines shown are today's, and the change shown is the last one. A claim that cites only
+  earlier changes speaks of the code as it was, which is not shown, so a `contradicts` on such a
+  claim is set aside and the check says so.
+- Without collected code, on a drilled case or a file too large for line blame, the audit asks
+  the single question it asked before.
+
+**How the wording was arrived at.** The controls in [`audit-controls.json`](audit-controls.json)
+were committed with their expected verdicts before the audit was changed (commit `b798b88`).
+The first wording of the two questions let the judge answer `contradicts` whenever the lines
+shown did not show what a claim said. Replayed, it refused every false statement about the code,
+and it also turned true claims about earlier versions of the code into misattributions, on the
+synthetic cases whose history has several commits. The wording was revised three times against
+the same controls and claims: `contradicts` narrowed to "the lines show the opposite", a line's
+stated purpose read as a statement of what the line does, and the rule for claims that cite only
+earlier changes. Those intermediate replays are not kept. So the controls served as a
+development set for this change. The check it was not tuned on is the end-to-end run further
+down, whose claims the writer wrote afresh.
+
+**The audit alone.** The 93 claims audited in the run of 12 Oct
+([`results/2026-10-12-line-attribution.jsonl`](results/2026-10-12-line-attribution.jsonl)) and
+the 31 controls, each judged four times on the same evidence, before the change
+([`results/2026-10-12-code-facts-replay-before.jsonl`](results/2026-10-12-code-facts-replay-before.jsonl),
+commit `b798b88`) and after
+([`results/2026-10-12-code-facts-replay-after.jsonl`](results/2026-10-12-code-facts-replay-after.jsonl),
+commit `0620638`). These are the lines `npm run eval:audit` prints for each file, and a unit
+test fails if they drift apart.
+
+Before:
+
+```text
+Claims given the same verdict on every replay: 83 of 93 (89%).
+  recorded, synthetic: 48 of 51 (94%)
+  recorded, sampled: 15 of 19 (79%)
+  incidental, sampled: 7 of 8 (88%)
+  recorded, picked: 13 of 15 (87%)
+Verdicts: 295 supported, 72 weak, 4 unsupported over 371 judgements; 1 errored.
+Supported verdicts lost to a quote the source does not contain: 0 of 295 (0%).
+Judgements answered by the fallback model: 17 of 371 (5%).
+Control, each claim against another repository's sources: 0 of 93 (0%) came back supported.
+true of the code and backed by a source, expected supported: 24 of 40 (60%) as expected. 24 supported, 16 weak, 0 unsupported; 0 errored.
+  missed 4 of 4: ng-http-411, "This line was added as part of a JSDoc comment documenting the new XSRF‑token‑wh"
+  missed 4 of 4: ng-http-411, "This line was added as part of a documentation block that provides an example fo"
+  missed 1 of 4: q-306, "This line returns the current index when the array element equals the searched v"
+  missed 3 of 4: ng-http-114, "The line was rewritten to take an index argument in the forEach callback, in the"
+  missed 4 of 4: tslint-189, "The condition was rewritten from `!== undefined` to `=== undefined` by commit 8b"
+says something the code or the patch contradicts, expected not supported: 31 of 32 (97%) as expected. 1 supported, 11 weak, 20 unsupported; 0 errored.
+  missed 1 of 4: ng-http-411, "The line was added to implement support for sending the XSRF token to whiteliste"
+gives a reason no source gives, expected not supported: 30 of 32 (94%) as expected. 2 supported, 30 weak, 0 unsupported; 0 errored.
+  missed 2 of 4: jitter, "Jitter was later added to the backoff delays so that clients would not all retry"
+gives the line a reason the source gives for another part of the change, expected not supported: 1 of 8 (13%) as expected. 7 supported, 1 weak, 0 unsupported; 0 errored.
+  missed 4 of 4: machine-32, "The code at libmachine/host/host.go line 32 was changed because earlier modifica"
+  missed 3 of 4: tslint-257, "This line was added by commit 63fc794 so that rules are no longer responsible fo"
+true of the code, with no reason given, expected not supported: 12 of 12 (100%) as expected. 0 supported, 12 weak, 0 unsupported; 0 errored.
+```
+
+After:
+
+```text
+Claims given the same verdict on every replay: 80 of 93 (86%).
+  recorded, synthetic: 47 of 51 (92%)
+  recorded, sampled: 17 of 19 (89%)
+  incidental, sampled: 3 of 8 (38%)
+  recorded, picked: 13 of 15 (87%)
+Verdicts: 317 supported, 55 weak, 0 unsupported over 372 judgements; 0 errored.
+Supported verdicts lost to a quote the source does not contain: 1 of 318 (0%).
+Judgements answered by the fallback model: 19 of 372 (5%).
+Control, each claim against another repository's sources: 0 of 93 (0%) came back supported.
+true of the code and backed by a source, expected supported: 30 of 40 (75%) as expected. 30 supported, 10 weak, 0 unsupported; 0 errored.
+  missed 4 of 4: ng-http-411, "This line was added as part of a JSDoc comment documenting the new XSRF‑token‑wh"
+  missed 4 of 4: ng-http-411, "This line was added as part of a documentation block that provides an example fo"
+  missed 2 of 4: machine-168, "This method was added by commit d3ee30b as part of pull request #4002, which add"
+says something the code or the patch contradicts, expected not supported: 32 of 32 (100%) as expected. 0 supported, 3 weak, 29 unsupported; 0 errored.
+gives a reason no source gives, expected not supported: 29 of 32 (91%) as expected. 3 supported, 29 weak, 0 unsupported; 0 errored.
+  missed 3 of 4: jitter, "Jitter was later added to the backoff delays so that clients would not all retry"
+gives the line a reason the source gives for another part of the change, expected not supported: 5 of 8 (63%) as expected. 3 supported, 1 weak, 4 unsupported; 0 errored.
+  missed 3 of 4: tslint-257, "This line was added by commit 63fc794 so that rules are no longer responsible fo"
+true of the code, with no reason given, expected not supported: 12 of 12 (100%) as expected. 0 supported, 12 weak, 0 unsupported; 0 errored.
+```
+
+Read with these:
+
+- **True of the code and backed by a source: 24 of 40 judgements credited, then 30.** Before,
+  the judge refused "the condition was rewritten from `!== undefined` to `=== undefined` by
+  commit 8b853b2, a cleanup and refactoring of the rule and formatter loaders" four times in
+  four, because no source spells out the condition. After, it credits it four times in four.
+- **The two sentences #43 was filed on are still held at weak, four times in four.** Both say
+  the `* @example` line of `ng-http-411` was added as part of a doc comment about the XSRF
+  whitelist feature. The judge now answers `code: agrees` and `record: unproven`: "the line is a
+  JSDoc comment, matching the claim; the commit message does not state that the comment was
+  added to document the new feature". What the comment documents is in the patch, 42 added
+  lines. The audit is shown seven lines around the marked one and the count of the others.
+- **Contradicted by the code or the patch: one of 32 judgements credited before, none after.**
+  Before, 11 of the 32 were held at weak and 20 counted as misattributions. After, three and 29.
+  The three are one control, which says what a line was "originally added" for: the judge
+  answers that the lines shown cannot settle that and that no source says it.
+  The one credited before was "the line was added to implement support for sending the XSRF
+  token to whitelisted origins", said of a doc-comment line.
+- **A reason no source gives: 30 of 32 refused, then 29.** Every miss, in both, is one control:
+  jitter "preventing lockstep retries and reducing the risk of a thundering-herd effect", where
+  the commit says only that it "stops recovering clients from retrying in lockstep". It is the
+  weakest of the controls, since what it adds is close to what the source says. It is kept as
+  written.
+- **A reason the source gives for another part of the change: one of eight refused, then
+  five.** `machine-32` is now refused four times in four, on the code: the claim says the line
+  was rewritten and the patch shows it was added. `tslint-257` is credited three times in four
+  in both: "this line was added by commit 63fc794 so that rules are no longer responsible for
+  disabling themselves", where the line reads a file. The judge does not tell which part of a
+  change a reason belongs to. That is the failure #31 reports, and the audit does not catch it.
+  What keeps it out of answers is the writer abstaining.
+- **A claim that only reads the code back: never credited, before or after.**
+- **The kept claims: 295 of 371 judgements supported, then 317 of 372.** The four
+  misattributions before were all on `ws-revert-story`, and there are none after. In five
+  judgements after, the judge called a contradiction on a claim about `ws-revert-story` that
+  cites only an earlier change, and the rule set it aside. Four of the five are one claim, "the
+  sync job originally dropped all rows with a zero quantity", true of the commit it cites: it
+  was credited four times in four before and is held at weak four times in four after, because
+  the judge, having read today's code against it, also answers that the record does not prove
+  it. That is a loss this change causes. Fewer claims get one verdict four times in four, 80
+  against 83, because claims that were steadily held at weak are now credited in most replays
+  and not in all. On the incidental cases that is five of eight claims, all about `draft-644`
+  and `tslint-189`, each credited in three replays of four.
+- **The claims an earlier read had marked.** The read of 12 Oct lists 26 runs under
+  `fromTheCode`, for saying something true of the code that no source repeats. Of the 39 claims
+  audited in those runs, ten were never credited in four replays before, and five after.
+- **Against another repository's sources, no claim is credited, before or after.**
+
+**End to end.** The 27 cases whose answers can reach the audit, four passes each, on the commit
+before the change
+([`results/2026-10-12-code-facts-before.jsonl`](results/2026-10-12-code-facts-before.jsonl)) and
+on the change ([`results/2026-10-12-code-facts.jsonl`](results/2026-10-12-code-facts.jsonl)),
+started in the same minute. The nine out-of-scope cases were left out: their questions are
+refused before any claim is written. Manual verdicts are beside each run in a `.review.json`.
+
+| Runs passed          | Before | This change |
+| -------------------- | ------ | ----------- |
+| recorded, synthetic  | 32/32  | 32/32       |
+| recorded, real lines | 17/28  | 21/28       |
+| incidental           | 16/16  | 16/16       |
+| false-premise        | 12/12  | 12/12       |
+| silent               | 19/20  | 18/20       |
+
+The recorded real lines, one by one:
+
+| Case             | Before | This change |
+| ---------------- | ------ | ----------- |
+| `ng-http-114`    | 3/4    | 4/4         |
+| `ng-http-411`    | 0/4    | 0/4         |
+| `machine-168`    | 0/4    | 2/4         |
+| `q-306`          | 3/4    | 3/4         |
+| `q-796`          | 3/4    | 4/4         |
+| `tslint-260`     | 4/4    | 4/4         |
+| `apollo-http-10` | 4/4    | 4/4         |
+
+Each failed run of those seven cases, by what failed it:
+
+| Why the run failed                                                  | Before | This change |
+| ------------------------------------------------------------------- | ------ | ----------- |
+| The writer abstained                                                | 6      | 5           |
+| Its one claim is true, and was held at weak for what the code shows | 3      | 2           |
+| Its one claim adds something neither the code nor a source says     | 2      | 0           |
+
+Read with these:
+
+- **`ng-http-411` fails every run in both columns.** Before, all four runs abstain. After,
+  three abstain and one says "the line was added in commit 1e90d03 as part of the documentation
+  for the new XSRF-token-whitelisting feature, providing an @example block to illustrate usage".
+  That is what the case expects, and the audit holds it at weak: "code shows the line was added,
+  but sources do not state it was added as documentation for the XSRF-token-whitelisting
+  feature". No run says the line implements anything.
+- **`machine-168` is where the change shows.** Before, two runs answer and both are held at
+  weak. One adds a reason no source gives, that the upgrade "required a way to retrieve the
+  Docker version from the host driver". The other says only that the method was added by commit
+  d3ee30b as part of the CE upgrade, and is refused because the sources "do not explicitly state
+  that DockerVersion was introduced in commit d3ee30b". After, the two runs that answer say the
+  latter and are credited. The other two runs abstain in both columns, which is
+  [#39](https://github.com/maricastroc/understory/issues/39).
+- **`q-306` still loses a run to it.** "This line returns the index of the matching element as
+  part of the Array.prototype.indexOf shim that was added to support IE < 9" is credited in two
+  runs and held at weak in a third: "code shows return, but source only mentions shim".
+- **On the recorded real lines the audit credited 22 of 37 claims before and 32 of 41 after.**
+  On the synthetic recorded cases, 47 of 53 and 50 of 51.
+- **No claim was counted as a misattribution in either run.** Twice the judge called a
+  contradiction on a claim that the first version of the retry loop retried until the charge
+  succeeded, citing only the commit that wrote it, because today's code stops at three attempts.
+  Both were set aside by the rule and credited on the commit's own words.
+- **The four swept-along lines and the three false premises pass every run in both columns.**
+  In each column twelve of the 16 incidental runs abstain and four explain the `var` to `const`
+  sweep. All 24 false-premise runs abstain, refuse or correct the premise, with no claim, so
+  the audit never sees them.
+- **`ws-skew-value` answers as recorded in one run before and two after.** The writer explains
+  why the cursor is moved back, which the commit says, when asked why by two seconds and not
+  thirty, which it does not. The claim is true of its source and credited in both columns. That
+  is the writer, and [#32](https://github.com/maricastroc/understory/issues/32).
+- **A higher score for fewer credited claims.** On `ws-batch-size` the change credits "the
+  constant was renamed from PAGE_SIZE to BATCH_SIZE, preserving the same value of 250" in three
+  runs of four, where it was credited in one before. The answer then has two credited claims,
+  which the scoring caps at 0.55 because the line's last change is cosmetic. With one credited
+  claim the same answer scores 0.65. The case passes either way. The scoring is unchanged here.
+- **The read of the claims** is in
+  [`results/2026-10-12-code-facts.reading.json`](results/2026-10-12-code-facts.reading.json):
+  61 runs of the change made a claim. In none is a credited claim contradicted by the code or
+  the patch, and none gives a reason no source gives or borrows the reason of another part of
+  the change. Two claims are true and not credited, the ones quoted above. Four are borderline.
+- **Cost.** An audit call reads about 1,880 tokens where it read 1,380, and writes about 1,010
+  where it wrote 850. The 27 cases cost US$ 0.091 against US$ 0.083.
+
+**Against the acceptance criteria of #43:**
+
+- "Every run of `ng-http-411` that says the line is documentation added with the XSRF whitelist
+  feature is audited as supported." Not met. One run says it and is held at weak, and both
+  sentences of the control are held at weak in every replay.
+- "No claim that says something the code or the patch contradicts is credited", with a control
+  kept beside the results. Met in these runs: none of the 32 control judgements, and none in the
+  read of the end-to-end run.
+- "The `recorded` and `incidental` cases that pass every run on the branch of #41 still do."
+  Met but for one run. `ng-http-114`, `tslint-260`, `apollo-http-10`, the eight synthetic cases
+  and the four incidental ones pass every run. `q-306` passed four of four on 12 Oct and passes
+  three of four here, as it does on the commit before the change at the same hour.
+- "The README says which record each verdict stands on." Done, in the pipeline section.
+
+So the audit asks a source for what the code shows less often, and a statement the code
+contradicts now sinks a claim. It has not stopped: the sentence the issue was filed on is still
+not credited, and what is missing there is narrower than the issue says. The judge no longer
+asks a source to say the line is a comment. It asks one to say what the comment is about, which
+only the rest of the patch shows.
 
 ### What this does not show
 

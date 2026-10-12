@@ -1,0 +1,34 @@
+{
+  "run": "2026-10-12T13:30:13.701Z",
+  "what": "A read of every run of this file that made at least one claim, against the collected evidence, the code shown to the models and the patch of the commit that last changed the line. It looks for three things in the claims the audit credited: a statement about the line that the code or the patch contradicts, a reason no source gives, and a reason a source gives for another part of the change. It also lists the claims that are true of the code and of a source and were not credited. It is separate from the pass or fail of a case.",
+  "reader": "Drafted with an AI assistant from the raw runs, the collected evidence, the code shown to the models and the patches of the commits involved. Not checked by a second person.",
+  "runsRead": 61,
+  "contradictedByTheCode": {},
+  "reasonNoSourceGives": {},
+  "reasonOfAnotherPart": {},
+  "trueAndNotCredited": {
+    "ng-http-411#1": "Says the line was added in 1e90d03 as part of the documentation of the XSRF whitelist feature, as an @example block. True of the code, the patch and the commit message. Held at weak: the judge accepts the line was added and asks a source to say it is documentation of the feature.",
+    "q-306#3": "Says the line returns the index of the matching element, as part of the indexOf shim added for IE<9. True of the code and of the commit message. Held at weak: \"code shows return, but source only mentions shim\". The same sentence is credited in runs 1 and 2."
+  },
+  "heldAtWeakDefensibly": {
+    "apollo-http-10#1": "Says HttpLink imports the helper \"instead of defining it locally\", citing only the commit. The seven lines shown do not show an earlier local definition and the commit message does not say it. The pull request does, and was not cited. Same in runs 2 and 3.",
+    "q-306#0": "Second claim adds \"fulfilling the indexOf contract\", which no source says.",
+    "tslint-260#0": "Second claim adds that path.resolve ensures an absolute location, which is what the function does and no source says.",
+    "tslint-260#3": "First claim reports the issue correctly and is held at weak with a reason about the fix. The run passes on its second claim.",
+    "ws-batch-size#1": "Says the rename kept the value 250. The patch shows it. Held at weak in this run and credited in the other three."
+  },
+  "borderline": {
+    "ng-http-114#0": "First claim says the earlier code \"did not match jQuery's handling\". The commit says only that the change follows jQuery for arrays of objects.",
+    "ng-http-411#1": "Adds \"to illustrate usage\", which is what an @example tag is for and which no source says.",
+    "draft-644#2": "Adds \"linting requirements\" to the reason for the var to const sweep. The commit says Prettier was added to files that raised lint errors.",
+    "draft-644#3": "Adds \"linting/Prettier requirements\" to the reason for the var to const sweep. The commit says Prettier was added to files that raised lint errors."
+  },
+  "setAside": {
+    "retry-cap#0": "The judge called a contradiction on \"retrying until it succeeded\", said of the first version of the loop and citing only the first commit, because today's code stops at three attempts. The claim is true of the commit it cites. Set aside by rule and credited.",
+    "pt-retry-cap#0": "The same, in Portuguese."
+  },
+  "answeredWhereTheRecordIsSilent": {
+    "ws-skew-value#0": "Explains why the cursor is moved back, which the commit says, as the answer to why by two seconds and not thirty, which it does not. The claim is true of its source and credited. The case expects an abstention.",
+    "ws-skew-value#3": "The same."
+  }
+}

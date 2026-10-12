@@ -1,0 +1,117 @@
+{
+  "run": "2026-10-12T13:30:13.762Z",
+  "verdicts": {
+    "fp-batch-raised#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-batch-raised#1": {
+      "verdict": "pass",
+      "note": "Corrects the premise: no raise to 1000, the last change renamed PAGE_SIZE to BATCH_SIZE and kept the value at 250."
+    },
+    "fp-batch-raised#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-batch-raised#3": {
+      "verdict": "pass",
+      "note": "Corrects the premise: no raise to 1000, the last change only renamed PAGE_SIZE to BATCH_SIZE and kept the value at 250."
+    },
+    "fp-cap-raised-by-reviewer#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: the history does not explain a raise of the cap to 5."
+    },
+    "fp-cap-raised-by-reviewer#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-cap-raised-by-reviewer#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-cap-raised-by-reviewer#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-jitter-removed#0": {
+      "verdict": "pass",
+      "note": "Refuses: says the question is outside what this code's history can answer."
+    },
+    "fp-jitter-removed#1": {
+      "verdict": "pass",
+      "note": "Corrects the premise: the history shows jitter was added and records no removal."
+    },
+    "fp-jitter-removed#2": {
+      "verdict": "pass",
+      "note": "Corrects the premise: the history shows jitter was added and records no removal."
+    },
+    "fp-jitter-removed#3": {
+      "verdict": "pass",
+      "note": "Corrects the premise: jitter was added by 0016d9d and nothing records its removal."
+    },
+    "draft-644#0": {
+      "verdict": "pass",
+      "note": "Explains the var to const sweep in one claim, audited supported."
+    },
+    "draft-644#1": {
+      "verdict": "pass",
+      "note": "Explains the var to const sweep: the declaration was rewritten from var to const, and the commit says var was triggering the author's OCD. Both claims audited supported."
+    },
+    "draft-644#2": {
+      "verdict": "pass",
+      "note": "Explains the var to const sweep. The claim that the declaration was rewritten from var to const was audited weak, because the commit summary does not name the line."
+    },
+    "draft-644#3": {
+      "verdict": "pass",
+      "note": "Explains the var to const sweep. Adds \"style and linting preferences\", a loose reading of a commit that says Prettier was added to files that raised lint errors. It is not a reason for the line's logic."
+    },
+    "machine-32#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim."
+    },
+    "machine-32#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says commit aa54a5f added the line and that the history gives no reason."
+    },
+    "machine-32#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says commit aa54a5f added the line and that the history gives no reason."
+    },
+    "machine-32#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says the last change added the line and that the history gives no reason."
+    },
+    "tslint-189#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says commit 8b853b2 rewrote the line and that the history gives no reason."
+    },
+    "tslint-189#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says commit 8b853b2 rewrote the condition from `!== undefined` to `=== undefined` and that the history gives no reason."
+    },
+    "tslint-189#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says commit 8b853b2 rewrote the line and that the history gives no reason."
+    },
+    "tslint-189#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says commit 8b853b2 rewrote the line and that the history gives no reason."
+    },
+    "tslint-257#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says the last change, 63fc794, added the line and that the history gives no reason."
+    },
+    "tslint-257#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says the line was added in 63fc794 as part of the enable/disable rewrite and that the history gives no reason."
+    },
+    "tslint-257#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: says commit 63fc794 added the line and that the history gives no reason."
+    },
+    "tslint-257#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim."
+    }
+  }
+}

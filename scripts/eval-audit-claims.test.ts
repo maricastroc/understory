@@ -193,6 +193,30 @@ describe("the replays published in eval/README.md", () => {
   });
 });
 
+describe("the replays of the written controls published in eval/README.md", () => {
+  it("are the lines eval:audit prints for the two kept replays, controls included", () => {
+    const readme = readFileSync("eval/README.md", "utf8");
+    const published = new Set(readme.split("\n").map((line) => line.trim()));
+    const controls = parseControls(readFileSync("eval/audit-controls.json", "utf8"));
+    for (const name of [
+      "2026-10-12-code-facts-replay-before",
+      "2026-10-12-code-facts-replay-after",
+    ]) {
+      expect(readme).toContain(`(results/${name}.jsonl)`);
+      const { meta, judgements } = parseReplay(readFileSync(`eval/results/${name}.jsonl`, "utf8"));
+      expect(meta?.kind).toBe("audit-replay");
+      expect(meta?.from).toContain("eval/audit-controls.json");
+      const written = judgements.filter((j) => j.kind);
+      expect(new Set(written.map((j) => j.claim))).toEqual(new Set(controls.map((c) => c.text)));
+      for (const j of written)
+        expect(j.expect).toBe(controls.find((c) => c.text === j.claim)?.expect);
+      const lines = [...replayLines(judgements), ...controlLines(judgements)];
+      expect(lines.length).toBeGreaterThan(15);
+      for (const line of lines) expect(published).toContain(line.trim());
+    }
+  });
+});
+
 describe("written controls", () => {
   const control = (
     claim: string,
