@@ -370,3 +370,20 @@ describe("buildInvestigationView — robustness", () => {
     expect(v.artifacts[v.artifacts.length - 1].id).toBe("commit:7be210e");
   });
 });
+
+describe("buildInvestigationView — the reading by change and scope", () => {
+  it("is left out of the view unless it is asked for", () => {
+    expect("reading" in view()).toBe(false);
+    expect("reading" in buildInvestigationView(syntheticRetryCap, { now, reading: false })).toBe(
+      false,
+    );
+  });
+
+  it("reads the answer from the same evidence when asked, and changes nothing else", () => {
+    const { reading, ...rest } = buildInvestigationView(syntheticRetryCap, { now, reading: true });
+    expect(rest).toEqual(view());
+    expect(reading!.history).toBe("the line");
+    expect(reading!.changes.map((c) => c.id)).toEqual(["commit:7be210e", "commit:92f6a3f"]);
+    expect(reading!.earlier).toBe("not read");
+  });
+});

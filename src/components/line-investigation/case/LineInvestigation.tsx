@@ -14,6 +14,7 @@ import { Answer } from "../answer/Answer";
 import { tickText } from "../copy/artifact-copy";
 import { caseSubject } from "../copy/subject-copy";
 import { historyModel } from "../history/history-model";
+import { extentOf, readingLayer } from "../history/reading-layer";
 import { HistorySection } from "../history/HistorySection";
 import type { SpecimenSlot } from "../instrument/types";
 import { buildInvestigationView } from "../model/build-investigation-view";
@@ -42,7 +43,9 @@ export function LineInvestigation({
   parent,
   phase,
   failure,
+  reading = false,
 }: {
+  reading?: boolean;
   result: DigResult;
   pending: boolean;
   analysis?: AnalysisLanguage;
@@ -57,10 +60,11 @@ export function LineInvestigation({
   failure?: ReactNode;
 }) {
   const view = useMemo(
-    () => buildInvestigationView(result, { now, pending }),
-    [result, now, pending],
+    () => buildInvestigationView(result, { now, pending, reading }),
+    [result, now, pending, reading],
   );
   const model = useMemo(() => historyModel(view, now), [view, now]);
+  const layer = useMemo(() => readingLayer(view.reading, now), [view, now]);
   const subject = useMemo(
     () => caseSubject(view, result.evidence.anchor),
     [view, result.evidence.anchor],
@@ -113,6 +117,7 @@ export function LineInvestigation({
   );
 
   const historyCount = model.strata.length;
+  const extent = extentOf(layer, historyCount, model.originDays);
   const hasHistory = !phase && (historyCount > 0 || model.loose.length > 0);
   const artifactCount = model.strata.reduce((n, s) => n + s.members.length, 0) + model.loose.length;
   const summary = !hasHistory
@@ -120,8 +125,8 @@ export function LineInvestigation({
     : subject.kind === "anchor"
       ? `Around ${subject.label} · ${plural(artifactCount, "artifact")}`
       : historyCount > 0
-        ? `History · ${plural(historyCount, "change")}${
-            model.originDays !== null ? ` over ${tickText(model.originDays).replace("−", "")}` : ""
+        ? `History · ${plural(extent.changes, "change")}${
+            extent.days !== null ? ` over ${tickText(extent.days).replace("−", "")}` : ""
           }`
         : `History · ${plural(model.loose.length, "artifact")}`;
 
@@ -198,6 +203,7 @@ export function LineInvestigation({
           onBack={back}
           onDrill={onDrill}
           arrive={collectedHere}
+          layer={layer}
         />
       )}
     </div>

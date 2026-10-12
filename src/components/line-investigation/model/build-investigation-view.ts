@@ -1,4 +1,5 @@
 import { narrativeLanguage } from "@understory/core/narrative-language";
+import { readAnswer } from "@understory/core/reading";
 import type { DigResult } from "@understory/core/types";
 import { auditClaims } from "./audit-claims";
 import { countLinks } from "./count-links";
@@ -13,7 +14,7 @@ import type { InvestigationView } from "./types";
 
 export function buildInvestigationView(
   result: DigResult,
-  opts: { now: Date | number; pending?: boolean },
+  opts: { now: Date | number; pending?: boolean; reading?: boolean },
 ): InvestigationView {
   const ev = result.evidence;
   const narrative = result.narrative;
@@ -45,5 +46,6 @@ export function buildInvestigationView(
     answer: narrative?.answer ?? null,
     language: narrative ? narrativeLanguage(narrative) : null,
     error: result.error ?? null,
+    ...(opts.reading ? { reading: readAnswer(ev, narrative) } : {}),
   };
 }

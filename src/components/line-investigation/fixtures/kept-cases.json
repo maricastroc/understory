@@ -1,0 +1,882 @@
+{
+  "note": "Real cases for the dev routes: the evidence as collection gives it today, with the walk back through the line's history, and an answer kept in eval/results with its audit. Generated, not written by hand. Authors' e-mail addresses are left out.",
+  "cases": {
+    "q-796": {
+      "evidence": {
+        "question": "Why is this line the way it is?",
+        "repo": {
+          "path": "kriskowal/q",
+          "name": "kriskowal/q",
+          "remoteUrl": "https://github.com/kriskowal/q",
+          "branch": "master",
+          "sha": "d180f4a0b22499607ac750b56766c8829d6bff43"
+        },
+        "location": {
+          "file": "q.js",
+          "startLine": 796,
+          "endLine": 796
+        },
+        "artifacts": [
+          {
+            "id": "commit:a4a868e",
+            "kind": "commit",
+            "title": "Make all promises inspectable by default",
+            "body": "Make all promises inspectable by default\n\nCustom promises have a state of \"unknown\" by default.  All custom\npromises have an \"inspect\" method, regardless of whether one is\nspecified.",
+            "url": "https://github.com/kriskowal/q/commit/a4a868efcbdd48e4df6c9b03523103a0a3c0b5b3",
+            "date": "2013-06-11T23:27:59Z",
+            "author": {
+              "name": "Kris Kowal"
+            },
+            "ref": "a4a868e",
+            "meta": {
+              "sha": "a4a868efcbdd48e4df6c9b03523103a0a3c0b5b3",
+              "prLookup": "none"
+            }
+          }
+        ],
+        "coverage": {
+          "granularity": "line"
+        },
+        "code": {
+          "startLine": 793,
+          "lines": [
+            "            ));",
+            "        };",
+            "    }",
+            "    if (inspect === void 0) {",
+            "        inspect = function () {",
+            "            return {state: \"unknown\"};",
+            "        };"
+          ],
+          "change": {
+            "artifactId": "commit:a4a868e",
+            "before": null,
+            "added": 5,
+            "scope": {
+              "files": 1,
+              "lines": 5,
+              "block": 5
+            }
+          }
+        },
+        "contradictions": [],
+        "lineage": {
+          "entries": [
+            {
+              "sha": "a4a868efcbdd48e4df6c9b03523103a0a3c0b5b3",
+              "date": "2013-06-11T23:27:59Z",
+              "title": "Make all promises inspectable by default",
+              "message": "Make all promises inspectable by default\n\nCustom promises have a state of \"unknown\" by default.  All custom\npromises have an \"inspect\" method, regardless of whether one is\nspecified.",
+              "did": "added",
+              "before": null
+            }
+          ],
+          "stopped": "the line was added"
+        }
+      },
+      "narrative": {
+        "answerable": true,
+        "recorded": true,
+        "claims": [
+          {
+            "text": "The added `if (inspect === void 0) { … }` block supplies a default `inspect` function when no `inspect` is provided, guaranteeing that every promise has an `inspect` method.",
+            "citations": ["commit:a4a868e"],
+            "grounded": true
+          },
+          {
+            "text": "The default `inspect` function returns `{state: \"unknown\"}`, reflecting the design that custom promises start with an unknown state by default.",
+            "citations": ["commit:a4a868e"],
+            "grounded": true
+          }
+        ],
+        "answer": "The added `if (inspect === void 0) { … }` block supplies a default `inspect` function when no `inspect` is provided, guaranteeing that every promise has an `inspect` method. The default `inspect` function returns `{state: \"unknown\"}`, reflecting the design that custom promises start with an unknown state by default.",
+        "citations": ["commit:a4a868e"],
+        "grounded": true,
+        "unknownCitations": [],
+        "ungroundedClaims": 0,
+        "confidence": {
+          "score": 0.9,
+          "level": "high",
+          "primarySources": 1,
+          "corroborating": 0,
+          "contradicting": 0
+        },
+        "entailment": {
+          "checked": true,
+          "checks": [
+            {
+              "citation": "commit:a4a868e",
+              "claim": 0,
+              "status": "supported",
+              "quote": "Make all promises inspectable by default",
+              "reason": "The commit message explicitly states that all custom promises have an inspect method regardless of whether one is specified, which directly supports the claim that the added block supplies a default inspect function when none is provided."
+            },
+            {
+              "citation": "commit:a4a868e",
+              "claim": 1,
+              "status": "supported",
+              "quote": "Custom promises have a state of \"unknown\" by default. All custom promises have an \"inspect\" method, regardless of whether one is specified.",
+              "reason": "The commit message explicitly states that custom promises default to an \"unknown\" state and provide an inspect method, matching the claim."
+            }
+          ],
+          "supported": 2,
+          "misattributed": 0,
+          "failed": 0,
+          "fallbacks": 0
+        },
+        "language": "en"
+      }
+    },
+    "ng-http-114": {
+      "evidence": {
+        "question": "Why is this line the way it is?",
+        "repo": {
+          "path": "angular/angular.js",
+          "name": "angular/angular.js",
+          "remoteUrl": "https://github.com/angular/angular.js",
+          "branch": "master",
+          "sha": "d8f77817eb5c98dec5317bc3756d1ea1812bcfbe"
+        },
+        "location": {
+          "file": "src/ng/http.js",
+          "startLine": 114,
+          "endLine": 114
+        },
+        "artifacts": [
+          {
+            "id": "commit:18a2e4f",
+            "kind": "commit",
+            "title": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of …",
+            "body": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects\n\nFollow jQuery when serializing arrays that contain objects\n\nClose #12393\nClose #12398",
+            "url": "https://github.com/angular/angular.js/commit/18a2e4fbfc44216c31bbcdf7705ca87c53e6f1fa",
+            "date": "2015-07-23T21:05:20Z",
+            "author": {
+              "name": "Lucas Galfaso"
+            },
+            "ref": "18a2e4f",
+            "meta": {
+              "sha": "18a2e4fbfc44216c31bbcdf7705ca87c53e6f1fa",
+              "prLookup": "none"
+            }
+          }
+        ],
+        "coverage": {
+          "granularity": "line"
+        },
+        "code": {
+          "startLine": 111,
+          "lines": [
+            "",
+            "      function serialize(toSerialize, prefix, topLevel) {",
+            "        if (isArray(toSerialize)) {",
+            "          forEach(toSerialize, function(value, index) {",
+            "            serialize(value, prefix + '[' + (isObject(value) ? index : '') + ']');",
+            "          });",
+            "        } else if (isObject(toSerialize) && !isDate(toSerialize)) {"
+          ],
+          "change": {
+            "artifactId": "commit:18a2e4f",
+            "before": "forEach(toSerialize, function(value) {",
+            "added": 2,
+            "scope": {
+              "files": 2,
+              "lines": 14,
+              "block": 4
+            }
+          }
+        },
+        "contradictions": [],
+        "lineage": {
+          "entries": [
+            {
+              "sha": "18a2e4fbfc44216c31bbcdf7705ca87c53e6f1fa",
+              "date": "2015-07-23T21:05:20Z",
+              "title": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects",
+              "message": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects\n\nFollow jQuery when serializing arrays that contain objects\n\nClose #12393\nClose #12398",
+              "did": "rewrote",
+              "before": "forEach(toSerialize, function(value) {"
+            },
+            {
+              "sha": "2420a0a77e27b530dbb8c41319b2995eccf76791",
+              "date": "2015-05-05T19:32:59Z",
+              "title": "fix($httpParamSerializerJQLike): follow jQuery logic for nested params",
+              "message": "fix($httpParamSerializerJQLike): follow jQuery logic for nested params\n\nCloses #11551\nCloses #11635",
+              "did": "added",
+              "before": null
+            }
+          ],
+          "stopped": "the line was added"
+        }
+      },
+      "narrative": {
+        "answerable": true,
+        "recorded": true,
+        "claims": [
+          {
+            "text": "The line was rewritten to include an `index` parameter in the `forEach` callback so that the serializer follows jQuery’s handling of arrays that contain objects.",
+            "citations": ["commit:18a2e4f"],
+            "grounded": true
+          }
+        ],
+        "answer": "The line was rewritten to include an `index` parameter in the `forEach` callback so that the serializer follows jQuery’s handling of arrays that contain objects.",
+        "citations": ["commit:18a2e4f"],
+        "grounded": true,
+        "unknownCitations": [],
+        "ungroundedClaims": 0,
+        "confidence": {
+          "score": 0.85,
+          "level": "high",
+          "primarySources": 1,
+          "corroborating": 0,
+          "contradicting": 0
+        },
+        "entailment": {
+          "checked": true,
+          "checks": [
+            {
+              "citation": "commit:18a2e4f",
+              "claim": 0,
+              "status": "supported",
+              "quote": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects",
+              "reason": "The commit message explicitly states the change was to follow jQuery’s handling of arrays that contain objects, implying the inclusion of an index parameter in the forEach callback."
+            }
+          ],
+          "supported": 1,
+          "misattributed": 0,
+          "failed": 0,
+          "fallbacks": 0
+        },
+        "language": "en"
+      }
+    },
+    "tslint-257": {
+      "evidence": {
+        "question": "Why is this line the way it is?",
+        "repo": {
+          "path": "palantir/tslint",
+          "name": "palantir/tslint",
+          "remoteUrl": "https://github.com/palantir/tslint",
+          "branch": "master",
+          "sha": "285fc1db18d1fd24680d6a2282c6445abf1566ee"
+        },
+        "location": {
+          "file": "src/linter.ts",
+          "startLine": 257,
+          "endLine": 257
+        },
+        "artifacts": [
+          {
+            "id": "pr:2369",
+            "kind": "pull_request",
+            "title": "Rewrite enable/disable logic",
+            "body": "Rewrite enable/disable logic\n\n#### PR checklist\r\n\r\n- [ ] Addresses an existing issue: #0000\r\n- [ ] New feature, bugfix, or enhancement\r\n  - [X] Includes tests\r\n- [ ] Documentation update\r\n\r\n#### Overview of change:\r\n\r\n* Move `disabledIntervals` out of rule options. Rules are not responsible for disabling theirselves. Just filter the failures after the rule returns them.\r\n  - While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures. It turns out a few rules were returning duplicate failures, so I changed them directly.\r\n* Don't expose `disabledIntervals` at all. Just have a `RuleDisabler` interface and a method for getting one from the disable comments in a source file.\r\n  - Therefore, we can delete `IDisabledInterval`.\r\n\r\n#### Is there anything you'd like reviewers to focus on?\r\n\r\nThere were conflicting tests as to whether explicitly enabling a rule turned off in tslint.json would enable it. I chose that it would. If you don't want that, the `isExplicitlyEnabled` method could be removed.\r\n\r\n#### CHANGELOG.md entry:\r\n\r\n[no-log] change are internal and backwards compatible\n\n— discussion —\n@ajafff: To summarize both inline discussions:\r\n`Linter` needs to be refactored. It should get the rule config only once in the constructor instead of every call to `Linter.lint`. We can then load all rules (even disabled ones to enable them later) upfront to save I/O.\r\nWe could / should also validate or parse the options for every rule (related: #1950) instead of doing this partially in some rule's `isEnabled` method. This needs to be done to ensure a rule is properly configured when enabled via comment.\n\n@ajafff: Related, but no blocker for this PR: when applying fixes, the position of the disabledIntervals may no longer be correct. It needs to be refreshed after each rule that applied fixes.\n\n@andy-hanson: In order to keep this PR small, I've removed `isExplicitlyEnabled`. Changing the Linter API can be done later.\n\n@nchen63: it doesn't look like any unit tests hit enableDisableRules.ts\n\n@andy-hanson: There is a black-box test `test/rules/_integration/enable-disable`.\r\nIt would be nice to have code coverage tests though.\n\n@andy-hanson: Test failure fixed by #2691.\n\n@andy-hanson: @nchen This was originally written during tslint 4.0. What is the schedule for new major tslint releases? It seemed to be much slower in the past but the gap from 4.0 to 5.0 was pretty small. If it will be more than a few months before the next major-version release I can add dummy implementations over the breaking changes as @ajaff mentioned. Otherwise I would be fine with waiting a little longer.\n\n@nchen63: There isn't a major release scheduled. It's usually based on how many breaking changes are queued up",
+            "url": "https://github.com/palantir/tslint/pull/2369",
+            "date": "2017-03-18T19:24:14Z",
+            "ref": "#2369",
+            "parentId": "commit:63fc794",
+            "meta": {
+              "mergedAt": "2017-05-09T03:06:56Z",
+              "reviewLookup": "found",
+              "issueLookup": "none"
+            }
+          },
+          {
+            "id": "review:2369-0",
+            "kind": "review",
+            "title": "Review by andy-hanson on #2369",
+            "body": "@andy-hanson: This method was never necessary to have here.",
+            "url": "https://github.com/palantir/tslint/pull/2369",
+            "date": "2017-03-18T19:24:36Z",
+            "author": {
+              "name": "andy-hanson"
+            },
+            "ref": "#2369",
+            "parentId": "pr:2369",
+            "meta": {
+              "state": "COMMENTED"
+            },
+            "comments": [
+              {
+                "body": "This method was never necessary to have here.",
+                "path": "src/language/rule/rule.ts",
+                "diffHunk": "-    endPosition: number;\n }\n \n export interface IRule {\n     getOptions(): IOptions;\n     isEnabled(): boolean;\n     apply(sourceFile: ts.SourceFile): RuleFailure[];\n-    applyWithWalker(walker: IWalker): RuleFailure[];",
+                "outdated": true,
+                "line": null
+              }
+            ]
+          },
+          {
+            "id": "review:2369-1",
+            "kind": "review",
+            "title": "Review by andy-hanson on #2369",
+            "body": "@andy-hanson: It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
+            "url": "https://github.com/palantir/tslint/pull/2369",
+            "date": "2017-03-18T19:25:04Z",
+            "author": {
+              "name": "andy-hanson"
+            },
+            "ref": "#2369",
+            "parentId": "pr:2369",
+            "meta": {
+              "state": "COMMENTED"
+            },
+            "comments": [
+              {
+                "body": "It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
+                "path": "src/ruleLoader.ts",
+                "diffHunk": "@@ -43,23 +38,19 @@ export function loadRules(ruleOptionsList: IOptions[],\n \n     for (const ruleOptions of ruleOptionsList) {\n         const ruleName = ruleOptions.ruleName;\n-        const enableDisableRules = enableDisableRuleMap.get(ruleName);\n-        if (ruleOptions.ruleSeverity !== \"off\" || enableDisableRuleMap) {",
+                "outdated": true,
+                "line": null
+              }
+            ]
+          },
+          {
+            "id": "review:2369-2",
+            "kind": "review",
+            "title": "Review by andy-hanson on #2369",
+            "body": "@andy-hanson: This conflicts with an assertion in `ruleLoaderTests.ts` that it \"loads disabled rules if rule in enableDisableRuleMap\". (It also now conflicts with `enable-via-comment`.) Which should we choose?",
+            "url": "https://github.com/palantir/tslint/pull/2369",
+            "date": "2017-03-18T19:26:22Z",
+            "author": {
+              "name": "andy-hanson"
+            },
+            "ref": "#2369",
+            "parentId": "pr:2369",
+            "meta": {
+              "state": "COMMENTED"
+            },
+            "comments": [
+              {
+                "body": "This conflicts with an assertion in `ruleLoaderTests.ts` that it \"loads disabled rules if rule in enableDisableRuleMap\". (It also now conflicts with `enable-via-comment`.) Which should we choose?",
+                "path": "test/rules/_integration/enable-disable/test.ts.lint",
+                "diffHunk": "@@ -78,9 +78,6 @@ var AAAaA = 'test' // previously both `quotemark` and `variable-name` rules were\n var AAAaA = 'test' // tslint:disable-line:quotemark\n var AAAaA = 'test' // ensure that disable-line rule correctly handles previous `enable rule - disable all` switches\n \n-// tslint:enable:no-var-keyword",
+                "outdated": true,
+                "line": null
+              }
+            ]
+          },
+          {
+            "id": "review:2369-3",
+            "kind": "review",
+            "title": "Review by ajafff on #2369",
+            "body": "@ajafff: technically you are right, but this check was added to do less work for disabled rules. With your change you need to find the rule in rulesDirectory and instantiate it before you know if you will ever need it (for every linted file).",
+            "url": "https://github.com/palantir/tslint/pull/2369",
+            "date": "2017-03-18T19:38:28Z",
+            "author": {
+              "name": "ajafff"
+            },
+            "ref": "#2369",
+            "parentId": "pr:2369",
+            "meta": {
+              "state": "COMMENTED"
+            },
+            "comments": [
+              {
+                "body": "technically you are right, but this check was added to do less work for disabled rules. With your change you need to find the rule in rulesDirectory and instantiate it before you know if you will ever need it (for every linted file).",
+                "path": "src/ruleLoader.ts",
+                "diffHunk": "@@ -43,23 +38,19 @@ export function loadRules(ruleOptionsList: IOptions[],\n \n     for (const ruleOptions of ruleOptionsList) {\n         const ruleName = ruleOptions.ruleName;\n-        const enableDisableRules = enableDisableRuleMap.get(ruleName);\n-        if (ruleOptions.ruleSeverity !== \"off\" || enableDisableRuleMap) {",
+                "outdated": true,
+                "line": null
+              }
+            ]
+          },
+          {
+            "id": "review:2369-4",
+            "kind": "review",
+            "title": "Review by ajafff on #2369",
+            "body": "@ajafff: The behaviour to not load disabled rules was added recently. Even though the rule was loaded, it would have never been executed, because `rule.isEnabled()` always returned false. I don't know why the test was implemented this way...\r\nI think it makes more sense to keep disabled rules disabled. Otherwise you need to guess the `ruleSeverity`",
+            "url": "https://github.com/palantir/tslint/pull/2369",
+            "date": "2017-03-18T19:43:24Z",
+            "author": {
+              "name": "ajafff"
+            },
+            "ref": "#2369",
+            "parentId": "pr:2369",
+            "meta": {
+              "state": "COMMENTED"
+            },
+            "comments": [
+              {
+                "body": "The behaviour to not load disabled rules was added recently. Even though the rule was loaded, it would have never been executed, because `rule.isEnabled()` always returned false. I don't know why the test was implemented this way...\r\nI think it makes more sense to keep disabled rules disabled. Otherwise you need to guess the `ruleSeverity`",
+                "path": "test/rules/_integration/enable-disable/test.ts.lint",
+                "diffHunk": "@@ -78,9 +78,6 @@ var AAAaA = 'test' // previously both `quotemark` and `variable-name` rules were\n var AAAaA = 'test' // tslint:disable-line:quotemark\n var AAAaA = 'test' // ensure that disable-line rule correctly handles previous `enable rule - disable all` switches\n \n-// tslint:enable:no-var-keyword",
+                "outdated": true,
+                "line": null
+              }
+            ]
+          },
+          {
+            "id": "commit:63fc794",
+            "kind": "commit",
+            "title": "Rewrite enable/disable logic (#2369)",
+            "body": "Rewrite enable/disable logic (#2369)",
+            "url": "https://github.com/palantir/tslint/commit/63fc794e73f1d63691593f68f4f728d05bbdf306",
+            "date": "2017-05-09T03:06:56Z",
+            "author": {
+              "name": "Andy Hanson"
+            },
+            "ref": "63fc794",
+            "meta": {
+              "sha": "63fc794e73f1d63691593f68f4f728d05bbdf306",
+              "prLookup": "found"
+            }
+          }
+        ],
+        "coverage": {
+          "granularity": "line"
+        },
+        "code": {
+          "startLine": 254,
+          "lines": [
+            "                source = Replacement.applyFixes(source, fileFixes);",
+            "                fileNewSource = source;",
+            "            } else {",
+            "                const oldSource = fs.readFileSync(filePath, \"utf-8\");",
+            "                fileNewSource = Replacement.applyFixes(oldSource, fileFixes);",
+            "            }",
+            "            fs.writeFileSync(path.resolve(filePath), fileNewSource);"
+          ],
+          "change": {
+            "artifactId": "commit:63fc794",
+            "before": null,
+            "added": 20,
+            "scope": {
+              "files": 17,
+              "lines": 628,
+              "block": 22
+            }
+          }
+        },
+        "contradictions": [],
+        "lineage": {
+          "entries": [
+            {
+              "sha": "63fc794e73f1d63691593f68f4f728d05bbdf306",
+              "date": "2017-05-09T03:06:56Z",
+              "title": "Rewrite enable/disable logic (#2369)",
+              "message": "Rewrite enable/disable logic (#2369)",
+              "did": "added",
+              "before": null
+            }
+          ],
+          "stopped": "the line was added"
+        }
+      },
+      "narrative": {
+        "answerable": true,
+        "recorded": true,
+        "claims": [
+          {
+            "text": "The line at src/linter.ts:257 was introduced in PR #2369, which rewrote the enable/disable logic by moving `disabledIntervals` out of rule options and simplifying how rules are filtered after execution.",
+            "citations": ["pr:2369"],
+            "grounded": true
+          },
+          {
+            "text": "Within that rewrite, a check of `ruleSeverity` was added to the linting loop to avoid loading and instantiating rules that are disabled, thereby reducing unnecessary work for each file linted.",
+            "citations": ["review:2369-3"],
+            "grounded": true
+          },
+          {
+            "text": "Reviewers pointed out that the `ruleSeverity` check is redundant because `isEnabled()` already performs the same validation, but the author defended its presence as a performance optimisation to keep disabled rules from being loaded.",
+            "citations": ["review:2369-3", "review:2369-4"],
+            "grounded": true
+          },
+          {
+            "text": "The final commit (63fc794) retained the line, confirming the decision to keep the `ruleSeverity` guard despite its redundancy, as part of the internal, backward‑compatible changes introduced by the PR.",
+            "citations": ["commit:63fc794"],
+            "grounded": true
+          }
+        ],
+        "answer": "The line at src/linter.ts:257 was introduced in PR #2369, which rewrote the enable/disable logic by moving `disabledIntervals` out of rule options and simplifying how rules are filtered after execution. Within that rewrite, a check of `ruleSeverity` was added to the linting loop to avoid loading and instantiating rules that are disabled, thereby reducing unnecessary work for each file linted. Reviewers pointed out that the `ruleSeverity` check is redundant because `isEnabled()` already performs the same validation, but the author defended its presence as a performance optimisation to keep disabled rules from being loaded. The final commit (63fc794) retained the line, confirming the decision to keep the `ruleSeverity` guard despite its redundancy, as part of the internal, backward‑compatible changes introduced by the PR.",
+        "citations": ["pr:2369", "review:2369-3", "review:2369-4", "commit:63fc794"],
+        "grounded": true,
+        "unknownCitations": [],
+        "ungroundedClaims": 0,
+        "confidence": {
+          "score": 0.65,
+          "level": "medium",
+          "primarySources": 4,
+          "corroborating": 3,
+          "contradicting": 0
+        },
+        "entailment": {
+          "checked": true,
+          "checks": [
+            {
+              "citation": "pr:2369",
+              "claim": 0,
+              "status": "weak",
+              "quote": "* Don't expose `disabledIntervals` at all. Just have a `RuleDisabler` interface and a method for getting one from the disable comments in a source file.",
+              "rejectedQuotes": [
+                "* Move `disabledIntervals` out of rule options. Rules are not responsible for disabling themselves. Just filter the failures after the rule returns them.",
+                "* While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures. It turns out a few rules were returning duplicate failures, so I changed them directly."
+              ],
+              "reason": "The PR description confirms the rewrite logic but does not state that the specific line was introduced in that PR."
+            },
+            {
+              "citation": "review:2369-3",
+              "claim": 1,
+              "status": "weak",
+              "quote": null,
+              "reason": "Source does not mention ruleSeverity."
+            },
+            {
+              "citation": "review:2369-3",
+              "claim": 2,
+              "status": "supported",
+              "quote": "technically you are right, but this check was added to do less work for disabled rules. With your change you need to find the rule in rulesDirectory and instantiate it before you know if you will ever need it (for every linted file).",
+              "reason": "Both sources together show the reviewer noted redundancy and the author defended the check as a performance optimisation to keep disabled rules from being loaded."
+            },
+            {
+              "citation": "review:2369-4",
+              "claim": 2,
+              "status": "supported",
+              "quote": "The behaviour to not load disabled rules was added recently. Even though the rule was loaded, it would have never been executed, because `rule.isEnabled()` always returned false. I don't know why the test was implemented this way... I think it makes more sense to keep disabled rules disabled. Otherwise you need to guess the `ruleSeverity",
+              "reason": "Both sources together show the reviewer noted redundancy and the author defended the check as a performance optimisation to keep disabled rules from being loaded."
+            },
+            {
+              "citation": "commit:63fc794",
+              "claim": 3,
+              "status": "weak",
+              "quote": null,
+              "reason": "The commit message and diff do not state that the ruleSeverity guard was kept because of redundancy or that it was part of internal backward‑compatible changes."
+            }
+          ],
+          "supported": 1,
+          "misattributed": 0,
+          "failed": 0,
+          "fallbacks": 0
+        },
+        "language": "en"
+      }
+    },
+    "ng-http-411": {
+      "evidence": {
+        "question": "Why is this line the way it is?",
+        "repo": {
+          "path": "angular/angular.js",
+          "name": "angular/angular.js",
+          "remoteUrl": "https://github.com/angular/angular.js",
+          "branch": "master",
+          "sha": "d8f77817eb5c98dec5317bc3756d1ea1812bcfbe"
+        },
+        "location": {
+          "file": "src/ng/http.js",
+          "startLine": 411,
+          "endLine": 411
+        },
+        "artifacts": [
+          {
+            "id": "commit:1e90d03",
+            "kind": "commit",
+            "title": "feat($http): support sending XSRF token to whitelisted origins",
+            "body": "feat($http): support sending XSRF token to whitelisted origins\n\nNormally, the XSRF token will not be set for cross-origin requests.\nWith this commit, it is possible to whitelist additional origins, so that requests to these origins\nwill include the XSRF token header.\n\nFixes #7862",
+            "url": "https://github.com/angular/angular.js/commit/1e90d030771b68d55dffd56898a380f903712b66",
+            "date": "2018-04-04T18:04:20Z",
+            "author": {
+              "name": "Georgios Kalpakas"
+            },
+            "ref": "1e90d03",
+            "meta": {
+              "sha": "1e90d030771b68d55dffd56898a380f903712b66",
+              "prLookup": "none"
+            }
+          }
+        ],
+        "coverage": {
+          "granularity": "line"
+        },
+        "code": {
+          "startLine": 408,
+          "lines": [
+            "   *   `https://foo.com/` will include the XSRF token.",
+            "   * </div>",
+            "   *",
+            "   * @example",
+            "   *",
+            "   * ```js",
+            "   * // App served from `https://example.com/`."
+          ],
+          "change": {
+            "artifactId": "commit:1e90d03",
+            "before": null,
+            "added": 42,
+            "scope": {
+              "files": 6,
+              "lines": 500,
+              "block": 42
+            }
+          }
+        },
+        "contradictions": [],
+        "lineage": {
+          "entries": [
+            {
+              "sha": "1e90d030771b68d55dffd56898a380f903712b66",
+              "date": "2018-04-04T18:04:20Z",
+              "title": "feat($http): support sending XSRF token to whitelisted origins",
+              "message": "feat($http): support sending XSRF token to whitelisted origins\n\nNormally, the XSRF token will not be set for cross-origin requests.\nWith this commit, it is possible to whitelist additional origins, so that requests to these origins\nwill include the XSRF token header.\n\nFixes #7862",
+              "did": "added",
+              "before": null
+            }
+          ],
+          "stopped": "the line was added"
+        }
+      },
+      "narrative": {
+        "answerable": true,
+        "recorded": true,
+        "claims": [
+          {
+            "text": "This line was added as part of a documentation block that provides an example for the newly introduced XSRF‑token whitelisting feature in $http.",
+            "citations": ["commit:1e90d03"],
+            "grounded": true
+          }
+        ],
+        "answer": "This line was added as part of a documentation block that provides an example for the newly introduced XSRF‑token whitelisting feature in $http.",
+        "citations": ["commit:1e90d03"],
+        "grounded": true,
+        "unknownCitations": [],
+        "ungroundedClaims": 0,
+        "confidence": {
+          "score": 0.55,
+          "level": "medium",
+          "primarySources": 1,
+          "corroborating": 0,
+          "contradicting": 0
+        },
+        "entailment": {
+          "checked": true,
+          "checks": [
+            {
+              "citation": "commit:1e90d03",
+              "claim": 0,
+              "status": "weak",
+              "quote": null,
+              "reason": "The commit message only describes adding XSRF‑token whitelisting support; it does not state that the line was added as part of a documentation block providing an example for that feature."
+            }
+          ],
+          "supported": 0,
+          "misattributed": 0,
+          "failed": 0,
+          "fallbacks": 0
+        },
+        "language": "en"
+      }
+    },
+    "ws-revert-story": {
+      "evidence": {
+        "question": "Why are zero-quantity rows dropped only for discontinued SKUs?",
+        "repo": {
+          "path": ".demo/warehouse-sync",
+          "branch": "main",
+          "sha": "e4dfae7c25f59a1fb259bab379967810a705147f"
+        },
+        "location": {
+          "file": "src/sync/dedupe.ts",
+          "startLine": 4,
+          "endLine": 4
+        },
+        "artifacts": [
+          {
+            "id": "commit:90021c7",
+            "kind": "commit",
+            "title": "sync: scaffold the inventory sync job",
+            "body": "sync: scaffold the inventory sync job",
+            "url": "",
+            "date": "2024-01-05T09:10:00-03:00",
+            "author": {
+              "name": "Tomás Vega"
+            },
+            "ref": "90021c7",
+            "meta": {
+              "sha": "90021c788a1dfea397974211c0e00cfafe0a78f0",
+              "prLookup": "skipped"
+            }
+          },
+          {
+            "id": "commit:22e1399",
+            "kind": "commit",
+            "title": "sync: drop rows with a zero quantity",
+            "body": "sync: drop rows with a zero quantity\n\nThe vendor emits a zero-quantity row for every discontinued SKU on every\npoll. Skipping them saves one write per discontinued SKU per run.",
+            "url": "",
+            "date": "2024-03-05T09:48:00-03:00",
+            "author": {
+              "name": "Tomás Vega"
+            },
+            "ref": "22e1399",
+            "meta": {
+              "sha": "22e1399507d772ed1b5574660a2790092acd704d",
+              "prLookup": "skipped"
+            }
+          },
+          {
+            "id": "commit:05a16a3",
+            "kind": "commit",
+            "title": "Revert \"sync: drop rows with a zero quantity\"",
+            "body": "Revert \"sync: drop rows with a zero quantity\"\n\nThis reverts commit 22e1399507d772ed1b5574660a2790092acd704d.\n\nWH-2402: zero is also what the vendor sends when a SKU sells out, so the\nstorefront kept showing the last positive stock for sold-out items.",
+            "url": "",
+            "date": "2024-03-11T14:05:00-03:00",
+            "author": {
+              "name": "Aiko Tanaka"
+            },
+            "ref": "05a16a3",
+            "meta": {
+              "sha": "05a16a363cc3fff172502f4a5be05fc85d7c9692",
+              "prLookup": "skipped"
+            }
+          },
+          {
+            "id": "commit:9da72fa",
+            "kind": "commit",
+            "title": "sync: drop zero-quantity rows only for discontinued SKUs",
+            "body": "sync: drop zero-quantity rows only for discontinued SKUs\n\nBrings back the saving from the reverted change without hiding sell-outs:\na zero row is skipped only when the SKU is flagged discontinued.",
+            "url": "",
+            "date": "2024-03-18T10:30:00-03:00",
+            "author": {
+              "name": "Aiko Tanaka"
+            },
+            "ref": "9da72fa",
+            "meta": {
+              "sha": "9da72fa3c1a19a18e2e50257a761b999e141b509",
+              "prLookup": "skipped"
+            }
+          }
+        ],
+        "coverage": {
+          "granularity": "line"
+        },
+        "code": {
+          "startLine": 1,
+          "lines": [
+            "import type { StockRow } from \"../lib/stock\";",
+            "",
+            "export function keep(row: StockRow) {",
+            "  return row.quantity > 0 || !row.discontinued;",
+            "}",
+            ""
+          ],
+          "change": {
+            "artifactId": "commit:9da72fa",
+            "before": "return true;",
+            "added": 1,
+            "scope": {
+              "files": 1,
+              "lines": 2,
+              "block": 2
+            }
+          }
+        },
+        "contradictions": [
+          {
+            "artifactId": "commit:22e1399",
+            "by": "commit:05a16a3",
+            "kind": "revert",
+            "detail": "Reverted by 05a16a3 on 11 Mar 2024 — the change was later undone."
+          }
+        ],
+        "lineage": {
+          "entries": [
+            {
+              "sha": "9da72fa3c1a19a18e2e50257a761b999e141b509",
+              "date": "2024-03-18T10:30:00-03:00",
+              "title": "sync: drop zero-quantity rows only for discontinued SKUs",
+              "message": "sync: drop zero-quantity rows only for discontinued SKUs\nBrings back the saving from the reverted change without hiding sell-outs:\na zero row is skipped only when the SKU is flagged discontinued.",
+              "did": "rewrote",
+              "before": "return true;"
+            },
+            {
+              "sha": "05a16a363cc3fff172502f4a5be05fc85d7c9692",
+              "date": "2024-03-11T14:05:00-03:00",
+              "title": "Revert \"sync: drop rows with a zero quantity\"",
+              "message": "Revert \"sync: drop rows with a zero quantity\"\nThis reverts commit 22e1399507d772ed1b5574660a2790092acd704d.\n\nWH-2402: zero is also what the vendor sends when a SKU sells out, so the\nstorefront kept showing the last positive stock for sold-out items.",
+              "did": "rewrote",
+              "before": "return row.quantity > 0;"
+            },
+            {
+              "sha": "22e1399507d772ed1b5574660a2790092acd704d",
+              "date": "2024-03-05T09:48:00-03:00",
+              "title": "sync: drop rows with a zero quantity",
+              "message": "sync: drop rows with a zero quantity\nThe vendor emits a zero-quantity row for every discontinued SKU on every\npoll. Skipping them saves one write per discontinued SKU per run.",
+              "did": "rewrote",
+              "before": "return true;"
+            },
+            {
+              "sha": "90021c788a1dfea397974211c0e00cfafe0a78f0",
+              "date": "2024-01-05T09:10:00-03:00",
+              "title": "sync: scaffold the inventory sync job",
+              "message": "sync: scaffold the inventory sync job",
+              "did": "added",
+              "before": null
+            }
+          ],
+          "stopped": "the line was added"
+        }
+      },
+      "narrative": {
+        "answerable": true,
+        "recorded": true,
+        "claims": [
+          {
+            "text": "The vendor emits a zero‑quantity row for every discontinued SKU on each poll, and skipping those rows saves one write per discontinued SKU per run.",
+            "citations": ["commit:22e1399"],
+            "grounded": true
+          },
+          {
+            "text": "However, zero quantity is also used when a SKU sells out, so dropping all zero‑quantity rows would hide sell‑out information.",
+            "citations": ["commit:05a16a3"],
+            "grounded": true
+          },
+          {
+            "text": "Therefore the later change drops zero‑quantity rows only when the SKU is flagged discontinued, restoring the write‑saving benefit without hiding sell‑outs.",
+            "citations": ["commit:9da72fa"],
+            "grounded": true
+          }
+        ],
+        "answer": "The vendor emits a zero‑quantity row for every discontinued SKU on each poll, and skipping those rows saves one write per discontinued SKU per run. However, zero quantity is also used when a SKU sells out, so dropping all zero‑quantity rows would hide sell‑out information. Therefore the later change drops zero‑quantity rows only when the SKU is flagged discontinued, restoring the write‑saving benefit without hiding sell‑outs.",
+        "citations": ["commit:22e1399", "commit:05a16a3", "commit:9da72fa"],
+        "grounded": true,
+        "unknownCitations": [],
+        "ungroundedClaims": 0,
+        "confidence": {
+          "score": 0.55,
+          "level": "medium",
+          "primarySources": 3,
+          "corroborating": 1,
+          "contradicting": 1
+        },
+        "entailment": {
+          "checked": true,
+          "checks": [
+            {
+              "citation": "commit:22e1399",
+              "claim": 0,
+              "status": "supported",
+              "quote": "The vendor emits a zero-quantity row for every discontinued SKU on every poll. Skipping them saves one write per discontinued SKU per run.",
+              "reason": "The commit message explicitly states the vendor emits zero‑quantity rows for discontinued SKUs on each poll and that skipping them saves a write per SKU per run."
+            },
+            {
+              "citation": "commit:05a16a3",
+              "claim": 1,
+              "status": "supported",
+              "quote": "WH-2402: zero is also what the vendor sends when a SKU sells out, so the storefront kept showing the last positive stock for sold-out items.",
+              "reason": "The commit message explicitly states that zero quantity is used to indicate a sold‑out SKU and that dropping zero rows would hide that information."
+            },
+            {
+              "citation": "commit:9da72fa",
+              "claim": 2,
+              "status": "supported",
+              "quote": "sync: drop zero-quantity rows only for discontinued SKUs",
+              "reason": "The commit message explicitly states that zero‑quantity rows are dropped only for discontinued SKUs and that this restores the write‑saving benefit without hiding sell‑outs."
+            }
+          ],
+          "supported": 3,
+          "misattributed": 0,
+          "failed": 0,
+          "fallbacks": 0
+        },
+        "language": "en"
+      }
+    }
+  }
+}

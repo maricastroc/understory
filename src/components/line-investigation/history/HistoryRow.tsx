@@ -3,6 +3,7 @@ import { dateLine, dayDate, displayId, labelTitle, tickText } from "../copy/arti
 import { artifactName, gapName } from "../copy/accessible-name";
 import { contextLines, metaLine } from "../copy/drawer-copy";
 import { gapChip } from "../copy/gap-copy";
+import { factText, scopeText } from "../copy/reading-copy";
 import { excerpt } from "../copy/source-copy";
 import { subjectCaption } from "../copy/subject-copy";
 import type { CaseSubject } from "../copy/types";
@@ -13,6 +14,7 @@ import { EvidenceLetter } from "../parts/EvidenceLetter";
 import { liButton } from "../parts/button-class";
 import type { CaseAction } from "../state/types";
 import { BoreCell, Glyph, Margin, ROW_GRID } from "./HistoryParts";
+import { type ReadingLayer, scopeKey } from "./reading-layer";
 import type { HistoryMember, HistoryStratum } from "./types";
 
 function shortDate(a: ViewArtifact, anchor: ViewArtifact): string {
@@ -35,7 +37,9 @@ export function HistoryRow({
   dispatch,
   onBack,
   onDrill,
+  layer,
 }: {
+  layer?: ReadingLayer | null;
   member: HistoryMember;
   stratum: HistoryStratum;
   view: InvestigationView;
@@ -63,6 +67,7 @@ export function HistoryRow({
   const shown = opened ? excerpt(a, quotes[0]?.range ?? null) : null;
   const context = opened ? contextLines(a, view.artifacts) : [];
   const meta = opened ? metaLine(a, view.artifacts) : "";
+  const fact = layer && anchor ? layer.facts.get(a.id) : undefined;
 
   return (
     <div
@@ -139,9 +144,21 @@ export function HistoryRow({
           ))}
         </button>
         {caption && <span className="font-li-mono text-[11px] text-li-text-subtle">{caption}</span>}
+        {fact && (
+          <span data-fact className="font-li-mono text-[11px] text-li-datum-ink">
+            {factText(fact)}
+            {fact.did === "rewrote" && fact.before !== null && (
+              <>
+                {" · before: "}
+                <code className="text-li-neutral-800">{fact.before}</code>
+              </>
+            )}
+          </span>
+        )}
         {quotes.map((q, i) => {
           const c = view.clauses.find((x) => x.id === q.clauseId);
           const active = q.clauseId === clause;
+          const scope = layer && c ? layer.scopes.get(scopeKey(a.id, c.index)) : undefined;
           return (
             <span
               key={`${q.clauseId}-${i}`}
@@ -153,6 +170,19 @@ export function HistoryRow({
                 “{q.text}”
               </span>
               {c && <span className="text-[11px]">quoted for clause {c.index + 1}</span>}
+              {scope && (
+                <>
+                  <span aria-hidden className="text-[11px]">
+                    ·
+                  </span>
+                  <span
+                    data-scope={scope.scope}
+                    className={`text-[11px] ${scope.scope === "line" ? "text-li-datum-ink" : "text-li-text-subtle"}`}
+                  >
+                    {scopeText(scope)}
+                  </span>
+                </>
+              )}
             </span>
           );
         })}

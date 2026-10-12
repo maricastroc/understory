@@ -4,6 +4,7 @@ import { type Dispatch, useEffect, useId, useMemo, useRef, useState } from "reac
 import { dayDate, displayId, tickText } from "../copy/artifact-copy";
 import { gapName } from "../copy/accessible-name";
 import { gapBody, gapLetter, gapTitle } from "../copy/gap-copy";
+import { EARLIER_CAPTION, edgeText, factText } from "../copy/reading-copy";
 import {
   breakMargin,
   breakText,
@@ -18,8 +19,9 @@ import { HATCH_BAND } from "../parts/hatch";
 import { liButton } from "../parts/button-class";
 import { cssEscape, reveal } from "../parts/dom";
 import type { CaseAction, CaseState } from "../state/types";
-import { BoreCell, BreakMark, Margin, ROW_GRID } from "./HistoryParts";
+import { BoreCell, BreakMark, Glyph, Margin, ROW_GRID } from "./HistoryParts";
 import { HistoryRow } from "./HistoryRow";
+import { extentOf, type ReadingLayer } from "./reading-layer";
 import type { HistoryItem, HistoryModel, HistoryStratum } from "./types";
 import { useHistoryPosition } from "./use-history-position";
 
@@ -54,7 +56,9 @@ export function HistorySection({
   onBack,
   onDrill,
   arrive,
+  layer,
 }: {
+  layer?: ReadingLayer | null;
   model: HistoryModel;
   view: InvestigationView;
   subject: CaseSubject;
@@ -76,6 +80,9 @@ export function HistorySection({
   const byStratum = useMemo(() => new Map(model.strata.map((s) => [s.id, s])), [model.strata]);
   const here = at ? byStratum.get(at) : undefined;
   const count = model.strata.reduce((n, s) => n + s.members.length, 0) + model.loose.length;
+  const edge = layer ? edgeText(layer.edge, layer.history) : null;
+  const extent = extentOf(layer, model.strata.length, model.originDays);
+  const open = layer?.history === "the line" && edge !== null;
 
   const forced = useMemo(() => {
     const wanted = new Set<string>([...(lit ?? []), ...(state.located ? [state.located] : [])]);
@@ -180,6 +187,7 @@ export function HistorySection({
               dispatch={dispatch}
               onBack={onBack}
               onDrill={onDrill}
+              layer={layer}
             />
           ))}
           {silent.map((g) => (
@@ -224,8 +232,9 @@ export function HistorySection({
           {historyTitle(subject)}
         </h2>
         <span className="font-li-mono text-[11px] text-li-text-subtle">
-          today ±0 → origin {model.originDays !== null ? tickText(model.originDays) : "—"} ·{" "}
-          {plural(model.strata.length, "change")} · {plural(count, "artifact")}
+          today ±0 → {open ? "oldest read" : "origin"}{" "}
+          {extent.days !== null ? tickText(extent.days) : "—"} · {plural(extent.changes, "change")}{" "}
+          · {plural(count, "artifact")}
         </span>
         {inside && here && (
           <span className="font-li-mono text-[11px] text-li-ink" aria-hidden>
@@ -272,7 +281,74 @@ export function HistorySection({
 
       <ol aria-label="History, newest first">{renderItems(model.items)}</ol>
 
-      {origin && (
+      {layer && layer.earlier.length > 0 && (
+        <ol aria-label="Earlier changes to this line, found by following it back">
+          {layer.earlier.map((entry) => (
+            <li
+              key={entry.id}
+              data-earlier={entry.id}
+              className={`${ROW_GRID} border-t border-li-neutral-300 pt-2`}
+            >
+              <Margin>{dayDate(entry.date)}</Margin>
+              <BoreCell line="dashed">
+                <Glyph kind="commit" cited={false} dim />
+              </BoreCell>
+              <div className="col-span-2 flex min-w-0 flex-col gap-1 pb-2.5 max-[820px]:col-span-1">
+                <span className="font-li-mono text-[11px] text-li-text-subtle min-[821px]:hidden">
+                  {dayDate(entry.date)}
+                </span>
+                <span className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="font-li-mono text-[12.5px] font-medium text-li-ink">
+                    {entry.id.replace("commit:", "")}
+                  </span>
+                  <span className="text-[14.5px] leading-[1.35] text-li-neutral-800">
+                    {entry.title}
+                  </span>
+                </span>
+                {entry.did && (
+                  <span className="font-li-mono text-[11px] text-li-datum-ink">
+                    {factText({ did: entry.did, before: entry.before ?? null })}
+                    {entry.did === "rewrote" && entry.before && (
+                      <>
+                        {" · before: "}
+                        <code className="text-li-neutral-800">{entry.before}</code>
+                      </>
+                    )}
+                  </span>
+                )}
+                <span className="font-li-mono text-[11px] text-li-text-subtle">
+                  {EARLIER_CAPTION}
+                </span>
+                {entry.message && entry.message.trim() !== entry.title.trim() && (
+                  <details className="max-w-170 text-[12.5px] text-li-neutral-800">
+                    <summary className="w-fit cursor-pointer font-li-mono text-[11px] text-li-text-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus">
+                      the commit message
+                    </summary>
+                    <pre className="mt-1 font-li-mono text-[11.5px] leading-[1.5] whitespace-pre-wrap">
+                      {entry.message}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {edge && (
+        <p
+          role="note"
+          data-edge
+          className={`${ROW_GRID} border-t border-dashed border-li-neutral-300 pt-2 pb-2`}
+        >
+          <span className="col-span-2 max-[820px]:hidden" />
+          <span className="col-span-2 font-li-mono text-[11px] text-li-text-subtle max-[820px]:col-span-2">
+            {edge}
+          </span>
+        </p>
+      )}
+
+      {origin && !(layer && (layer.earlier.length > 0 || edge !== null)) && (
         <div className={`${ROW_GRID} border-t border-li-neutral-300 pt-2`}>
           <Margin>
             origin
