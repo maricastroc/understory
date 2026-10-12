@@ -78,6 +78,50 @@ function lineFact(example: Example): string {
     : `Commit ${commit} added this line.`;
 }
 
+const LIMIT = 150;
+
+type Source = { kind: string; date: string; body: string; change: string | null };
+
+const sourcesOf = (example: Example) =>
+  example.sources as unknown as Record<string, Source | undefined>;
+
+function Quote({
+  example,
+  source,
+  text,
+  note,
+}: {
+  example: Example;
+  source: string;
+  text: string;
+  note?: string;
+}) {
+  const from = sourcesOf(example)[source];
+  return (
+    <div className="border-l border-li-evidence-edge pl-3">
+      <p className="text-li-ink">
+        “{text.length > LIMIT ? `${text.slice(0, LIMIT).trimEnd()}…` : text}”
+      </p>
+      {text.length > LIMIT ? (
+        <details className="text-[13px] text-li-text-subtle">
+          <summary className="cursor-pointer font-mono text-[11px]">the whole passage</summary>
+          <p className="mt-1 text-li-ink">“{text}”</p>
+        </details>
+      ) : null}
+      <details className="text-[13px] text-li-text-subtle">
+        <summary className="cursor-pointer font-mono text-[11px] text-li-text-muted">
+          {short(source)} · {from?.kind.replace("_", " ")} · {from?.date}
+          {note ? ` · ${note}` : ""} · the source in full
+        </summary>
+        <pre className="mt-1 font-mono text-[11px] leading-5 whitespace-pre-wrap">{from?.body}</pre>
+      </details>
+    </div>
+  );
+}
+
+const placed = (claim: Claim, source: string) =>
+  source.startsWith("review") && claim.anchoring ? `comment made ${claim.anchoring}` : undefined;
+
 function Apart({ example }: { example: Example }) {
   const direct = example.claims.filter((c) => c.state === DIRECT);
   const change = example.claims.filter((c) => c.state === CHANGE);
@@ -105,7 +149,7 @@ function Apart({ example }: { example: Example }) {
         )}
       </section>
       {change.length ? (
-        <section className="space-y-2">
+        <section className="space-y-3">
           <h4 className="font-mono text-[11px] tracking-wide text-li-evidence-ink uppercase">
             About the change that last touched it
           </h4>
@@ -113,20 +157,15 @@ function Apart({ example }: { example: Example }) {
             The record&apos;s own words. They explain the change. Whether they explain this line is
             not shown.
           </p>
-          {change.flatMap((claim) =>
+          {change.flatMap((claim, at) =>
             claim.quotes.map((quote, i) => (
-              <p
-                key={`${quote.source}-${i}`}
-                className="border-l border-li-evidence-edge pl-3 text-li-ink"
-              >
-                “{quote.text}”{" "}
-                <span className="font-mono text-[11px] text-li-text-muted">
-                  {short(quote.source)}
-                  {quote.source.startsWith("review") && claim.anchoring
-                    ? `, comment made ${claim.anchoring}`
-                    : ""}
-                </span>
-              </p>
+              <Quote
+                key={`${at}-${quote.source}-${i}`}
+                example={example}
+                source={quote.source}
+                text={quote.text}
+                note={placed(claim, quote.source)}
+              />
             )),
           )}
         </section>
@@ -148,14 +187,141 @@ function Apart({ example }: { example: Example }) {
   );
 }
 
-export function LinkPreview() {
+function Synthesis({ example }: { example: Example }) {
+  const sources = sourcesOf(example);
+  const last = example.change?.commit ?? null;
+  const sustained = example.claims.filter((c) => c.state !== "not sustained");
+  const rest = example.claims.filter((c) => c.state === "not sustained");
+  const told = example.history
+    .map((entry) => ({
+      entry,
+      claims: sustained.filter((c) => c.citations.some((id) => sources[id]?.change === entry.id)),
+    }))
+    .filter((group) => group.claims.length > 0);
   return (
-    <main className="mx-auto max-w-6xl bg-li-paper px-6 py-10 text-[15px] leading-6 text-li-ink">
-      <h1 className="text-xl">Evidence and link, shown two ways</h1>
+    <div className="space-y-6">
+      <section className="space-y-2">
+        <h4 className="font-mono text-[11px] tracking-wide text-li-datum-ink uppercase">
+          What happened on this line
+        </h4>
+        <ol className="space-y-1">
+          {example.history.map((entry) => (
+            <li
+              key={entry.id}
+              className={entry.id === last ? "text-li-ink" : "text-li-text-subtle"}
+            >
+              <span className="font-mono text-[11px] text-li-text-muted">
+                {entry.date} · {short(entry.id)}
+              </span>{" "}
+              {entry.title}
+              {entry.id === last ? <span className="block">{lineFact(example)}</span> : null}
+            </li>
+          ))}
+        </ol>
+      </section>
+      <section className="space-y-4">
+        <h4 className="font-mono text-[11px] tracking-wide text-li-evidence-ink uppercase">
+          What the record gives as the reason
+        </h4>
+        {told.length === 0 ? (
+          <p className="text-li-text-subtle">Nothing the audit could sustain.</p>
+        ) : null}
+        {told.map(({ entry, claims }) => {
+          const tied = claims.filter((c) => c.state === DIRECT);
+          const scope = tied.length
+            ? "tied to this line"
+            : entry.id === last
+              ? "given for the change as a whole"
+              : "given for an earlier change to this line";
+          return (
+            <div key={entry.id} className="space-y-2">
+              <p className="font-mono text-[11px]">
+                <span className={tied.length ? "text-li-datum-ink" : "text-li-text-subtle"}>
+                  {scope}
+                </span>
+                <span className="text-li-text-muted">
+                  {" "}
+                  · {short(entry.id)} · {entry.date}
+                </span>
+              </p>
+              {tied.map((claim, i) => (
+                <p key={i} className="text-li-ink">
+                  {claim.text}
+                </p>
+              ))}
+              {claims.flatMap((claim, at) =>
+                claim.quotes
+                  .filter((quote) => sources[quote.source]?.change === entry.id)
+                  .map((quote, i) => (
+                    <Quote
+                      key={`${at}-${quote.source}-${i}`}
+                      example={example}
+                      source={quote.source}
+                      text={quote.text}
+                      note={placed(claim, quote.source)}
+                    />
+                  )),
+              )}
+            </div>
+          );
+        })}
+      </section>
+      {(sustained.length > 0 && !sustained.some((c) => c.state === DIRECT)) || rest.length > 0 ? (
+        <section className="space-y-2">
+          <h4 className="font-mono text-[11px] tracking-wide text-li-gap-ink uppercase">
+            Not established
+          </h4>
+          {sustained.length > 0 && !sustained.some((c) => c.state === DIRECT) ? (
+            <p className="text-li-text-subtle">
+              The record explains the change. It does not show that this is why this line reads as
+              it does.
+            </p>
+          ) : null}
+          {sustained.length === 0 ? (
+            <p className="text-li-text-subtle">
+              No reason for this line that a source sustains. What the record does give is the
+              change itself, above.
+            </p>
+          ) : null}
+          {rest.length ? (
+            <details className="text-[13px] text-li-text-muted">
+              <summary className="cursor-pointer font-mono text-[11px]">
+                {rest.length} {rest.length === 1 ? "sentence" : "sentences"} of the answer that no
+                source sustains
+              </summary>
+              {rest.map((claim, i) => (
+                <p key={i} className="mt-1">
+                  {claim.text}{" "}
+                  <span className="font-mono text-[11px] text-li-gap-ink">{claim.evidence}</span>
+                </p>
+              ))}
+            </details>
+          ) : null}
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+const VIEWS = [
+  ["a", "A · the explanation, qualified claim by claim", Qualified],
+  ["b", "B · the change and the line, told apart", Apart],
+  [
+    "c",
+    "C · what happened, what the record gives as the reason, what is not established",
+    Synthesis,
+  ],
+] as const;
+
+export function LinkPreview({ only }: { only: "a" | "b" | "c" | null }) {
+  const views = VIEWS.filter(([key]) => !only || key === only);
+  return (
+    <main className="mx-auto max-w-[1500px] bg-li-paper px-6 py-10 text-[15px] leading-6 text-li-ink">
+      <h1 className="text-xl">Evidence and link, shown three ways</h1>
       <p className="mt-2 max-w-3xl text-li-text-subtle">
-        Four answers kept in the eval, unchanged. Each claim carries two separate readings: how good
+        Five answers kept in the eval, unchanged. Each claim carries two separate readings: how good
         its evidence is, as the audit judged it, and how specifically its sources are tied to the
-        line. A shows them on the explanation as it is written. B takes the explanation apart.
+        line. Add ?d=a, ?d=b or ?d=c to see one alone.
       </p>
       {fixture.examples.map((example) => (
         <article key={example.id} className="mt-12 border-t border-li-rule pt-6">
@@ -166,19 +332,15 @@ export function LinkPreview() {
           <pre className="mt-3 overflow-x-auto bg-li-datum-row px-3 py-1.5 font-mono text-[13px]">
             {example.line}
           </pre>
-          <div className="mt-6 grid gap-10 md:grid-cols-2">
-            <div>
-              <h3 className="mb-4 font-mono text-[11px] tracking-wide text-li-text-muted uppercase">
-                A · the explanation, qualified claim by claim
-              </h3>
-              <Qualified example={example} />
-            </div>
-            <div>
-              <h3 className="mb-4 font-mono text-[11px] tracking-wide text-li-text-muted uppercase">
-                B · the change and the line, told apart
-              </h3>
-              <Apart example={example} />
-            </div>
+          <div className={only ? "mt-6 max-w-2xl" : "mt-6 grid gap-10 xl:grid-cols-3"}>
+            {views.map(([key, title, View]) => (
+              <div key={key}>
+                <h3 className="mb-4 font-mono text-[11px] tracking-wide text-li-text-muted uppercase">
+                  {title}
+                </h3>
+                <View example={example} />
+              </div>
+            ))}
           </div>
         </article>
       ))}
