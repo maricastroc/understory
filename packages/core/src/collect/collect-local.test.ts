@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { blameWindow } from "./blame-window";
-import { lineHistory, readFileAtRef } from "./git";
+import { filePatch, lineHistory, readFileAtRef } from "./git";
 import { collect } from "./index";
 
 let dir = "";
@@ -52,6 +52,42 @@ describe("collect — local checkout", () => {
     expect(ev.artifacts.every((a) => a.meta?.prLookup === "skipped")).toBe(true);
   });
 
+  it("keeps the investigated line with its neighbours, read at the pinned revision", async () => {
+    const ev = await collect({
+      repoPath: dir,
+      question: "why 3?",
+      location: { file: "charge.ts", startLine: 2, endLine: 2 },
+    });
+    expect(ev.code).toEqual({
+      startLine: 1,
+      lines: ["a", "for (let i = 0; i < 3; i++) {", "c", "d", ""],
+      change: { artifactId: `commit:${second.slice(0, 7)}`, before: "while (true) {", added: 1 },
+    });
+  });
+
+  it("says a line is new when the last change added it", async () => {
+    const ev = await collect({
+      repoPath: dir,
+      question: "why d?",
+      location: { file: "charge.ts", startLine: 4, endLine: 4 },
+    });
+    expect(ev.code?.change).toEqual({
+      artifactId: `commit:${second.slice(0, 7)}`,
+      before: null,
+      added: 1,
+    });
+  });
+
+  it("keeps the code and leaves the change out for a range of lines", async () => {
+    const ev = await collect({
+      repoPath: dir,
+      question: "why?",
+      location: { file: "charge.ts", startLine: 2, endLine: 3 },
+    });
+    expect(ev.code?.lines).toContain("for (let i = 0; i < 3; i++) {");
+    expect(ev.code).not.toHaveProperty("change");
+  });
+
   it("reads line history at a pinned revision, not at the current HEAD", async () => {
     const history = await lineHistory(dir, { file: "charge.ts", startLine: 2, endLine: 2 }, first);
     expect(history.map((c) => c.sha)).toEqual([first]);
@@ -72,6 +108,19 @@ describe("readFileAtRef", () => {
 
   it("refuses anything that is not a sha", async () => {
     await expect(readFileAtRef(dir, "HEAD~1", "charge.ts")).rejects.toThrow(/Not a commit sha/);
+  });
+});
+
+describe("filePatch", () => {
+  it("returns what one commit did to one file", async () => {
+    const patch = await filePatch(dir, second, "charge.ts");
+    expect(patch).toContain("-while (true) {");
+    expect(patch).toContain("+for (let i = 0; i < 3; i++) {");
+    expect(patch).toContain("+d");
+  });
+
+  it("refuses anything that is not a sha", async () => {
+    await expect(filePatch(dir, "HEAD", "charge.ts")).rejects.toThrow(/Not a commit sha/);
   });
 });
 

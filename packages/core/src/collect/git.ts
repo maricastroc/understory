@@ -167,6 +167,11 @@ export async function readFileAtRef(
   return git(repoPath, ["show", `${ref}:${filePath}`]);
 }
 
+export async function filePatch(repoPath: string, sha: string, filePath: string): Promise<string> {
+  if (!isCommitSha(sha)) throw new Error(`Not a commit sha: ${sha}`);
+  return git(repoPath, ["show", "--format=", "--unified=3", sha, "--", filePath]);
+}
+
 export async function blameWindowLocal(
   repoPath: string,
   ref: string,

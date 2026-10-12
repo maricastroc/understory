@@ -6,18 +6,23 @@ const HEAD = "f".repeat(40);
 const OWNER = "c".repeat(40);
 const BRANCH_HEAD = "e".repeat(40);
 
-type Route = (url: string, body: string) => unknown;
+type Route = (url: string, body: string, accept: string) => unknown;
 
 function stub(route: Route) {
   const calls: string[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (input: unknown, init?: { body?: string }) => {
+    vi.fn(async (input: unknown, init?: { body?: string; headers?: Record<string, string> }) => {
       const url = String(input);
       calls.push(url);
-      const body = route(url, init?.body ?? "");
+      const body = route(url, init?.body ?? "", init?.headers?.Accept ?? "");
       if (body === undefined) return { ok: false, status: 404, json: async () => ({}) };
-      return { ok: true, status: 200, json: async () => body, text: async () => "" };
+      return {
+        ok: true,
+        status: 200,
+        json: async () => body,
+        text: async () => (typeof body === "string" ? body : ""),
+      };
     }),
   );
   return calls;
@@ -142,5 +147,96 @@ describe("collect — GitHub pins the investigated revision", () => {
 
     expect(ev.repo).not.toHaveProperty("sha");
     expect(ev.coverage).toEqual({ granularity: "file" });
+  });
+});
+
+describe("collect — GitHub shows the investigated code", () => {
+  const SOURCE = ["a", "b", "c", "if (found === undefined) {", "e", "f", "g", "h"].join("\n");
+
+  const PATCH = [
+    "@@ -3,2 +3,2 @@",
+    " c",
+    "-if (!found) {",
+    "+if (found === undefined) {",
+    " e",
+  ].join("\n");
+
+  const routes =
+    (name: string, source: unknown, patch: string | null = PATCH): Route =>
+    (url, body, accept) => {
+      if (url.endsWith(`/repos/${name}`)) return meta(name);
+      if (url.includes("/contents/")) return accept.includes("raw") ? source : { size: 100 };
+      if (url.endsWith(`/repos/${name}/commits/${OWNER}`))
+        return patch === null
+          ? undefined
+          : { files: [{ filename: "README.md" }, { filename: "src/charge.ts", patch }] };
+      if (body.includes("query Blame")) {
+        return {
+          data: {
+            repository: {
+              object: {
+                oid: HEAD,
+                blame: { ranges: [{ startingLine: 1, endingLine: 8, commit: leanCommit }] },
+              },
+            },
+          },
+        };
+      }
+      if (body.includes("query Enrich")) {
+        return { data: { repository: { c0: { associatedPullRequests: { nodes: [] } } } } };
+      }
+      return undefined;
+    };
+
+  const dig = (repoPath: string) =>
+    runWithTokens({ github: "t" }, () =>
+      collect({
+        repoPath,
+        question: "why?",
+        location: { file: "src/charge.ts", startLine: 4, endLine: 4 },
+      }),
+    );
+
+  it("keeps the line with its neighbours, read at the revision the blame ran on", async () => {
+    const calls = stub(routes("code1/r", SOURCE));
+    const ev = await dig("code1/r");
+
+    expect(ev.code).toMatchObject({ startLine: 1, lines: SOURCE.split("\n").slice(0, 7) });
+    expect(calls.some((u) => u.includes(`/contents/src/charge.ts?ref=${HEAD}`))).toBe(true);
+  });
+
+  it("reads from the owning commit's patch what that commit did to the line", async () => {
+    const calls = stub(routes("code3/r", SOURCE));
+    const ev = await dig("code3/r");
+
+    expect(ev.code?.change).toEqual({
+      artifactId: `commit:${OWNER.slice(0, 7)}`,
+      before: "if (!found) {",
+      added: 1,
+    });
+    expect(calls.filter((u) => u.endsWith(`/commits/${OWNER}`))).toHaveLength(1);
+  });
+
+  it("keeps the code when the patch cannot be read or does not hold the line", async () => {
+    stub(routes("code4/r", SOURCE, null));
+    expect((await dig("code4/r")).code).toEqual({
+      startLine: 1,
+      lines: SOURCE.split("\n").slice(0, 7),
+    });
+
+    stub(routes("code5/r", SOURCE, "@@ -1 +1 @@\n-x\n+y"));
+    expect((await dig("code5/r")).code).not.toHaveProperty("change");
+  });
+
+  it("still returns the evidence when the file cannot be read", async () => {
+    stub((url, body, accept) =>
+      url.includes("/contents/") && accept.includes("raw")
+        ? undefined
+        : routes("code2/r", SOURCE)(url, body, accept),
+    );
+    const ev = await dig("code2/r");
+
+    expect(ev.artifacts).toHaveLength(1);
+    expect(ev).not.toHaveProperty("code");
   });
 });

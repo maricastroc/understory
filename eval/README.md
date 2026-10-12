@@ -236,6 +236,8 @@ the audit reads the claim and the sources it cites. Neither sees the text of the
 diff. The auditor marked several of these claims as supported, because the source does say what
 the claim quotes; nothing checks that the source is about the line. The verdict was "resolved"
 with medium confidence, 0.55 to 0.65. Tracked in [#31](https://github.com/maricastroc/understory/issues/31).
+What was changed for it, and what that cost, is under
+[Line attribution after #31](#line-attribution-after-31).
 
 **A non-answer returned as an answer.** `ws-skew-value` asks why an allowance is 2 seconds and
 not more. The commit explains why the cursor is moved back, never why by two seconds. Both runs
@@ -522,6 +524,106 @@ Four cases were also run once straight to Groq, to check that the changed reques
 route the product uses
 ([`results/2026-10-11-audit-fix-direct-check.jsonl`](results/2026-10-11-audit-fix-direct-check.jsonl)):
 four of four passed, with no failed and no fallback audit.
+
+### Line attribution after #31
+
+The pipeline now reads the investigated line and what the last change did to it, and shows both
+to the writer and to the audit. This section measures that. It ran in the night of 11 to 12
+Oct, through OpenRouter pinned to Groq, with the machine asleep for most of it, so the three
+runs below overlap over about four hours instead of twenty minutes. Five of their 320 runs
+ended in an API error and are counted as errored.
+
+**What changed.**
+
+- Collection keeps the investigated line with three lines on each side, and reads from the
+  owning commit's patch what that commit did to the line: added it, and with how many other
+  lines, or rewrote it, and from what. On GitHub and on local repositories, for a single line.
+  When the file or the patch cannot be read, or the line is not found exactly once in the patch,
+  the evidence goes on without them.
+- The writer is shown both before the evidence. It is asked first whether the code is part of
+  what the evidence describes. If it is, the change's stated purpose is the recorded reason. If
+  the evidence is about other parts of the change, the answer is an abstention that names the
+  change and what it did to the line.
+- The audit is given the same code and the same fact as established.
+
+**Three versions, four passes each, the same night.** The unchanged pipeline of `main`
+([`before-on-main`](results/2026-10-12-line-attribution-before-on-main.jsonl), commit
+`cc3574a`), the audit change of #33 alone
+([`before-on-audit-fix`](results/2026-10-12-line-attribution-before-on-audit-fix.jsonl), commit
+`fd843e2`), and this change on top of it
+([`results/2026-10-12-line-attribution.jsonl`](results/2026-10-12-line-attribution.jsonl),
+commit `85a9aec`). Each has its manual verdicts beside it in a `.review.json`. The two
+baselines ran only the three categories this change is about.
+
+| Runs passed          | `main`           | Audit change     | This change      |
+| -------------------- | ---------------- | ---------------- | ---------------- |
+| incidental           | 5/16             | 7/16             | 16/16            |
+| false-premise        | 11/11, 1 errored | 12/12            | 11/11, 1 errored |
+| recorded, synthetic  | 31/32            | 31/31, 1 errored | 32/32            |
+| recorded, real lines | 19/28            | 25/28            | 20/27, 1 errored |
+| silent               | not run          | not run          | 19/19, 1 errored |
+| out-of-scope         | not run          | not run          | 36/36            |
+
+The recorded real lines, one by one:
+
+| Case             | `main` | Audit change | This change    |
+| ---------------- | ------ | ------------ | -------------- |
+| `ng-http-114`    | 4/4    | 4/4          | 4/4            |
+| `ng-http-411`    | 1/4    | 4/4          | 0/4            |
+| `machine-168`    | 2/4    | 2/4          | 2/4            |
+| `q-306`          | 3/4    | 3/4          | 4/4            |
+| `q-796`          | 3/4    | 4/4          | 3/4            |
+| `tslint-260`     | 2/4    | 4/4          | 4/4            |
+| `apollo-http-10` | 4/4    | 4/4          | 3/3, 1 errored |
+
+Read with these:
+
+- **The four swept-along lines no longer get another line's reasons.** Fifteen of the 16 runs
+  abstain or explain the `var` to `const` sweep, and the one that answers on `tslint-189` says
+  only that the condition was rewritten during the loader cleanup. The abstentions now say what
+  happened: "The last change rewrote the line from `if (Formatter !== undefined)` to
+  `if (Formatter === undefined)`, but the provided PR and commit messages do not explain why."
+  On both baselines `tslint-189` and `tslint-257` fail every run, as on 11 Oct.
+- **`ng-http-411` is the whole cost on recorded lines, and what it lost was a false pass.**
+  Line 411 is `* @example`. On the audit change it passes four runs in four by saying the line
+  "implements a check that only adds the XSRF token header", audited as supported with
+  confidence 0.85 to 0.9. With the line in view no run says that. Two say the line was added as
+  part of the documentation of the XSRF whitelist feature, which is true, and the audit holds
+  that at weak because no commit message says a line is documentation. Two abstain: "the commit
+  message and other evidence do not explain why this @example line was written that way". The
+  case is labelled recorded, so all four count as failures. Without it the recorded real lines
+  read 20/23 here and 21/24 on the audit change.
+- **`machine-168` fails two runs in four in all three columns**, each time because the writer
+  abstained. That is [#39](https://github.com/maricastroc/understory/issues/39), not this change.
+- **The read of the claims** is in
+  [`results/2026-10-12-line-attribution.reading.json`](results/2026-10-12-line-attribution.reading.json):
+  60 runs made a claim. In none does a claim say the line is or does something the code
+  contradicts. In 26 a claim says something about the line that is true of the code or the patch
+  shown and that no source states, such as "this line returns the index when the element
+  matches". Six are borderline. Two runs of `ws-revert-story` misread a commit message, saying
+  the storefront hid a stock figure the commit says it kept showing; the audit caught one of
+  the two.
+- **Told not to explain the code, the writer still does.** Six wordings of that rule were tried
+  on the twelve real lines, among them a private field for remarks about the code and a rule
+  that the change must be the subject of every sentence. None stopped it, and the audit holds a
+  claim at weak when its one sentence carries a remark about the code that no source makes.
+  That is where `q-796` lost a run here.
+- **`ws-skew-value` abstained in its three scored runs**, where it had answered as recorded in
+  every run of 11 Oct. One case, so it says nothing yet about
+  [#32](https://github.com/maricastroc/understory/issues/32).
+- **Cost.** On the same 36 cases, a synthesis call reads about 2,010 tokens where it read 1,400,
+  the rules and the code. The whole run used the same tokens per investigation, about 3,900,
+  because an answer that abstains is not audited: 96 claim audits against 151. US$ 0.093 against
+  US$ 0.095. Collection makes one more request to GitHub per investigation, for the commit's
+  patch.
+
+**Against the acceptance criteria of #31.** No run of the four incidental cases fails its
+rubric, in four passes. No run of `ng-http-411` misdescribes the line. The read still finds
+statements about a line that no source supports: two that misread a commit, and the 26 that
+come from the code now shown. The recorded cases that passed both runs on 11 Oct do not all
+still pass: `ng-http-411` fails all four, for the reason above, and `machine-168` and `q-796`
+lose runs they also lose without this change. So #31 is not closed by the letter of its
+criteria, and the open question is the label of `ng-http-411`, which this branch does not touch.
 
 ### What this does not show
 

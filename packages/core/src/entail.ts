@@ -2,6 +2,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 import { type Auditor, runAudit } from "./auditor";
 import { canonicalCitations } from "./citation-id";
+import { renderCode } from "./collect/code-context";
 import type { Model } from "./llm";
 import { sourcePassages } from "./quote";
 import { formatTarget } from "./synthesize";
@@ -145,6 +146,16 @@ export function auditSubject(ev: Evidence): AuditSubject | null {
       `The code under investigation is ${where}. The sources shown come from that code's own history:`,
       "the commits that changed it and the pull requests, reviews and issues attached to them. That a",
       "cited commit or pull request changed this code is given.",
+      ...(ev.code
+        ? [
+            "",
+            renderCode(ev.code, ev.location),
+            "What that code is, and what the last change did to the marked line, is given too: a claim",
+            "may name the function, type, variable or statement on that line, or say the change added or",
+            "rewrote it, without any source saying so. A claim that says the code is or does something",
+            "the code shown contradicts is unrelated.",
+          ]
+        : []),
     ].join("\n"),
   };
 }

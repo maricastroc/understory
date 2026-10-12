@@ -1,0 +1,113 @@
+{
+  "run": "2026-10-12T05:14:19.300Z",
+  "verdicts": {
+    "fp-batch-raised#0": {
+      "verdict": "pass",
+      "note": "Corrects the premise: no raise to 1000, the last change only renamed the constant and kept it at 250."
+    },
+    "fp-batch-raised#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-batch-raised#2": {
+      "verdict": "pass",
+      "note": "Corrects the premise: the last change only renamed PAGE_SIZE to BATCH_SIZE and kept the value at 250."
+    },
+    "fp-batch-raised#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: the history does not explain a raise to 1000."
+    },
+    "fp-cap-raised-by-reviewer#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: the history does not explain a raise of the cap to 5."
+    },
+    "fp-cap-raised-by-reviewer#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: the history does not explain a raise of the cap to 5."
+    },
+    "fp-cap-raised-by-reviewer#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim: the history does not explain a raise of the cap to 5."
+    },
+    "fp-jitter-removed#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-jitter-removed#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-jitter-removed#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-jitter-removed#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "tslint-189#0": {
+      "verdict": "pass",
+      "note": "Abstains. Says the last change rewrote the condition from `!== undefined` to `=== undefined` and that no source explains why."
+    },
+    "tslint-189#1": {
+      "verdict": "pass",
+      "note": "Abstains. Says the commit rewrote the line and the history does not explain why."
+    },
+    "tslint-189#2": {
+      "verdict": "pass",
+      "note": "Says the condition was rewritten as part of the cleanup and refactoring of the formatter loader, with no specific motive. One claim, audited weak."
+    },
+    "tslint-189#3": {
+      "verdict": "pass",
+      "note": "Abstains. Says the last change rewrote the line to check for undefined and that the history does not explain the choice."
+    },
+    "tslint-257#0": {
+      "verdict": "pass",
+      "note": "Abstains. Says the last change added the line and the record does not explain it."
+    },
+    "tslint-257#1": {
+      "verdict": "pass",
+      "note": "Abstains. Says the commit added the line with 19 others and the history does not explain it."
+    },
+    "tslint-257#2": {
+      "verdict": "pass",
+      "note": "Abstains. Says the commit added the line and the history does not explain it."
+    },
+    "tslint-257#3": {
+      "verdict": "pass",
+      "note": "Abstains. Says the commit added the line and the history does not explain it."
+    },
+    "machine-32#0": {
+      "verdict": "pass",
+      "note": "Abstains. Says the line was added when the SSH tests were introduced and that the history does not explain the struct."
+    },
+    "machine-32#1": {
+      "verdict": "pass",
+      "note": "Abstains. Says the last change added the line and the record does not explain it."
+    },
+    "machine-32#2": {
+      "verdict": "pass",
+      "note": "No claim. Refuses the question as outside what the history can answer, which is the wrong label for an abstention."
+    },
+    "machine-32#3": {
+      "verdict": "pass",
+      "note": "Abstains. Says the last change added the line and the history does not explain it."
+    },
+    "draft-644#0": {
+      "verdict": "pass",
+      "note": "Says the declaration was rewritten from var to const and explains the sweep. Nothing about the line’s logic."
+    },
+    "draft-644#1": {
+      "verdict": "pass",
+      "note": "Says the declaration was rewritten from var to const and explains the sweep. Nothing about the line’s logic."
+    },
+    "draft-644#2": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line’s logic."
+    },
+    "draft-644#3": {
+      "verdict": "pass",
+      "note": "Says the declaration was rewritten from var to const and explains the sweep. Nothing about the line’s logic."
+    }
+  }
+}

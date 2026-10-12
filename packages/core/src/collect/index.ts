@@ -1,15 +1,35 @@
-import type { Artifact, ArtifactRef, CodeLocation, Coverage, Evidence, RepoRef } from "../types";
+import type {
+  Artifact,
+  ArtifactRef,
+  CodeLocation,
+  Coverage,
+  Evidence,
+  LineChange,
+  RepoRef,
+} from "../types";
+import { owningCommit } from "../provenance";
 import type { BlameCommit } from "./github";
+import { codeWindow, lineChange } from "./code-context";
 import { detectContradictions } from "./contradictions";
-import { commitToArtifact, headSha, isGitRepo, lineHistory, resolveRepo } from "./git";
+import {
+  commitToArtifact,
+  filePatch,
+  headSha,
+  isGitRepo,
+  lineHistory,
+  readFileAtRef,
+  resolveRepo,
+} from "./git";
 import { enrichLocalCommits } from "./local-enrich";
 import { resolveToken } from "./token-context";
 import {
   blameLinesAt,
   commitContextArtifacts,
+  commitFilePatch,
   expandCommit,
   fileHistoryGitHub,
   getBranchHeadGitHub,
+  getFileContentGitHub,
   getFileSizeGitHub,
   getRepoMeta,
   issueContextArtifacts,
@@ -45,6 +65,43 @@ export type CollectInput = {
 };
 
 type BaseEvidence = Omit<Evidence, "contradictions">;
+
+type PatchOf = (sha: string) => Promise<string | null>;
+
+async function lastChange(
+  base: BaseEvidence,
+  line: string | undefined,
+  patchOf: PatchOf,
+): Promise<LineChange | null> {
+  const { location } = base;
+  const owner = owningCommit(base);
+  const sha = owner?.meta?.sha;
+  if (!location || location.startLine !== location.endLine) return null;
+  if (!owner || typeof sha !== "string" || line === undefined) return null;
+  try {
+    const found = lineChange((await patchOf(sha)) ?? "", line);
+    return found ? { artifactId: owner.id, ...found } : null;
+  } catch {
+    return null;
+  }
+}
+
+async function withCode(
+  base: BaseEvidence,
+  source: () => Promise<string>,
+  patchOf: PatchOf,
+): Promise<BaseEvidence> {
+  const { location } = base;
+  if (!location || base.coverage?.granularity === "file") return base;
+  try {
+    const code = codeWindow(await source(), location);
+    if (!code) return base;
+    const change = await lastChange(base, code.lines[location.startLine - code.startLine], patchOf);
+    return { ...base, code: change ? { ...code, change } : code };
+  } catch {
+    return base;
+  }
+}
 
 export async function collect(input: CollectInput): Promise<Evidence> {
   const { repoPath, question, location, anchor } = input;
@@ -88,13 +145,19 @@ async function collectLocal(
           return { ...a, meta: { ...a.meta, prLookup: "skipped" } };
         });
 
-  return {
+  const base: BaseEvidence = {
     question,
     repo: sha ? { ...repo, sha } : repo,
     location,
     artifacts,
     coverage: { granularity: "line" },
   };
+  if (!sha) return base;
+  return withCode(
+    base,
+    () => readFileAtRef(repoPath, sha, location.file),
+    (commit) => filePatch(repoPath, commit, location.file),
+  );
 }
 
 const LARGE_FILE_BYTES = 1_000_000;
@@ -164,7 +227,7 @@ async function collectFromGitHub(
   }
 
   artifacts.sort((a, b) => a.date.localeCompare(b.date));
-  return {
+  const base: BaseEvidence = {
     question,
     repo: sha ? { ...repoRef, sha } : repoRef,
     location,
@@ -172,6 +235,11 @@ async function collectFromGitHub(
     note,
     coverage: { granularity },
   };
+  return withCode(
+    base,
+    () => getFileContentGitHub(owner, repo, sha ?? meta.branch, location.file),
+    (commit) => commitFilePatch(owner, repo, commit, location.file),
+  );
 }
 
 async function collectAroundArtifact(
