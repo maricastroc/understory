@@ -3,6 +3,7 @@ import { anchorQuestion } from "@understory/core/anchor-question";
 import { sessionToken } from "@/lib/auth/current-user";
 import { type CollectInput, collect, parseLocation } from "@understory/core/collect";
 import { parseGitHubRepo } from "@understory/core/collect/github";
+import { lineageOf } from "@understory/core/collect/lineage";
 import { parseGitLabRepo } from "@understory/core/collect/gitlab";
 import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
@@ -95,6 +96,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `${message}${hint}` }, { status: 400 });
   }
 
+  const walking = new AbortController();
+  const abandon = () => walking.abort();
+  req.signal.addEventListener("abort", abandon, { once: true });
+  const walkBegan = Date.now();
+  const walk =
+    process.env.UNDERSTORY_LINEAGE === "1"
+      ? runWithTokens({ github: githubToken, gitlab: gitlabToken }, () =>
+          lineageOf(evidence, { signal: walking.signal }),
+        ).catch(() => null)
+      : null;
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enc = new TextEncoder();
@@ -112,9 +124,20 @@ export async function POST(req: Request) {
           narrative: null,
           error: e instanceof Error ? e.message : String(e),
         });
+      }
+      try {
+        const lineage = walk ? await walk : null;
+        if (lineage && !walking.signal.aborted)
+          send({ phase: "lineage", lineage, ms: Date.now() - walkBegan });
+      } catch {
+        walking.abort();
       } finally {
+        req.signal.removeEventListener("abort", abandon);
         controller.close();
       }
+    },
+    cancel() {
+      walking.abort();
     },
   });
 
