@@ -9,7 +9,10 @@ import {
   type AuditedClaim,
   type Judgement,
   type ReplayMeta,
+  type WrittenClaim,
   auditedClaims,
+  controlLines,
+  parseControls,
   parseReplay,
   replayLines,
 } from "./eval-audit-claims";
@@ -44,7 +47,7 @@ async function pooled<T>(items: T[], work: (item: T) => Promise<void>): Promise<
 }
 
 type Task = {
-  claim: AuditedClaim;
+  claim: AuditedClaim | WrittenClaim;
   question: string;
   subject: AuditSubject | null;
   sources: Artifact[];
@@ -57,13 +60,16 @@ async function main() {
   const files = args.only;
   if (files.length === 0)
     stop(
-      "usage: npm run eval:audit -- eval/results/<run>.jsonl [...] [--repeat 3] [--via openrouter] [--out <file>]",
+      "usage: npm run eval:audit -- eval/results/<run>.jsonl [eval/audit-controls.json] [...] [--repeat 3] [--via openrouter] [--out <file>]",
     );
   for (const file of files) if (!existsSync(file)) stop(`"${file}" not found.`);
 
-  const first = parseReplay(readFileSync(files[0], "utf8"));
-  if (first.meta?.kind === "audit-replay") {
-    for (const line of replayLines(first.judgements)) console.log(line);
+  const written = files.filter((file) => file.endsWith(".json"));
+  const kept = files.filter((file) => !file.endsWith(".json"));
+  const first = kept.length ? parseReplay(readFileSync(kept[0], "utf8")) : null;
+  if (first?.meta?.kind === "audit-replay") {
+    for (const line of [...replayLines(first.judgements), ...controlLines(first.judgements)])
+      console.log(line);
     return;
   }
 
@@ -79,15 +85,19 @@ async function main() {
 
   const gold: Gold = JSON.parse(readFileSync("eval/gold.json", "utf8"));
   const cases = new Map<string, Case>(gold.cases.map((c) => [c.id, c]));
-  const claims = auditedClaims(
-    files.flatMap((file) => parseRecords(readFileSync(file, "utf8")).runs),
-  ).filter(
+  const controls: WrittenClaim[] = written
+    .flatMap((file) => parseControls(readFileSync(file, "utf8")))
+    .map((c) => ({ ...c, category: cases.get(c.id)?.category, source: cases.get(c.id)?.source }));
+  const claims: Array<AuditedClaim | WrittenClaim> = [
+    ...auditedClaims(kept.flatMap((file) => parseRecords(readFileSync(file, "utf8")).runs)),
+    ...controls,
+  ].filter(
     (c) =>
       cases.has(c.id) &&
       (args.category === null || c.category === args.category) &&
       (args.set === null || c.set === args.set),
   );
-  if (claims.length === 0) stop("Those runs hold no audited claim for that selection.");
+  if (claims.length === 0) stop("Those files hold no claim for that selection.");
 
   const repoOf = (c: Case) => c.repo ?? gold.repo;
   const ids = [...new Set(claims.map((c) => c.id))];
@@ -123,6 +133,7 @@ async function main() {
     if (sources.length === 0) continue;
     for (let replay = 0; replay < args.repeat; replay++)
       tasks.push({ claim, question, subject, sources, replay });
+    if ("kind" in claim) continue;
     const others = foreign(claim.id, sources.length);
     if (others.length) tasks.push({ claim, question, subject, sources: others, replay: -1 });
   }
@@ -140,7 +151,7 @@ async function main() {
     ...(route ? { via: "OpenRouter, pinned to Groq" } : {}),
   };
   console.log(
-    `Understory — audit replay (${claims.length} claims × ${args.repeat}, plus one control each)\naudit ${meta.audit}${meta.via ? ` · via ${meta.via}` : ""}\n`,
+    `Understory — audit replay (${claims.length - controls.length} kept claims and ${controls.length} written controls × ${args.repeat})\naudit ${meta.audit}${meta.via ? ` · via ${meta.via}` : ""}\n`,
   );
   if (args.out) {
     mkdirSync(dirname(args.out), { recursive: true });
@@ -160,6 +171,7 @@ async function main() {
       citations: claim.citations,
       replay: control ? 0 : replay,
       control,
+      ...("kind" in claim ? { kind: claim.kind, expect: claim.expect } : {}),
     };
     let record: Judgement;
     try {
@@ -193,7 +205,7 @@ async function main() {
   });
 
   console.log("");
-  for (const line of replayLines(judgements)) console.log(line);
+  for (const line of [...replayLines(judgements), ...controlLines(judgements)]) console.log(line);
   if (route) {
     const usage = route.usage();
     if (args.out) appendFileSync(args.out, `${JSON.stringify({ type: "usage", models: usage })}\n`);

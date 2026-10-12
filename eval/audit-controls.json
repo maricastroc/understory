@@ -1,0 +1,254 @@
+{
+  "what": "Claims written or kept to check the audit against a known answer, replayed with `npm run eval:audit -- eval/audit-controls.json`. Each says what it should get. The expectations were fixed before any of these met the audit, and are not edited after a run.",
+  "rule": "What a line is and what a change did to it is checked against the code and the patch. Why is checked against a collected source. A sentence that mixes the two has to hold on both.",
+  "controls": [
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["commit:1e90d03"],
+      "text": "This line was added as part of a JSDoc comment documenting the new XSRF‑token‑whitelisting feature introduced in commit 1e90d03.",
+      "why": "Kept claim. The line is `* @example` in a doc comment the commit added; the commit message states the feature."
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["commit:1e90d03"],
+      "text": "This line was added as part of a documentation block that provides an example for the newly introduced XSRF‑token whitelisting feature in $http.",
+      "why": "Kept claim, the other wording of the same answer."
+    },
+    {
+      "id": "machine-168",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["pr:4002", "commit:d3ee30b"],
+      "text": "This method was added by commit d3ee30b as part of pull request #4002, which adds support for upgrading to the new CE edition.",
+      "why": "The patch adds the method; the pull request states the purpose."
+    },
+    {
+      "id": "q-306",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["commit:5ea9aaf"],
+      "text": "This line returns the current index when the array element equals the searched value, as part of the Array.prototype.indexOf shim added for IE<9.",
+      "why": "Kept claim. The code shows the return; the commit states the shim."
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["commit:18a2e4f"],
+      "text": "The line was rewritten to take an index argument in the forEach callback, in the commit that makes the serializer follow jQuery for the index of arrays of objects.",
+      "why": "The patch shows the argument added; the commit states the reason."
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["commit:a4a868e"],
+      "text": "This check was added by the commit that makes all promises inspectable by default, so that custom promises have an inspect method whether or not one is specified.",
+      "why": "The patch adds the check; the commit states the purpose."
+    },
+    {
+      "id": "tslint-260",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["pr:4887", "commit:8c2ac95"],
+      "text": "The line was rewritten to pass the path through path.resolve by pull request #4887, which adds path.resolve when fs.writeFileSync is called with a temp file path, to fix writing temp files on macOS 10.15.",
+      "why": "The patch shows the rewrite; the pull request states both the change and the bug."
+    },
+    {
+      "id": "draft-644",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["commit:8de2db9"],
+      "text": "The declaration was rewritten from var to const by commit 8de2db9, which changed the remaining vars in Draft.js to let/const because var was triggering the author’s OCD.",
+      "why": "The patch shows var becoming const; the commit states the sweep and its reason."
+    },
+    {
+      "id": "tslint-189",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["pr:3412", "commit:8b853b2"],
+      "text": "The condition was rewritten from `!== undefined` to `=== undefined` by commit 8b853b2, a cleanup and refactoring of the rule and formatter loaders.",
+      "why": "An incidental line described without a borrowed motive: the patch shows the rewrite, the commit title names the cleanup."
+    },
+    {
+      "id": "jitter",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "citations": ["commit:0016d9d"],
+      "text": "The delay was rewritten to add jitter by commit 0016d9d, which stops recovering clients from retrying in lockstep after an outage.",
+      "why": "Synthetic. The patch shows the rewrite; the commit states the reason."
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "citations": ["commit:1e90d03"],
+      "text": "The line at src/ng/http.js:411 implements the whitelist check, so the XSRF token header is attached only when the request URL matches one of the whitelisted origins.",
+      "why": "Kept claim, credited in every run before the line was shown. The line is `* @example`."
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "citations": ["commit:1e90d03"],
+      "text": "The line was added to implement support for sending the XSRF token to whitelisted origins, because normally the token is omitted for cross‑origin requests.",
+      "why": "Kept claim, the commonest wording. A doc comment implements nothing."
+    },
+    {
+      "id": "tslint-189",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "citations": ["pr:3412", "commit:8b853b2"],
+      "text": "The line was rewritten to call path.resolve instead of the now‑deprecated getRelativePath function.",
+      "why": "Kept claim. The line is `if (Formatter === undefined) {` and read `if (Formatter !== undefined) {` before. Neither calls path.resolve."
+    },
+    {
+      "id": "tslint-257",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "citations": ["review:2369-1"],
+      "text": "The line was originally added to check a rule’s severity before processing it, aiming to skip work for rules that were disabled.",
+      "why": "Kept claim. The line reads a file to apply fixes."
+    },
+    {
+      "id": "q-306",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "citations": ["commit:5ea9aaf"],
+      "text": "This line throws an error when the searched value is missing, as part of the Array.prototype.indexOf shim added for IE<9.",
+      "why": "Written for this file. The line is `return i;`."
+    },
+    {
+      "id": "machine-168",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "citations": ["pr:4002", "commit:d3ee30b"],
+      "text": "This line removes the DockerVersion method from Host, as part of adding support for upgrading to the new CE edition.",
+      "why": "Written for this file. The patch adds the method."
+    },
+    {
+      "id": "draft-644",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "citations": ["commit:8de2db9"],
+      "text": "The declaration was rewritten from const to var by commit 8de2db9, which changed the remaining declarations in Draft.js.",
+      "why": "Written for this file. The patch shows the opposite direction."
+    },
+    {
+      "id": "tslint-260",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "citations": ["pr:4887", "commit:8c2ac95"],
+      "text": "The line was rewritten to drop the call to path.resolve, in the pull request that fixes writing temp files on macOS 10.15.",
+      "why": "Written for this file. The patch adds the call."
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "citations": ["commit:1e90d03"],
+      "text": "This doc-comment line was added by commit 1e90d03 because the documentation generator could not render the earlier examples.",
+      "why": "True of the line, invented reason."
+    },
+    {
+      "id": "q-306",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "citations": ["commit:5ea9aaf"],
+      "text": "This line was added by commit 5ea9aaf to make lookups faster than the native indexOf.",
+      "why": "True of the patch, invented reason."
+    },
+    {
+      "id": "machine-168",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "citations": ["pr:4002", "commit:d3ee30b"],
+      "text": "This method was added by commit d3ee30b because the Docker API changed its version endpoint.",
+      "why": "True of the patch, invented reason."
+    },
+    {
+      "id": "q-796",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "citations": ["commit:a4a868e"],
+      "text": "This check was added by commit a4a868e to fix a crash that users of custom promises had reported.",
+      "why": "True of the patch, invented reason."
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "citations": ["commit:18a2e4f"],
+      "text": "The callback was rewritten to take an index by commit 18a2e4f because the old code leaked memory on large arrays.",
+      "why": "True of the patch, invented reason."
+    },
+    {
+      "id": "tslint-260",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "citations": ["pr:4887", "commit:8c2ac95"],
+      "text": "The line was rewritten to call path.resolve by commit 8c2ac95 to make writing many files faster.",
+      "why": "True of the patch, invented reason."
+    },
+    {
+      "id": "jitter",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "citations": ["commit:0016d9d"],
+      "text": "Jitter was later added to the backoff delays so that clients would not all retry at the same moments after an outage, preventing lockstep retries and reducing the risk of a thundering‑herd effect.",
+      "why": "Kept claim. The reason is the commit’s; the last consequence is added by the writer."
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "citations": ["commit:e4dfae7"],
+      "text": "The constant originally named PAGE_SIZE was renamed to BATCH_SIZE to reflect its role as the size of each request batch.",
+      "why": "Kept claim. The commit is only the rename."
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "expect": "not-supported",
+      "citations": ["pr:2493"],
+      "text": "The code at libmachine/host/host.go line 32 was changed because earlier modifications broke the marshaling and unmarshaling of host objects, so the line was rewritten to avoid that regression.",
+      "why": "Kept claim. The pull request does discuss marshaling, about an approach it dropped. The line is a type the patch adds."
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "expect": "not-supported",
+      "citations": ["pr:2369", "commit:63fc794"],
+      "text": "This line was added by commit 63fc794 so that rules are no longer responsible for disabling themselves and failures are filtered after a rule returns them.",
+      "why": "Written for this file. True of the patch and of the pull request; the reason is for the enable/disable rewrite, and the line reads a file to apply fixes."
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code, with no reason given",
+      "expect": "not-supported",
+      "citations": ["commit:a4a868e"],
+      "text": "This line was added by commit a4a868e, together with four other lines.",
+      "why": "Only what the patch shows. Nothing for a source to back, so nothing to credit, and nothing to rule a misattribution."
+    },
+    {
+      "id": "tslint-257",
+      "kind": "true of the code, with no reason given",
+      "expect": "not-supported",
+      "citations": ["commit:63fc794"],
+      "text": "This line was added by commit 63fc794, together with 19 other new lines.",
+      "why": "Only what the patch shows."
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code, with no reason given",
+      "expect": "not-supported",
+      "citations": ["commit:1e90d03"],
+      "text": "This line is part of a doc comment and was added by commit 1e90d03.",
+      "why": "Only what the code and the patch show."
+    }
+  ]
+}
