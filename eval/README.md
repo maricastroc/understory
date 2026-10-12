@@ -43,6 +43,7 @@ npm run eval -- retry-cap jitter      # some cases by id
 npm run eval -- --repeat 2 --via openrouter --out eval/results/run.jsonl
 npm run eval:report -- eval/results/run.jsonl eval/results/run.review.json
 npm run eval:audit -- eval/results/run.jsonl --repeat 4 --via openrouter --out eval/results/replay.jsonl
+npm run eval:audit -- eval/results/run.jsonl eval/audit-controls.json --repeat 4 --via openrouter --out eval/results/replay.jsonl
 ```
 
 Needs `GROQ_API_KEY` and `GITHUB_TOKEN` in `.env.local` or `.env`; the cases on real repositories read
@@ -68,6 +69,12 @@ the claims that kept runs audited, collects the evidence again and asks the audi
 claim `--repeat` times, plus once against the sources of a case from another repository as a
 control. It keeps the judge's raw answer next to the final verdict. Given a kept replay
 instead of a run, it prints that replay's summary and calls no model.
+
+Given a `.json` file of written controls as well, it replays those too.
+[`audit-controls.json`](audit-controls.json) holds 53 claims about cases of the gold set, each
+with the verdict it should get. The expectations were fixed before any of the claims met the
+audit, and are not edited after a run. The summary counts them by kind, apart from the kept
+claims, and names the ones that missed.
 
 `eval:report` takes the kept run and, for the cases held for a manual verdict, the review file
 written for it. It refuses a review file that is missing, that belongs to another run or that
@@ -706,6 +713,77 @@ Read with these:
 
 So what #31 reports, a change's reasons given to a line it only touched, is gone in these
 runs. What keeps one recorded case from passing is narrower and has its own issue.
+
+### The audit against written controls
+
+Everything above measures the audit on claims the writer happened to make. The controls in
+[`audit-controls.json`](audit-controls.json) are claims written to have a known answer, about
+lines of the gold set:
+
+- Three kinds should be credited: claims true of the code and backed by a source, claims true
+  of an earlier version of the code and backed by the commit that wrote it, and claims that
+  give a line the reason the source gives for the very part of a change it belongs to.
+- Seven should not. Claims the code or the patch contradicts. Claims that give a reason no
+  source gives. Claims that only read the code back. Claims that say of an earlier version what
+  its commit contradicts. And three kinds of borrowed reason: the reason a source gives for
+  another part of the change, the same in the source's own words, and the reason of another
+  change in the line's history.
+
+**The audit as it is**, commit `b798b88`: the 93 claims kept in the run of 12 Oct and the 53
+controls, each judged four times on 12 Oct at 14:49 UTC, through OpenRouter pinned to Groq
+([`results/2026-10-12-patch-context-replay-one-question.jsonl`](results/2026-10-12-patch-context-replay-one-question.jsonl)).
+These are the lines `npm run eval:audit` prints for the file, and a unit test fails if they
+drift apart.
+
+```text
+Claims given the same verdict on every replay: 80 of 93 (86%).
+  recorded, synthetic: 49 of 51 (96%)
+  recorded, sampled: 15 of 19 (79%)
+  incidental, sampled: 4 of 8 (50%)
+  recorded, picked: 12 of 15 (80%)
+Verdicts: 298 supported, 72 weak, 0 unsupported over 370 judgements; 2 errored.
+Supported verdicts lost to a quote the source does not contain: 2 of 300 (1%).
+Judgements answered by the fallback model: 16 of 370 (4%).
+Control, each claim against another repository's sources: 0 of 93 (0%) came back supported.
+true of the code and backed by a source, expected supported: 23 of 40 (57%) as expected. 23 supported, 17 weak, 0 unsupported; 0 errored.
+  missed 4 of 4: ng-http-411, "This line was added as part of a JSDoc comment documenting the new XSRF‑token‑wh"
+  missed 4 of 4: ng-http-411, "This line was added as part of a documentation block that provides an example fo"
+  missed 3 of 4: ng-http-114, "The line was rewritten to take an index argument in the forEach callback, in the"
+  missed 2 of 4: q-306, "This line returns the current index when the array element equals the searched v"
+  missed 4 of 4: tslint-189, "The condition was rewritten from `!== undefined` to `=== undefined` by commit 8b"
+says something the code or the patch contradicts, expected not supported: 32 of 32 (100%) as expected. 0 supported, 14 weak, 18 unsupported; 0 errored.
+gives a reason no source gives, expected not supported: 32 of 32 (100%) as expected. 0 supported, 32 weak, 0 unsupported; 0 errored.
+gives the line a reason the source gives for another part of the change, expected not supported: 2 of 8 (25%) as expected. 6 supported, 2 weak, 0 unsupported; 0 errored.
+  missed 2 of 4: machine-32, "The code at libmachine/host/host.go line 32 was changed because earlier modifica"
+  missed 4 of 4: tslint-257, "This line was added by commit 63fc794 so that rules are no longer responsible fo"
+true of the code, with no reason given, expected not supported: 12 of 12 (100%) as expected. 0 supported, 12 weak, 0 unsupported; 0 errored.
+gives the line, in the source's words, the reason of another part of the same change, expected not supported: 20 of 32 (63%) as expected. 12 supported, 20 weak, 0 unsupported; 0 errored.
+  missed 4 of 4: tslint-189, "The condition was rewritten to allow uncompiled custom formatters, as uncompiled"
+  missed 4 of 4: tslint-189, "The condition was rewritten so that the formatter module is first resolved relat"
+  missed 4 of 4: machine-32, "This type was added so that hosts can still be marshaled and unmarshaled, which "
+gives the last change the reason of another change in the line's history, expected not supported: 15 of 16 (94%) as expected. 1 supported, 15 weak, 0 unsupported; 0 errored.
+  missed 1 of 4: ws-revert-story, "The sync job first dropped every row with a zero quantity because zero is also w"
+true of an earlier version of the code and backed by the commit that wrote it, expected supported: 19 of 20 (95%) as expected. 19 supported, 1 weak, 0 unsupported; 0 errored.
+  missed 1 of 4: ws-revert-story, "The sync job first dropped every row with a zero quantity, because the vendor em"
+says of an earlier version what the commit that wrote it contradicts, expected not supported: 12 of 12 (100%) as expected. 0 supported, 4 weak, 8 unsupported; 0 errored.
+gives the line the reason the source gives for the part of the change it belongs to, expected supported: 8 of 8 (100%) as expected. 8 supported, 0 weak, 0 unsupported; 0 errored.
+```
+
+Read with these:
+
+- **What the code contradicts, what no source says and what only reads the code back is never
+  credited**: none of 32, 32 and 12 judgements. Nor is a false statement about an earlier
+  version of the code, none of 12.
+- **A claim that should be credited is credited in 50 judgements of 68.** The 18 misses are
+  nearly all claims true of the code and backed by a source, held at weak because no source
+  repeats what the code shows. That is
+  [#43](https://github.com/maricastroc/understory/issues/43).
+- **A borrowed reason is credited in 19 judgements of 56.** The audit checks that a reason is in
+  the cited source. It does not check that the reason is the line's. It refuses most borrowed
+  reasons only by being strict with every claim, the true ones included, and it credits every
+  time the ones written for `tslint-189` and one of the two written for `machine-32`. That is
+  [#49](https://github.com/maricastroc/understory/issues/49). What keeps a borrowed reason out
+  of an answer is the writer abstaining ([Line attribution after #31](#line-attribution-after-31)).
 
 ### What this does not show
 
