@@ -17,6 +17,7 @@ export type RawVerdict = {
   reason: string;
   code?: string;
   record?: string;
+  earlier?: boolean;
 };
 
 export type Expectation = "supported" | "not-supported";
