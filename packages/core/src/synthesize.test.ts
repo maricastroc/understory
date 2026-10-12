@@ -88,6 +88,31 @@ describe("buildSynthesisInput — the code under investigation", () => {
   });
 });
 
+describe("buildSynthesisInput — the line's earlier history", () => {
+  it("shows the writer the same thing whether or not the evidence carries the walk", () => {
+    const ev: Evidence = {
+      ...evidence([mk("commit:a", "bumped the retry ceiling")]),
+      code: {
+        startLine: 1,
+        lines: ["const MAX = 3;"],
+        change: { artifactId: "commit:a", before: "const MAX = 5;", added: 1 },
+      },
+    };
+    const walked: Evidence = {
+      ...ev,
+      lineage: {
+        stopped: "the line was added",
+        entries: [
+          { sha: "a", date: "2023-01-01", title: "a", did: "rewrote", before: "const MAX = 5;" },
+          { sha: "0", date: "2022-01-01", title: "first", message: "why it began", did: "added" },
+        ],
+      },
+    };
+    expect(buildSynthesisInput(walked)).toEqual(buildSynthesisInput(ev));
+    expect(buildSynthesisInput(walked).prompt).not.toContain("why it began");
+  });
+});
+
 describe("buildSynthesisInput — language", () => {
   const ev = evidence([mk("commit:a", "x")]);
 

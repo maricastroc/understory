@@ -72,4 +72,30 @@ describe("/api/investigations", () => {
     expect(res.status).toBe(400);
     expect(db.investigation.upsert).not.toHaveBeenCalled();
   });
+
+  it("replaces the whole saved result, and keeps whichever save was written last", async () => {
+    let row: unknown = null;
+    const writes: Array<() => void> = [];
+    db.investigation.upsert.mockImplementation(
+      (args: { update: { result: unknown } }) =>
+        new Promise((resolve) =>
+          writes.push(() => {
+            row = args.update.result;
+            resolve({});
+          }),
+        ),
+    );
+    const first = post({ ...payload, result: { evidence: {}, narrative: "the answer" } });
+    const second = post({
+      ...payload,
+      result: { evidence: { lineage: { entries: [] } }, narrative: "the answer" },
+    });
+    await vi.waitFor(() => expect(writes).toHaveLength(2));
+    const where = db.investigation.upsert.mock.calls.map(([args]) => args.where);
+    expect(where[0]).toEqual(where[1]);
+    writes[1]();
+    writes[0]();
+    await Promise.all([first, second]);
+    expect(row).toEqual({ evidence: {}, narrative: "the answer" });
+  });
 });

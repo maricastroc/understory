@@ -446,6 +446,16 @@ describe("auditSubject — what the history settles before the judge reads a wor
     expect(auditSubject(ev({ location: undefined }))).toBeNull();
   });
 
+  it("is the same whether or not the evidence carries the line's earlier history", () => {
+    const walked = ev({
+      lineage: {
+        stopped: "depth limit",
+        entries: [{ sha: "0", date: "2022-01-01", title: "first", message: "why it began" }],
+      },
+    });
+    expect(auditSubject(walked)).toEqual(auditSubject(ev()));
+  });
+
   it("gives the code and what the last change did to the line, when they were collected", () => {
     const subject = auditSubject(
       ev({

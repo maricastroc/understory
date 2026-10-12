@@ -188,3 +188,383 @@ describe("useInvestigation — rewriting a case in another language", () => {
     expect(result.current.current?.result.narrative).toEqual(syntheticRetryCap.narrative);
   });
 });
+
+describe("useInvestigation — the line's earlier history, sent after the answer", () => {
+  const USER = { login: "synthetic", name: "Synthetic User", avatarUrl: "" };
+  const lineage = {
+    stopped: "the line was added" as const,
+    entries: [
+      {
+        sha: "92f6a3f0000000000000000000000000000000ff",
+        date: "2023-03-15T16:20:00Z",
+        title: "Cap charge retries at 3, add backoff",
+        did: "rewrote" as const,
+        before: "while (true) {",
+      },
+      {
+        sha: "7be210e0000000000000000000000000000000ff",
+        date: "2021-06-18T10:00:00Z",
+        title: "Add charge retries",
+        did: "added" as const,
+        before: null,
+      },
+    ],
+  };
+  const portuguese = { ...syntheticRetryCap.narrative!, language: "pt" as const };
+
+  async function streaming(user: typeof USER | null, narrate?: Route) {
+    const stream = ndjson();
+    const saved: Array<{ result: { evidence: { lineage?: unknown }; narrative: unknown } }> = [];
+    const narrated: Array<{ evidence: { lineage?: unknown } }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url === "/api/investigations") {
+          if (init?.method === "POST") saved.push(JSON.parse(String(init.body)));
+          return Response.json({ investigations: [], persisted: !!user });
+        }
+        if (url === "/api/dig") return stream.response;
+        if (url === "/api/narrate" && narrate) {
+          narrated.push(JSON.parse(String(init?.body)));
+          return narrate(init);
+        }
+        throw new Error(`unexpected ${url}`);
+      }),
+    );
+    const hook = renderHook(() => useInvestigation(user));
+    await waitFor(() => expect(hook.result.current.loaded).toBe(true));
+    let done: Promise<void> = Promise.resolve();
+    act(() => {
+      done = hook.result.current.investigate(FORM);
+    });
+    const send = (line: object) =>
+      act(async () => {
+        stream.push(line);
+      });
+    const answer = async () => {
+      await send({ phase: "evidence", evidence: syntheticRetryCap.evidence });
+      await waitFor(() => expect(hook.result.current.current?.pending).toBe(true));
+      await send({ phase: "final", narrative: syntheticRetryCap.narrative });
+      await waitFor(() => expect(hook.result.current.current?.pending).toBe(false));
+    };
+    const close = () =>
+      act(async () => {
+        stream.end();
+        await done;
+      });
+    return { ...hook, send, answer, close, saved, narrated };
+  }
+
+  it("keeps the history on the case and leaves the answer as it was", async () => {
+    const { result, send, answer, close } = await streaming(null);
+    await answer();
+    expect(result.current.current?.result.evidence.lineage).toBeUndefined();
+    const before = result.current.current!.result;
+
+    await send({ phase: "lineage", lineage, ms: 812 });
+    await close();
+    const after = result.current.current!.result;
+    expect(after.evidence.lineage).toEqual(lineage);
+    expect(after.narrative).toBe(before.narrative);
+    expect({ ...after.evidence, lineage: undefined }).toEqual({
+      ...before.evidence,
+      lineage: undefined,
+    });
+    expect(result.current.current?.pending).toBe(false);
+  });
+
+  it("saves the case with its answer first, and again once the history is in", async () => {
+    const { send, answer, close, saved } = await streaming(USER);
+    await answer();
+    await waitFor(() => expect(saved).toHaveLength(1));
+    expect(saved[0].result.evidence.lineage).toBeUndefined();
+    expect(saved[0].result.narrative).not.toBeNull();
+
+    await send({ phase: "lineage", lineage });
+    await close();
+    await waitFor(() => expect(saved).toHaveLength(2));
+    expect(saved[1].result.evidence.lineage).toEqual(lineage);
+    expect(saved[1].result.narrative).toEqual(saved[0].result.narrative);
+  });
+
+  it("saves nothing more and shows nothing new when no history is sent", async () => {
+    const { result, answer, close, saved } = await streaming(USER);
+    await answer();
+    await close();
+    expect(saved).toHaveLength(1);
+    expect(result.current.current?.result.evidence.lineage).toBeUndefined();
+  });
+
+  it("ignores a history line that has no answered case to join", async () => {
+    const { result, send, answer, close, saved } = await streaming(USER);
+    await send({ phase: "lineage", lineage });
+    expect(result.current.current).toBeNull();
+    await answer();
+    await send({ phase: "lineage", lineage: null });
+    await close();
+    expect(result.current.current?.result.evidence.lineage).toBeUndefined();
+    expect(saved).toHaveLength(1);
+  });
+
+  it("does not send the history back to be rewritten, and keeps it on the rewritten case", async () => {
+    const { result, send, answer, close, saved, narrated } = await streaming(USER, async () =>
+      Response.json({ narrative: portuguese }),
+    );
+    await answer();
+    await send({ phase: "lineage", lineage });
+    await close();
+    const id = result.current.current!.caseId;
+    await act(async () => {
+      await result.current.rewrite(id, "pt");
+    });
+    expect(narrated).toHaveLength(1);
+    expect("lineage" in narrated[0].evidence).toBe(false);
+    expect(narrated[0].evidence).toEqual(syntheticRetryCap.evidence);
+    expect(result.current.current?.result.narrative?.language).toBe("pt");
+    expect(result.current.current?.result.evidence.lineage).toEqual(lineage);
+    expect(saved.at(-1)?.result.evidence.lineage).toEqual(lineage);
+  });
+
+  it("keeps the history when a rewrite begun before it arrived ends after it", async () => {
+    let release: (r: Response) => void = () => {};
+    const { result, send, answer, close, saved } = await streaming(
+      USER,
+      () => new Promise<Response>((resolve) => (release = resolve)),
+    );
+    await answer();
+    const id = result.current.current!.caseId;
+    let rewriting: Promise<void> = Promise.resolve();
+    act(() => {
+      rewriting = result.current.rewrite(id, "pt");
+    });
+    await waitFor(() => expect(result.current.current?.rewriting).toBe("pt"));
+
+    await send({ phase: "lineage", lineage });
+    await close();
+    await waitFor(() => expect(result.current.current?.result.evidence.lineage).toEqual(lineage));
+
+    await act(async () => {
+      release(Response.json({ narrative: portuguese }));
+      await rewriting;
+    });
+    expect(result.current.current?.result.narrative?.language).toBe("pt");
+    expect(result.current.current?.result.evidence.lineage).toEqual(lineage);
+    expect(saved.at(-1)?.result).toMatchObject({
+      narrative: { language: "pt" },
+      evidence: { lineage },
+    });
+  });
+});
+
+describe("useInvestigation — the order in which a case's saves land", () => {
+  const USER = { login: "synthetic", name: "Synthetic User", avatarUrl: "" };
+  const lineage = {
+    stopped: "the line was added" as const,
+    entries: [
+      {
+        sha: "92f6a3f0000000000000000000000000000000ff",
+        date: "2023-03-15T16:20:00Z",
+        title: "Cap charge retries at 3, add backoff",
+        did: "added" as const,
+        before: null,
+      },
+    ],
+  };
+  const portuguese = { ...syntheticRetryCap.narrative!, language: "pt" as const };
+  type Saved = { result: { evidence: { lineage?: unknown }; narrative: { language?: string } } };
+  type Held = { body: Saved; open: boolean; finish: (ok?: boolean) => void };
+
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  async function held() {
+    const stream = ndjson();
+    const saves: Held[] = [];
+    const removed: string[] = [];
+    const database = { row: null as Saved | null, most: 0 };
+    let answerRewrite: (r: Response) => void = () => {};
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => {
+        if (url === "/api/investigations" && init?.method === "POST")
+          return new Promise<Response>((resolve, reject) => {
+            const body = JSON.parse(String(init.body)) as Saved;
+            const save: Held = {
+              body,
+              open: true,
+              finish: (ok = true) => {
+                save.open = false;
+                if (!ok) return reject(new TypeError("Failed to fetch"));
+                database.row = body;
+                resolve(Response.json({ persisted: true }));
+              },
+            };
+            saves.push(save);
+            database.most = Math.max(database.most, saves.filter((x) => x.open).length);
+          });
+        if (url === "/api/investigations")
+          return Promise.resolve(Response.json({ investigations: [], persisted: true }));
+        if (url.startsWith("/api/investigations/") && init?.method === "DELETE") {
+          removed.push(url);
+          database.row = null;
+          return Promise.resolve(Response.json({ deleted: true }));
+        }
+        if (url === "/api/dig") return Promise.resolve(stream.response);
+        if (url === "/api/narrate")
+          return new Promise<Response>((resolve) => (answerRewrite = resolve));
+        throw new Error(`unexpected ${url}`);
+      }),
+    );
+    const hook = renderHook(() => useInvestigation(USER));
+    await waitFor(() => expect(hook.result.current.loaded).toBe(true));
+    let done: Promise<void> = Promise.resolve();
+    act(() => {
+      done = hook.result.current.investigate(FORM);
+    });
+    const send = (line: object) =>
+      act(async () => {
+        stream.push(line);
+      });
+    await send({ phase: "evidence", evidence: syntheticRetryCap.evidence });
+    await waitFor(() => expect(hook.result.current.current?.pending).toBe(true));
+    await send({ phase: "final", narrative: syntheticRetryCap.narrative });
+    await waitFor(() => expect(hook.result.current.current?.pending).toBe(false));
+    await waitFor(() => expect(saves).toHaveLength(1));
+    const landNewestFirst = async () => {
+      for (let quiet = 0; quiet < 3;) {
+        const open = saves.filter((x) => x.open);
+        if (open.length === 0) quiet++;
+        else quiet = 0;
+        await act(async () => {
+          open.at(-1)?.finish();
+          await tick();
+        });
+      }
+    };
+    const close = () =>
+      act(async () => {
+        stream.end();
+        await done;
+      });
+    return {
+      ...hook,
+      stream,
+      send,
+      close,
+      saves,
+      removed,
+      database,
+      landNewestFirst,
+      rewriteAnswers: (r: Response) => answerRewrite(r),
+    };
+  }
+
+  it("does not let the first save, landing late, write over the history", async () => {
+    const { send, close, saves, database, landNewestFirst } = await held();
+    await send({ phase: "lineage", lineage });
+    await close();
+    await landNewestFirst();
+    expect(saves).toHaveLength(2);
+    expect(database.row?.result.evidence.lineage).toEqual(lineage);
+    expect(database.row?.result.narrative).not.toBeNull();
+    expect(database.most).toBe(1);
+  });
+
+  it("sends the save with the history after the one before it failed", async () => {
+    const { send, close, saves, database, landNewestFirst } = await held();
+    await send({ phase: "lineage", lineage });
+    await close();
+    await act(async () => {
+      saves[0].finish(false);
+      await tick();
+    });
+    await landNewestFirst();
+    expect(saves).toHaveLength(2);
+    expect(database.row?.result.evidence.lineage).toEqual(lineage);
+  });
+
+  it("saves the rewritten answer with the history when the rewrite ends as the history arrives", async () => {
+    const { result, stream, close, saves, database, landNewestFirst, rewriteAnswers } =
+      await held();
+    await landNewestFirst();
+    const id = result.current.current!.caseId;
+    let rewriting: Promise<void> = Promise.resolve();
+    act(() => {
+      rewriting = result.current.rewrite(id, "pt");
+    });
+    await waitFor(() => expect(result.current.current?.rewriting).toBe("pt"));
+    await act(async () => {
+      stream.push({ phase: "lineage", lineage });
+      for (let i = 0; i < 5; i++) await tick();
+      rewriteAnswers(Response.json({ narrative: portuguese }));
+      await rewriting;
+    });
+    await close();
+    await landNewestFirst();
+    expect(result.current.current?.result).toMatchObject({
+      narrative: { language: "pt" },
+      evidence: { lineage },
+    });
+    expect(database.row?.result).toMatchObject({
+      narrative: { language: "pt" },
+      evidence: { lineage },
+    });
+    expect(database.most).toBe(1);
+    expect(saves).toHaveLength(3);
+  });
+
+  it("saves both when the history arrives as the rewrite ends", async () => {
+    const { result, stream, close, database, landNewestFirst, rewriteAnswers } = await held();
+    await landNewestFirst();
+    const id = result.current.current!.caseId;
+    let rewriting: Promise<void> = Promise.resolve();
+    act(() => {
+      rewriting = result.current.rewrite(id, "pt");
+    });
+    await waitFor(() => expect(result.current.current?.rewriting).toBe("pt"));
+    await act(async () => {
+      rewriteAnswers(Response.json({ narrative: portuguese }));
+      await rewriting;
+      stream.push({ phase: "lineage", lineage });
+      for (let i = 0; i < 5; i++) await tick();
+    });
+    await close();
+    await landNewestFirst();
+    expect(result.current.current?.result).toMatchObject({
+      narrative: { language: "pt" },
+      evidence: { lineage },
+    });
+    expect(database.row?.result).toMatchObject({
+      narrative: { language: "pt" },
+      evidence: { lineage },
+    });
+  });
+
+  it("does not bring back a case removed before its history arrived", async () => {
+    const { result, send, close, saves, removed, database, landNewestFirst } = await held();
+    await landNewestFirst();
+    const id = result.current.current!.caseId;
+    act(() => result.current.removeCase(id));
+    await waitFor(() => expect(removed).toEqual([`/api/investigations/${id}`]));
+    await send({ phase: "lineage", lineage });
+    await close();
+    await landNewestFirst();
+    expect(saves).toHaveLength(1);
+    expect(database.row).toBeNull();
+  });
+
+  it("removes a case only after the save in flight has landed", async () => {
+    const { result, close, saves, removed, database } = await held();
+    const id = result.current.current!.caseId;
+    act(() => result.current.removeCase(id));
+    await act(async () => {
+      await tick();
+    });
+    expect(removed).toEqual([]);
+    await act(async () => {
+      saves[0].finish();
+      await tick();
+    });
+    await waitFor(() => expect(removed).toEqual([`/api/investigations/${id}`]));
+    await close();
+    expect(database.row).toBeNull();
+  });
+});

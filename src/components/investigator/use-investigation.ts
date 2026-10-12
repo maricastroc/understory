@@ -6,6 +6,7 @@ import type {
   ArtifactRef,
   DigResult,
   InvestigateInput,
+  Lineage,
   NarrativeLanguage,
 } from "@understory/core/types";
 import { readJson } from "@/lib/read-json";
@@ -38,7 +39,14 @@ export type View = "browse" | "case";
 
 type StreamMessage =
   | { phase: "evidence"; evidence: DigResult["evidence"] }
-  | { phase: "final"; narrative: DigResult["narrative"]; error?: string };
+  | { phase: "final"; narrative: DigResult["narrative"]; error?: string }
+  | { phase: "lineage"; lineage: Lineage };
+
+function forTheWriter(evidence: DigResult["evidence"]): DigResult["evidence"] {
+  const sent = { ...evidence };
+  delete sent.lineage;
+  return sent;
+}
 
 async function readNdjson(
   body: ReadableStream<Uint8Array>,
@@ -121,6 +129,28 @@ export function useInvestigation(user: AuthUser | null) {
     historyRef.current = history;
   }, [history]);
 
+  const latest = useRef(new Map<string, DigResult>());
+  const saving = useRef(new Map<string, Promise<void>>());
+  const saveCase = useCallback(
+    (saved: SavedCase) => {
+      if (!user) return;
+      const send = () =>
+        fetch("/api/investigations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(saved),
+        }).then(
+          () => {},
+          () => {},
+        );
+      saving.current.set(
+        saved.caseId,
+        (saving.current.get(saved.caseId) ?? Promise.resolve()).then(send),
+      );
+    },
+    [user],
+  );
+
   const rewrite = useCallback(
     async (caseId: string, language: NarrativeLanguage) => {
       const entry = historyRef.current.find((e) => e.caseId === caseId);
@@ -130,24 +160,25 @@ export function useInvestigation(user: AuthUser | null) {
       const alternates = { ...entry.alternates, ...(from ? { [from]: previous } : {}) };
       const patch = (fn: (e: Entry) => Entry) =>
         setHistory((h) => h.map((e) => (e.caseId === caseId ? fn(e) : e)));
-      const save = (result: DigResult) => {
-        if (!user) return;
-        void fetch("/api/investigations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            caseId,
-            question: entry.form.question,
-            repoPath: entry.form.repoPath,
-            location: entry.form.location,
-            result,
-            ...(entry.parentCaseId ? { parentCaseId: entry.parentCaseId } : {}),
-          } satisfies SavedCase),
-        }).catch(() => {});
-      };
+      const save = (result: DigResult) =>
+        saveCase({
+          caseId,
+          question: entry.form.question,
+          repoPath: entry.form.repoPath,
+          location: entry.form.location,
+          result,
+          ...(entry.parentCaseId ? { parentCaseId: entry.parentCaseId } : {}),
+        });
       const settle = (narrative: NonNullable<DigResult["narrative"]>) => {
-        const result = { ...entry.result, narrative };
-        patch((e) => ({ ...e, result, alternates, rewriting: null, rewriteError: null }));
+        const result = { ...(latest.current.get(caseId) ?? entry.result), narrative };
+        latest.current.set(caseId, result);
+        patch((e) => ({
+          ...e,
+          result: { ...e.result, narrative },
+          alternates,
+          rewriting: null,
+          rewriteError: null,
+        }));
         save(result);
       };
 
@@ -163,7 +194,7 @@ export function useInvestigation(user: AuthUser | null) {
         const res = await fetch("/api/narrate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ evidence: entry.result.evidence, language }),
+          body: JSON.stringify({ evidence: forTheWriter(entry.result.evidence), language }),
         });
         const data = await readJson<{ narrative: DigResult["narrative"]; error?: string }>(res);
         if (!res.ok || !data.narrative) {
@@ -175,7 +206,7 @@ export function useInvestigation(user: AuthUser | null) {
         failed(err instanceof Error ? err.message : String(err));
       }
     },
-    [user],
+    [saveCase],
   );
 
   async function submit(
@@ -207,14 +238,7 @@ export function useInvestigation(user: AuthUser | null) {
       setView("browse");
     };
 
-    const persist = (caseId: string, data: DigResult) => {
-      if (!user) return;
-      void fetch("/api/investigations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildSave(caseId, data)),
-      }).catch(() => {});
-    };
+    const persist = (caseId: string, data: DigResult) => saveCase(buildSave(caseId, data));
 
     try {
       const res = await fetch("/api/dig", {
@@ -241,6 +265,7 @@ export function useInvestigation(user: AuthUser | null) {
           return;
         }
         const caseId = `GI-${counter.current++}`;
+        latest.current.set(caseId, data);
         setHistory((h) => [{ ...buildEntry(caseId, data), mountKey: key }, ...h]);
         setActiveId(caseId);
         settleDraft();
@@ -270,8 +295,24 @@ export function useInvestigation(user: AuthUser | null) {
             narrative: msg.narrative,
             ...(msg.error ? { error: msg.error } : {}),
           };
+          latest.current.set(id, full);
           setHistory((h) =>
             h.map((e) => (e.caseId === id ? { ...e, ...buildEntry(id, full), pending: false } : e)),
+          );
+          persist(id, full);
+        } else if (msg.phase === "lineage") {
+          const id = caseId;
+          const base = id ? latest.current.get(id) : undefined;
+          if (!id || !base || !msg.lineage) return;
+          const lineage = msg.lineage;
+          const full = { ...base, evidence: { ...base.evidence, lineage } };
+          latest.current.set(id, full);
+          setHistory((h) =>
+            h.map((e) =>
+              e.caseId === id
+                ? { ...e, result: { ...e.result, evidence: { ...e.result.evidence, lineage } } }
+                : e,
+            ),
           );
           persist(id, full);
         }
@@ -373,10 +414,14 @@ export function useInvestigation(user: AuthUser | null) {
 
   function removeCase(id: string) {
     setHistory((h) => h.filter((e) => e.caseId !== id));
+    latest.current.delete(id);
     if (user) {
-      void fetch(`/api/investigations/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(
-        () => {},
-      );
+      const remove = () =>
+        fetch(`/api/investigations/${encodeURIComponent(id)}`, { method: "DELETE" }).then(
+          () => {},
+          () => {},
+        );
+      saving.current.set(id, (saving.current.get(id) ?? Promise.resolve()).then(remove));
     }
     if (activeId === id) {
       setActiveId(null);
