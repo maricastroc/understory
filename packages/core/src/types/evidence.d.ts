@@ -4,6 +4,7 @@ import type { CodeContext } from "./code-context";
 import type { CodeLocation } from "./code-location";
 import type { Contradiction } from "./contradiction";
 import type { Coverage } from "./coverage";
+import type { Lineage } from "./reading";
 import type { RepoRef } from "./repo-ref";
 
 export type Evidence = {
@@ -16,4 +17,5 @@ export type Evidence = {
   contradictions: Contradiction[];
   note?: string;
   coverage?: Coverage;
+  lineage?: Lineage;
 };

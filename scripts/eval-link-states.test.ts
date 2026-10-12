@@ -1,4 +1,6 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { parseRecords } from "./eval-report";
 import {
   type CaseFacts,
   anchoringOf,
@@ -125,5 +127,37 @@ describe("crossTab", () => {
         (r) => r.b,
       ),
     ).toEqual({ x: { "1": 2 }, y: { "2": 1 } });
+  });
+});
+
+describe("the kept projection, recomputed through the core", () => {
+  it("gives every kept claim the same evidence, link, state and anchoring", () => {
+    const kept = JSON.parse(readFileSync("eval/results/2026-10-12-link-projection.json", "utf8"));
+    const all = JSON.parse(readFileSync(kept.facts, "utf8")).cases as CaseFacts[];
+    const byCase = new Map(all.map((c) => [c.id, c]));
+    const rows = new Map<string, Record<string, unknown>>(
+      kept.claims.map((p: Record<string, unknown>) => [
+        `${p.from}|${p.id}|${p.pass}|${p.claim}`,
+        p,
+      ]),
+    );
+    let seen = 0;
+    for (const name of kept.files as string[])
+      for (const run of parseRecords(readFileSync(`eval/results/${name}`, "utf8")).runs)
+        (run.narrative?.claims ?? []).forEach((claim, i) => {
+          const checks = (run.narrative?.entailment?.checks ?? []).filter((k) => k.claim === i);
+          const cited = checks.length ? checks.map((k) => k.citation) : claim.citations;
+          const evidence = evidenceOf(checks[0]?.status ?? null);
+          const specificity = specificityOf(byCase.get(run.id), cited);
+          expect(rows.get(`${name}|${run.id}|${run.pass}|${i}`)).toMatchObject({
+            evidence,
+            specificity,
+            state: stateOf(evidence, specificity),
+            anchoring: anchoringOf(byCase.get(run.id), cited),
+          });
+          seen++;
+        });
+    expect(seen).toBe(kept.claims.length);
+    expect(seen).toBeGreaterThan(1000);
   });
 });

@@ -1,78 +1,18 @@
-import type { EntailmentStatus } from "@understory/core/types";
-import type { Placement, SourceLink } from "./eval-link-signals";
+import {
+  type CaseFacts as CoreFacts,
+  type SourceFacts,
+  qualityOf,
+  specificityOf,
+  stateOf,
+} from "@understory/core/reading";
+import type { Quality, Specificity, State } from "@understory/core/types";
 
-export type SourceFacts = {
-  kind: string;
-  link: SourceLink;
-  comments: Array<{ placement: Placement; outdated: boolean }>;
-};
+export type { SourceFacts, Specificity, State };
+export type Evidence = Quality;
+export type CaseFacts = CoreFacts & { id: string };
 
-export type CaseFacts = {
-  id: string;
-  granularity: string | null;
-  alone: boolean;
-  sources: Record<string, SourceFacts>;
-};
-
-export type Evidence = "stated by a cited source" | "insufficient" | "refuted" | "absent";
-
-export type Specificity =
-  | "direct: a review comment on the line"
-  | "direct: the change is this block alone"
-  | "the change that last changed the line"
-  | "another change in the line's history"
-  | "the file's history"
-  | "none";
-
-export type State =
-  | "directly linked to the line"
-  | "recorded for the change, no specific link shown"
-  | "not sustained";
-
-export const evidenceOf = (status: EntailmentStatus | null | undefined): Evidence =>
-  status === "supported"
-    ? "stated by a cited source"
-    : status === "weak"
-      ? "insufficient"
-      : status === "unsupported"
-        ? "refuted"
-        : "absent";
-
-const ORDER: Specificity[] = [
-  "direct: a review comment on the line",
-  "direct: the change is this block alone",
-  "the change that last changed the line",
-  "another change in the line's history",
-  "the file's history",
-  "none",
-];
-
-function specificityOfSource(facts: CaseFacts, source: SourceFacts): Specificity {
-  if (facts.granularity === "file") return "the file's history";
-  const anchored = source.comments.some(
-    (c) => c.placement === "on the line" || c.placement === "in its hunk",
-  );
-  if (source.kind === "review" && anchored) return "direct: a review comment on the line";
-  if (source.link === "this change")
-    return facts.alone
-      ? "direct: the change is this block alone"
-      : "the change that last changed the line";
-  return source.link === "another change" ? "another change in the line's history" : "none";
-}
-
-export function specificityOf(facts: CaseFacts | undefined, cited: string[]): Specificity {
-  const found = cited.flatMap((id) => (facts?.sources[id] ? [facts.sources[id]] : []));
-  if (!facts || found.length === 0) return "none";
-  const each = found.map((source) => specificityOfSource(facts, source));
-  return ORDER.find((level) => each.includes(level)) ?? "none";
-}
-
-export function stateOf(evidence: Evidence, specificity: Specificity): State {
-  if (evidence !== "stated by a cited source" || specificity === "none") return "not sustained";
-  return specificity.startsWith("direct")
-    ? "directly linked to the line"
-    : "recorded for the change, no specific link shown";
-}
+export const evidenceOf = qualityOf;
+export { specificityOf, stateOf };
 
 export type Anchoring =
   | "on the line or in its hunk"
