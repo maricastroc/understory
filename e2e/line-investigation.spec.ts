@@ -1,9 +1,9 @@
 import { expect, type Page, test } from "@playwright/test";
 import { axeViolations } from "./axe";
 
-async function open(page: Page, width = 1440, state = "resolved") {
+async function open(page: Page, width = 1440, state = "resolved", reading = false) {
   await page.setViewportSize({ width, height: 900 });
-  await page.goto(`/dev/line?state=${state}`);
+  await page.goto(`/dev/line?state=${state}${reading ? "&reading=1" : ""}`);
   await page.locator(`[data-answer="${width >= 1100 ? "panel" : "strip"}"]`).waitFor();
   await page.locator('ol[aria-label="History, newest first"] button').first().waitFor();
   await page.evaluate(() => document.fonts.ready);
@@ -153,4 +153,38 @@ for (const width of [1440, 1280, 960, 390]) {
     const history = await box(page, "section#history");
     expect(history.y).toBeGreaterThan(code.y + code.height);
   });
+}
+
+const marks = (page: Page) =>
+  page.locator("#history").locator("[data-fact], [data-scope], [data-earlier], [data-edge]");
+
+test("the reading stays out of the history until it is switched on", async ({ page }) => {
+  await open(page, 1440, "kept-ng-http-114");
+  await expect(marks(page)).toHaveCount(0);
+  await expect(page.locator("#history")).toContainText("oldest recorded change to line 114");
+  await open(page, 1440, "kept-ng-http-114", true);
+  await expect(page.locator("#history [data-fact]")).toHaveText(/^rewrote this line · before: /);
+  await expect(page.locator("#history [data-scope]")).toHaveText("said of the change as a whole");
+  await expect(page.locator("#history [data-earlier]")).toContainText(
+    "found by following the line back · not read for a reason",
+  );
+  await expect(page.locator('#history [data-artifact="commit:2420a0a"]')).toHaveCount(0);
+});
+
+for (const state of ["kept-ng-http-114", "kept-tslint-257", "kept-ws-revert-story"]) {
+  for (const width of [1440, 390]) {
+    test(`the reading in the history, ${state} at ${width}: axe with contrast, no page overflow`, async ({
+      page,
+    }) => {
+      await open(page, width, state, true);
+      await expect(marks(page).first()).toBeVisible();
+      const overflow = await page.evaluate(() => {
+        const main = document.querySelector("main")!;
+        return main.scrollWidth - main.clientWidth;
+      });
+      expect(overflow).toBeLessThanOrEqual(0);
+      await page.mouse.move(0, 0);
+      expect(await axeViolations(page, { within: "main", settleMs: 400 })).toEqual([]);
+    });
+  }
 }

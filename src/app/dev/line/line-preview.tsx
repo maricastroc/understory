@@ -11,6 +11,7 @@ import {
   syntheticChargeBlame,
   syntheticChargeLines,
 } from "@/components/line-investigation/fixtures/synthetic-charge-file";
+import kept from "@/components/line-investigation/fixtures/kept-cases.json";
 import { syntheticCases } from "@/components/line-investigation/fixtures/synthetic-cases";
 import {
   SYNTHETIC_NOW,
@@ -77,12 +78,23 @@ const STATES: Record<string, () => DigResult> = {
   "many-owners": () => states.syntheticManyOwners(8),
 };
 
-export function LinePreview({ state, user }: { state: string; user: string | null }) {
+const KEPT = kept.cases as unknown as Record<string, DigResult>;
+
+export function LinePreview({
+  state,
+  user,
+  reading = false,
+}: {
+  state: string;
+  user: string | null;
+  reading?: boolean;
+}) {
   const layout = useSpecimenLayout();
   const [menuOpen, setMenuOpen] = useState(false);
   const phase = PHASES[state];
   const pending = state === "pending" || !!phase;
-  const result = (STATES[state] ?? STATES.resolved)();
+  const keptCase = state.startsWith("kept-") ? (KEPT[state.slice(5)] ?? null) : null;
+  const result = keptCase ?? (STATES[state] ?? STATES.resolved)();
   const loc = result.evidence.location!;
   const signedIn = user === "synthetic" ? SYNTHETIC_USER : null;
 
@@ -100,11 +112,18 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
 
   const renderSpecimen: SpecimenSlot = (slot) => (
     <CodeSpecimen
-      path={SYNTHETIC_FILE_PATH}
-      lines={syntheticChargeLines}
-      datum={{ start: loc.startLine, end: loc.endLine }}
+      path={keptCase ? loc.file : SYNTHETIC_FILE_PATH}
+      lines={keptCase?.evidence.code?.lines ?? syntheticChargeLines}
+      datum={
+        keptCase?.evidence.code
+          ? {
+              start: loc.startLine - keptCase.evidence.code.startLine + 1,
+              end: loc.endLine - keptCase.evidence.code.startLine + 1,
+            }
+          : { start: loc.startLine, end: loc.endLine }
+      }
       question={result.evidence.question}
-      blame={phase || state === "empty" ? null : syntheticChargeBlame}
+      blame={phase || state === "empty" || keptCase ? null : syntheticChargeBlame}
       blameStatus={phase === "collecting" ? "loading" : phase === "failed" ? "unpinned" : "ready"}
       now={NOW}
       {...slot}
@@ -156,6 +175,7 @@ export function LinePreview({ state, user }: { state: string; user: string | nul
           onDrill={() => {}}
           onFollowUp={() => {}}
           onBackToQuestion={() => {}}
+          reading={reading}
           phase={phase}
           failure={
             phase === "failed" ? (

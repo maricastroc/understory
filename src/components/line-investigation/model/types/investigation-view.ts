@@ -1,4 +1,10 @@
-import type { CodeLocation, Confidence, NarrativeLanguage, RepoRef } from "@understory/core/types";
+import type {
+  CodeLocation,
+  Confidence,
+  NarrativeLanguage,
+  Reading,
+  RepoRef,
+} from "@understory/core/types";
 import type { ChainLinks } from "./chain-links";
 import type { ChecklistItem } from "./checklist-item";
 import type { Verdict } from "./verdict";
@@ -23,4 +29,5 @@ export type InvestigationView = {
   answer: string | null;
   language: NarrativeLanguage | null;
   error: string | null;
+  reading?: Reading | null;
 };
