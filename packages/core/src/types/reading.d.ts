@@ -11,6 +11,7 @@ export type PlacedComment = {
 export type LineageStop =
   | "the line was added"
   | "depth limit"
+  | "request limit"
   | "time limit"
   | "no patch"
   | "line not located"

@@ -167,6 +167,44 @@ export async function readFileAtRef(
   return git(repoPath, ["show", `${ref}:${filePath}`]);
 }
 
+export async function commitAt(
+  repoPath: string,
+  sha: string,
+  filePath: string,
+): Promise<{ date: string; title: string; message: string; parent: string | null; patch: string }> {
+  if (!isCommitSha(sha)) throw new Error(`Not a commit sha: ${sha}`);
+  const [parents, date, title, ...body] = (
+    await git(repoPath, ["log", "-1", "--format=%P%n%aI%n%s%n%b", sha])
+  ).split("\n");
+  return {
+    date: date ?? "",
+    title: title ?? "",
+    message: [title ?? "", ...body].join("\n").trim(),
+    parent: parents?.split(" ")[0] || null,
+    patch: await filePatch(repoPath, sha, filePath),
+  };
+}
+
+export async function ownerAt(
+  repoPath: string,
+  sha: string,
+  filePath: string,
+  line: number,
+): Promise<string | null> {
+  if (!isCommitSha(sha)) throw new Error(`Not a commit sha: ${sha}`);
+  const out = await git(repoPath, [
+    "blame",
+    "-L",
+    `${line},${line}`,
+    "--porcelain",
+    sha,
+    "--",
+    filePath,
+  ]);
+  const owner = out.split(/\s/)[0] ?? "";
+  return isCommitSha(owner) ? owner : null;
+}
+
 export async function commitScope(
   repoPath: string,
   sha: string,
