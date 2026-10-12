@@ -64,6 +64,27 @@ export function lineChange(patch: string, line: string): Omit<LineChange, "artif
   return { before: paired === undefined ? null : clamp(paired.trim()), added: added.length };
 }
 
+export function lineBefore(patch: string, before: string): number | null {
+  const wanted = before.trim();
+  let old = 0;
+  let found: number | null = null;
+  for (const row of patch.replace(/\r\n/g, "\n").split("\n")) {
+    const header = /^@@ -(\d+)/.exec(row);
+    if (header) {
+      old = Number(header[1]);
+      continue;
+    }
+    if (isRemoved(row)) {
+      if (row.slice(1).trim() === wanted) {
+        if (found !== null) return null;
+        found = old;
+      }
+      old++;
+    } else if (!isAdded(row)) old++;
+  }
+  return found;
+}
+
 export function changedRun(patch: string, line: string): number | null {
   const wanted = line.trim();
   if (!wanted) return null;
