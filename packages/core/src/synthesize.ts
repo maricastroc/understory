@@ -72,7 +72,7 @@ const SYSTEM = [
   "- Only cite ids that literally appear in the evidence. Never fabricate an id.",
 ].join("\n");
 
-function languageRule(language: Language): string {
+export function languageRule(language: Language): string {
   if (language === "pt")
     return "- LANGUAGE: write every claim's `text` (and `answer`) in Brazilian Portuguese (pt-BR), no matter what language the question or the evidence is in.";
   if (language === "en")

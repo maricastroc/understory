@@ -227,7 +227,8 @@ The cause is structural. Synthesis reads the collected artifacts and the locatio
 the audit reads the claim and the sources it cites. Neither sees the text of the line or the
 diff. The auditor marked several of these claims as supported, because the source does say what
 the claim quotes; nothing checks that the source is about the line. The verdict was "resolved"
-with medium confidence, 0.55 to 0.65. Tracked in [#31](https://github.com/maricastroc/understory/issues/31).
+with medium confidence, 0.55 to 0.65. Tracked in [#31](https://github.com/maricastroc/understory/issues/31). What has been tried since is
+[further down](#what-was-tried-for-31-and-where-it-stands).
 
 **A non-answer returned as an answer.** `ws-skew-value` asks why an allowance is 2 seconds and
 not more. The commit explains why the cursor is moved back, never why by two seconds. Both runs
@@ -353,6 +354,71 @@ What is planned to close these gaps is in [#34](https://github.com/maricastroc/u
   of a local clone with a GitHub remote. On GitHub a single line yields only the last change
   that touched it, while a local repository yields the line's whole history; every real case
   here is the first kind and every synthetic one the second.
+
+## What was tried for #31, and where it stands
+
+[#31](https://github.com/maricastroc/understory/issues/31) is the failure where an answer gives a change's reasons to a line the change only
+happened to touch. It is not fixed. Two ways of fixing it were built and measured on 11 Oct,
+through OpenRouter, against four passes of the unchanged pipeline (the two of the main run and
+the two of the route check). Neither closes the issue. This section says what each did.
+
+|                                           | Unchanged, 4 passes | Code shown, 2 passes | Relevance step, 4 passes |
+| ----------------------------------------- | ------------------- | -------------------- | ------------------------ |
+| Runs passed                               | 126/144             | 62/72                | 128/144                  |
+| `incidental` runs passed                  | 5/16                | 8/8                  | 12/16                    |
+| `recorded` runs passed, real lines        | 25/28               | 6/14                 | 21/28                    |
+| `recorded` runs passed, synthetic         | 32/32               | 16/16                | 30/32                    |
+| `recorded` runs that came back abstaining | 0/60                | 2/30                 | 3/60                     |
+| Tokens per run on the synthesis model     | 2,057               | 2,389                | 2,904                    |
+
+**Code shown to the writer and the auditor**
+([run](results/2026-10-11-issue-31-code-shown.jsonl),
+[verdicts](results/2026-10-11-issue-31-code-shown.review.json)). Collection kept the
+investigated code with three lines on each side, and both models were shown it, with rules
+against borrowing reasons. On the writing side it did everything asked: all four incidental
+lines abstained in both runs, `ng-http-411` stopped saying a doc line implements a feature, and
+for the first time a false premise was corrected instead of repeated. But the answers then
+named what they saw ("the DockerVersion method was introduced as part of..."), and the auditor
+marked those claims weak or unsupported because no source mentions a method or a loop by name.
+Four real lines that passed before failed both runs on the confidence floor, and one was
+flagged as a misattribution while being right. Three rewordings, one with the auditor put back
+as it was, gave the same result. The writer can be made to see the code; the audit cannot yet
+judge what it then writes.
+
+**A relevance step before the unchanged pipeline**
+([run](results/2026-10-11-issue-31-relevance.jsonl),
+[verdicts](results/2026-10-11-issue-31-relevance.review.json)). The synthesis and the audit stay
+as they are. One call before them shows the synthesis model the code and the evidence and asks
+one thing: does this code belong to something the evidence gives a reason for, or was it only
+swept along? A line swept along gets an abstention that names the last change. This is what the
+branch holds.
+
+- It stops the plainest case. `tslint-257`, a line moved by an unrelated rewrite, abstained in
+  every run.
+- In that four-pass run it also swept three runs it should not have: `ws-batch-size` twice,
+  where the reason sits one commit before a rename, and `machine-168` once. Its instruction
+  spoke of "the change that last touched" the code, which is wrong for a history with several
+  changes. The instruction was corrected after the run.
+- With the corrected instruction the step was measured alone, ten times per case
+  ([`results/2026-10-11-relevance-step-alone.json`](results/2026-10-11-relevance-step-alone.json)).
+  It swept `tslint-257` ten times in ten and no `recorded` case in 150 calls. It swept
+  `machine-32` only twice and `tslint-189` once. The whole set has not been run again with it.
+- It cannot fix `tslint-189`, and mostly not `machine-32`. Those lines do belong to their
+  change. What goes wrong is that the writer, who still does not see the code, hands them the
+  wrong items of the pull request. `tslint-189` failed all four runs, as before.
+- `ng-http-411` still says a doc line implements a check.
+- It costs one more call to the synthesis model, about 40% more tokens per investigation, and
+  on GitHub one more request to read the file.
+
+**Where that leaves it.** A full fix needs the writer to see the code, and that needs an
+auditor that can judge a claim about code it is shown, which is the subject of [#33](https://github.com/maricastroc/understory/issues/33).
+The relevance step is a partial measure with a real cost. Whether to take it in the meantime
+is open.
+
+The runs differ from one another by more than the changes do in places. With unchanged prompts,
+`machine-168` passed three runs of four in the first column and its claim was then judged weak
+three times in a row in the third. Two passes are too few to compare versions on a single
+case.
 
 ## Why it exists
 

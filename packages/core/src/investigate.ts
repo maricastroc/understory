@@ -3,6 +3,7 @@ import { type CollectInput, collect } from "./collect";
 import { checkEntailment } from "./entail";
 import { type LlmConfig, getModel } from "./llm";
 import { narrativeLanguage } from "./narrative-language";
+import { checkRelevance, sweptAlong } from "./relevance";
 import { synthesize } from "./synthesize";
 import type { DigResult, Entailment, Evidence, VerifiedNarrative } from "./types";
 import { verify } from "./verify";
@@ -26,7 +27,18 @@ export async function narrate(
   if (!model) return { narrative: null, error: NO_LLM };
   const auditor = getAuditor(config) ?? { primary: model, fallback: null };
 
+  const asked = config.language === "en" || config.language === "pt" ? config.language : null;
+  const inLanguage = (verified: VerifiedNarrative): VerifiedNarrative => {
+    const language = asked ?? narrativeLanguage(verified);
+    return language ? { ...verified, language } : verified;
+  };
+
   try {
+    const swept = sweptAlong(
+      await checkRelevance(evidence, model, config.language).catch(() => null),
+    );
+    if (swept) return { narrative: inLanguage(verify(evidence, swept)) };
+
     const narrative = await synthesize(evidence, model, config.language);
     const doEntail = config.entail ?? process.env.ENTAILMENT !== "0";
     let entailment: Entailment | undefined;
@@ -37,10 +49,7 @@ export async function narrate(
         entailment = undefined;
       }
     }
-    const verified = verify(evidence, narrative, entailment);
-    const asked = config.language === "en" || config.language === "pt" ? config.language : null;
-    const language = asked ?? narrativeLanguage(verified);
-    return { narrative: language ? { ...verified, language } : verified };
+    return { narrative: inLanguage(verify(evidence, narrative, entailment)) };
   } catch (e) {
     return { narrative: null, error: synthesisError(e) };
   }

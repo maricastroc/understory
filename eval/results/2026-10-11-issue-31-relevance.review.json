@@ -1,0 +1,117 @@
+{
+  "run": "2026-10-11T20:13:10.715Z",
+  "verdicts": {
+    "fp-batch-raised#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. The relevance step answered: it names the rename as the last change."
+    },
+    "fp-jitter-removed#0": {
+      "verdict": "pass",
+      "note": "Refuses as out of scope."
+    },
+    "fp-cap-raised-by-reviewer#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. The relevance step answered: it names commit c038fb3 as the last change."
+    },
+    "tslint-257#0": {
+      "verdict": "pass",
+      "note": "Abstains: the relevance step names commit 63fc794 and says the record does not explain this line."
+    },
+    "machine-32#0": {
+      "verdict": "pass",
+      "note": "Abstains: the relevance step names commit aa54a5f and says the record does not explain this code."
+    },
+    "fp-batch-raised#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. The relevance step answered: it names the rename as the last change."
+    },
+    "fp-jitter-removed#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise."
+    },
+    "fp-cap-raised-by-reviewer#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. The relevance step answered: it names commit c038fb3 as the last change."
+    },
+    "tslint-257#1": {
+      "verdict": "pass",
+      "note": "Abstains: the relevance step names commit 63fc794 and says the record does not explain this line."
+    },
+    "machine-32#1": {
+      "verdict": "pass",
+      "note": "Abstains: the relevance step names commit aa54a5f and says the record does not explain this code."
+    },
+    "fp-batch-raised#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise."
+    },
+    "fp-jitter-removed#2": {
+      "verdict": "pass",
+      "note": "Refuses as out of scope."
+    },
+    "fp-cap-raised-by-reviewer#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. The relevance step answered: it names commit c038fb3 as the last change."
+    },
+    "tslint-257#2": {
+      "verdict": "pass",
+      "note": "Abstains: the relevance step names commit 63fc794 and says the record does not explain this line."
+    },
+    "machine-32#2": {
+      "verdict": "pass",
+      "note": "Abstains: the relevance step names commit aa54a5f and says the record does not explain this code."
+    },
+    "fp-batch-raised#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise."
+    },
+    "fp-jitter-removed#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise."
+    },
+    "fp-cap-raised-by-reviewer#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. The relevance step answered: it names commit c038fb3 as the last change."
+    },
+    "tslint-257#3": {
+      "verdict": "pass",
+      "note": "Abstains: the relevance step names commit 63fc794 and says the record does not explain this line."
+    },
+    "machine-32#3": {
+      "verdict": "pass",
+      "note": "Abstains: the relevance step names commit aa54a5f and says the record does not explain this code."
+    },
+    "tslint-189#0": {
+      "verdict": "fail",
+      "note": "Says the line was changed to use path.resolve and that this enables resolving formatters relative to the working directory. The line is `if (Formatter === undefined) {`. Two claims audited as supported."
+    },
+    "tslint-189#1": {
+      "verdict": "fail",
+      "note": "Says the line was changed to use path.resolve and now resolves formatter modules relative to cwd. Both claims audited as supported."
+    },
+    "tslint-189#2": {
+      "verdict": "fail",
+      "note": "Opens with the cleanup, then gives the deprecation of getRelativePath and the cwd lookup as what the change did to this line. All three claims audited as weak."
+    },
+    "tslint-189#3": {
+      "verdict": "fail",
+      "note": "Says the line was changed to use path.resolve because getRelativePath was deprecated. Audited as supported."
+    },
+    "draft-644#0": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line's logic."
+    },
+    "draft-644#1": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line's logic."
+    },
+    "draft-644#2": {
+      "verdict": "pass",
+      "note": "Abstains: the relevance step says commit 8de2db9 does not explain this line."
+    },
+    "draft-644#3": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line's logic."
+    }
+  }
+}

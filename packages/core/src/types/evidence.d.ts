@@ -1,5 +1,6 @@
 import type { Artifact } from "./artifact";
 import type { ArtifactRef } from "./artifact-ref";
+import type { CodeContext } from "./code-context";
 import type { CodeLocation } from "./code-location";
 import type { Contradiction } from "./contradiction";
 import type { Coverage } from "./coverage";
@@ -10,6 +11,7 @@ export type Evidence = {
   repo: RepoRef;
   location?: CodeLocation;
   anchor?: ArtifactRef;
+  code?: CodeContext;
   artifacts: Artifact[];
   contradictions: Contradiction[];
   note?: string;

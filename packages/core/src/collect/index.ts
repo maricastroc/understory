@@ -1,7 +1,15 @@
 import type { Artifact, ArtifactRef, CodeLocation, Coverage, Evidence, RepoRef } from "../types";
 import type { BlameCommit } from "./github";
+import { codeWindow } from "./code-context";
 import { detectContradictions } from "./contradictions";
-import { commitToArtifact, headSha, isGitRepo, lineHistory, resolveRepo } from "./git";
+import {
+  commitToArtifact,
+  headSha,
+  isGitRepo,
+  lineHistory,
+  readFileAtRef,
+  resolveRepo,
+} from "./git";
 import { enrichLocalCommits } from "./local-enrich";
 import { resolveToken } from "./token-context";
 import {
@@ -10,6 +18,7 @@ import {
   expandCommit,
   fileHistoryGitHub,
   getBranchHeadGitHub,
+  getFileContentGitHub,
   getFileSizeGitHub,
   getRepoMeta,
   issueContextArtifacts,
@@ -45,6 +54,17 @@ export type CollectInput = {
 };
 
 type BaseEvidence = Omit<Evidence, "contradictions">;
+
+async function withCode(base: BaseEvidence, source: () => Promise<string>): Promise<BaseEvidence> {
+  const { location } = base;
+  if (!location || base.coverage?.granularity === "file") return base;
+  try {
+    const code = codeWindow(await source(), location);
+    return code ? { ...base, code } : base;
+  } catch {
+    return base;
+  }
+}
 
 export async function collect(input: CollectInput): Promise<Evidence> {
   const { repoPath, question, location, anchor } = input;
@@ -88,13 +108,15 @@ async function collectLocal(
           return { ...a, meta: { ...a.meta, prLookup: "skipped" } };
         });
 
-  return {
+  const base: BaseEvidence = {
     question,
     repo: sha ? { ...repo, sha } : repo,
     location,
     artifacts,
     coverage: { granularity: "line" },
   };
+  if (!sha) return base;
+  return withCode(base, () => readFileAtRef(repoPath, sha, location.file));
 }
 
 const LARGE_FILE_BYTES = 1_000_000;
@@ -164,7 +186,7 @@ async function collectFromGitHub(
   }
 
   artifacts.sort((a, b) => a.date.localeCompare(b.date));
-  return {
+  const base: BaseEvidence = {
     question,
     repo: sha ? { ...repoRef, sha } : repoRef,
     location,
@@ -172,6 +194,7 @@ async function collectFromGitHub(
     note,
     coverage: { granularity },
   };
+  return withCode(base, () => getFileContentGitHub(owner, repo, sha ?? meta.branch, location.file));
 }
 
 async function collectAroundArtifact(

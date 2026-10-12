@@ -6,18 +6,23 @@ const HEAD = "f".repeat(40);
 const OWNER = "c".repeat(40);
 const BRANCH_HEAD = "e".repeat(40);
 
-type Route = (url: string, body: string) => unknown;
+type Route = (url: string, body: string, accept: string) => unknown;
 
 function stub(route: Route) {
   const calls: string[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (input: unknown, init?: { body?: string }) => {
+    vi.fn(async (input: unknown, init?: { body?: string; headers?: Record<string, string> }) => {
       const url = String(input);
       calls.push(url);
-      const body = route(url, init?.body ?? "");
+      const body = route(url, init?.body ?? "", init?.headers?.Accept ?? "");
       if (body === undefined) return { ok: false, status: 404, json: async () => ({}) };
-      return { ok: true, status: 200, json: async () => body, text: async () => "" };
+      return {
+        ok: true,
+        status: 200,
+        json: async () => body,
+        text: async () => (typeof body === "string" ? body : ""),
+      };
     }),
   );
   return calls;
@@ -142,5 +147,61 @@ describe("collect — GitHub pins the investigated revision", () => {
 
     expect(ev.repo).not.toHaveProperty("sha");
     expect(ev.coverage).toEqual({ granularity: "file" });
+  });
+});
+
+describe("collect — GitHub shows the investigated code", () => {
+  const SOURCE = ["a", "b", "c", "if (found === undefined) {", "e", "f", "g", "h"].join("\n");
+
+  const routes =
+    (name: string, source: unknown): Route =>
+    (url, body, accept) => {
+      if (url.endsWith(`/repos/${name}`)) return meta(name);
+      if (url.includes("/contents/")) return accept.includes("raw") ? source : { size: 100 };
+      if (body.includes("query Blame")) {
+        return {
+          data: {
+            repository: {
+              object: {
+                oid: HEAD,
+                blame: { ranges: [{ startingLine: 1, endingLine: 8, commit: leanCommit }] },
+              },
+            },
+          },
+        };
+      }
+      if (body.includes("query Enrich")) {
+        return { data: { repository: { c0: { associatedPullRequests: { nodes: [] } } } } };
+      }
+      return undefined;
+    };
+
+  const dig = (repoPath: string) =>
+    runWithTokens({ github: "t" }, () =>
+      collect({
+        repoPath,
+        question: "why?",
+        location: { file: "src/charge.ts", startLine: 4, endLine: 4 },
+      }),
+    );
+
+  it("keeps the line with its neighbours, read at the revision the blame ran on", async () => {
+    const calls = stub(routes("code1/r", SOURCE));
+    const ev = await dig("code1/r");
+
+    expect(ev.code).toEqual({ startLine: 1, lines: SOURCE.split("\n").slice(0, 7) });
+    expect(calls.some((u) => u.includes(`/contents/src/charge.ts?ref=${HEAD}`))).toBe(true);
+  });
+
+  it("still returns the evidence when the file cannot be read", async () => {
+    stub((url, body, accept) =>
+      url.includes("/contents/") && accept.includes("raw")
+        ? undefined
+        : routes("code2/r", SOURCE)(url, body, accept),
+    );
+    const ev = await dig("code2/r");
+
+    expect(ev.artifacts).toHaveLength(1);
+    expect(ev).not.toHaveProperty("code");
   });
 });
