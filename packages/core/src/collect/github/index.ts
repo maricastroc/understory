@@ -2,6 +2,7 @@ export { parseGitHubRepo, getRepoMeta, getBranchHeadGitHub } from "./repo";
 export {
   defaultFilesGitHub,
   searchFilesGitHub,
+  commitFileChange,
   commitFilePatch,
   getFileContentGitHub,
   getFileSizeGitHub,

@@ -61,7 +61,12 @@ describe("collect — local checkout", () => {
     expect(ev.code).toEqual({
       startLine: 1,
       lines: ["a", "for (let i = 0; i < 3; i++) {", "c", "d", ""],
-      change: { artifactId: `commit:${second.slice(0, 7)}`, before: "while (true) {", added: 1 },
+      change: {
+        artifactId: `commit:${second.slice(0, 7)}`,
+        before: "while (true) {",
+        added: 1,
+        scope: { files: 1, lines: 3, block: 2 },
+      },
     });
   });
 
@@ -75,6 +80,7 @@ describe("collect — local checkout", () => {
       artifactId: `commit:${second.slice(0, 7)}`,
       before: null,
       added: 1,
+      scope: { files: 1, lines: 3, block: 1 },
     });
   });
 

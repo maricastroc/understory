@@ -286,3 +286,48 @@ describe("expandCommit — bots are not evidence", () => {
     expect(body).not.toContain("changeset");
   });
 });
+
+describe("expandCommit — where each inline review comment was made", () => {
+  const inline = (over: object = {}) => ({
+    author: { login: "bob" },
+    body: "not needed here",
+    createdAt: "2024-01-01T00:00:00Z",
+    ...over,
+  });
+  const withReview = (comments: object[]) =>
+    bc({
+      associatedPullRequests: {
+        nodes: [
+          {
+            ...pr(42, 0),
+            reviews: {
+              nodes: [
+                {
+                  author: { login: "bob" },
+                  state: "COMMENTED",
+                  body: "",
+                  submittedAt: "2024-01-01T00:00:00Z",
+                  comments: { nodes: comments },
+                },
+              ],
+            },
+            closingIssuesReferences: { nodes: [] },
+          },
+        ],
+      },
+    } as unknown as Partial<BlameCommit>);
+  const reviewOf = (comments: object[]) =>
+    expandCommit(withReview(comments)).find((a) => a.kind === "review");
+
+  it("keeps the file, the hunk and the line beside the review's text, which does not change", () => {
+    const placed = { path: "src/a.ts", diffHunk: "@@ -1 +1 @@\n+x();", outdated: false, line: 7 };
+    const review = reviewOf([inline(placed)]);
+    expect(review?.comments).toEqual([{ body: "not needed here", ...placed }]);
+    expect(review?.body).toBe(reviewOf([inline()])?.body);
+  });
+
+  it("records nothing when the host gave no place for the comment", () => {
+    expect(reviewOf([inline()])).not.toHaveProperty("comments");
+    expect(reviewOf([inline({ path: "src/a.ts" })])).not.toHaveProperty("comments");
+  });
+});

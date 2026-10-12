@@ -2,7 +2,7 @@ import type { Artifact } from "../../types";
 import { commitArtifact, issueArtifact, prArtifact, reviewArtifact } from "./artifacts";
 import type { BlameCommit } from "./blame";
 import { withoutBots } from "./bots";
-import { foldComments } from "./comments";
+import { foldComments, placedComments } from "./comments";
 
 const MAX_REVIEWS = 5;
 
@@ -32,6 +32,8 @@ export function expandCommit(bc: BlameCommit): Artifact[] {
       if (!rv.body.trim() && !comments.some((c) => c.body?.trim())) return;
       const rvCard = reviewArtifact(pr.number, pr.url, rv, i, prCard.id);
       rvCard.body = foldComments(rv.body.trim(), comments);
+      const placed = placedComments(comments);
+      if (placed.length) rvCard.comments = placed;
       out.push(rvCard);
     });
   }

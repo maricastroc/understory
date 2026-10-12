@@ -9,10 +9,11 @@ import type {
 } from "../types";
 import { owningCommit } from "../provenance";
 import type { BlameCommit } from "./github";
-import { codeWindow, lineChange } from "./code-context";
+import { changedRun, codeWindow, lineChange } from "./code-context";
 import { detectContradictions } from "./contradictions";
 import {
   commitToArtifact,
+  commitScope,
   filePatch,
   headSha,
   isGitRepo,
@@ -25,7 +26,7 @@ import { resolveToken } from "./token-context";
 import {
   blameLinesAt,
   commitContextArtifacts,
-  commitFilePatch,
+  commitFileChange,
   expandCommit,
   fileHistoryGitHub,
   getBranchHeadGitHub,
@@ -68,7 +69,9 @@ export type CollectInput = {
 
 type BaseEvidence = Omit<Evidence, "contradictions">;
 
-type PatchOf = (sha: string) => Promise<string | null>;
+type Patched = { patch: string | null; files?: number | null; lines?: number | null };
+
+type PatchOf = (sha: string) => Promise<string | null | Patched>;
 
 async function lastChange(
   base: BaseEvidence,
@@ -81,8 +84,19 @@ async function lastChange(
   if (!location || location.startLine !== location.endLine) return null;
   if (!owner || typeof sha !== "string" || line === undefined) return null;
   try {
-    const found = lineChange((await patchOf(sha)) ?? "", line);
-    return found ? { artifactId: owner.id, ...found } : null;
+    const got = await patchOf(sha);
+    const patched: Patched = typeof got === "string" || got === null ? { patch: got } : got;
+    const patch = patched.patch ?? "";
+    const found = lineChange(patch, line);
+    if (!found) return null;
+    const block = changedRun(patch, line);
+    const { files, lines } = patched;
+    const known = typeof files === "number" && typeof lines === "number" && block !== null;
+    return {
+      artifactId: owner.id,
+      ...found,
+      ...(known ? { scope: { files, lines, block } } : {}),
+    };
   } catch {
     return null;
   }
@@ -158,7 +172,10 @@ async function collectLocal(
   return withCode(
     base,
     () => readFileAtRef(repoPath, sha, location.file),
-    (commit) => filePatch(repoPath, commit, location.file),
+    async (commit) => ({
+      patch: await filePatch(repoPath, commit, location.file),
+      ...((await commitScope(repoPath, commit).catch(() => null)) ?? {}),
+    }),
   );
 }
 
@@ -240,7 +257,7 @@ async function collectFromGitHub(
   return withCode(
     base,
     () => getFileContentGitHub(owner, repo, sha ?? meta.branch, location.file),
-    (commit) => commitFilePatch(owner, repo, commit, location.file),
+    (commit) => commitFileChange(owner, repo, commit, location.file),
   );
 }
 

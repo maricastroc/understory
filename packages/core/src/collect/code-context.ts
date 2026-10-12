@@ -64,6 +64,21 @@ export function lineChange(patch: string, line: string): Omit<LineChange, "artif
   return { before: paired === undefined ? null : clamp(paired.trim()), added: added.length };
 }
 
+export function changedRun(patch: string, line: string): number | null {
+  const wanted = line.trim();
+  if (!wanted) return null;
+  const rows = patch.replace(/\r\n/g, "\n").split("\n");
+  const hits = rows.flatMap((row, i) =>
+    isAdded(row) && row.slice(1).trim() === wanted ? [i] : [],
+  );
+  if (hits.length !== 1) return null;
+  let from = hits[0];
+  while (from > 0 && (isAdded(rows[from - 1]) || isRemoved(rows[from - 1]))) from--;
+  let to = hits[0];
+  while (to < rows.length - 1 && (isAdded(rows[to + 1]) || isRemoved(rows[to + 1]))) to++;
+  return to - from + 1;
+}
+
 function renderChange(change: LineChange, line: string): string[] {
   const lead = `What the last change did to the marked line: [${change.artifactId}]`;
   if (change.before === null) {

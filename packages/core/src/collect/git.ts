@@ -167,6 +167,23 @@ export async function readFileAtRef(
   return git(repoPath, ["show", `${ref}:${filePath}`]);
 }
 
+export async function commitScope(
+  repoPath: string,
+  sha: string,
+): Promise<{ files: number; lines: number } | null> {
+  if (!isCommitSha(sha)) throw new Error(`Not a commit sha: ${sha}`);
+  const rows = (await git(repoPath, ["show", "--format=", "--numstat", sha]))
+    .split("\n")
+    .map((row) => row.split("\t"))
+    .filter((cells) => cells.length >= 3);
+  if (rows.length === 0 || rows.some(([added, removed]) => added === "-" || removed === "-"))
+    return null;
+  return {
+    files: rows.length,
+    lines: rows.reduce((sum, [added, removed]) => sum + Number(added) + Number(removed), 0),
+  };
+}
+
 export async function filePatch(repoPath: string, sha: string, filePath: string): Promise<string> {
   if (!isCommitSha(sha)) throw new Error(`Not a commit sha: ${sha}`);
   return git(repoPath, ["show", "--format=", "--unified=3", sha, "--", filePath]);
