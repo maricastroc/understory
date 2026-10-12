@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-12T16:08:13.609Z",
+  "date": "2026-10-12T16:31:37.755Z",
   "replay": "eval/results/2026-10-12-patch-context-replay-one-question.jsonl",
   "judge": "b798b88",
   "controls": [
@@ -2591,6 +2591,772 @@
           "says": "\"or\" the server"
         }
       ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "retry-cap",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "why-retry-loop",
+      "granularity": "line",
+      "lastChange": "commit:f2b44ae",
+      "alone": true,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "jitter",
+      "granularity": "line",
+      "lastChange": "commit:0016d9d",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:0016d9d": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "bug-phrasing",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "refund-silent",
+      "granularity": "line",
+      "lastChange": "commit:a29288e",
+      "alone": true,
+      "sources": {
+        "commit:a29288e": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "oos-love",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "oos-france",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "oos-poem",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "ws-batch-size",
+      "granularity": "line",
+      "lastChange": "commit:e4dfae7",
+      "alone": false,
+      "sources": {
+        "commit:83eb2b9": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:78ff826": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:e4dfae7": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "ws-injected-commit",
+      "granularity": "line",
+      "lastChange": "commit:a77590a",
+      "alone": true,
+      "sources": {
+        "commit:a77590a": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "ws-revert-story",
+      "granularity": "line",
+      "lastChange": "commit:9da72fa",
+      "alone": true,
+      "sources": {
+        "commit:90021c7": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:22e1399": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:05a16a3": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:9da72fa": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "pt-retry-cap",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "ws-poll-interval",
+      "granularity": "line",
+      "lastChange": "commit:579181c",
+      "alone": true,
+      "sources": {
+        "commit:83eb2b9": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:579181c": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "ws-skew-value",
+      "granularity": "line",
+      "lastChange": "commit:68726e0",
+      "alone": false,
+      "sources": {
+        "commit:68726e0": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "demo-error-type",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "oos-refactor",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "oos-write-tests",
+      "granularity": "line",
+      "lastChange": "commit:83eb2b9",
+      "alone": true,
+      "sources": {
+        "commit:83eb2b9": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "oos-vendor-ceo",
+      "granularity": "line",
+      "lastChange": "commit:e4dfae7",
+      "alone": false,
+      "sources": {
+        "commit:83eb2b9": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:e4dfae7": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "oos-other-subsystem",
+      "granularity": "line",
+      "lastChange": "commit:e4dfae7",
+      "alone": false,
+      "sources": {
+        "commit:83eb2b9": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:e4dfae7": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "oos-advice",
+      "granularity": "line",
+      "lastChange": "commit:9da72fa",
+      "alone": true,
+      "sources": {
+        "commit:90021c7": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:22e1399": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:05a16a3": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:9da72fa": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "oos-system-prompt",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "fp-batch-raised",
+      "granularity": "line",
+      "lastChange": "commit:e4dfae7",
+      "alone": false,
+      "sources": {
+        "commit:83eb2b9": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:78ff826": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:e4dfae7": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "fp-jitter-removed",
+      "granularity": "line",
+      "lastChange": "commit:0016d9d",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:0016d9d": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "fp-cap-raised-by-reviewer",
+      "granularity": "line",
+      "lastChange": "commit:c038fb3",
+      "alone": false,
+      "sources": {
+        "commit:f2b44ae": {
+          "kind": "commit",
+          "link": "another change",
+          "comments": []
+        },
+        "commit:c038fb3": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "ng-http-114",
+      "granularity": "line",
+      "lastChange": "commit:18a2e4f",
+      "alone": false,
+      "sources": {
+        "commit:18a2e4f": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "ng-http-411",
+      "granularity": "line",
+      "lastChange": "commit:1e90d03",
+      "alone": false,
+      "sources": {
+        "commit:1e90d03": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "machine-168",
+      "granularity": "line",
+      "lastChange": "commit:d3ee30b",
+      "alone": false,
+      "sources": {
+        "pr:4002": {
+          "kind": "pull_request",
+          "link": "this change",
+          "comments": []
+        },
+        "commit:d3ee30b": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "q-306",
+      "granularity": "line",
+      "lastChange": "commit:5ea9aaf",
+      "alone": false,
+      "sources": {
+        "commit:5ea9aaf": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "q-796",
+      "granularity": "line",
+      "lastChange": "commit:a4a868e",
+      "alone": true,
+      "sources": {
+        "commit:a4a868e": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "draft-110",
+      "granularity": "line",
+      "lastChange": "commit:342576b",
+      "alone": false,
+      "sources": {
+        "commit:342576b": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "tslint-189",
+      "granularity": "line",
+      "lastChange": "commit:8b853b2",
+      "alone": false,
+      "sources": {
+        "pr:3412": {
+          "kind": "pull_request",
+          "link": "this change",
+          "comments": []
+        },
+        "commit:8b853b2": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "tslint-257",
+      "granularity": "line",
+      "lastChange": "commit:63fc794",
+      "alone": false,
+      "sources": {
+        "pr:2369": {
+          "kind": "pull_request",
+          "link": "this change",
+          "comments": []
+        },
+        "review:2369-0": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true
+            }
+          ]
+        },
+        "review:2369-1": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true
+            }
+          ]
+        },
+        "review:2369-2": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true
+            }
+          ]
+        },
+        "review:2369-3": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true
+            }
+          ]
+        },
+        "review:2369-4": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true
+            }
+          ]
+        },
+        "commit:63fc794": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "machine-32",
+      "granularity": "line",
+      "lastChange": "commit:aa54a5f",
+      "alone": false,
+      "sources": {
+        "pr:2493": {
+          "kind": "pull_request",
+          "link": "this change",
+          "comments": []
+        },
+        "commit:aa54a5f": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "draft-644",
+      "granularity": "line",
+      "lastChange": "commit:8de2db9",
+      "alone": false,
+      "sources": {
+        "commit:8de2db9": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "tslint-260",
+      "granularity": "line",
+      "lastChange": "commit:8c2ac95",
+      "alone": false,
+      "sources": {
+        "issue:4880": {
+          "kind": "issue",
+          "link": "this change",
+          "comments": []
+        },
+        "pr:4887": {
+          "kind": "pull_request",
+          "link": "this change",
+          "comments": []
+        },
+        "review:4887-0": {
+          "kind": "review",
+          "link": "this change",
+          "comments": []
+        },
+        "commit:8c2ac95": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
+    },
+    {
+      "id": "apollo-http-10",
+      "granularity": "line",
+      "lastChange": "commit:cfe548c",
+      "alone": false,
+      "sources": {
+        "issue:231": {
+          "kind": "issue",
+          "link": "this change",
+          "comments": []
+        },
+        "issue:343": {
+          "kind": "issue",
+          "link": "this change",
+          "comments": []
+        },
+        "pr:364": {
+          "kind": "pull_request",
+          "link": "this change",
+          "comments": []
+        },
+        "review:364-0": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true
+            }
+          ]
+        },
+        "review:364-1": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": false
+            },
+            {
+              "placement": "another file",
+              "outdated": true
+            },
+            {
+              "placement": "another file",
+              "outdated": true
+            },
+            {
+              "placement": "another file",
+              "outdated": true
+            },
+            {
+              "placement": "same file, elsewhere",
+              "outdated": true
+            }
+          ]
+        },
+        "review:364-2": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true
+            }
+          ]
+        },
+        "review:364-3": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "same file, elsewhere",
+              "outdated": true
+            }
+          ]
+        },
+        "review:364-4": {
+          "kind": "review",
+          "link": "this change",
+          "comments": [
+            {
+              "placement": "another file",
+              "outdated": true
+            }
+          ]
+        },
+        "commit:cfe548c": {
+          "kind": "commit",
+          "link": "this change",
+          "comments": []
+        }
+      }
     }
   ]
 }
