@@ -1,0 +1,262 @@
+{
+  "note": "Real answers kept in eval/results, with the two readings of eval/results/2026-10-12-link-projection.json. Nothing here was written for the prototype.",
+  "examples": [
+    {
+      "id": "q-796",
+      "why": "recorded, with a change that is the line's block alone",
+      "from": "2026-10-12-line-attribution.jsonl",
+      "pass": 1,
+      "category": "recorded",
+      "repo": "kriskowal/q",
+      "location": "q.js:796",
+      "question": "Why is this line the way it is?",
+      "line": "if (inspect === void 0) {",
+      "change": {
+        "commit": "commit:a4a868e",
+        "before": null,
+        "others": 4
+      },
+      "score": 0.9,
+      "level": "high",
+      "answer": "The added `if (inspect === void 0) { … }` block supplies a default `inspect` function when no `inspect` is provided, guaranteeing that every promise has an `inspect` method. The default `inspect` function returns `{state: \"unknown\"}`, reflecting the design that custom promises start with an unknown state by default.",
+      "sources": {
+        "commit:a4a868e": {
+          "kind": "commit",
+          "title": "Make all promises inspectable by default"
+        }
+      },
+      "claims": [
+        {
+          "text": "The added `if (inspect === void 0) { … }` block supplies a default `inspect` function when no `inspect` is provided, guaranteeing that every promise has an `inspect` method.",
+          "citations": ["commit:a4a868e"],
+          "status": "supported",
+          "evidence": "stated by a cited source",
+          "specificity": "direct: the change is this block alone",
+          "state": "directly linked to the line",
+          "causal": false,
+          "anchoring": null,
+          "quotes": [
+            {
+              "source": "commit:a4a868e",
+              "text": "Make all promises inspectable by default"
+            }
+          ],
+          "reason": "The commit message explicitly states that all custom promises have an inspect method regardless of whether one is specified, which directly supports the claim that the added block supplies a default inspect function when none is provided."
+        },
+        {
+          "text": "The default `inspect` function returns `{state: \"unknown\"}`, reflecting the design that custom promises start with an unknown state by default.",
+          "citations": ["commit:a4a868e"],
+          "status": "supported",
+          "evidence": "stated by a cited source",
+          "specificity": "direct: the change is this block alone",
+          "state": "directly linked to the line",
+          "causal": false,
+          "anchoring": null,
+          "quotes": [
+            {
+              "source": "commit:a4a868e",
+              "text": "Custom promises have a state of \"unknown\" by default. All custom promises have an \"inspect\" method, regardless of whether one is specified."
+            }
+          ],
+          "reason": "The commit message explicitly states that custom promises default to an \"unknown\" state and provide an inspect method, matching the claim."
+        }
+      ]
+    },
+    {
+      "id": "ng-http-114",
+      "why": "recorded, a true reason stated for a change that did more than this line",
+      "from": "2026-10-12-line-attribution.jsonl",
+      "pass": 1,
+      "category": "recorded",
+      "repo": "angular/angular.js",
+      "location": "src/ng/http.js:114",
+      "question": "Why is this line the way it is?",
+      "line": "forEach(toSerialize, function(value, index) {",
+      "change": {
+        "commit": "commit:18a2e4f",
+        "before": "forEach(toSerialize, function(value) {",
+        "others": 1
+      },
+      "score": 0.85,
+      "level": "high",
+      "answer": "The line was rewritten to include an `index` parameter in the `forEach` callback so that the serializer follows jQuery’s handling of arrays that contain objects.",
+      "sources": {
+        "commit:18a2e4f": {
+          "kind": "commit",
+          "title": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of …"
+        }
+      },
+      "claims": [
+        {
+          "text": "The line was rewritten to include an `index` parameter in the `forEach` callback so that the serializer follows jQuery’s handling of arrays that contain objects.",
+          "citations": ["commit:18a2e4f"],
+          "status": "supported",
+          "evidence": "stated by a cited source",
+          "specificity": "the change that last changed the line",
+          "state": "recorded for the change, no specific link shown",
+          "causal": true,
+          "anchoring": null,
+          "quotes": [
+            {
+              "source": "commit:18a2e4f",
+              "text": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects"
+            }
+          ],
+          "reason": "The commit message explicitly states the change was to follow jQuery’s handling of arrays that contain objects, implying the inclusion of an index parameter in the forEach callback."
+        }
+      ]
+    },
+    {
+      "id": "tslint-257",
+      "why": "incidental, a reason borrowed from a review comment made in another file, credited by the audit",
+      "from": "2026-10-11-audit-first-fix.jsonl",
+      "pass": 1,
+      "category": "incidental",
+      "repo": "palantir/tslint",
+      "location": "src/linter.ts:257",
+      "question": "Why is this line the way it is?",
+      "line": "const oldSource = fs.readFileSync(filePath, \"utf-8\");",
+      "change": {
+        "commit": "commit:63fc794",
+        "before": null,
+        "others": 19
+      },
+      "score": 0.65,
+      "level": "medium",
+      "answer": "The line at src/linter.ts:257 was introduced in PR #2369, which rewrote the enable/disable logic by moving `disabledIntervals` out of rule options and simplifying how rules are filtered after execution. Within that rewrite, a check of `ruleSeverity` was added to the linting loop to avoid loading and instantiating rules that are disabled, thereby reducing unnecessary work for each file linted. Reviewers pointed out that the `ruleSeverity` check is redundant because `isEnabled()` already performs the same validation, but the author defended its presence as a performance optimisation to keep disabled rules from being loaded. The final commit (63fc794) retained the line, confirming the decision to keep the `ruleSeverity` guard despite its redundancy, as part of the internal, backward‑compatible changes introduced by the PR.",
+      "sources": {
+        "pr:2369": {
+          "kind": "pull_request",
+          "title": "Rewrite enable/disable logic"
+        },
+        "review:2369-0": {
+          "kind": "review",
+          "title": "Review by andy-hanson on #2369"
+        },
+        "review:2369-1": {
+          "kind": "review",
+          "title": "Review by andy-hanson on #2369"
+        },
+        "review:2369-2": {
+          "kind": "review",
+          "title": "Review by andy-hanson on #2369"
+        },
+        "review:2369-3": {
+          "kind": "review",
+          "title": "Review by ajafff on #2369"
+        },
+        "review:2369-4": {
+          "kind": "review",
+          "title": "Review by ajafff on #2369"
+        },
+        "commit:63fc794": {
+          "kind": "commit",
+          "title": "Rewrite enable/disable logic (#2369)"
+        }
+      },
+      "claims": [
+        {
+          "text": "The line at src/linter.ts:257 was introduced in PR #2369, which rewrote the enable/disable logic by moving `disabledIntervals` out of rule options and simplifying how rules are filtered after execution.",
+          "citations": ["pr:2369"],
+          "status": "weak",
+          "evidence": "insufficient",
+          "specificity": "the change that last changed the line",
+          "state": "not sustained",
+          "causal": false,
+          "anchoring": null,
+          "quotes": [
+            {
+              "source": "pr:2369",
+              "text": "* Don't expose `disabledIntervals` at all. Just have a `RuleDisabler` interface and a method for getting one from the disable comments in a source file."
+            }
+          ],
+          "reason": "The PR description confirms the rewrite logic but does not state that the specific line was introduced in that PR."
+        },
+        {
+          "text": "Within that rewrite, a check of `ruleSeverity` was added to the linting loop to avoid loading and instantiating rules that are disabled, thereby reducing unnecessary work for each file linted.",
+          "citations": ["review:2369-3"],
+          "status": "weak",
+          "evidence": "insufficient",
+          "specificity": "the change that last changed the line",
+          "state": "not sustained",
+          "causal": true,
+          "anchoring": "in another file, outdated",
+          "quotes": [],
+          "reason": "Source does not mention ruleSeverity."
+        },
+        {
+          "text": "Reviewers pointed out that the `ruleSeverity` check is redundant because `isEnabled()` already performs the same validation, but the author defended its presence as a performance optimisation to keep disabled rules from being loaded.",
+          "citations": ["review:2369-3", "review:2369-4"],
+          "status": "supported",
+          "evidence": "stated by a cited source",
+          "specificity": "the change that last changed the line",
+          "state": "recorded for the change, no specific link shown",
+          "causal": true,
+          "anchoring": "in another file, outdated",
+          "quotes": [
+            {
+              "source": "review:2369-3",
+              "text": "technically you are right, but this check was added to do less work for disabled rules. With your change you need to find the rule in rulesDirectory and instantiate it before you know if you will ever need it (for every linted file)."
+            },
+            {
+              "source": "review:2369-4",
+              "text": "The behaviour to not load disabled rules was added recently. Even though the rule was loaded, it would have never been executed, because `rule.isEnabled()` always returned false. I don't know why the test was implemented this way... I think it makes more sense to keep disabled rules disabled. Otherwise you need to guess the `ruleSeverity"
+            }
+          ],
+          "reason": "Both sources together show the reviewer noted redundancy and the author defended the check as a performance optimisation to keep disabled rules from being loaded."
+        },
+        {
+          "text": "The final commit (63fc794) retained the line, confirming the decision to keep the `ruleSeverity` guard despite its redundancy, as part of the internal, backward‑compatible changes introduced by the PR.",
+          "citations": ["commit:63fc794"],
+          "status": "weak",
+          "evidence": "insufficient",
+          "specificity": "the change that last changed the line",
+          "state": "not sustained",
+          "causal": true,
+          "anchoring": null,
+          "quotes": [],
+          "reason": "The commit message and diff do not state that the ruleSeverity guard was kept because of redundancy or that it was part of internal backward‑compatible changes."
+        }
+      ]
+    },
+    {
+      "id": "ng-http-411",
+      "why": "recorded, a true sentence the audit held as insufficient",
+      "from": "2026-10-12-line-attribution.jsonl",
+      "pass": 0,
+      "category": "recorded",
+      "repo": "angular/angular.js",
+      "location": "src/ng/http.js:411",
+      "question": "Why is this line the way it is?",
+      "line": "* @example",
+      "change": {
+        "commit": "commit:1e90d03",
+        "before": null,
+        "others": 41
+      },
+      "score": 0.55,
+      "level": "medium",
+      "answer": "This line was added as part of a documentation block that provides an example for the newly introduced XSRF‑token whitelisting feature in $http.",
+      "sources": {
+        "commit:1e90d03": {
+          "kind": "commit",
+          "title": "feat($http): support sending XSRF token to whitelisted origins"
+        }
+      },
+      "claims": [
+        {
+          "text": "This line was added as part of a documentation block that provides an example for the newly introduced XSRF‑token whitelisting feature in $http.",
+          "citations": ["commit:1e90d03"],
+          "status": "weak",
+          "evidence": "insufficient",
+          "specificity": "the change that last changed the line",
+          "state": "not sustained",
+          "causal": false,
+          "anchoring": null,
+          "quotes": [],
+          "reason": "The commit message only describes adding XSRF‑token whitelisting support; it does not state that the line was added as part of a documentation block providing an example for that feature."
+        }
+      ]
+    }
+  ]
+}
