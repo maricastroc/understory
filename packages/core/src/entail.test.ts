@@ -564,13 +564,6 @@ describe("sitedStatus — one verdict out of the two records", () => {
     expect(sitedStatus("agrees", "nothing")).toBe("weak");
     expect(sitedStatus("nothing", "nothing")).toBe("weak");
   });
-
-  it("refuses a reason the sources state when it is about another part of the change", () => {
-    expect(sitedStatus("agrees", "supported", "elsewhere")).toBe("unsupported");
-    expect(sitedStatus("agrees", "supported", "line")).toBe("supported");
-    expect(sitedStatus("agrees", "supported", "unclear")).toBe("supported");
-    expect(sitedStatus("agrees", "unproven", "elsewhere")).toBe("weak");
-  });
 });
 
 describe("the audit of a claim about code that is shown", () => {
@@ -600,7 +593,7 @@ describe("the audit of a claim about code that is shown", () => {
   });
   const QUOTE = "allow sending XSRF token to whitelisted cross-origin domains";
   const audit = (reply: object, text = "The line was added as an example tag.") => {
-    const judge = scriptedJudge(() => ({ bearing: "nothing", ...reply }));
+    const judge = scriptedJudge(() => reply);
     return checkEntailment(evidence, narrative(text), { primary: judge, fallback: null }).then(
       (e) => ({ e, sent: JSON.stringify(judge.doGenerateCalls[0].prompt) }),
     );
@@ -716,7 +709,6 @@ describe("the audit of a claim about code that is shown", () => {
     const judge = scriptedJudge(() => ({
       code: "contradicts",
       record: "supported",
-      bearing: "elsewhere",
       quotes: ["drop rows with a zero quantity"],
       reason: "today's line does not drop them",
     }));
@@ -730,7 +722,6 @@ describe("the audit of a claim about code that is shown", () => {
     });
     expect(earlier).toMatchObject({ supported: 1, misattributed: 0 });
     expect(earlier.checks[0].code).toBeUndefined();
-    expect(earlier.checks[0].bearing).toBeUndefined();
     expect(earlier.checks[0].reason).toContain("cites only changes made before the one shown");
 
     const current = await checkEntailment(history, cited(pr.id), {
@@ -739,57 +730,6 @@ describe("the audit of a claim about code that is shown", () => {
     });
     expect(current).toMatchObject({ supported: 0, misattributed: 1 });
     expect(current.checks[0].code).toBe("contradicts");
-  });
-
-  it("counts a reason the source gives for another part of the change as a misattribution", async () => {
-    const { e } = await audit(
-      {
-        code: "agrees",
-        record: "supported",
-        bearing: "elsewhere",
-        quotes: [QUOTE],
-        reason: "the line is a doc tag, the reason is about the request code",
-      },
-      "This tag was added to allow sending the XSRF token to whitelisted domains.",
-    );
-    expect(e).toMatchObject({ supported: 0, misattributed: 1 });
-    expect(e.checks[0]).toMatchObject({ status: "unsupported", bearing: "elsewhere", quote: null });
-    expect(e.checks[0].reason).toContain(
-      "the reason the sources give is about another part of the change",
-    );
-  });
-
-  it("credits a reason the source states when it is about the line, or when that cannot be told", async () => {
-    const reply = (bearing: string) => ({
-      code: "agrees",
-      record: "supported",
-      bearing,
-      quotes: [QUOTE],
-      reason: "stated",
-    });
-    const about = await audit(reply("line"));
-    expect(about.e).toMatchObject({ supported: 1, misattributed: 0 });
-    expect(about.e.checks[0].bearing).toBe("line");
-    const unclear = await audit(reply("unclear"));
-    expect(unclear.e).toMatchObject({ supported: 1, misattributed: 0 });
-    expect(unclear.e.checks[0].bearing).toBeUndefined();
-  });
-
-  it("does not turn an unproven reason into a misattribution for being about something else", async () => {
-    const { e } = await audit({
-      code: "agrees",
-      record: "unproven",
-      bearing: "elsewhere",
-      quotes: [],
-      reason: "no source gives it",
-    });
-    expect(e).toMatchObject({ supported: 0, misattributed: 0 });
-    expect(e.checks[0].status).toBe("weak");
-  });
-
-  it("asks whose reason it is, as a third part", async () => {
-    const { sent } = await audit({ code: "agrees", record: "nothing", quotes: [], reason: "x" });
-    expect(sent).toContain("PART 3, `bearing`");
   });
 
   it("counts a claim whose sources are about something else as a misattribution", async () => {
