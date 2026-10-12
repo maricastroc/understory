@@ -60,6 +60,9 @@ export function placementOf(
 
 const anchored = (placement: Placement) => placement === "on the line";
 
+const onTheLine = (passage: Passage) =>
+  passage.placement !== undefined && anchored(passage.placement);
+
 const oneLine = (ev: Evidence): number | undefined =>
   ev.location && ev.location.startLine === ev.location.endLine ? ev.location.startLine : undefined;
 
@@ -85,7 +88,7 @@ function specificityOfSource(facts: CaseFacts, source: SourceFacts): Specificity
   if (source.kind === "review" && source.comments.some((c) => anchored(c.placement)))
     return "direct: a review comment on the line";
   if (source.link === "this change")
-    return facts.alone
+    return facts.alone && source.kind === "commit"
       ? "direct: the change is this block alone"
       : "the change that last changed the line";
   return source.link === "another change" ? "another change in the line's history" : "none";
@@ -217,6 +220,12 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
     unsustained: [],
     claims: [],
   };
+  const scopeOf = (entry: ChangeEntry, passage: Passage): ReasonScope => {
+    if (facts.granularity === "file") return "file";
+    if (!entry.last) return "earlier change";
+    const ownMessage = facts.alone && byId.get(passage.source)?.kind === "commit";
+    return ownMessage || onTheLine(passage) ? "line" : "change";
+  };
   const checks = narrative?.entailment?.checks ?? [];
   (narrative?.claims ?? []).forEach((claim, at) => {
     const mine = checks.filter((check) => check.claim === at);
@@ -255,34 +264,35 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
         },
       ]);
     }
-    const onTheLine = [...byChange.values()]
-      .flat()
-      .some((p) => p.placement !== undefined && anchored(p.placement));
-    const specificity =
-      onTheLine && facts.granularity !== "file"
-        ? "direct: a review comment on the line"
-        : specificityOf(plain, cited);
-    reading.claims.push({ claim: at, quality, specificity, state: stateOf(quality, specificity) });
-    for (const [commitId, passages] of byChange) {
+    const scoped = [...byChange].flatMap(([commitId, passages]) => {
       const entry = changes.find((change) => change.id === commitId);
-      if (!entry) continue;
-      const tied =
-        entry.last &&
-        (facts.alone || passages.some((p) => p.placement !== undefined && anchored(p.placement)));
-      const scope: ReasonScope =
-        facts.granularity === "file"
-          ? "file"
-          : !entry.last
-            ? "earlier change"
-            : tied
-              ? "line"
-              : "change";
-      entry.reasons.push({
-        claim: at,
-        scope,
-        ...(scope === "line" ? { sentence: claim.text } : {}),
-        passages,
-      });
+      return entry
+        ? passages.map((passage) => ({ entry, passage, scope: scopeOf(entry, passage) }))
+        : [];
+    });
+    const tied = scoped.filter((each) => each.scope === "line").map((each) => each.passage);
+    const linked = specificityOf(plain, cited);
+    const specificity: Specificity =
+      facts.granularity === "file"
+        ? linked
+        : tied.some(onTheLine)
+          ? "direct: a review comment on the line"
+          : tied.length > 0
+            ? "direct: the change is this block alone"
+            : linked.startsWith("direct")
+              ? "the change that last changed the line"
+              : linked;
+    reading.claims.push({ claim: at, quality, specificity, state: stateOf(quality, specificity) });
+    for (const { entry, passage, scope } of scoped) {
+      const reason = entry.reasons.find((r) => r.claim === at && r.scope === scope);
+      if (reason) reason.passages.push(passage);
+      else
+        entry.reasons.push({
+          claim: at,
+          scope,
+          ...(scope === "line" ? { sentence: claim.text } : {}),
+          passages: [passage],
+        });
     }
   });
   return reading;

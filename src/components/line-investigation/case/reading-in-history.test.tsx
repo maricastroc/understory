@@ -268,4 +268,21 @@ describe("a source that only shares the line's commit or pull request", () => {
     expect(document.querySelectorAll("[data-scope]").length).toBeGreaterThan(0);
     expect(document.querySelector('[data-scope="line"]')).toBeNull();
   });
+
+  it("is not linked to the line: reviews in other files, with a commit that is the block alone", () => {
+    setup(
+      withEvidence("tslint-257", (ev) => ({
+        ...ev,
+        code: {
+          ...ev.code!,
+          change: { ...ev.code!.change!, scope: { files: 1, lines: 22, block: 22 } },
+        },
+      })),
+      true,
+    );
+    expect(new Set(marks("scope"))).toEqual(
+      new Set(["said of the change as a whole · comment made in another file"]),
+    );
+    expect(document.querySelector('[data-scope="line"]')).toBeNull();
+  });
 });

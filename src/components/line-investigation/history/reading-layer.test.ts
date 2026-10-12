@@ -120,4 +120,17 @@ describe("readingLayer", () => {
       scope: "change",
     });
   });
+
+  it("does not link a review comment in another file to the line because the commit is small", () => {
+    const { scopes } = layerOf("tslint-257", (ev) => ({
+      ...ev,
+      code: {
+        ...ev.code!,
+        change: { ...ev.code!.change!, scope: { files: 1, lines: 22, block: 22 } },
+      },
+    }));
+    expect(scopes.size).toBeGreaterThan(0);
+    for (const scope of scopes.values())
+      expect(scope).toMatchObject({ scope: "change", placement: "another file" });
+  });
 });
