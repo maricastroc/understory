@@ -158,16 +158,35 @@ export async function getFileContentGitHub(
   return restRaw(`/repos/${owner}/${repo}/contents/${encoded}?ref=${encodeURIComponent(branch)}`);
 }
 
+const MAX_LISTED_FILES = 300;
+
+export type FileChange = { patch: string | null; files: number | null; lines: number | null };
+
+export async function commitFileChange(
+  owner: string,
+  repo: string,
+  oid: string,
+  path: string,
+): Promise<FileChange> {
+  const d = await rest<{
+    stats?: { total?: number };
+    files?: Array<{ filename: string; patch?: string }>;
+  }>(`/repos/${owner}/${repo}/commits/${encodeURIComponent(oid)}`);
+  const listed = d.files?.length ?? 0;
+  return {
+    patch: d.files?.find((f) => f.filename === path)?.patch ?? null,
+    files: listed > 0 && listed < MAX_LISTED_FILES ? listed : null,
+    lines: typeof d.stats?.total === "number" ? d.stats.total : null,
+  };
+}
+
 export async function commitFilePatch(
   owner: string,
   repo: string,
   oid: string,
   path: string,
 ): Promise<string | null> {
-  const d = await rest<{ files?: Array<{ filename: string; patch?: string }> }>(
-    `/repos/${owner}/${repo}/commits/${encodeURIComponent(oid)}`,
-  );
-  return d.files?.find((f) => f.filename === path)?.patch ?? null;
+  return (await commitFileChange(owner, repo, oid, path)).patch;
 }
 
 export async function getFileSizeGitHub(

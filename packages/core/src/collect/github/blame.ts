@@ -2,7 +2,7 @@ import type { BlameSpan, PrLookup } from "../../types";
 import { graphql, rest } from "./client";
 import { rememberGitHubBlame, rememberGitHubLookups } from "../history/remember";
 import { ACTOR, type Actor } from "./bots";
-import { type Comment, COMMENTS } from "./comments";
+import { type Comment, COMMENTS, REVIEW_COMMENTS } from "./comments";
 
 export type PrReview = {
   author: Actor;
@@ -59,7 +59,7 @@ const PR_FIELDS = `associatedPullRequests(first: 1) {
     createdAt
     mergedAt
     ${COMMENTS}
-    reviews(first: 20) { nodes { ${ACTOR} state body submittedAt ${COMMENTS} } }
+    reviews(first: 20) { nodes { ${ACTOR} state body submittedAt ${REVIEW_COMMENTS} } }
     closingIssuesReferences(first: 5) { nodes { number title body url createdAt state stateReason ${COMMENTS} } }
   }
 }`;
