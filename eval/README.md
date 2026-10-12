@@ -134,6 +134,35 @@ of these lines met the model:
 chosen by hand to cover that: `tslint-260`, whose reason sits in an issue, and `apollo-http-10`,
 whose evidence is large enough that the bodies are trimmed before the model reads them.
 
+**Amended once after it met the model.** On 12 Oct 2026 `ng-http-411` was given a `review`
+rubric. Its label was checked against rule 6 and stays `recorded`: the line is `* @example`, in
+a doc comment that commit `1e90d03` added for the feature the commit message explains. What was
+wrong was the test. With automatic checks alone the case passed in 21 kept runs, and in every
+one of them the answer says the line implements, checks or sends something. A doc comment does
+none of that. [#31](https://github.com/maricastroc/understory/issues/31) had already recorded
+that answer as false, and the read of 11 Oct had listed both of its runs as unsupported while
+noting that they passed. The rubric only adds a condition: a run still has to pass every
+automatic check first. So it can turn a pass into a fail and never the reverse.
+
+The kept runs and their review files are not rewritten. Every stored run of the case is read
+against the rubric in
+[`results/2026-10-12-ng-http-411.reread.json`](results/2026-10-12-ng-http-411.reread.json), and
+this is what it does to the counts of each kept run:
+
+| Kept run                                                | Recorded, as scored then | Recorded, with the rubric | `ng-http-411` |
+| ------------------------------------------------------- | ------------------------ | ------------------------- | ------------- |
+| `2026-10-11.jsonl`                                      | 28/30                    | 26/30                     | 2/2 to 0/2    |
+| `2026-10-11-via-openrouter.jsonl`                       | 29/30                    | 27/30                     | 2/2 to 0/2    |
+| `2026-10-11-recorded-before-evening.jsonl`              | 52/60                    | 48/60                     | 4/4 to 0/4    |
+| `2026-10-11-audit-first-fix.jsonl`                      | 54/60                    | 50/60                     | 4/4 to 0/4    |
+| `2026-10-11-audit-fix.jsonl`                            | 54/60                    | 50/60                     | 4/4 to 0/4    |
+| `2026-10-12-line-attribution-before-on-main.jsonl`      | 50/60                    | 49/60                     | 1/4 to 0/4    |
+| `2026-10-12-line-attribution-before-on-audit-fix.jsonl` | 56/59                    | 52/59                     | 4/4 to 0/4    |
+| `2026-10-12-line-attribution.jsonl`                     | 52/59                    | 52/59                     | 0/4 to 0/4    |
+
+Every table further down keeps the outcome a run was given when it was made. Where the
+rubric changes a reading, the text says so.
+
 ## What a case checks
 
 Assertions are **structural**, not exact prose, so they hold across the model's wording:
@@ -158,12 +187,45 @@ Three limits of these checks are worth knowing before reading a pass:
   means the pipeline's auditor accepted a claim, not that a second party did.
 - Nothing structural reads the claims. A `recorded` case passes when the right source is
   cited and one claim is audited as supported, even if another claim overreaches.
-- Seven cases cannot be judged by a pattern, because a good answer and a bad one use the same
+- Eight cases cannot be judged by a pattern, because a good answer and a bad one use the same
   words. They carry a `review` rubric. The verdicts are in the `.review.json` file next to the
-  run, one per run, with the reason.
+  run, one per run, with the reason. Seven had the rubric before they met the model. The
+  eighth, `ng-http-411`, got it on 12 Oct ([The gold set](#the-gold-set)).
 
 A run that ends in an API error (a rate limit, a timeout) is reported as **errored** and left
 out of the pass counts: it says nothing about the model's answer.
+
+### What counts as evidence, and for what
+
+An answer about a line says two kinds of things, and they are not checked against the same
+record.
+
+- **What the line is, and what a change did to it.** "This is a doc comment", "the commit added
+  this line", "it used to read `var`". The record for these is the code at the investigated
+  revision and the patch of the commit that last touched the line. Collection reads both without
+  a model. Such a statement is true or false by looking, and no commit message has to repeat it.
+- **Why.** A motive, a problem, a decision, a consequence: "because the vendor rejects larger
+  pages", "to follow jQuery". The record for these is a collected source: a commit message, a
+  pull request, an issue, a review. The code never proves a reason. A reason read off the code is
+  a guess, however plausible.
+
+A sentence that mixes the two is read part by part, and is wrong if either part is.
+
+So a manual verdict, or a read of the claims, fails an answer for three things: a statement
+about the line that the code or the patch contradicts, a reason that no source gives, and a
+reason a source gives for another part of the change. It does not fail an answer for saying
+something true about the code that no source repeats. The reads kept since 12 Oct list that
+last kind apart, under `fromTheCode`, so that it can be counted and checked.
+
+Two parts of the system do not work to this rule, and a result has to be read knowing it:
+
+- The automatic checks see the answer's structure and the audit's verdict, never the claims.
+- The audit applies the rule only in part. Since the line and its last change are shown to it,
+  it is told they are established, and it still asks a source for some of what they show. On
+  `ng-http-411` it held "this line was added as part of a JSDoc comment documenting the new
+  XSRF-token-whitelisting feature" at weak, in both runs that said it, because no commit message
+  says a line is documentation. Tracked in
+  [#43](https://github.com/maricastroc/understory/issues/43).
 
 ## Results
 
@@ -203,7 +265,7 @@ Out-of-scope runs: 14 of 18 labelled out of scope, 18 of 18 with no claim.
 
 Claim audits: 77, of which 7 were answered by the fallback model and 0 failed. The judge called 59 claims supported, and 9 of those were set back to weak because the passage it quoted is not in the source.
 
-Four things to hold against those tables:
+Five things to hold against those tables:
 
 - **The split by source says more than the total.** The cases written for the eval pass almost
   always. Of the ten lines drawn at random from real repositories, five passed both runs.
@@ -216,6 +278,10 @@ Four things to hold against those tables:
   smaller model's call failed, are none of them in a case that changed between runs.
 - The `v1` row is the original eight. The `ms` of each kept run includes the 30-second pause
   before it.
+- **One of these passes was withdrawn afterwards.** `ng-http-411` passed both runs on the
+  automatic checks while saying that a doc comment implements a feature. It has had a rubric
+  since 12 Oct ([The gold set](#the-gold-set)), under which both runs fail. Read that way the
+  recorded row is 26/30, and 29 of the 36 cases passed every run.
 
 ### What failed
 
@@ -555,26 +621,28 @@ ended in an API error and are counted as errored.
 commit `85a9aec`). Each has its manual verdicts beside it in a `.review.json`. The two
 baselines ran only the three categories this change is about.
 
-| Runs passed          | `main`           | Audit change     | This change      |
-| -------------------- | ---------------- | ---------------- | ---------------- |
-| incidental           | 5/16             | 7/16             | 16/16            |
-| false-premise        | 11/11, 1 errored | 12/12            | 11/11, 1 errored |
-| recorded, synthetic  | 31/32            | 31/31, 1 errored | 32/32            |
-| recorded, real lines | 19/28            | 25/28            | 20/27, 1 errored |
-| silent               | not run          | not run          | 19/19, 1 errored |
-| out-of-scope         | not run          | not run          | 36/36            |
+| Runs passed                                | `main`           | Audit change     | This change      |
+| ------------------------------------------ | ---------------- | ---------------- | ---------------- |
+| incidental                                 | 5/16             | 7/16             | 16/16            |
+| false-premise                              | 11/11, 1 errored | 12/12            | 11/11, 1 errored |
+| recorded, synthetic                        | 31/32            | 31/31, 1 errored | 32/32            |
+| recorded, real lines                       | 19/28            | 25/28            | 20/27, 1 errored |
+| the same, with the rubric of `ng-http-411` | 18/28            | 21/28            | 20/27, 1 errored |
+| silent                                     | not run          | not run          | 19/19, 1 errored |
+| out-of-scope                               | not run          | not run          | 36/36            |
 
 The recorded real lines, one by one:
 
-| Case             | `main` | Audit change | This change    |
-| ---------------- | ------ | ------------ | -------------- |
-| `ng-http-114`    | 4/4    | 4/4          | 4/4            |
-| `ng-http-411`    | 1/4    | 4/4          | 0/4            |
-| `machine-168`    | 2/4    | 2/4          | 2/4            |
-| `q-306`          | 3/4    | 3/4          | 4/4            |
-| `q-796`          | 3/4    | 4/4          | 3/4            |
-| `tslint-260`     | 2/4    | 4/4          | 4/4            |
-| `apollo-http-10` | 4/4    | 4/4          | 3/3, 1 errored |
+| Case                      | `main` | Audit change | This change    |
+| ------------------------- | ------ | ------------ | -------------- |
+| `ng-http-114`             | 4/4    | 4/4          | 4/4            |
+| `ng-http-411`             | 1/4    | 4/4          | 0/4            |
+| the same, with its rubric | 0/4    | 0/4          | 0/4            |
+| `machine-168`             | 2/4    | 2/4          | 2/4            |
+| `q-306`                   | 3/4    | 3/4          | 4/4            |
+| `q-796`                   | 3/4    | 4/4          | 3/4            |
+| `tslint-260`              | 2/4    | 4/4          | 4/4            |
+| `apollo-http-10`          | 4/4    | 4/4          | 3/3, 1 errored |
 
 Read with these:
 
@@ -584,15 +652,18 @@ Read with these:
   happened: "The last change rewrote the line from `if (Formatter !== undefined)` to
   `if (Formatter === undefined)`, but the provided PR and commit messages do not explain why."
   On both baselines `tslint-189` and `tslint-257` fail every run, as on 11 Oct.
-- **`ng-http-411` is the whole cost on recorded lines, and what it lost was a false pass.**
-  Line 411 is `* @example`. On the audit change it passes four runs in four by saying the line
-  "implements a check that only adds the XSRF token header", audited as supported with
-  confidence 0.85 to 0.9. With the line in view no run says that. Two say the line was added as
-  part of the documentation of the XSRF whitelist feature, which is true, and the audit holds
-  that at weak because no commit message says a line is documentation. Two abstain: "the commit
-  message and other evidence do not explain why this @example line was written that way". The
-  case is labelled recorded, so all four count as failures. Without it the recorded real lines
-  read 20/23 here and 21/24 on the audit change.
+- **`ng-http-411` is the whole difference on recorded lines, and what it lost was a false
+  pass.** Line 411 is `* @example`. On the audit change it passes four runs in four by saying
+  the line "implements a check that only adds the XSRF token header", audited as supported with
+  confidence 0.85 to 0.9. The case was given a rubric after this run
+  ([The gold set](#the-gold-set)), and with it those four fail, as does the one pass on `main`.
+  With the line in view no run says that. Two say the line was added as part of the
+  documentation of the XSRF whitelist feature, which is true and is what the case expects, and
+  the audit holds it at weak because no commit message says a line is documentation
+  ([#43](https://github.com/maricastroc/understory/issues/43)). Two abstain: "the commit
+  message and other evidence do not explain why this @example line was written that way". So
+  the case fails in all three columns, for three different reasons: a false statement credited,
+  a true one not credited, and an abstention on a line whose commit explains what it documents.
 - **`machine-168` fails two runs in four in all three columns**, each time because the writer
   abstained. That is [#39](https://github.com/maricastroc/understory/issues/39), not this change.
 - **The read of the claims** is in
@@ -617,13 +688,24 @@ Read with these:
   US$ 0.095. Collection makes one more request to GitHub per investigation, for the commit's
   patch.
 
-**Against the acceptance criteria of #31.** No run of the four incidental cases fails its
-rubric, in four passes. No run of `ng-http-411` misdescribes the line. The read still finds
-statements about a line that no source supports: two that misread a commit, and the 26 that
-come from the code now shown. The recorded cases that passed both runs on 11 Oct do not all
-still pass: `ng-http-411` fails all four, for the reason above, and `machine-168` and `q-796`
-lose runs they also lose without this change. So #31 is not closed by the letter of its
-criteria, and the open question is the label of `ng-http-411`, which this branch does not touch.
+**Against the acceptance criteria of #31**, read with the rule in
+[What counts as evidence](#what-counts-as-evidence-and-for-what):
+
+- No run of the four incidental cases fails its rubric, in four passes. Met.
+- No run of `ng-http-411` says the line does something it does not. Met.
+- "A new read finds no statement about a line that no source supports." The read finds none
+  that the code or the patch contradicts. It finds 26 runs that say something true of the code
+  or the patch that no source repeats, which the rule does not count against an answer, and
+  six borderline runs, listed there. It also finds two runs of `ws-revert-story` that misread a
+  commit message. That failure is real, is not about a line, and is on `main` too.
+- "The recorded cases that passed both runs on 11 Oct still pass both." With its rubric,
+  `ng-http-411` did not pass on 11 Oct, so it is no longer in that set. It is still expected to
+  pass and does not: that is the audit, in #43, and the writer abstaining, in
+  [#39](https://github.com/maricastroc/understory/issues/39). `machine-168` and `q-796` lose
+  runs here that they also lose on `main` the same night.
+
+So what #31 reports, a change's reasons given to a line it only touched, is gone in these
+runs. What keeps one recorded case from passing is narrower and has its own issue.
 
 ### What this does not show
 
