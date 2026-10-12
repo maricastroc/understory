@@ -1,9 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { getAuditor, runAudit } from "@understory/core/auditor";
+import { getAuditor } from "@understory/core/auditor";
 import { collect, parseLocation } from "@understory/core/collect";
-import { finalizeClaim, judgeClaim } from "@understory/core/entail";
+import { auditClaim, auditSubject } from "@understory/core/entail";
 import type { Artifact } from "@understory/core/types";
 import {
   type AuditedClaim,
@@ -43,7 +43,13 @@ async function pooled<T>(items: T[], work: (item: T) => Promise<void>): Promise<
   await Promise.all(Array.from({ length: PARALLEL }, worker));
 }
 
-type Task = { claim: AuditedClaim; question: string; sources: Artifact[]; replay: number };
+type Task = {
+  claim: AuditedClaim;
+  question: string;
+  subject: string | null;
+  sources: Artifact[];
+  replay: number;
+};
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -86,6 +92,7 @@ async function main() {
   const repoOf = (c: Case) => c.repo ?? gold.repo;
   const ids = [...new Set(claims.map((c) => c.id))];
   const artifacts = new Map<string, Artifact[]>();
+  const subjects = new Map<string, string | null>();
   for (const id of ids) {
     const c = cases.get(id)!;
     const ev = await collect({
@@ -94,6 +101,7 @@ async function main() {
       location: parseLocation(c.location),
     });
     artifacts.set(id, ev.artifacts);
+    subjects.set(id, auditSubject(ev));
   }
   const foreign = (id: string, count: number): Artifact[] => {
     const at = ids.indexOf(id);
@@ -109,13 +117,14 @@ async function main() {
   const tasks: Task[] = [];
   for (const claim of claims) {
     const question = cases.get(claim.id)!.question;
+    const subject = subjects.get(claim.id) ?? null;
     const byId = new Map((artifacts.get(claim.id) ?? []).map((a) => [a.id, a]));
     const sources = claim.citations.map((id) => byId.get(id)).filter((a): a is Artifact => !!a);
     if (sources.length === 0) continue;
     for (let replay = 0; replay < args.repeat; replay++)
-      tasks.push({ claim, question, sources, replay });
+      tasks.push({ claim, question, subject, sources, replay });
     const others = foreign(claim.id, sources.length);
-    if (others.length) tasks.push({ claim, question, sources: others, replay: -1 });
+    if (others.length) tasks.push({ claim, question, subject, sources: others, replay: -1 });
   }
 
   const meta: ReplayMeta = {
@@ -139,7 +148,7 @@ async function main() {
   }
 
   const judgements: Judgement[] = [];
-  await pooled(tasks, async ({ claim, question, sources, replay }) => {
+  await pooled(tasks, async ({ claim, question, subject, sources, replay }) => {
     const control = replay < 0;
     const base = {
       type: "judgement" as const,
@@ -154,11 +163,20 @@ async function main() {
     };
     let record: Judgement;
     try {
-      const { value, fellBack } = await runAudit(auditor, (model) =>
-        judgeClaim(question, claim.text, sources, model),
+      const { raw, verdict, fellBack } = await auditClaim(
+        question,
+        claim.text,
+        sources,
+        auditor,
+        subject,
       );
-      const verdict = finalizeClaim(sources, value);
-      record = { ...base, raw: value, status: verdict.status, quote: verdict.quote, fellBack };
+      record = {
+        ...base,
+        raw,
+        status: verdict.status,
+        quote: verdict.quotes[0]?.text ?? null,
+        fellBack,
+      };
     } catch (err) {
       record = {
         ...base,

@@ -109,7 +109,7 @@ function renderEvidence(ev: Evidence): string {
     .join("\n\n---\n\n");
 }
 
-function formatTarget(ev: Evidence): string {
+export function formatTarget(ev: Evidence): string {
   if (ev.location) {
     const { file, startLine, endLine } = ev.location;
     return endLine !== startLine ? `${file}:${startLine}-${endLine}` : `${file}:${startLine}`;

@@ -10,7 +10,12 @@ export type AuditedClaim = {
   citations: string[];
 };
 
-export type RawVerdict = { status: EntailmentStatus; quote: string; reason: string };
+export type RawVerdict = {
+  status: EntailmentStatus;
+  quote?: string;
+  quotes?: string[];
+  reason: string;
+};
 
 export type ReplayMeta = {
   type: "meta";

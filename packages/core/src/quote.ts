@@ -1,31 +1,22 @@
 import type { QuoteRange } from "./types";
 
 const QUOTE_MIN = 8;
+const MARK = /["'`«»‘-‟′″]/;
+const DASH = /[‐-―−]/;
+const ELLIPSIS = "…";
 
-const normalize = (s: string): string => s.replace(/\s+/g, " ").trim().toLowerCase();
-
-export function verifyQuote(body: string, quote: string): string | null {
-  const q = quote.trim();
-  if (q.length < QUOTE_MIN) return null;
-  return normalize(body).includes(normalize(q)) ? q : null;
+function folded(ch: string): string {
+  if (/\s/.test(ch) || MARK.test(ch)) return "";
+  if (DASH.test(ch)) return "-";
+  if (ch === ELLIPSIS) return "...";
+  return ch.toLowerCase();
 }
 
-function normalizeWithMap(s: string): { text: string; map: number[] } {
+function comparable(s: string): { text: string; map: number[] } {
   let text = "";
   const map: number[] = [];
-  let pendingSpace = -1;
   for (let i = 0; i < s.length; i++) {
-    const ch = s[i];
-    if (/\s/.test(ch)) {
-      if (text.length > 0 && pendingSpace < 0) pendingSpace = i;
-      continue;
-    }
-    if (pendingSpace >= 0) {
-      text += " ";
-      map.push(pendingSpace);
-      pendingSpace = -1;
-    }
-    for (const unit of ch.toLowerCase()) {
+    for (const unit of folded(s[i])) {
       text += unit;
       map.push(i);
     }
@@ -33,13 +24,33 @@ function normalizeWithMap(s: string): { text: string; map: number[] } {
   return { text, map };
 }
 
+const readable = (s: string): string =>
+  Array.from(s, (ch) => (MARK.test(ch) ? "" : ch))
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim();
+
+export function verifyQuote(body: string, quote: string): string | null {
+  const q = quote.trim();
+  if (readable(q).length < QUOTE_MIN) return null;
+  return comparable(body).text.includes(comparable(q).text) ? q : null;
+}
+
 export function locateQuote(body: string, quote: string): QuoteRange | null {
-  if (!verifyQuote(body, quote)) return null;
-  const needle = normalize(quote);
-  const hay = normalizeWithMap(body);
+  const q = verifyQuote(body, quote);
+  if (!q) return null;
+  const needle = comparable(q).text;
+  const hay = comparable(body);
   const at = hay.text.indexOf(needle);
   if (at < 0) return null;
-  const start = hay.map[at];
-  const end = hay.map[at + needle.length - 1] + 1;
+  let start = hay.map[at];
+  let end = hay.map[at + needle.length - 1] + 1;
+  if (MARK.test(q[0]) && start > 0 && MARK.test(body[start - 1])) start -= 1;
+  if (MARK.test(q[q.length - 1]) && end < body.length && MARK.test(body[end])) end += 1;
   return { start, end };
+}
+
+export function sourceQuote(body: string, quote: string): string | null {
+  const range = locateQuote(body, quote);
+  return range ? body.slice(range.start, range.end).replace(/\s+/g, " ").trim() : null;
 }

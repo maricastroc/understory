@@ -5,6 +5,7 @@ export type CitationCheck = {
   claim?: number;
   status: EntailmentStatus;
   quote: string | null;
+  rejectedQuotes?: string[];
   reason: string;
 };
 
