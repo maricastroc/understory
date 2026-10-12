@@ -102,10 +102,11 @@ export type Args = {
   out: string | null;
   set: string | null;
   category: string | null;
+  via: "openrouter" | null;
   problems: string[];
 };
 
-const VALUE_FLAGS = ["--repeat", "--delay", "--out", "--set", "--category"];
+const VALUE_FLAGS = ["--repeat", "--delay", "--out", "--set", "--category", "--via"];
 
 export function parseArgs(argv: string[]): Args {
   const values = new Map<string, string>();
@@ -138,6 +139,8 @@ export function parseArgs(argv: string[]): Args {
     problems.push(`${flag} needs a number of at least ${least}`);
     return least;
   };
+  const via = values.get("--via") ?? null;
+  if (via !== null && via !== "openrouter") problems.push(`--via only knows "openrouter"`);
   return {
     repeat: Math.floor(count("--repeat", 1)),
     delayMs: count("--delay", 0),
@@ -145,6 +148,7 @@ export function parseArgs(argv: string[]): Args {
     out: values.get("--out") ?? null,
     set: values.get("--set") ?? null,
     category: values.get("--category") ?? null,
+    via: via === "openrouter" ? via : null,
     problems,
   };
 }

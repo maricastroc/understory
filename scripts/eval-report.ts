@@ -11,6 +11,7 @@ export type MetaRecord = {
   repeat: number;
   delayMs: number;
   cases: number;
+  via?: string;
 };
 
 export type RunRecord = {
@@ -261,7 +262,7 @@ export function renderReport(
   const passes = new Set(runs.map((r) => r.pass)).size;
   const planned = meta && meta.repeat > passes ? ` of ${meta.repeat}` : "";
   const header = meta
-    ? `${meta.date.slice(0, 10)} · commit ${meta.commit ?? "unknown"} · synthesis \`${meta.synthesis}\` · audit \`${meta.audit}\` · ${passes}${planned} ${passes === 1 && !planned ? "pass" : "passes"}`
+    ? `${meta.date.slice(0, 10)} · commit ${meta.commit ?? "unknown"} · synthesis \`${meta.synthesis}\` · audit \`${meta.audit}\`${meta.via ? ` · via ${meta.via}` : ""} · ${passes}${planned} ${passes === 1 && !planned ? "pass" : "passes"}`
     : "";
   const caseLine = (r: CaseRow) =>
     `| \`${r.id}\` | ${r.set} | ${r.category} | ${r.source} | ${r.verdicts.map((v) => MARK[v]).join(" ")}${r.manual ? " (manual)" : ""} | ${r.scores.join(" · ")} | ${cell(r.notes.join(" / "))} |`;

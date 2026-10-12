@@ -1,0 +1,61 @@
+{
+  "run": "2026-10-11T19:06:25.678Z",
+  "verdicts": {
+    "fp-batch-raised#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-batch-raised#1": {
+      "verdict": "pass",
+      "note": "Same answer as the first pass."
+    },
+    "fp-jitter-removed#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-jitter-removed#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise."
+    },
+    "fp-cap-raised-by-reviewer#0": {
+      "verdict": "pass",
+      "note": "Refuses as out of scope. No claim, no correction."
+    },
+    "fp-cap-raised-by-reviewer#1": {
+      "verdict": "pass",
+      "note": "Refuses as out of scope. No claim, no correction."
+    },
+    "tslint-189#0": {
+      "verdict": "fail",
+      "note": "Says the line was changed to replace getRelativePath with path.resolve and to resolve formatters relative to the working directory. The line is `if (Formatter === undefined) {`. All three claims audited as supported."
+    },
+    "tslint-189#1": {
+      "verdict": "fail",
+      "note": "Says the line was rewritten to use path.resolve. Same line, same misattribution, both claims audited as supported."
+    },
+    "tslint-257#0": {
+      "verdict": "fail",
+      "note": "Explains the line with the enable/disable rewrite and a review comment about a severity check, and says it implements an early skip for disabled rules. The line reads a file to apply fixes."
+    },
+    "tslint-257#1": {
+      "verdict": "fail",
+      "note": "Says the line was added to check a rule's severity. The line reads a file to apply fixes. One of these claims was audited as supported."
+    },
+    "machine-32#0": {
+      "verdict": "fail",
+      "note": "Says the original implementation of the line broke host marshaling and was fixed. The line is a type declaration and no source says why it exists."
+    },
+    "machine-32#1": {
+      "verdict": "fail",
+      "note": "Says the pull request's tests revealed a marshaling bug that this line was revised to resolve. No source says so."
+    },
+    "draft-644#0": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line's logic."
+    },
+    "draft-644#1": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line's logic."
+    }
+  }
+}
