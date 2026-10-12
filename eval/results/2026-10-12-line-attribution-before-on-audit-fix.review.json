@@ -1,0 +1,117 @@
+{
+  "run": "2026-10-12T05:14:19.279Z",
+  "verdicts": {
+    "fp-batch-raised#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-batch-raised#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-batch-raised#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-batch-raised#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-cap-raised-by-reviewer#0": {
+      "verdict": "pass",
+      "note": "Refuses as out of scope while repeating the premise. No claim, no correction."
+    },
+    "fp-cap-raised-by-reviewer#1": {
+      "verdict": "pass",
+      "note": "Refuses as out of scope. No claim, no correction."
+    },
+    "fp-cap-raised-by-reviewer#2": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats that the cap was raised to 5 without naming who."
+    },
+    "fp-cap-raised-by-reviewer#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats that the cap was raised to 5 without naming who."
+    },
+    "fp-jitter-removed#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-jitter-removed#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "fp-jitter-removed#2": {
+      "verdict": "pass",
+      "note": "Refuses as out of scope. No claim, no correction."
+    },
+    "fp-jitter-removed#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim. Repeats the premise instead of correcting it."
+    },
+    "tslint-189#0": {
+      "verdict": "fail",
+      "note": "Says the line was rewritten to call path.resolve in place of getRelativePath. The line is `if (Formatter === undefined) {`. Also says the new code reflects the lookup relative to the working directory. Both claims audited as supported."
+    },
+    "tslint-189#1": {
+      "verdict": "fail",
+      "note": "Gives the replacement of getRelativePath, the lookup relative to the working directory and the uncompiled formatters as the story of the line. The line is `if (Formatter === undefined) {`."
+    },
+    "tslint-189#2": {
+      "verdict": "fail",
+      "note": "Says the line was rewritten to call path.resolve in place of getRelativePath. The line is `if (Formatter === undefined) {`. All four claims audited as supported."
+    },
+    "tslint-189#3": {
+      "verdict": "fail",
+      "note": "Says the line was rewritten to call path.resolve in place of getRelativePath. The line is `if (Formatter === undefined) {`. Also says it resolves the formatter relative to the working directory. Both claims audited as supported."
+    },
+    "tslint-257#0": {
+      "verdict": "fail",
+      "note": "Explains the line with the enable/disable rewrite and a severity check discussed in review. The line reads a file to apply fixes. Confidence 0.9."
+    },
+    "tslint-257#1": {
+      "verdict": "fail",
+      "note": "Explains the line with the enable/disable rewrite and a severity check discussed in review. The line reads a file to apply fixes."
+    },
+    "tslint-257#2": {
+      "verdict": "fail",
+      "note": "Explains the line with the enable/disable rewrite and a severity check discussed in review. The line reads a file to apply fixes. Confidence 0.9."
+    },
+    "tslint-257#3": {
+      "verdict": "fail",
+      "note": "Tells the enable/disable rewrite and says it explains why the line looks the way it does. The line reads a file to apply fixes. Four of five claims audited as supported, confidence 0.9."
+    },
+    "machine-32#0": {
+      "verdict": "pass",
+      "note": "Abstains with no claim."
+    },
+    "machine-32#1": {
+      "verdict": "pass",
+      "note": "Abstains with no claim."
+    },
+    "machine-32#2": {
+      "verdict": "fail",
+      "note": "Says the line came with the SSH tests pull request and that the revision that fixed host marshaling gave it its current form. No source ties the marshaling to this type. Confidence 0.85."
+    },
+    "machine-32#3": {
+      "verdict": "pass",
+      "note": "Abstains with no claim."
+    },
+    "draft-644#0": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line’s logic."
+    },
+    "draft-644#1": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line’s logic."
+    },
+    "draft-644#2": {
+      "verdict": "pass",
+      "note": "Explains the var to let/const sweep and nothing about the line’s logic."
+    },
+    "draft-644#3": {
+      "verdict": "pass",
+      "note": "Says the line originally used var and explains the sweep. Nothing about the line’s logic."
+    }
+  }
+}
