@@ -17,6 +17,7 @@ export type RawVerdict = {
   reason: string;
   code?: string;
   record?: string;
+  bearing?: string;
   earlier?: boolean;
 };
 

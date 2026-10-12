@@ -57,6 +57,11 @@ const sitedSchema = z.object({
     .describe(
       "PART 2, against the sources and nothing else: whatever the claim says beyond what the lines shown and the stated change show. nothing = it says nothing beyond them. supported = the sources state or clearly imply all the rest (quotes required). unproven = the sources are about the subject but leave part of the rest unstated. unrelated = the sources are about something else, or say the opposite.",
     ),
+  bearing: z
+    .enum(["nothing", "line", "elsewhere", "unclear"])
+    .describe(
+      "PART 3, whose reason it is. nothing = the claim gives the marked line no reason, or PART 2 did not find its reason in the sources. line = the marked line, or the block it sits in, is part of what that reason describes. elsewhere = the reason is about another part of the change, or about another change. unclear = what is shown does not let you tell.",
+    ),
   quotes,
   reason: z
     .string()
@@ -79,12 +84,18 @@ export type RawVerdict = {
   reason: string;
   code?: Sited["code"];
   record?: Sited["record"];
+  bearing?: Sited["bearing"];
   earlier?: boolean;
 };
 
-export function sitedStatus(code: Sited["code"], record: Sited["record"]): EntailmentStatus {
+export function sitedStatus(
+  code: Sited["code"],
+  record: Sited["record"],
+  bearing: Sited["bearing"] = "nothing",
+): EntailmentStatus {
   if (code === "contradicts" || record === "unrelated") return "unsupported";
-  return record === "supported" ? "supported" : "weak";
+  if (record !== "supported") return "weak";
+  return bearing === "elsewhere" ? "unsupported" : "supported";
 }
 
 const CLAIM_SYSTEM = [
@@ -128,7 +139,7 @@ const SITED_SYSTEM = [
   "You are a citation auditor. An answer about the history of a piece of code makes ONE claim and",
   "cites the source(s) shown. Under 'Established' you are also shown a few lines of that code as it",
   "is today, with the line under investigation marked, and, when it is known, what the last change",
-  "did to that line and the other lines that change added around it. Check the claim in TWO",
+  "did to that line and the other lines that change added around it. Check the claim in THREE",
   "separate parts, each against its own record. Never outside knowledge, never what merely seems",
   "plausible.",
   "",
@@ -176,6 +187,22 @@ const SITED_SYSTEM = [
   "A claim that mixes both kinds is checked on both: what it says of the code shown in PART 1, the",
   "rest in PART 2. Neither part excuses the other.",
   "",
+  "PART 3, `bearing`: whose reason is it? A change often does several things, and its message",
+  "explains some of them. A line can be moved, renamed, re-indented or carried along by a change",
+  "whose stated reasons are about something else. So a reason can be in the sources, word for word,",
+  "and still not be the reason for the marked line. When the claim gives the marked line, or the",
+  "last change to it, a reason that PART 2 found in the sources, compare what that reason is about",
+  "with what the marked line and the lines added around it do.",
+  "- nothing: the claim gives the marked line no reason, or PART 2 did not find its reason in the",
+  "  sources.",
+  "- line: the marked line, or the block it sits in, is part of what the reason describes.",
+  "- elsewhere: the reason is about another part of the change, or about another change. The",
+  "  sources explain why a cache was added, and the marked line is a log statement the same change",
+  "  moved. The sources explain an earlier change, and the claim gives that reason to the last",
+  "  one. Answer elsewhere only when you can say what the marked line does and what else the",
+  "  reason is about, and say both in `reason`.",
+  "- unclear: what is shown does not let you tell whether the reason is about the marked line.",
+  "",
   "`quotes` holds the proof for PART 2: the passage, or the few passages, where the sources state",
   "it. Each item must be ONE continuous stretch copied EXACTLY from one source, character for",
   "character, never from the code. Put separate passages in separate items: never join two in one",
@@ -197,9 +224,11 @@ export type ClaimVerdict = {
   rejectedQuotes: string[];
   reason: string;
   code?: "agrees" | "contradicts";
+  bearing?: "line" | "elsewhere";
 };
 
 const CONTRADICTED = "the code shown contradicts the claim";
+const ELSEWHERE = "the reason the sources give is about another part of the change";
 const EARLIER =
   "the claim cites only changes made before the one shown, so the code shown is not held against it";
 const ONLY_THE_CODE =
@@ -216,8 +245,15 @@ function inSources(sources: Artifact[], offered: string): SourcedQuote[] | null 
 }
 
 export function finalizeClaim(sources: Artifact[], raw: RawVerdict): ClaimVerdict {
-  const setAside = raw.earlier && raw.code === "contradicts";
-  const code = raw.code && raw.code !== "nothing" && !setAside ? { code: raw.code } : {};
+  const setAside = raw.earlier && (raw.code === "contradicts" || raw.bearing === "elsewhere");
+  const code = {
+    ...(raw.code && raw.code !== "nothing" && !(raw.earlier && raw.code === "contradicts")
+      ? { code: raw.code }
+      : {}),
+    ...(!raw.earlier && (raw.bearing === "line" || raw.bearing === "elsewhere")
+      ? { bearing: raw.bearing }
+      : {}),
+  };
   const said = setAside ? withNote(raw.reason, EARLIER) : raw.reason;
   if (raw.code === "contradicts" && !setAside)
     return {
@@ -228,7 +264,16 @@ export function finalizeClaim(sources: Artifact[], raw: RawVerdict): ClaimVerdic
       ...code,
     };
   if (raw.status === "unsupported")
-    return { status: "unsupported", quotes: [], rejectedQuotes: [], reason: said, ...code };
+    return {
+      status: "unsupported",
+      quotes: [],
+      rejectedQuotes: [],
+      reason:
+        raw.bearing === "elsewhere" && !raw.earlier && raw.record === "supported"
+          ? withNote(said, ELSEWHERE)
+          : said,
+      ...code,
+    };
   const quotes: SourcedQuote[] = [];
   const rejectedQuotes: string[] = [];
   for (const offered of raw.quotes.map((q) => q.trim()).filter(Boolean)) {
@@ -347,7 +392,9 @@ export async function judgeClaim(
     const earlier = !sources.some((a) => subject.shown.includes(a.id));
     return {
       ...object,
-      status: sitedStatus(earlier ? "nothing" : object.code, object.record),
+      status: earlier
+        ? sitedStatus("nothing", object.record)
+        : sitedStatus(object.code, object.record, object.bearing),
       ...(earlier ? { earlier } : {}),
     };
   }
@@ -421,6 +468,7 @@ export async function entailClaims(
         quote: verdict.quotes.find((q) => q.sourceId === src.id)?.text ?? null,
         ...(verdict.rejectedQuotes.length ? { rejectedQuotes: verdict.rejectedQuotes } : {}),
         ...(verdict.code ? { code: verdict.code } : {}),
+        ...(verdict.bearing ? { bearing: verdict.bearing } : {}),
         reason: verdict.reason,
       });
     }

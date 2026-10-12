@@ -7,6 +7,7 @@ export type CitationCheck = {
   quote: string | null;
   rejectedQuotes?: string[];
   code?: "agrees" | "contradicts";
+  bearing?: "line" | "elsewhere";
   reason: string;
 };
 
