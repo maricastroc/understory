@@ -91,4 +91,33 @@ describe("readingLayer", () => {
     expect(extentOf(layer, 1, 9000)).toEqual({ changes: 2, days: 9000 });
     expect(extentOf(layerOf("ws-revert-story"), 4, 1000)).toEqual({ changes: 4, days: 1000 });
   });
+
+  it("keeps what the walk read and where it stopped, whatever stopped it", () => {
+    const [last, first] = KEPT["ng-http-114"].evidence.lineage!.entries;
+    const stoppedAt = (lineage: Evidence["lineage"]) =>
+      layerOf("ng-http-114", (ev) => ({ ...ev, lineage }));
+    const limited = stoppedAt({
+      entries: [last, { ...first, did: "rewrote", before: "forEach(toSerialize, noop);" }],
+      stopped: "request limit",
+    });
+    expect([limited.edge, limited.earlier.map((c) => [c.id, c.did])]).toEqual([
+      "request limit",
+      [["commit:2420a0a", "rewrote"]],
+    ]);
+    const { sha, date, title } = first;
+    const unread = stoppedAt({ entries: [last, { sha, date, title }], stopped: "no patch" });
+    expect([unread.edge, unread.earlier.map((c) => [c.id, c.did])]).toEqual([
+      "no patch",
+      [["commit:2420a0a", undefined]],
+    ]);
+    const late = stoppedAt({ entries: [], stopped: "time limit" });
+    expect([late.edge, late.earlier, late.reach]).toEqual(["time limit", [], null]);
+    expect(late.facts.get("commit:18a2e4f")?.did).toBe("rewrote");
+  });
+
+  it("does not link a source to the line for sharing its commit", () => {
+    expect(layerOf("ng-http-114").scopes.get(scopeKey("commit:18a2e4f", 0))).toEqual({
+      scope: "change",
+    });
+  });
 });

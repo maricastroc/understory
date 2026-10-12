@@ -8,7 +8,7 @@ export function factText(fact: ChangeFact): string {
 }
 
 const SCOPE: Record<PassageScope["scope"], string> = {
-  line: "tied to this line",
+  line: "source linked directly to this line",
   change: "said of the change as a whole",
   "earlier change": "said of an earlier change to this line",
   file: "from the file's history, not this line's",
@@ -39,8 +39,8 @@ export function edgeText(edge: Reading["earlier"], history: Reading["history"]):
     Exclude<NonNullable<Reading["earlier"]>, "not read" | "the line was added">,
     string
   > = {
-    "depth limit": "it goes further back than this view follows",
-    "request limit": "it goes further back than this view follows",
+    "depth limit": "this view follows only a few changes back",
+    "request limit": "this view follows only a few changes back",
     "time limit": "following it took too long",
     "no patch": "the host did not return the change",
     "line not located": "the line could not be followed through the change",

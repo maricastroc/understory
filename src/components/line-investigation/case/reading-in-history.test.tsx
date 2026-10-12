@@ -1,4 +1,4 @@
-import type { DigResult, Evidence } from "@understory/core/types";
+import type { DigResult, Evidence, Lineage } from "@understory/core/types";
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { axe } from "@/test/axe";
@@ -15,6 +15,31 @@ const withEvidence = (id: string, change: (ev: Evidence) => Evidence): DigResult
   ...KEPT[id],
   evidence: change(KEPT[id].evidence),
 });
+
+const LAST = "commit:9da72fa";
+const WALKED = KEPT["ws-revert-story"].evidence.lineage!.entries;
+
+function hosted(lineage: Lineage): DigResult {
+  const { evidence, narrative } = KEPT["ws-revert-story"];
+  const at = narrative!.claims.findIndex((claim) => claim.citations.includes(LAST));
+  return {
+    evidence: {
+      ...evidence,
+      artifacts: evidence.artifacts.filter((a) => a.id === LAST),
+      lineage,
+    },
+    narrative: {
+      ...narrative!,
+      claims: [narrative!.claims[at]],
+      entailment: {
+        ...narrative!.entailment!,
+        checks: narrative!
+          .entailment!.checks.filter((check) => check.claim === at)
+          .map((check) => ({ ...check, claim: 0 })),
+      },
+    },
+  };
+}
 
 function setup(result: DigResult, reading?: boolean) {
   const { evidence } = result;
@@ -53,6 +78,8 @@ const row = (id: string) => document.querySelector<HTMLElement>(`[data-artifact=
 const marks = (name: string, within_: ParentNode = document) =>
   [...within_.querySelectorAll<HTMLElement>(`[data-${name}]`)].map((e) => e.textContent);
 const markup = () => section().innerHTML.replace(/id="[^"]*"/g, "");
+const earlierIds = () =>
+  [...document.querySelectorAll("[data-earlier]")].map((e) => e.getAttribute("data-earlier"));
 const summary = () => section().querySelector("h2")!.nextElementSibling!.textContent;
 
 beforeEach(() => window.localStorage.clear());
@@ -84,9 +111,9 @@ describe("the history with the reading", () => {
     expect(marks("fact")).toHaveLength(4);
   });
 
-  it("ties a reason to the line only on the last change, and names the rest as earlier", () => {
+  it("links a source to the line only on the last change, and names the rest as earlier", () => {
     setup(KEPT["ws-revert-story"], true);
-    expect(marks("scope", row("commit:9da72fa"))).toEqual(["tied to this line"]);
+    expect(marks("scope", row("commit:9da72fa"))).toEqual(["source linked directly to this line"]);
     expect(marks("scope", row("commit:05a16a3"))).toEqual([
       "said of an earlier change to this line",
     ]);
@@ -152,7 +179,7 @@ describe("the history with the reading", () => {
       true,
     );
     expect(marks("edge")).toEqual([
-      "The line's history before this was not read: it goes further back than this view follows.",
+      "The line's history before this was not read: this view follows only a few changes back.",
     ]);
     expect(marks("earlier")).toEqual([]);
     expect((await axe(container)).violations).toEqual([]);
@@ -166,5 +193,79 @@ describe("the history with the reading", () => {
     expect(marks("fact")).toEqual(["added this line"]);
     expect(marks("edge")).toEqual([]);
     expect(section().textContent).toContain("oldest recorded change to line 411 · 1e90d03");
+  });
+});
+
+describe("the history where the walk stopped before the line's first change", () => {
+  it("counts the changes it read at the request limit, each once, and calls none the origin", () => {
+    setup(hosted({ entries: WALKED.slice(0, 3), stopped: "request limit" }), true);
+    expect(earlierIds()).toEqual(["commit:05a16a3", "commit:22e1399"]);
+    expect(document.querySelectorAll(`[data-artifact="${LAST}"]`)).toHaveLength(1);
+    expect(document.querySelector(`[data-earlier="${LAST}"]`)).toBeNull();
+    expect(summary()).toMatch(/→ oldest read −\S+ · 3 changes · 1 artifact$/);
+    expect(screen.getByRole("button", { name: /^History · 3 changes over / })).toBeTruthy();
+    expect(marks("edge")).toEqual([
+      "The line's history before this was not read: this view follows only a few changes back.",
+    ]);
+    expect(section().textContent).not.toMatch(/\borigin\b|oldest recorded change/);
+  });
+
+  it("shows only the collected change where the time ran out before anything was read", () => {
+    setup(hosted({ entries: [], stopped: "time limit" }), true);
+    expect(earlierIds()).toEqual([]);
+    expect(marks("fact")).toEqual([expect.stringMatching(/^rewrote this line · before: /)]);
+    expect(summary()).toMatch(/→ oldest read −\S+ · 1 change · 1 artifact$/);
+    expect(marks("edge")).toEqual([
+      "The line's history before this was not read: following it took too long.",
+    ]);
+    expect(section().textContent).not.toMatch(/\borigin\b|oldest recorded change/);
+  });
+
+  it("lists a change whose patch the host did not return, without saying what it did", () => {
+    const { sha, date, title } = WALKED[1];
+    setup(hosted({ entries: [WALKED[0], { sha, date, title }], stopped: "no patch" }), true);
+    expect(earlierIds()).toEqual(["commit:05a16a3"]);
+    const unread = document.querySelector<HTMLElement>('[data-earlier="commit:05a16a3"]')!;
+    expect(unread.textContent).not.toMatch(/(added|rewrote) this line|spacing of this line/);
+    expect(unread.textContent).toContain(
+      "found by following the line back · not read for a reason",
+    );
+    expect(summary()).toMatch(/→ oldest read −\S+ · 2 changes · 1 artifact$/);
+    expect(marks("edge")).toEqual([
+      "The line's history before this was not read: the host did not return the change.",
+    ]);
+    expect(section().textContent).not.toMatch(/\borigin\b|oldest recorded change/);
+  });
+
+  it("does not say the history goes further back when older changes were already collected", () => {
+    setup(
+      withEvidence("ws-revert-story", (ev) => ({
+        ...ev,
+        lineage: { entries: ev.lineage!.entries.slice(0, 2), stopped: "depth limit" },
+      })),
+      true,
+    );
+    expect(earlierIds()).toEqual([]);
+    expect(marks("fact")).toHaveLength(2);
+    expect(marks("fact", row("commit:90021c7"))).toEqual([]);
+    expect(summary()).toMatch(/→ oldest read −\S+ · 4 changes · 4 artifacts$/);
+    expect(marks("edge")).toEqual([
+      "The line's history before this was not read: this view follows only a few changes back.",
+    ]);
+    expect(section().textContent).not.toMatch(/goes further back|oldest recorded change/);
+  });
+});
+
+describe("a source that only shares the line's commit or pull request", () => {
+  it("is not linked to the line: a commit that also changed other code", () => {
+    setup(KEPT["ng-http-114"], true);
+    expect(marks("scope", row("commit:18a2e4f"))).toEqual(["said of the change as a whole"]);
+    expect(document.querySelector('[data-scope="line"]')).toBeNull();
+  });
+
+  it("is not linked to the line: reviews of a pull request that changed many files", () => {
+    setup(KEPT["tslint-257"], true);
+    expect(document.querySelectorAll("[data-scope]").length).toBeGreaterThan(0);
+    expect(document.querySelector('[data-scope="line"]')).toBeNull();
   });
 });

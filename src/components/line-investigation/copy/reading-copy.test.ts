@@ -13,8 +13,8 @@ describe("what a change did to the line", () => {
 });
 
 describe("the scope of a quoted passage", () => {
-  it("keeps a reason tied to the line apart from one said of the change or of an earlier one", () => {
-    expect(scopeText({ scope: "line" })).toBe("tied to this line");
+  it("keeps a source linked to the line apart from one said of the change or of an earlier one", () => {
+    expect(scopeText({ scope: "line" })).toBe("source linked directly to this line");
     expect(scopeText({ scope: "change" })).toBe("said of the change as a whole");
     expect(scopeText({ scope: "earlier change" })).toBe("said of an earlier change to this line");
     expect(scopeText({ scope: "file" })).toBe("from the file's history, not this line's");
@@ -22,7 +22,7 @@ describe("the scope of a quoted passage", () => {
 
   it("says where a review comment was made, without turning it away", () => {
     expect(scopeText({ scope: "line", placement: "on the line", outdated: false })).toBe(
-      "tied to this line · comment made on this line",
+      "source linked directly to this line · comment made on this line",
     );
     expect(scopeText({ scope: "change", placement: "in its hunk", outdated: false })).toBe(
       "said of the change as a whole · comment made near this line",
@@ -60,8 +60,8 @@ describe("where the history shown ends", () => {
   it("says the earlier history was not read, and why when the walk stopped", () => {
     expect(edgeText("not read", "the line")).toBe("The line's history before this was not read.");
     const why: Record<Exclude<LineageStop, "the line was added">, string> = {
-      "depth limit": "it goes further back than this view follows",
-      "request limit": "it goes further back than this view follows",
+      "depth limit": "this view follows only a few changes back",
+      "request limit": "this view follows only a few changes back",
       "time limit": "following it took too long",
       "no patch": "the host did not return the change",
       "line not located": "the line could not be followed through the change",
