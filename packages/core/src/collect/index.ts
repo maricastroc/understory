@@ -41,8 +41,10 @@ import {
   type MergeRequestBundle,
   blameLinesGitLab,
   commitContextArtifactsGitLab,
+  commitFilePatchGitLab,
   fileHistoryGitLab,
   getBranchHeadGitLab,
+  getFileContentGitLab,
   getFileSizeGitLab,
   getProjectMeta,
   glCommitArtifact,
@@ -375,7 +377,7 @@ async function collectFromGitLab(
   }
 
   artifacts.sort((a, b) => a.date.localeCompare(b.date));
-  return {
+  const base: BaseEvidence = {
     question,
     repo: sha ? { ...repoRef, sha } : repoRef,
     location,
@@ -383,6 +385,11 @@ async function collectFromGitLab(
     note,
     coverage: { granularity },
   };
+  return withCode(
+    base,
+    () => getFileContentGitLab(host, project, ref, location.file),
+    (commit) => commitFilePatchGitLab(host, project, commit, location.file),
+  );
 }
 
 async function collectAroundGitLabArtifact(

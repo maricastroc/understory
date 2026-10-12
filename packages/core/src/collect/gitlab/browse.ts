@@ -135,6 +135,22 @@ export async function getFileContentGitLab(
   );
 }
 
+const MAX_DIFF_PAGES = 5;
+
+export async function commitFilePatchGitLab(
+  host: string,
+  project: string,
+  sha: string,
+  filePath: string,
+): Promise<string | null> {
+  const diffs = await glRestPaged<{ new_path: string; diff?: string }>(
+    host,
+    `/projects/${projectId(project)}/repository/commits/${encodeURIComponent(sha)}/diff`,
+    MAX_DIFF_PAGES,
+  );
+  return diffs.find((d) => d.new_path === filePath)?.diff || null;
+}
+
 export async function getFileSizeGitLab(
   host: string,
   project: string,

@@ -1,5 +1,6 @@
 export { parseGitLabRepo, getProjectMeta, getBranchHeadGitLab } from "./repo";
 export {
+  commitFilePatchGitLab,
   defaultFilesGitLab,
   searchFilesGitLab,
   getFileContentGitLab,
