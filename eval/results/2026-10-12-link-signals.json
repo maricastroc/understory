@@ -1,3091 +1,2235 @@
 {
- "date": "2026-10-12T15:49:58.020Z",
- "replay": "eval/results/2026-10-12-patch-context-replay-one-question.jsonl",
- "judge": "b798b88",
- "controls": [
-  {
-   "id": "ng-http-411",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "This line was added as part of a JSDoc comment documenting the new XSRF‑token‑whitelisting feature introduced in commit 1e90d03.",
-   "scope": {
-    "files": 6,
-    "lines": 500,
-    "block": 42
-   },
-   "sources": [
+  "date": "2026-10-12T15:49:58.020Z",
+  "replay": "eval/results/2026-10-12-patch-context-replay-one-question.jsonl",
+  "judge": "b798b88",
+  "controls": [
     {
-     "id": "commit:1e90d03",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "feat($http): support sending XSRF token to whitelisted origins",
-     "namesLine": [],
-     "namesBlock": [
-      "http",
-      "xsrf",
-      "token",
-      "whitelisted",
-      "origin"
-     ],
-     "namesElsewhere": [
-      "support"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ng-http-411",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "This line was added as part of a documentation block that provides an example for the newly introduced XSRF‑token whitelisting feature in $http.",
-   "scope": {
-    "files": 6,
-    "lines": 500,
-    "block": 42
-   },
-   "sources": [
-    {
-     "id": "commit:1e90d03",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "feat($http): support sending XSRF token to whitelisted origins",
-     "namesLine": [],
-     "namesBlock": [
-      "http",
-      "xsrf",
-      "token",
-      "whitelisted",
-      "origin"
-     ],
-     "namesElsewhere": [
-      "support"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "machine-168",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "This method was added by commit d3ee30b as part of pull request #4002, which adds support for upgrading to the new CE edition.",
-   "scope": {
-    "files": 7,
-    "lines": 82,
-    "block": 18
-   },
-   "sources": [
-    {
-     "id": "pr:4002",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "Add support for upgrade to new CE edition",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "upgrade"
-     ]
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "This line was added as part of a JSDoc comment documenting the new XSRF‑token‑whitelisting feature introduced in commit 1e90d03.",
+      "scope": {
+        "files": 6,
+        "lines": 500,
+        "block": 42
+      },
+      "sources": [
+        {
+          "id": "commit:1e90d03",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "feat($http): support sending XSRF token to whitelisted origins",
+          "namesLine": [],
+          "namesBlock": ["http", "xsrf", "token", "whitelisted", "origin"],
+          "namesElsewhere": ["support"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
     },
     {
-     "id": "commit:d3ee30b",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Add support for upgrade to new CE edition",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "upgrade"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change",
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "q-306",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "This line returns the current index when the array element equals the searched value, as part of the Array.prototype.indexOf shim added for IE<9.",
-   "scope": {
-    "files": 1,
-    "lines": 15,
-    "block": 13
-   },
-   "sources": [
-    {
-     "id": "commit:5ea9aaf",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Add Array.prototype.indexOf shim for IE<9.",
-     "namesLine": [],
-     "namesBlock": [
-      "array",
-      "prototype",
-      "indexof",
-      "index",
-      "shim"
-     ],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 2,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ng-http-114",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "The line was rewritten to take an index argument in the forEach callback, in the commit that makes the serializer follow jQuery for the index of arrays of objects.",
-   "scope": {
-    "files": 2,
-    "lines": 14,
-    "block": 4
-   },
-   "sources": [
-    {
-     "id": "commit:18a2e4f",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects",
-     "namesLine": [
-      "index"
-     ],
-     "namesBlock": [
-      "index",
-      "object"
-     ],
-     "namesElsewhere": [
-      "array"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 1,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "credit",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "credit",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "q-796",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "This check was added by the commit that makes all promises inspectable by default, so that custom promises have an inspect method whether or not one is specified.",
-   "scope": {
-    "files": 1,
-    "lines": 5,
-    "block": 5
-   },
-   "sources": [
-    {
-     "id": "commit:a4a868e",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "promises have an \"inspect\" method, regardless of whether one is",
-     "namesLine": [
-      "inspect"
-     ],
-     "namesBlock": [
-      "inspect"
-     ],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": true,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "credit",
-     "credit",
-     "credit",
-     "credit"
-    ],
-    "judgeThenHints": [
-     "credit",
-     "credit",
-     "credit",
-     "credit"
-    ]
-   }
-  },
-  {
-   "id": "tslint-260",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "The line was rewritten to pass the path through path.resolve by pull request #4887, which adds path.resolve when fs.writeFileSync is called with a temp file path, to fix writing temp files on macOS 10.15.",
-   "scope": {
-    "files": 2,
-    "lines": 6,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "pr:4887",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "fix: writeFileSync can not write to temp files on macOS 10.15",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "This line was added as part of a documentation block that provides an example for the newly introduced XSRF‑token whitelisting feature in $http.",
+      "scope": {
+        "files": 6,
+        "lines": 500,
+        "block": 42
+      },
+      "sources": [
+        {
+          "id": "commit:1e90d03",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "feat($http): support sending XSRF token to whitelisted origins",
+          "namesLine": [],
+          "namesBlock": ["http", "xsrf", "token", "whitelisted", "origin"],
+          "namesElsewhere": ["support"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
     },
     {
-     "id": "commit:8c2ac95",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change",
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ]
-   }
-  },
-  {
-   "id": "draft-644",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "The declaration was rewritten from var to const by commit 8de2db9, which changed the remaining vars in Draft.js to let/const because var was triggering the author’s OCD.",
-   "scope": {
-    "files": 85,
-    "lines": 1461,
-    "block": 4
-   },
-   "sources": [
-    {
-     "id": "commit:8de2db9",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of fil",
-     "namesLine": [
-      "var"
-     ],
-     "namesBlock": [
-      "var"
-     ],
-     "namesElsewhere": [
-      "draft"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "credit",
-     "credit",
-     "credit",
-     "credit"
-    ],
-    "judgeThenHints": [
-     "credit",
-     "credit",
-     "credit",
-     "credit"
-    ]
-   }
-  },
-  {
-   "id": "tslint-189",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "The condition was rewritten from `!== undefined` to `=== undefined` by commit 8b853b2, a cleanup and refactoring of the rule and formatter loaders.",
-   "scope": {
-    "files": 9,
-    "lines": 157,
-    "block": 6
-   },
-   "sources": [
-    {
-     "id": "pr:3412",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "Cleanup and refactoring of (rule|formatter)Loader",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
+      "id": "machine-168",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "This method was added by commit d3ee30b as part of pull request #4002, which adds support for upgrading to the new CE edition.",
+      "scope": {
+        "files": 7,
+        "lines": 82,
+        "block": 18
+      },
+      "sources": [
+        {
+          "id": "pr:4002",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "Add support for upgrade to new CE edition",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["upgrade"]
+        },
+        {
+          "id": "commit:d3ee30b",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Add support for upgrade to new CE edition",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["upgrade"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change", "this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
     },
     {
-     "id": "commit:8b853b2",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Cleanup and refactoring of (rule|formatter)Loader (#3412)",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change",
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "jitter",
-   "kind": "true of the code and backed by a source",
-   "expect": "supported",
-   "text": "The delay was rewritten to add jitter by commit 0016d9d, which stops recovering clients from retrying in lockstep after an outage.",
-   "scope": {
-    "files": 1,
-    "lines": 3,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "commit:0016d9d",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Stops recovering clients from retrying in lockstep after an outage.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ]
-   }
-  },
-  {
-   "id": "ng-http-411",
-   "kind": "says something the code or the patch contradicts",
-   "expect": "not-supported",
-   "text": "The line at src/ng/http.js:411 implements the whitelist check, so the XSRF token header is attached only when the request URL matches one of the whitelisted origins.",
-   "scope": {
-    "files": 6,
-    "lines": 500,
-    "block": 42
-   },
-   "sources": [
-    {
-     "id": "commit:1e90d03",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "feat($http): support sending XSRF token to whitelisted origins",
-     "namesLine": [],
-     "namesBlock": [
-      "http",
-      "xsrf",
-      "token",
-      "whitelisted",
-      "origin"
-     ],
-     "namesElsewhere": [
-      "support"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ng-http-411",
-   "kind": "says something the code or the patch contradicts",
-   "expect": "not-supported",
-   "text": "The line was added to implement support for sending the XSRF token to whitelisted origins, because normally the token is omitted for cross‑origin requests.",
-   "scope": {
-    "files": 6,
-    "lines": 500,
-    "block": 42
-   },
-   "sources": [
-    {
-     "id": "commit:1e90d03",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "feat($http): support sending XSRF token to whitelisted origins",
-     "namesLine": [],
-     "namesBlock": [
-      "http",
-      "xsrf",
-      "token",
-      "whitelisted",
-      "origin"
-     ],
-     "namesElsewhere": [
-      "support"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-189",
-   "kind": "says something the code or the patch contradicts",
-   "expect": "not-supported",
-   "text": "The line was rewritten to call path.resolve instead of the now‑deprecated getRelativePath function.",
-   "scope": {
-    "files": 9,
-    "lines": 157,
-    "block": 6
-   },
-   "sources": [
-    {
-     "id": "pr:3412",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "* deprecate `getRelativePath`, use `path.resolve` instead",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "getrelativepath",
-      "relative",
-      "resolve",
-      "instead"
-     ]
+      "id": "q-306",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "This line returns the current index when the array element equals the searched value, as part of the Array.prototype.indexOf shim added for IE<9.",
+      "scope": {
+        "files": 1,
+        "lines": 15,
+        "block": 13
+      },
+      "sources": [
+        {
+          "id": "commit:5ea9aaf",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Add Array.prototype.indexOf shim for IE<9.",
+          "namesLine": [],
+          "namesBlock": ["array", "prototype", "indexof", "index", "shim"],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 2,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "reject", "reject"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "reject", "reject"]
+      }
     },
     {
-     "id": "commit:8b853b2",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Cleanup and refactoring of (rule|formatter)Loader (#3412)",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change",
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-257",
-   "kind": "says something the code or the patch contradicts",
-   "expect": "not-supported",
-   "text": "The line was originally added to check a rule’s severity before processing it, aiming to skip work for rules that were disabled.",
-   "scope": {
-    "files": 17,
-    "lines": 628,
-    "block": 22
-   },
-   "sources": [
-    {
-     "id": "review:2369-1",
-     "kind": "review",
-     "link": "this change",
-     "passage": "@andy-hanson: It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "ruleseverity",
-      "severity",
-      "isenabled",
-      "enabled"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "q-306",
-   "kind": "says something the code or the patch contradicts",
-   "expect": "not-supported",
-   "text": "This line throws an error when the searched value is missing, as part of the Array.prototype.indexOf shim added for IE<9.",
-   "scope": {
-    "files": 1,
-    "lines": 15,
-    "block": 13
-   },
-   "sources": [
-    {
-     "id": "commit:5ea9aaf",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Add Array.prototype.indexOf shim for IE<9.",
-     "namesLine": [],
-     "namesBlock": [
-      "array",
-      "prototype",
-      "indexof",
-      "index",
-      "shim"
-     ],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "machine-168",
-   "kind": "says something the code or the patch contradicts",
-   "expect": "not-supported",
-   "text": "This line removes the DockerVersion method from Host, as part of adding support for upgrading to the new CE edition.",
-   "scope": {
-    "files": 7,
-    "lines": 82,
-    "block": 18
-   },
-   "sources": [
-    {
-     "id": "pr:4002",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "Add support for upgrade to new CE edition",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "upgrade"
-     ]
+      "id": "ng-http-114",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "The line was rewritten to take an index argument in the forEach callback, in the commit that makes the serializer follow jQuery for the index of arrays of objects.",
+      "scope": {
+        "files": 2,
+        "lines": 14,
+        "block": 4
+      },
+      "sources": [
+        {
+          "id": "commit:18a2e4f",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects",
+          "namesLine": ["index"],
+          "namesBlock": ["index", "object"],
+          "namesElsewhere": ["array"]
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 1,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["credit", "reject", "reject", "reject"],
+        "judgeThenHints": ["credit", "reject", "reject", "reject"]
+      }
     },
     {
-     "id": "commit:d3ee30b",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Add support for upgrade to new CE edition",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "upgrade"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change",
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "draft-644",
-   "kind": "says something the code or the patch contradicts",
-   "expect": "not-supported",
-   "text": "The declaration was rewritten from const to var by commit 8de2db9, which changed the remaining declarations in Draft.js.",
-   "scope": {
-    "files": 85,
-    "lines": 1461,
-    "block": 4
-   },
-   "sources": [
-    {
-     "id": "commit:8de2db9",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of fil",
-     "namesLine": [
-      "var"
-     ],
-     "namesBlock": [
-      "var"
-     ],
-     "namesElsewhere": [
-      "draft"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-260",
-   "kind": "says something the code or the patch contradicts",
-   "expect": "not-supported",
-   "text": "The line was rewritten to drop the call to path.resolve, in the pull request that fixes writing temp files on macOS 10.15.",
-   "scope": {
-    "files": 2,
-    "lines": 6,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "pr:4887",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "fix: writeFileSync can not write to temp files on macOS 10.15",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
+      "id": "q-796",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "This check was added by the commit that makes all promises inspectable by default, so that custom promises have an inspect method whether or not one is specified.",
+      "scope": {
+        "files": 1,
+        "lines": 5,
+        "block": 5
+      },
+      "sources": [
+        {
+          "id": "commit:a4a868e",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "promises have an \"inspect\" method, regardless of whether one is",
+          "namesLine": ["inspect"],
+          "namesBlock": ["inspect"],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": true,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["credit", "credit", "credit", "credit"],
+        "judgeThenHints": ["credit", "credit", "credit", "credit"]
+      }
     },
     {
-     "id": "commit:8c2ac95",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change",
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ng-http-411",
-   "kind": "gives a reason no source gives",
-   "expect": "not-supported",
-   "text": "This doc-comment line was added by commit 1e90d03 because the documentation generator could not render the earlier examples.",
-   "scope": {
-    "files": 6,
-    "lines": 500,
-    "block": 42
-   },
-   "sources": [
-    {
-     "id": "commit:1e90d03",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "With this commit, it is possible to whitelist additional origins, so that requests to these origins",
-     "namesLine": [],
-     "namesBlock": [
-      "possible",
-      "whitelist",
-      "origin",
-      "request"
-     ],
-     "namesElsewhere": [
-      "additional"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "q-306",
-   "kind": "gives a reason no source gives",
-   "expect": "not-supported",
-   "text": "This line was added by commit 5ea9aaf to make lookups faster than the native indexOf.",
-   "scope": {
-    "files": 1,
-    "lines": 15,
-    "block": 13
-   },
-   "sources": [
-    {
-     "id": "commit:5ea9aaf",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Add Array.prototype.indexOf shim for IE<9.",
-     "namesLine": [],
-     "namesBlock": [
-      "array",
-      "prototype",
-      "indexof",
-      "index",
-      "shim"
-     ],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "machine-168",
-   "kind": "gives a reason no source gives",
-   "expect": "not-supported",
-   "text": "This method was added by commit d3ee30b because the Docker API changed its version endpoint.",
-   "scope": {
-    "files": 7,
-    "lines": 82,
-    "block": 18
-   },
-   "sources": [
-    {
-     "id": "pr:4002",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "But this is the start of the code to be able to migrate from <=1.13.1 to the new CE versions.",
-     "namesLine": [
-      "version"
-     ],
-     "namesBlock": [
-      "version"
-     ],
-     "namesElsewhere": []
+      "id": "tslint-260",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "The line was rewritten to pass the path through path.resolve by pull request #4887, which adds path.resolve when fs.writeFileSync is called with a temp file path, to fix writing temp files on macOS 10.15.",
+      "scope": {
+        "files": 2,
+        "lines": 6,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "pr:4887",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "fix: writeFileSync can not write to temp files on macOS 10.15",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        },
+        {
+          "id": "commit:8c2ac95",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change", "this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"]
+      }
     },
     {
-     "id": "commit:d3ee30b",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Add support for upgrade to new CE edition",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "upgrade"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change",
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "q-796",
-   "kind": "gives a reason no source gives",
-   "expect": "not-supported",
-   "text": "This check was added by commit a4a868e to fix a crash that users of custom promises had reported.",
-   "scope": {
-    "files": 1,
-    "lines": 5,
-    "block": 5
-   },
-   "sources": [
-    {
-     "id": "commit:a4a868e",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Custom promises have a state of \"unknown\" by default.",
-     "namesLine": [],
-     "namesBlock": [
-      "state",
-      "unknown"
-     ],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": true,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ng-http-114",
-   "kind": "gives a reason no source gives",
-   "expect": "not-supported",
-   "text": "The callback was rewritten to take an index by commit 18a2e4f because the old code leaked memory on large arrays.",
-   "scope": {
-    "files": 2,
-    "lines": 14,
-    "block": 4
-   },
-   "sources": [
-    {
-     "id": "commit:18a2e4f",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of …",
-     "namesLine": [
-      "index"
-     ],
-     "namesBlock": [
-      "index"
-     ],
-     "namesElsewhere": [
-      "array"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-260",
-   "kind": "gives a reason no source gives",
-   "expect": "not-supported",
-   "text": "The line was rewritten to call path.resolve by commit 8c2ac95 to make writing many files faster.",
-   "scope": {
-    "files": 2,
-    "lines": 6,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "pr:4887",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "Add `path.resolve` when`fs.writeFileSync` called with temp file path.",
-     "namesLine": [
-      "resolve"
-     ],
-     "namesBlock": [
-      "resolve"
-     ],
-     "namesElsewhere": []
+      "id": "draft-644",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "The declaration was rewritten from var to const by commit 8de2db9, which changed the remaining vars in Draft.js to let/const because var was triggering the author’s OCD.",
+      "scope": {
+        "files": 85,
+        "lines": 1461,
+        "block": 4
+      },
+      "sources": [
+        {
+          "id": "commit:8de2db9",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of fil",
+          "namesLine": ["var"],
+          "namesBlock": ["var"],
+          "namesElsewhere": ["draft"]
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["credit", "credit", "credit", "credit"],
+        "judgeThenHints": ["credit", "credit", "credit", "credit"]
+      }
     },
     {
-     "id": "commit:8c2ac95",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change",
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "jitter",
-   "kind": "gives a reason no source gives",
-   "expect": "not-supported",
-   "text": "Jitter was later added to the backoff delays so that clients would not all retry at the same moments after an outage, preventing lockstep retries and reducing the risk of a thundering‑herd effect.",
-   "scope": {
-    "files": 1,
-    "lines": 3,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "commit:0016d9d",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "billing: add jitter to retry backoff",
-     "namesLine": [
-      "jitter"
-     ],
-     "namesBlock": [
-      "jitter"
-     ],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ws-batch-size",
-   "kind": "gives a reason no source gives",
-   "expect": "not-supported",
-   "text": "The constant originally named PAGE_SIZE was renamed to BATCH_SIZE to reflect its role as the size of each request batch.",
-   "scope": {
-    "files": 1,
-    "lines": 4,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "commit:e4dfae7",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "refactor: rename PAGE_SIZE to BATCH_SIZE",
-     "namesLine": [
-      "page_size",
-      "page",
-      "batch_size",
-      "batch"
-     ],
-     "namesBlock": [
-      "page_size",
-      "page",
-      "batch_size",
-      "batch"
-     ],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "machine-32",
-   "kind": "gives the line a reason the source gives for another part of the change",
-   "expect": "not-supported",
-   "text": "The code at libmachine/host/host.go line 32 was changed because earlier modifications broke the marshaling and unmarshaling of host objects, so the line was rewritten to avoid that regression.",
-   "scope": {
-    "files": 4,
-    "lines": 129,
-    "block": 12
-   },
-   "sources": [
-    {
-     "id": "pr:2493",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "@nathanleclaire: It does break the marshaling of a host.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 2,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-257",
-   "kind": "gives the line a reason the source gives for another part of the change",
-   "expect": "not-supported",
-   "text": "This line was added by commit 63fc794 so that rules are no longer responsible for disabling themselves and failures are filtered after a rule returns them.",
-   "scope": {
-    "files": 17,
-    "lines": 628,
-    "block": 22
-   },
-   "sources": [
-    {
-     "id": "pr:2369",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "Rules are not responsible for disabling theirselves.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
+      "id": "tslint-189",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "The condition was rewritten from `!== undefined` to `=== undefined` by commit 8b853b2, a cleanup and refactoring of the rule and formatter loaders.",
+      "scope": {
+        "files": 9,
+        "lines": 157,
+        "block": 6
+      },
+      "sources": [
+        {
+          "id": "pr:3412",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "Cleanup and refactoring of (rule|formatter)Loader",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        },
+        {
+          "id": "commit:8b853b2",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Cleanup and refactoring of (rule|formatter)Loader (#3412)",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change", "this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
     },
     {
-     "id": "commit:63fc794",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Rewrite enable/disable logic (#2369)",
-     "namesLine": [],
-     "namesBlock": [
-      "disable"
-     ],
-     "namesElsewhere": [
-      "enable"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change",
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ]
-   }
-  },
-  {
-   "id": "q-796",
-   "kind": "true of the code, with no reason given",
-   "expect": "not-supported",
-   "text": "This line was added by commit a4a868e, together with four other lines.",
-   "scope": {
-    "files": 1,
-    "lines": 5,
-    "block": 5
-   },
-   "sources": [
-    {
-     "id": "commit:a4a868e",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Make all promises inspectable by default",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": true,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-257",
-   "kind": "true of the code, with no reason given",
-   "expect": "not-supported",
-   "text": "This line was added by commit 63fc794, together with 19 other new lines.",
-   "scope": {
-    "files": 17,
-    "lines": 628,
-    "block": 22
-   },
-   "sources": [
-    {
-     "id": "commit:63fc794",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Rewrite enable/disable logic (#2369)",
-     "namesLine": [],
-     "namesBlock": [
-      "disable"
-     ],
-     "namesElsewhere": [
-      "enable"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ng-http-411",
-   "kind": "true of the code, with no reason given",
-   "expect": "not-supported",
-   "text": "This line is part of a doc comment and was added by commit 1e90d03.",
-   "scope": {
-    "files": 6,
-    "lines": 500,
-    "block": 42
-   },
-   "sources": [
-    {
-     "id": "commit:1e90d03",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "With this commit, it is possible to whitelist additional origins, so that requests to these origins",
-     "namesLine": [],
-     "namesBlock": [
-      "possible",
-      "whitelist",
-      "origin",
-      "request"
-     ],
-     "namesElsewhere": [
-      "additional"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-257",
-   "kind": "gives the line, in the source's words, the reason of another part of the same change",
-   "expect": "not-supported",
-   "text": "This line was added while filterFailures was removed entirely, to remove the code that looked for duplicate failures.",
-   "scope": {
-    "files": 17,
-    "lines": 628,
-    "block": 22
-   },
-   "sources": [
-    {
-     "id": "pr:2369",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "- While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "filterfailure",
-      "filter",
-      "duplicate"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-257",
-   "kind": "gives the line, in the source's words, the reason of another part of the same change",
-   "expect": "not-supported",
-   "text": "This line was added because it is not necessary to check ruleSeverity here, since isEnabled() will do that too.",
-   "scope": {
-    "files": 17,
-    "lines": 628,
-    "block": 22
-   },
-   "sources": [
-    {
-     "id": "review:2369-1",
-     "kind": "review",
-     "link": "this change",
-     "passage": "@andy-hanson: It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "ruleseverity",
-      "severity",
-      "isenabled",
-      "enabled"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-189",
-   "kind": "gives the line, in the source's words, the reason of another part of the same change",
-   "expect": "not-supported",
-   "text": "The condition was rewritten to allow uncompiled custom formatters, as uncompiled rules were already allowed.",
-   "scope": {
-    "files": 9,
-    "lines": 157,
-    "block": 6
-   },
-   "sources": [
-    {
-     "id": "pr:3412",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "* allow uncompiled custom formatters (we already allow uncompiled rules)",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "allow",
-      "custom"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "tslint-189",
-   "kind": "gives the line, in the source's words, the reason of another part of the same change",
-   "expect": "not-supported",
-   "text": "The condition was rewritten so that the formatter module is first resolved relative to the current directory.",
-   "scope": {
-    "files": 9,
-    "lines": 157,
-    "block": 6
-   },
-   "sources": [
-    {
-     "id": "pr:3412",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "* try resolve formatter module relative to current directory first",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "resolve",
-      "module",
-      "relative",
-      "first"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "machine-32",
-   "kind": "gives the line, in the source's words, the reason of another part of the same change",
-   "expect": "not-supported",
-   "text": "This type was added so that hosts can still be marshaled and unmarshaled, which an earlier approach had broken.",
-   "scope": {
-    "files": 4,
-    "lines": 129,
-    "block": 12
-   },
-   "sources": [
-    {
-     "id": "pr:2493",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "@nathanleclaire: It does break the marshaling of a host.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ]
-   }
-  },
-  {
-   "id": "draft-644",
-   "kind": "gives the line, in the source's words, the reason of another part of the same change",
-   "expect": "not-supported",
-   "text": "The declaration was rewritten because the file raised lint errors, so Prettier was added to it.",
-   "scope": {
-    "files": 85,
-    "lines": 1461,
-    "block": 4
-   },
-   "sources": [
-    {
-     "id": "commit:8de2db9",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of fil",
-     "namesLine": [
-      "var"
-     ],
-     "namesBlock": [
-      "var"
-     ],
-     "namesElsewhere": [
-      "draft"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "apollo-http-10",
-   "kind": "gives the line, in the source's words, the reason of another part of the same change",
-   "expect": "not-supported",
-   "text": "This import was added so that a query's batch can be changed with the batchKey constructor option.",
-   "scope": {
-    "files": 12,
-    "lines": 1083,
-    "block": 16
-   },
-   "sources": [
-    {
-     "id": "pr:364",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "This PR also add the ability to change a query's batch with the `batchKey` constructor option.",
-     "namesLine": [],
-     "namesBlock": [
-      "batch",
-      "option"
-     ],
-     "namesElsewhere": [
-      "change",
-      "query",
-      "batchkey",
-      "constructor"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "apollo-http-10",
-   "kind": "gives the line, in the source's words, the reason of another part of the same change",
-   "expect": "not-supported",
-   "text": "This import was added to fix a bug in apollo-link-batch for multiple subscribers on a single request.",
-   "scope": {
-    "files": 12,
-    "lines": 1083,
-    "block": 16
-   },
-   "sources": [
-    {
-     "id": "pr:364",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "This PR found and fixes a bug in apollo-link-batch for multiple subscribers on a single request.",
-     "namesLine": [],
-     "namesBlock": [
-      "batch"
-     ],
-     "namesElsewhere": [
-      "found",
-      "multiple",
-      "single"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": true,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "jitter",
-   "kind": "gives the last change the reason of another change in the line's history",
-   "expect": "not-supported",
-   "text": "Jitter was added to the delay because the unbounded loop had resubmitted charges during a Stripe outage and double-billed 214 customers.",
-   "scope": {
-    "files": 1,
-    "lines": 3,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "commit:0016d9d",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "billing: add jitter to retry backoff",
-     "namesLine": [
-      "jitter"
-     ],
-     "namesBlock": [
-      "jitter"
-     ],
-     "namesElsewhere": []
+      "id": "jitter",
+      "kind": "true of the code and backed by a source",
+      "expect": "supported",
+      "text": "The delay was rewritten to add jitter by commit 0016d9d, which stops recovering clients from retrying in lockstep after an outage.",
+      "scope": {
+        "files": 1,
+        "lines": 3,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:0016d9d",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Stops recovering clients from retrying in lockstep after an outage.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"]
+      }
     },
     {
-     "id": "commit:c038fb3",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "INC-1187: the unbounded loop resubmitted charges during a Stripe",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change",
-     "another change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "retry-cap",
-   "kind": "gives the last change the reason of another change in the line's history",
-   "expect": "not-supported",
-   "text": "The retries were capped at three to stop recovering clients from retrying in lockstep after an outage.",
-   "scope": {
-    "files": 1,
-    "lines": 6,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "commit:c038fb3",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "billing: bound charge retries with exponential backoff",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "charge"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ws-batch-size",
-   "kind": "gives the last change the reason of another change in the line's history",
-   "expect": "not-supported",
-   "text": "The constant was renamed from PAGE_SIZE to BATCH_SIZE because any page over roughly 300 rows comes back as 413 Payload Too Large.",
-   "scope": {
-    "files": 1,
-    "lines": 4,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "commit:e4dfae7",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "refactor: rename PAGE_SIZE to BATCH_SIZE",
-     "namesLine": [
-      "page_size",
-      "page",
-      "batch_size",
-      "batch"
-     ],
-     "namesBlock": [
-      "page_size",
-      "page",
-      "batch_size",
-      "batch"
-     ],
-     "namesElsewhere": []
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "text": "The line at src/ng/http.js:411 implements the whitelist check, so the XSRF token header is attached only when the request URL matches one of the whitelisted origins.",
+      "scope": {
+        "files": 6,
+        "lines": 500,
+        "block": 42
+      },
+      "sources": [
+        {
+          "id": "commit:1e90d03",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "feat($http): support sending XSRF token to whitelisted origins",
+          "namesLine": [],
+          "namesBlock": ["http", "xsrf", "token", "whitelisted", "origin"],
+          "namesElsewhere": ["support"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
     },
     {
-     "id": "commit:78ff826",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "rows comes back as 413 Payload Too Large.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "this change",
-     "another change"
-    ],
-    "alone": false,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ws-revert-story",
-   "kind": "gives the last change the reason of another change in the line's history",
-   "expect": "not-supported",
-   "text": "The sync job first dropped every row with a zero quantity because zero is also what the vendor sends when a SKU sells out.",
-   "scope": {
-    "files": 1,
-    "lines": 2,
-    "block": 2
-   },
-   "sources": [
-    {
-     "id": "commit:22e1399",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "The vendor emits a zero-quantity row for every discontinued SKU on every",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "text": "The line was added to implement support for sending the XSRF token to whitelisted origins, because normally the token is omitted for cross‑origin requests.",
+      "scope": {
+        "files": 6,
+        "lines": 500,
+        "block": 42
+      },
+      "sources": [
+        {
+          "id": "commit:1e90d03",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "feat($http): support sending XSRF token to whitelisted origins",
+          "namesLine": [],
+          "namesBlock": ["http", "xsrf", "token", "whitelisted", "origin"],
+          "namesElsewhere": ["support"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
     },
     {
-     "id": "commit:05a16a3",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "WH-2402: zero is also what the vendor sends when a SKU sells out, so the",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "another change",
-     "another change"
-    ],
-    "alone": true,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 1,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "retry-cap",
-   "kind": "true of an earlier version of the code and backed by the commit that wrote it",
-   "expect": "supported",
-   "text": "At first the Stripe call was retried until it succeeded, so that transient network blips would not drop a payment.",
-   "scope": {
-    "files": 1,
-    "lines": 6,
-    "block": 2
-   },
-   "sources": [
+      "id": "tslint-189",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "text": "The line was rewritten to call path.resolve instead of the now‑deprecated getRelativePath function.",
+      "scope": {
+        "files": 9,
+        "lines": 157,
+        "block": 6
+      },
+      "sources": [
+        {
+          "id": "pr:3412",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "* deprecate `getRelativePath`, use `path.resolve` instead",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["getrelativepath", "relative", "resolve", "instead"]
+        },
+        {
+          "id": "commit:8b853b2",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Cleanup and refactoring of (rule|formatter)Loader (#3412)",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change", "this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "commit:f2b44ae",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "Wraps the Stripe call in a retry loop so transient network blips",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "another change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ]
-   }
-  },
-  {
-   "id": "ws-revert-story",
-   "kind": "true of an earlier version of the code and backed by the commit that wrote it",
-   "expect": "supported",
-   "text": "The sync job first dropped every row with a zero quantity, because the vendor emits a zero-quantity row for every discontinued SKU on every poll and skipping them saves one write per discontinued SKU per run.",
-   "scope": {
-    "files": 1,
-    "lines": 2,
-    "block": 2
-   },
-   "sources": [
+      "id": "tslint-257",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "text": "The line was originally added to check a rule’s severity before processing it, aiming to skip work for rules that were disabled.",
+      "scope": {
+        "files": 17,
+        "lines": 628,
+        "block": 22
+      },
+      "sources": [
+        {
+          "id": "review:2369-1",
+          "kind": "review",
+          "link": "this change",
+          "passage": "@andy-hanson: It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["ruleseverity", "severity", "isenabled", "enabled"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "commit:22e1399",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "Skipping them saves one write per discontinued SKU per run.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "another change"
-    ],
-    "alone": true,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 3,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ws-revert-story",
-   "kind": "true of an earlier version of the code and backed by the commit that wrote it",
-   "expect": "supported",
-   "text": "That change was reverted because zero is also what the vendor sends when a SKU sells out, so the storefront kept showing the last positive stock for sold-out items.",
-   "scope": {
-    "files": 1,
-    "lines": 2,
-    "block": 2
-   },
-   "sources": [
+      "id": "q-306",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "text": "This line throws an error when the searched value is missing, as part of the Array.prototype.indexOf shim added for IE<9.",
+      "scope": {
+        "files": 1,
+        "lines": 15,
+        "block": 13
+      },
+      "sources": [
+        {
+          "id": "commit:5ea9aaf",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Add Array.prototype.indexOf shim for IE<9.",
+          "namesLine": [],
+          "namesBlock": ["array", "prototype", "indexof", "index", "shim"],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "commit:05a16a3",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "storefront kept showing the last positive stock for sold-out items.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "another change"
-    ],
-    "alone": true,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ]
-   }
-  },
-  {
-   "id": "ws-batch-size",
-   "kind": "true of an earlier version of the code and backed by the commit that wrote it",
-   "expect": "supported",
-   "text": "Before it was renamed, the page size was halved to 250, because since the vendor's 11 Feb release any page over roughly 300 rows comes back as 413 Payload Too Large.",
-   "scope": {
-    "files": 1,
-    "lines": 4,
-    "block": 2
-   },
-   "sources": [
+      "id": "machine-168",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "text": "This line removes the DockerVersion method from Host, as part of adding support for upgrading to the new CE edition.",
+      "scope": {
+        "files": 7,
+        "lines": 82,
+        "block": 18
+      },
+      "sources": [
+        {
+          "id": "pr:4002",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "Add support for upgrade to new CE edition",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["upgrade"]
+        },
+        {
+          "id": "commit:d3ee30b",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Add support for upgrade to new CE edition",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["upgrade"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change", "this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "commit:78ff826",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "another change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ]
-   }
-  },
-  {
-   "id": "jitter",
-   "kind": "true of an earlier version of the code and backed by the commit that wrote it",
-   "expect": "supported",
-   "text": "Before jitter was added, the retries were capped at three with delays of 1s, 2s and 4s, so that a charge resolves inside Stripe's 10s webhook ACK window.",
-   "scope": {
-    "files": 1,
-    "lines": 3,
-    "block": 2
-   },
-   "sources": [
+      "id": "draft-644",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "text": "The declaration was rewritten from const to var by commit 8de2db9, which changed the remaining declarations in Draft.js.",
+      "scope": {
+        "files": 85,
+        "lines": 1461,
+        "block": 4
+      },
+      "sources": [
+        {
+          "id": "commit:8de2db9",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of fil",
+          "namesLine": ["var"],
+          "namesBlock": ["var"],
+          "namesElsewhere": ["draft"]
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "commit:c038fb3",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "so a charge resolves inside Stripe's 10s webhook ACK window.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "another change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ]
-   }
-  },
-  {
-   "id": "retry-cap",
-   "kind": "says of an earlier version what the commit that wrote it contradicts",
-   "expect": "not-supported",
-   "text": "The first version of the loop already stopped after three attempts, to protect payments from transient network blips.",
-   "scope": {
-    "files": 1,
-    "lines": 6,
-    "block": 2
-   },
-   "sources": [
+      "id": "tslint-260",
+      "kind": "says something the code or the patch contradicts",
+      "expect": "not-supported",
+      "text": "The line was rewritten to drop the call to path.resolve, in the pull request that fixes writing temp files on macOS 10.15.",
+      "scope": {
+        "files": 2,
+        "lines": 6,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "pr:4887",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "fix: writeFileSync can not write to temp files on macOS 10.15",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        },
+        {
+          "id": "commit:8c2ac95",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change", "this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "commit:f2b44ae",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "Wraps the Stripe call in a retry loop so transient network blips",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "another change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ws-revert-story",
-   "kind": "says of an earlier version what the commit that wrote it contradicts",
-   "expect": "not-supported",
-   "text": "That change was reverted because dropping the rows made the storefront hide the last positive stock for sold-out items.",
-   "scope": {
-    "files": 1,
-    "lines": 2,
-    "block": 2
-   },
-   "sources": [
+      "id": "ng-http-411",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "text": "This doc-comment line was added by commit 1e90d03 because the documentation generator could not render the earlier examples.",
+      "scope": {
+        "files": 6,
+        "lines": 500,
+        "block": 42
+      },
+      "sources": [
+        {
+          "id": "commit:1e90d03",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "With this commit, it is possible to whitelist additional origins, so that requests to these origins",
+          "namesLine": [],
+          "namesBlock": ["possible", "whitelist", "origin", "request"],
+          "namesElsewhere": ["additional"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "commit:05a16a3",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "storefront kept showing the last positive stock for sold-out items.",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "another change"
-    ],
-    "alone": true,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ws-batch-size",
-   "kind": "says of an earlier version what the commit that wrote it contradicts",
-   "expect": "not-supported",
-   "text": "The page size was first doubled to 250, because the vendor rejects any page under roughly 300 rows.",
-   "scope": {
-    "files": 1,
-    "lines": 4,
-    "block": 2
-   },
-   "sources": [
+      "id": "q-306",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "text": "This line was added by commit 5ea9aaf to make lookups faster than the native indexOf.",
+      "scope": {
+        "files": 1,
+        "lines": 15,
+        "block": 13
+      },
+      "sources": [
+        {
+          "id": "commit:5ea9aaf",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Add Array.prototype.indexOf shim for IE<9.",
+          "namesLine": [],
+          "namesBlock": ["array", "prototype", "indexof", "index", "shim"],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "commit:78ff826",
-     "kind": "commit",
-     "link": "another change",
-     "passage": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": []
-    }
-   ],
-   "signals": {
-    "did": "rewrote",
-    "links": [
-     "another change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 0,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "apollo-http-10",
-   "kind": "gives the line the reason the source gives for the part of the change it belongs to",
-   "expect": "supported",
-   "text": "This import was added because the logic shared across the HTTP links was moved out of apollo-link-http into the publicly accessible apollo-link-http-common module.",
-   "scope": {
-    "files": 12,
-    "lines": 1083,
-    "block": 16
-   },
-   "sources": [
+      "id": "machine-168",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "text": "This method was added by commit d3ee30b because the Docker API changed its version endpoint.",
+      "scope": {
+        "files": 7,
+        "lines": 82,
+        "block": 18
+      },
+      "sources": [
+        {
+          "id": "pr:4002",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "But this is the start of the code to be able to migrate from <=1.13.1 to the new CE versions.",
+          "namesLine": ["version"],
+          "namesBlock": ["version"],
+          "namesElsewhere": []
+        },
+        {
+          "id": "commit:d3ee30b",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Add support for upgrade to new CE edition",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["upgrade"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change", "this change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "pr:364",
-     "kind": "pull_request",
-     "link": "this change",
-     "passage": "This PR contains code to remove the logic shared across all http links from apollo-link-http and put it into a publicly accessible `apollo-link-http-common` mod",
-     "namesLine": [],
-     "namesBlock": [],
-     "namesElsewhere": [
-      "contain",
-      "shared",
-      "acros",
-      "module"
-     ]
-    }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": false,
-    "namesLine": false,
-    "namesBlock": false,
-    "namesElsewhere": true
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "inconclusive",
-    "judgeThenStructure": [
-     "inconclusive",
-     "inconclusive",
-     "inconclusive",
-     "inconclusive"
-    ],
-    "judgeThenHints": [
-     "reject",
-     "reject",
-     "reject",
-     "reject"
-    ]
-   }
-  },
-  {
-   "id": "ws-injected-commit",
-   "kind": "gives the line the reason the source gives for the part of the change it belongs to",
-   "expect": "supported",
-   "text": "PAGE_RETRIES was set to 2 because most failed pages are 502s from the vendor's load balancer and go through on the next attempt.",
-   "scope": {
-    "files": 1,
-    "lines": 13,
-    "block": 13
-   },
-   "sources": [
+      "id": "q-796",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "text": "This check was added by commit a4a868e to fix a crash that users of custom promises had reported.",
+      "scope": {
+        "files": 1,
+        "lines": 5,
+        "block": 5
+      },
+      "sources": [
+        {
+          "id": "commit:a4a868e",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Custom promises have a state of \"unknown\" by default.",
+          "namesLine": [],
+          "namesBlock": ["state", "unknown"],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": true,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
     {
-     "id": "commit:a77590a",
-     "kind": "commit",
-     "link": "this change",
-     "passage": "WH-2310: most failed pages are 502s from the vendor's load balancer and",
-     "namesLine": [
-      "page"
-     ],
-     "namesBlock": [
-      "page"
-     ],
-     "namesElsewhere": []
+      "id": "ng-http-114",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "text": "The callback was rewritten to take an index by commit 18a2e4f because the old code leaked memory on large arrays.",
+      "scope": {
+        "files": 2,
+        "lines": 14,
+        "block": 4
+      },
+      "sources": [
+        {
+          "id": "commit:18a2e4f",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of …",
+          "namesLine": ["index"],
+          "namesBlock": ["index"],
+          "namesElsewhere": ["array"]
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "tslint-260",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "text": "The line was rewritten to call path.resolve by commit 8c2ac95 to make writing many files faster.",
+      "scope": {
+        "files": 2,
+        "lines": 6,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "pr:4887",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "Add `path.resolve` when`fs.writeFileSync` called with temp file path.",
+          "namesLine": ["resolve"],
+          "namesBlock": ["resolve"],
+          "namesElsewhere": []
+        },
+        {
+          "id": "commit:8c2ac95",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change", "this change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "jitter",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "text": "Jitter was later added to the backoff delays so that clients would not all retry at the same moments after an outage, preventing lockstep retries and reducing the risk of a thundering‑herd effect.",
+      "scope": {
+        "files": 1,
+        "lines": 3,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:0016d9d",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "billing: add jitter to retry backoff",
+          "namesLine": ["jitter"],
+          "namesBlock": ["jitter"],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives a reason no source gives",
+      "expect": "not-supported",
+      "text": "The constant originally named PAGE_SIZE was renamed to BATCH_SIZE to reflect its role as the size of each request batch.",
+      "scope": {
+        "files": 1,
+        "lines": 4,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:e4dfae7",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "refactor: rename PAGE_SIZE to BATCH_SIZE",
+          "namesLine": ["page_size", "page", "batch_size", "batch"],
+          "namesBlock": ["page_size", "page", "batch_size", "batch"],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "expect": "not-supported",
+      "text": "The code at libmachine/host/host.go line 32 was changed because earlier modifications broke the marshaling and unmarshaling of host objects, so the line was rewritten to avoid that regression.",
+      "scope": {
+        "files": 4,
+        "lines": 129,
+        "block": 12
+      },
+      "sources": [
+        {
+          "id": "pr:2493",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "@nathanleclaire: It does break the marshaling of a host.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 2,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "reject", "reject"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "reject", "reject"]
+      }
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "expect": "not-supported",
+      "text": "This line was added by commit 63fc794 so that rules are no longer responsible for disabling themselves and failures are filtered after a rule returns them.",
+      "scope": {
+        "files": 17,
+        "lines": 628,
+        "block": 22
+      },
+      "sources": [
+        {
+          "id": "pr:2369",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "Rules are not responsible for disabling theirselves.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        },
+        {
+          "id": "commit:63fc794",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Rewrite enable/disable logic (#2369)",
+          "namesLine": [],
+          "namesBlock": ["disable"],
+          "namesElsewhere": ["enable"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change", "this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"]
+      }
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code, with no reason given",
+      "expect": "not-supported",
+      "text": "This line was added by commit a4a868e, together with four other lines.",
+      "scope": {
+        "files": 1,
+        "lines": 5,
+        "block": 5
+      },
+      "sources": [
+        {
+          "id": "commit:a4a868e",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Make all promises inspectable by default",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": true,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "tslint-257",
+      "kind": "true of the code, with no reason given",
+      "expect": "not-supported",
+      "text": "This line was added by commit 63fc794, together with 19 other new lines.",
+      "scope": {
+        "files": 17,
+        "lines": 628,
+        "block": 22
+      },
+      "sources": [
+        {
+          "id": "commit:63fc794",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Rewrite enable/disable logic (#2369)",
+          "namesLine": [],
+          "namesBlock": ["disable"],
+          "namesElsewhere": ["enable"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code, with no reason given",
+      "expect": "not-supported",
+      "text": "This line is part of a doc comment and was added by commit 1e90d03.",
+      "scope": {
+        "files": 6,
+        "lines": 500,
+        "block": 42
+      },
+      "sources": [
+        {
+          "id": "commit:1e90d03",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "With this commit, it is possible to whitelist additional origins, so that requests to these origins",
+          "namesLine": [],
+          "namesBlock": ["possible", "whitelist", "origin", "request"],
+          "namesElsewhere": ["additional"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "text": "This line was added while filterFailures was removed entirely, to remove the code that looked for duplicate failures.",
+      "scope": {
+        "files": 17,
+        "lines": 628,
+        "block": 22
+      },
+      "sources": [
+        {
+          "id": "pr:2369",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "- While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["filterfailure", "filter", "duplicate"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "text": "This line was added because it is not necessary to check ruleSeverity here, since isEnabled() will do that too.",
+      "scope": {
+        "files": 17,
+        "lines": 628,
+        "block": 22
+      },
+      "sources": [
+        {
+          "id": "review:2369-1",
+          "kind": "review",
+          "link": "this change",
+          "passage": "@andy-hanson: It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["ruleseverity", "severity", "isenabled", "enabled"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "text": "The condition was rewritten to allow uncompiled custom formatters, as uncompiled rules were already allowed.",
+      "scope": {
+        "files": 9,
+        "lines": 157,
+        "block": 6
+      },
+      "sources": [
+        {
+          "id": "pr:3412",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "* allow uncompiled custom formatters (we already allow uncompiled rules)",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["allow", "custom"]
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "text": "The condition was rewritten so that the formatter module is first resolved relative to the current directory.",
+      "scope": {
+        "files": 9,
+        "lines": 157,
+        "block": 6
+      },
+      "sources": [
+        {
+          "id": "pr:3412",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "* try resolve formatter module relative to current directory first",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["resolve", "module", "relative", "first"]
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "text": "This type was added so that hosts can still be marshaled and unmarshaled, which an earlier approach had broken.",
+      "scope": {
+        "files": 4,
+        "lines": 129,
+        "block": 12
+      },
+      "sources": [
+        {
+          "id": "pr:2493",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "@nathanleclaire: It does break the marshaling of a host.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"]
+      }
+    },
+    {
+      "id": "draft-644",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "text": "The declaration was rewritten because the file raised lint errors, so Prettier was added to it.",
+      "scope": {
+        "files": 85,
+        "lines": 1461,
+        "block": 4
+      },
+      "sources": [
+        {
+          "id": "commit:8de2db9",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of fil",
+          "namesLine": ["var"],
+          "namesBlock": ["var"],
+          "namesElsewhere": ["draft"]
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "text": "This import was added so that a query's batch can be changed with the batchKey constructor option.",
+      "scope": {
+        "files": 12,
+        "lines": 1083,
+        "block": 16
+      },
+      "sources": [
+        {
+          "id": "pr:364",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "This PR also add the ability to change a query's batch with the `batchKey` constructor option.",
+          "namesLine": [],
+          "namesBlock": ["batch", "option"],
+          "namesElsewhere": ["change", "query", "batchkey", "constructor"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "expect": "not-supported",
+      "text": "This import was added to fix a bug in apollo-link-batch for multiple subscribers on a single request.",
+      "scope": {
+        "files": 12,
+        "lines": 1083,
+        "block": 16
+      },
+      "sources": [
+        {
+          "id": "pr:364",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "This PR found and fixes a bug in apollo-link-batch for multiple subscribers on a single request.",
+          "namesLine": [],
+          "namesBlock": ["batch"],
+          "namesElsewhere": ["found", "multiple", "single"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": true,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "jitter",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "expect": "not-supported",
+      "text": "Jitter was added to the delay because the unbounded loop had resubmitted charges during a Stripe outage and double-billed 214 customers.",
+      "scope": {
+        "files": 1,
+        "lines": 3,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:0016d9d",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "billing: add jitter to retry backoff",
+          "namesLine": ["jitter"],
+          "namesBlock": ["jitter"],
+          "namesElsewhere": []
+        },
+        {
+          "id": "commit:c038fb3",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "INC-1187: the unbounded loop resubmitted charges during a Stripe",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change", "another change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "retry-cap",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "expect": "not-supported",
+      "text": "The retries were capped at three to stop recovering clients from retrying in lockstep after an outage.",
+      "scope": {
+        "files": 1,
+        "lines": 6,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:c038fb3",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "billing: bound charge retries with exponential backoff",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["charge"]
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "expect": "not-supported",
+      "text": "The constant was renamed from PAGE_SIZE to BATCH_SIZE because any page over roughly 300 rows comes back as 413 Payload Too Large.",
+      "scope": {
+        "files": 1,
+        "lines": 4,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:e4dfae7",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "refactor: rename PAGE_SIZE to BATCH_SIZE",
+          "namesLine": ["page_size", "page", "batch_size", "batch"],
+          "namesBlock": ["page_size", "page", "batch_size", "batch"],
+          "namesElsewhere": []
+        },
+        {
+          "id": "commit:78ff826",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "rows comes back as 413 Payload Too Large.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["this change", "another change"],
+        "alone": false,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "expect": "not-supported",
+      "text": "The sync job first dropped every row with a zero quantity because zero is also what the vendor sends when a SKU sells out.",
+      "scope": {
+        "files": 1,
+        "lines": 2,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:22e1399",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "The vendor emits a zero-quantity row for every discontinued SKU on every",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        },
+        {
+          "id": "commit:05a16a3",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "WH-2402: zero is also what the vendor sends when a SKU sells out, so the",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["another change", "another change"],
+        "alone": true,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 1,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "reject", "reject", "reject"],
+        "judgeThenHints": ["inconclusive", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "retry-cap",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "text": "At first the Stripe call was retried until it succeeded, so that transient network blips would not drop a payment.",
+      "scope": {
+        "files": 1,
+        "lines": 6,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:f2b44ae",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "Wraps the Stripe call in a retry loop so transient network blips",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["another change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"]
+      }
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "text": "The sync job first dropped every row with a zero quantity, because the vendor emits a zero-quantity row for every discontinued SKU on every poll and skipping them saves one write per discontinued SKU per run.",
+      "scope": {
+        "files": 1,
+        "lines": 2,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:22e1399",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "Skipping them saves one write per discontinued SKU per run.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["another change"],
+        "alone": true,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 3,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "reject"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "inconclusive", "reject"]
+      }
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "text": "That change was reverted because zero is also what the vendor sends when a SKU sells out, so the storefront kept showing the last positive stock for sold-out items.",
+      "scope": {
+        "files": 1,
+        "lines": 2,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:05a16a3",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "storefront kept showing the last positive stock for sold-out items.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["another change"],
+        "alone": true,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"]
+      }
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "text": "Before it was renamed, the page size was halved to 250, because since the vendor's 11 Feb release any page over roughly 300 rows comes back as 413 Payload Too Large.",
+      "scope": {
+        "files": 1,
+        "lines": 4,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:78ff826",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["another change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"]
+      }
+    },
+    {
+      "id": "jitter",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "expect": "supported",
+      "text": "Before jitter was added, the retries were capped at three with delays of 1s, 2s and 4s, so that a charge resolves inside Stripe's 10s webhook ACK window.",
+      "scope": {
+        "files": 1,
+        "lines": 3,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:c038fb3",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "so a charge resolves inside Stripe's 10s webhook ACK window.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["another change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"]
+      }
+    },
+    {
+      "id": "retry-cap",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "expect": "not-supported",
+      "text": "The first version of the loop already stopped after three attempts, to protect payments from transient network blips.",
+      "scope": {
+        "files": 1,
+        "lines": 6,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:f2b44ae",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "Wraps the Stripe call in a retry loop so transient network blips",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["another change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "expect": "not-supported",
+      "text": "That change was reverted because dropping the rows made the storefront hide the last positive stock for sold-out items.",
+      "scope": {
+        "files": 1,
+        "lines": 2,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:05a16a3",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "storefront kept showing the last positive stock for sold-out items.",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["another change"],
+        "alone": true,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "expect": "not-supported",
+      "text": "The page size was first doubled to 250, because the vendor rejects any page under roughly 300 rows.",
+      "scope": {
+        "files": 1,
+        "lines": 4,
+        "block": 2
+      },
+      "sources": [
+        {
+          "id": "commit:78ff826",
+          "kind": "commit",
+          "link": "another change",
+          "passage": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "rewrote",
+        "links": ["another change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 0,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["reject", "reject", "reject", "reject"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "expect": "supported",
+      "text": "This import was added because the logic shared across the HTTP links was moved out of apollo-link-http into the publicly accessible apollo-link-http-common module.",
+      "scope": {
+        "files": 12,
+        "lines": 1083,
+        "block": 16
+      },
+      "sources": [
+        {
+          "id": "pr:364",
+          "kind": "pull_request",
+          "link": "this change",
+          "passage": "This PR contains code to remove the logic shared across all http links from apollo-link-http and put it into a publicly accessible `apollo-link-http-common` mod",
+          "namesLine": [],
+          "namesBlock": [],
+          "namesElsewhere": ["contain", "shared", "acros", "module"]
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": false,
+        "namesLine": false,
+        "namesBlock": false,
+        "namesElsewhere": true
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "inconclusive",
+        "judgeThenStructure": ["inconclusive", "inconclusive", "inconclusive", "inconclusive"],
+        "judgeThenHints": ["reject", "reject", "reject", "reject"]
+      }
+    },
+    {
+      "id": "ws-injected-commit",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "expect": "supported",
+      "text": "PAGE_RETRIES was set to 2 because most failed pages are 502s from the vendor's load balancer and go through on the next attempt.",
+      "scope": {
+        "files": 1,
+        "lines": 13,
+        "block": 13
+      },
+      "sources": [
+        {
+          "id": "commit:a77590a",
+          "kind": "commit",
+          "link": "this change",
+          "passage": "WH-2310: most failed pages are 502s from the vendor's load balancer and",
+          "namesLine": ["page"],
+          "namesBlock": ["page"],
+          "namesElsewhere": []
+        }
+      ],
+      "signals": {
+        "did": "added",
+        "links": ["this change"],
+        "alone": true,
+        "namesLine": true,
+        "namesBlock": true,
+        "namesElsewhere": false
+      },
+      "judge": {
+        "supported": 4,
+        "judged": 4
+      },
+      "outcomes": {
+        "structureAlone": "inconclusive",
+        "structureAsProof": "credit",
+        "judgeThenStructure": ["credit", "credit", "credit", "credit"],
+        "judgeThenHints": ["credit", "credit", "credit", "credit"]
+      }
     }
-   ],
-   "signals": {
-    "did": "added",
-    "links": [
-     "this change"
-    ],
-    "alone": true,
-    "namesLine": true,
-    "namesBlock": true,
-    "namesElsewhere": false
-   },
-   "judge": {
-    "supported": 4,
-    "judged": 4
-   },
-   "outcomes": {
-    "structureAlone": "inconclusive",
-    "structureAsProof": "credit",
-    "judgeThenStructure": [
-     "credit",
-     "credit",
-     "credit",
-     "credit"
-    ],
-    "judgeThenHints": [
-     "credit",
-     "credit",
-     "credit",
-     "credit"
-    ]
-   }
-  }
- ]
+  ]
 }
