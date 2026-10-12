@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { auditSubject, checkEntailment, entailClaims, finalizeClaim, sitedStatus } from "./entail";
 import { verifyQuote } from "./quote";
+import { buildSynthesisInput } from "./synthesize";
 import { TOOL_CALL_ERROR, failingJudge, scriptedJudge } from "./testing/scripted-judge";
 import type { Artifact, Evidence, Narrative } from "./types";
 import { verify } from "./verify";
@@ -467,6 +468,57 @@ describe("auditSubject — what the history settles before the judge reads a wor
       "[commit:d3ee30b] added it, together with 17 other new lines around it.",
     );
     expect(subject?.sited).toBe(true);
+  });
+
+  it("shows the part of the patch the line sits in, to the audit and not to the writer", () => {
+    const sited = ev({
+      code: {
+        startLine: 167,
+        lines: [
+          "",
+          "func (h *Host) DockerVersion() (string, error) {",
+          "\turl, err := h.Driver.GetURL()",
+        ],
+        change: {
+          artifactId: "commit:d3ee30b",
+          before: null,
+          added: 3,
+          block: {
+            rows: [
+              "+func (h *Host) DockerVersion() (string, error) {",
+              "+\turl, err := h.Driver.GetURL()",
+              "+}",
+            ],
+            at: 0,
+          },
+        },
+      },
+    });
+    const established = auditSubject(sited)?.established ?? "";
+    expect(established).toContain("The part of [commit:d3ee30b]'s patch the marked line sits in");
+    expect(established).toContain("> +func (h *Host) DockerVersion() (string, error) {");
+    expect(established).toContain("  +}");
+    expect(buildSynthesisInput(sited).prompt).not.toContain("patch the marked line sits in");
+  });
+
+  it("shows no patch for a range of lines", () => {
+    const range = ev({
+      location: { file: "libmachine/host/host.go", startLine: 168, endLine: 169 },
+      code: {
+        startLine: 168,
+        lines: [
+          "func (h *Host) DockerVersion() (string, error) {",
+          "\turl, err := h.Driver.GetURL()",
+        ],
+        change: {
+          artifactId: "commit:d3ee30b",
+          before: null,
+          added: 3,
+          block: { rows: ["+a", "+b", "+c"], at: 0 },
+        },
+      },
+    });
+    expect(auditSubject(range)?.established).not.toContain("patch the marked line sits in");
   });
 
   it("shows no code when none was collected", () => {

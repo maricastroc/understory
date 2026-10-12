@@ -36,6 +36,30 @@ function likeness(a: string, b: string): number {
 const isAdded = (row: string) => row.startsWith("+") && !row.startsWith("+++");
 const isRemoved = (row: string) => row.startsWith("-") && !row.startsWith("---");
 
+const MAX_BLOCK_ROWS = 40;
+const BLOCK_HEAD_ROWS = 10;
+const BLOCK_ROW_CHARS = 160;
+
+const skipped = (count: number) => `… ${count} more changed ${count === 1 ? "line" : "lines"} …`;
+
+function changedBlock(rows: string[], at: number): LineChange["block"] {
+  if (rows.length < 3) return undefined;
+  const short = rows.map((row) =>
+    row.length > BLOCK_ROW_CHARS ? `${row.slice(0, BLOCK_ROW_CHARS)}…` : row,
+  );
+  if (short.length <= MAX_BLOCK_ROWS) return { rows: short, at };
+  const around = Math.floor((MAX_BLOCK_ROWS - BLOCK_HEAD_ROWS) / 2);
+  const from = Math.max(BLOCK_HEAD_ROWS, at - around);
+  const to = Math.min(short.length, Math.max(at + around + 1, from + 2 * around));
+  const kept = from > BLOCK_HEAD_ROWS ? short.slice(0, BLOCK_HEAD_ROWS) : short.slice(0, from);
+  const gap = from > BLOCK_HEAD_ROWS ? [skipped(from - BLOCK_HEAD_ROWS)] : [];
+  const tail = to < short.length ? [skipped(short.length - to)] : [];
+  return {
+    rows: [...kept, ...gap, ...short.slice(from, to), ...tail],
+    at: kept.length + gap.length + (at - from),
+  };
+}
+
 export function lineChange(patch: string, line: string): Omit<LineChange, "artifactId"> | null {
   const wanted = line.trim();
   if (!wanted) return null;
@@ -61,7 +85,21 @@ export function lineChange(patch: string, line: string): Omit<LineChange, "artif
           (removed.length === added.length && alike.find((c) => c.at === added.findIndex(same))) ||
           alike.sort((x, y) => y.score - x.score)[0]
         )?.row;
-  return { before: paired === undefined ? null : clamp(paired.trim()), added: added.length };
+  const shown = changedBlock(block, hits[0] - from);
+  return {
+    before: paired === undefined ? null : clamp(paired.trim()),
+    added: added.length,
+    ...(shown ? { block: shown } : {}),
+  };
+}
+
+export function renderBlock(change: LineChange): string[] {
+  if (!change.block) return [];
+  const { rows, at } = change.block;
+  return [
+    `The part of [${change.artifactId}]'s patch the marked line sits in (+ added, - removed, the marked line flagged with >):`,
+    ...rows.map((row, i) => `${i === at ? ">" : " "} ${row}`),
+  ];
 }
 
 function renderChange(change: LineChange, line: string): string[] {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { codeWindow, lineChange, renderCode } from "./code-context";
+import { codeWindow, lineChange, renderBlock, renderCode } from "./code-context";
 
 const source = Array.from({ length: 12 }, (_, i) => `line ${i + 1}`).join("\n");
 const at = (startLine: number, endLine = startLine) => ({ file: "a.ts", startLine, endLine });
@@ -94,11 +94,14 @@ describe("lineChange — what a patch did to one line", () => {
   });
 
   it("says the line is new when nothing was removed where it stands", () => {
-    expect(lineChange(ADDED, "    if (inspect === void 0) {")).toEqual({ before: null, added: 5 });
+    expect(lineChange(ADDED, "    if (inspect === void 0) {")).toMatchObject({
+      before: null,
+      added: 5,
+    });
   });
 
   it("pairs a line with the removed line it resembles when the counts differ", () => {
-    expect(lineChange(UNEVEN, "if (Formatter === undefined) {")).toEqual({
+    expect(lineChange(UNEVEN, "if (Formatter === undefined) {")).toMatchObject({
       before: "if (Formatter !== undefined) {",
       added: 2,
     });
@@ -112,7 +115,7 @@ describe("lineChange — what a patch did to one line", () => {
       "+const limit = 3;",
       "+export default limit;",
     ].join("\n");
-    expect(lineChange(patch, "export default limit;")).toEqual({ before: null, added: 2 });
+    expect(lineChange(patch, "export default limit;")).toMatchObject({ before: null, added: 2 });
   });
 
   it("recognises a line whose spacing alone changed", () => {
@@ -137,6 +140,115 @@ describe("lineChange — what a patch did to one line", () => {
     const long = `const text = "${"x".repeat(300)}";`;
     const patch = ["@@ -1,0 +1,1 @@", `+${long}`].join("\n");
     expect(lineChange(patch, `${long.slice(0, 200)}…`)).toEqual({ before: null, added: 1 });
+  });
+});
+
+describe("lineChange — the part of the patch the line sits in", () => {
+  const doc = (count: number) =>
+    Array.from({ length: count }, (_, i) => `+   * line ${i + 1} of the comment`);
+  const patch = (count: number, marked: number) =>
+    [
+      "@@ -10,2 +10,60 @@",
+      "   unchanged();",
+      ...doc(count).map((row, i) => (i === marked ? "+   * @example" : row)),
+      "   unchanged();",
+    ].join("\n");
+
+  it("keeps a short block whole, and says which row is the line", () => {
+    const change = lineChange(patch(6, 3), "* @example");
+    expect(change?.block).toEqual({
+      rows: [
+        "+   * line 1 of the comment",
+        "+   * line 2 of the comment",
+        "+   * line 3 of the comment",
+        "+   * @example",
+        "+   * line 5 of the comment",
+        "+   * line 6 of the comment",
+      ],
+      at: 3,
+    });
+  });
+
+  it("stops at the unchanged lines around the block", () => {
+    const rows = lineChange(patch(6, 3), "* @example")?.block?.rows ?? [];
+    expect(rows.some((row) => row.includes("unchanged"))).toBe(false);
+  });
+
+  it("keeps the removed lines of a rewrite beside the added ones", () => {
+    const rewrite = [
+      "@@ -3,3 +3,2 @@",
+      "-  if (found !== undefined) {",
+      "-    use(found);",
+      "-  } else {",
+      "+  const found = find(name);",
+      "+  if (found === undefined) {",
+      "     fail();",
+    ].join("\n");
+    expect(lineChange(rewrite, "if (found === undefined) {")?.block).toEqual({
+      rows: [
+        "-  if (found !== undefined) {",
+        "-    use(found);",
+        "-  } else {",
+        "+  const found = find(name);",
+        "+  if (found === undefined) {",
+      ],
+      at: 4,
+    });
+  });
+
+  it("keeps nothing when the change is the line alone or one line swapped for another", () => {
+    const swap = ["@@ -4,1 +4,1 @@", "-  write(file, text);", "+  write(resolve(file), text);"];
+    expect(lineChange(swap.join("\n"), "write(resolve(file), text);")).toEqual({
+      before: "write(file, text);",
+      added: 1,
+    });
+    expect(lineChange("@@ -1,0 +1,1 @@\n+const limit = 3;", "const limit = 3;")).toEqual({
+      before: null,
+      added: 1,
+    });
+  });
+
+  it("caps a long block to its head and the rows around the line, and says what it left out", () => {
+    const block = lineChange(patch(90, 60), "* @example")?.block;
+    expect(block?.rows.length).toBeLessThanOrEqual(43);
+    expect(block?.rows.slice(0, 10)).toEqual(doc(10));
+    expect(block?.rows[10]).toBe("… 35 more changed lines …");
+    expect(block?.rows[block.at]).toBe("+   * @example");
+    expect(block?.rows.at(-1)).toBe("… 14 more changed lines …");
+    expect(block?.rows).toContain("+   * line 46 of the comment");
+    expect(block?.rows).toContain("+   * line 76 of the comment");
+  });
+
+  it("keeps the line in view when it is near either end of a long block", () => {
+    const first = lineChange(patch(90, 2), "* @example")?.block;
+    expect(first?.rows[first.at]).toBe("+   * @example");
+    expect(first?.at).toBe(2);
+    const last = lineChange(patch(90, 88), "* @example")?.block;
+    expect(last?.rows[last.at]).toBe("+   * @example");
+    expect(last?.rows.at(-1)).toBe("+   * line 90 of the comment");
+    expect(last?.rows.length).toBeLessThanOrEqual(43);
+  });
+
+  it("cuts a very long row", () => {
+    const long = `+const text = "${"x".repeat(300)}";`;
+    const rows = lineChange(["@@ -1,0 +1,3 @@", "+a();", long, "+b();"].join("\n"), "a();")?.block
+      ?.rows;
+    expect(rows?.[1]).toHaveLength(161);
+    expect(rows?.[1].endsWith("…")).toBe(true);
+  });
+
+  it("renders the block with the line flagged, and nothing when there is no block", () => {
+    const change = lineChange(patch(6, 3), "* @example");
+    expect(renderBlock({ artifactId: "commit:1e90d03", ...change! })).toEqual([
+      "The part of [commit:1e90d03]'s patch the marked line sits in (+ added, - removed, the marked line flagged with >):",
+      "  +   * line 1 of the comment",
+      "  +   * line 2 of the comment",
+      "  +   * line 3 of the comment",
+      "> +   * @example",
+      "  +   * line 5 of the comment",
+      "  +   * line 6 of the comment",
+    ]);
+    expect(renderBlock({ artifactId: "commit:1e90d03", before: null, added: 1 })).toEqual([]);
   });
 });
 
