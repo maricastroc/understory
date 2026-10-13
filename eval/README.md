@@ -785,6 +785,82 @@ Read with these:
   [#49](https://github.com/maricastroc/understory/issues/49). What keeps a borrowed reason out
   of an answer is the writer abstaining ([Line attribution after #31](#line-attribution-after-31)).
 
+### Where a verified passage sits, and what that does not say
+
+Run on 13 Oct 2026, with no model. `npm run eval:origins -- <out.json>` collects again the
+evidence of every case that has a verified passage in a kept run or in a kept judgement of a
+written control, and keeps two things about each passage, both read from the record
+([`results/2026-10-13-passage-origins.json`](results/2026-10-13-passage-origins.json)):
+
+- **The part of the record it sits in.** A commit's title or the rest of its message. The title
+  of a pull request or of an issue, its description, or the discussion under it. A review's
+  summary or one of its comments, with where the comment was made when it has a position. These
+  are the distinctions the collected text carries, and no finer one: a comment in a discussion
+  has no position and no state, and a description is one block whatever it lists.
+- **The change it belongs to.** The commit its source hangs from, whether that is the change
+  that last changed the line, and, for each change in the line's history, what it did to the
+  line.
+
+`npm run eval:present` projects the kept claims onto what a reader would be shown
+([`results/2026-10-12-presentation.json`](results/2026-10-12-presentation.json)). It now reads
+the origins when they are there and prints them beside each presentation. It presents no claim
+differently for them: a unit test compares the projection with the origins and without.
+
+**Provenance is not pertinence.** Where a passage sits says where a sentence was written, and
+for which change. It does not say that the sentence is the reason for the investigated line,
+that it is about the part of the change the line belongs to, or that what it describes was kept
+in the change as merged. These are the lines `npm run eval:present` prints for the 53 written
+controls, and a unit test fails if they drift apart.
+
+```text
+Written controls: 110 verified passages
+
+where each passage sits in the record
+  true, inferred from the last change: 15 commit title · 8 pull request description · 4 pull request title
+  true, not established: 3 commit title
+  true, documented for the line: 4 commit message · 3 commit title · 1 commit title + commit message
+  false, not established: 5 commit message · 5 commit title · 3 pull request description · 1 commit title + commit message
+  borrowed, inferred from the last change: 12 pull request description · 6 pull request discussion
+  borrowed, not established: 7 commit title · 6 commit message · 3 pull request description · 2 pull request discussion · 1 review comment, another file
+  borrowed, told of an earlier change: 2 commit title
+  true, told of an earlier change: 11 commit message · 7 commit title · 1 commit title + commit message
+
+the change each passage's record belongs to
+  true, inferred from the last change: 27 the last change
+  true, not established: 2 the last change · 1 an earlier change
+  true, documented for the line: 8 the last change
+  false, not established: 14 the last change
+  borrowed, inferred from the last change: 18 the last change
+  borrowed, not established: 15 the last change · 4 an earlier change
+  borrowed, told of an earlier change: 2 an earlier change
+  true, told of an earlier change: 19 an earlier change
+```
+
+Read with these:
+
+- **A borrowed reason and a true one sit in the same parts of the record.** Of the passages
+  behind a claim that would be presented as an inference, a pull request description holds
+  eight of a true claim and twelve of a borrowed reason. The twelve are `tslint-189` and
+  `tslint-257`, each one item of a description that lists several changes, and the items quoted
+  for `tslint-189` have the origin of the item its own hunk carries out.
+- **The six in a discussion are one line, and the place is not what is wrong with them.**
+  `machine-32` quotes a comment about an approach the pull request later dropped. The comment
+  that says the approach was revised sits in the same discussion, and the record does not tell
+  the two apart. A discussion can also hold the reason: passages quoted for `apollo-http-10`
+  sit in the discussion of an issue.
+- **A title is behind 19 passages of a true claim and none of a borrowed reason**, and that is
+  no rule either. In the kept runs of the earlier pipelines, 15 passages behind an inference
+  in an answer whose kept verdict is a fail sit in a title.
+- **A reason that belongs to an earlier change keeps that change.** On `ws-batch-size` the
+  passage about the 413 is tied to the commit that took the size from 500 to 250, not to the
+  rename that last changed the line. All 19 passages of a true claim told of an earlier change
+  belong to an earlier change, and so do the two of the borrowed reason credited there, which
+  is located in both commits its control cites.
+- The 23 judgements of a true claim presented as an inference give 27 passages, because the
+  passage quoted for `machine-168` is the title of its commit and of its pull request.
+- No source is read for this beyond what collection already returns, and nothing here is
+  judged: 161 passages in 20 cases, every one located.
+
 ### What this does not show
 
 What is planned to close these gaps is in [#34](https://github.com/maricastroc/understory/issues/34).

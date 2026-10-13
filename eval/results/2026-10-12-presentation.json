@@ -1,7 +1,8 @@
 {
-  "date": "2026-10-13T00:56:50.065Z",
+  "date": "2026-10-13T13:24:09.520Z",
   "facts": "eval/results/2026-10-12-link-signals.json",
   "replay": "eval/results/2026-10-12-patch-context-replay-one-question.jsonl",
+  "origins": "eval/results/2026-10-13-passage-origins.json",
   "files": [
     "2026-10-11-audit-first-fix.jsonl",
     "2026-10-11-audit-fix-direct-check.jsonl",
@@ -10240,6 +10241,234 @@
           "incidental, real lines": {
             "same": 12,
             "of": 24
+          }
+        }
+      }
+    },
+    "origins": {
+      "controls": {
+        "passages": 110,
+        "where": {
+          "true, inferred from the last change": {
+            "pull request title": 4,
+            "commit title": 15,
+            "pull request description": 8
+          },
+          "true, not established": {
+            "commit title": 3
+          },
+          "true, documented for the line": {
+            "commit title + commit message": 1,
+            "commit title": 3,
+            "commit message": 4
+          },
+          "false, not established": {
+            "commit title + commit message": 1,
+            "commit message": 5,
+            "commit title": 5,
+            "pull request description": 3
+          },
+          "borrowed, inferred from the last change": {
+            "pull request discussion": 6,
+            "pull request description": 12
+          },
+          "borrowed, not established": {
+            "pull request discussion": 2,
+            "pull request description": 3,
+            "review comment, another file": 1,
+            "commit title": 7,
+            "commit message": 6
+          },
+          "borrowed, told of an earlier change": {
+            "commit title": 2
+          },
+          "true, told of an earlier change": {
+            "commit message": 11,
+            "commit title": 7,
+            "commit title + commit message": 1
+          }
+        },
+        "change": {
+          "true, inferred from the last change": {
+            "the last change": 27
+          },
+          "true, not established": {
+            "the last change": 2,
+            "an earlier change": 1
+          },
+          "true, documented for the line": {
+            "the last change": 8
+          },
+          "false, not established": {
+            "the last change": 14
+          },
+          "borrowed, inferred from the last change": {
+            "the last change": 18
+          },
+          "borrowed, not established": {
+            "the last change": 15,
+            "an earlier change": 4
+          },
+          "borrowed, told of an earlier change": {
+            "an earlier change": 2
+          },
+          "true, told of an earlier change": {
+            "an earlier change": 19
+          }
+        }
+      },
+      "runs": {
+        "The pipeline as it is on main (2026-10-12-line-attribution.jsonl)": {
+          "passages": 88,
+          "where": {
+            "inferred from the last change, verdict pass": {
+              "commit message": 20,
+              "commit title": 17,
+              "pull request title": 3,
+              "issue description": 1,
+              "pull request description": 5,
+              "commit title + commit message": 3,
+              "issue title": 1
+            },
+            "documented for the line, verdict pass": {
+              "commit message": 14,
+              "commit title": 4
+            },
+            "told of an earlier change, verdict pass": {
+              "commit message": 11,
+              "commit title + commit message": 1,
+              "commit title": 1
+            },
+            "not established, verdict pass": {
+              "commit title": 4,
+              "pull request description": 1,
+              "commit message": 1,
+              "issue description": 1
+            }
+          },
+          "change": {
+            "inferred from the last change, verdict pass": {
+              "the last change": 50
+            },
+            "documented for the line, verdict pass": {
+              "the last change": 17,
+              "an earlier change": 1
+            },
+            "told of an earlier change, verdict pass": {
+              "an earlier change": 13
+            },
+            "not established, verdict pass": {
+              "the last change": 6,
+              "an earlier change": 1
+            }
+          }
+        },
+        "The kept runs of the pipelines before it (13 files)": {
+          "passages": 773,
+          "where": {
+            "inferred from the last change, verdict pass": {
+              "commit message": 129,
+              "commit title + commit message": 14,
+              "commit title": 55,
+              "issue title": 17,
+              "pull request description": 60,
+              "pull request title": 10,
+              "issue description": 13,
+              "pull request title + pull request description": 12
+            },
+            "documented for the line, verdict pass": {
+              "commit message": 70,
+              "commit title": 19,
+              "commit title + commit message": 18
+            },
+            "not established, verdict fail": {
+              "commit message": 16,
+              "pull request title": 4,
+              "commit title": 4,
+              "review comment, another file": 10,
+              "issue description": 1,
+              "pull request discussion": 4,
+              "pull request description": 2
+            },
+            "told of an earlier change, verdict pass": {
+              "commit message": 136,
+              "commit title": 2
+            },
+            "inferred from the last change, verdict fail": {
+              "commit message": 27,
+              "commit title": 9,
+              "commit title + commit message": 3,
+              "pull request description": 40,
+              "pull request discussion": 3,
+              "pull request title": 3
+            },
+            "inferred from the last change, verdict pending": {
+              "pull request title": 2,
+              "pull request description": 8,
+              "pull request discussion": 1,
+              "commit message": 1,
+              "commit title": 5
+            },
+            "not established, verdict pending": {
+              "review comment, another file": 3,
+              "pull request description": 3
+            },
+            "said elsewhere in the change, verdict pending": {
+              "review comment, another file": 8
+            },
+            "not established, verdict pass": {
+              "pull request description": 13,
+              "issue title": 2,
+              "issue discussion": 3,
+              "commit title + commit message": 1,
+              "commit title": 12,
+              "commit message": 8,
+              "pull request title": 2,
+              "issue description": 3
+            },
+            "said elsewhere in the change, verdict fail": {
+              "review comment, another file": 16
+            },
+            "told of an earlier change, verdict fail": {
+              "commit message": 1
+            }
+          },
+          "change": {
+            "inferred from the last change, verdict pass": {
+              "the last change": 306,
+              "an earlier change": 4
+            },
+            "documented for the line, verdict pass": {
+              "the last change": 107
+            },
+            "not established, verdict fail": {
+              "the last change": 41
+            },
+            "told of an earlier change, verdict pass": {
+              "an earlier change": 138
+            },
+            "inferred from the last change, verdict fail": {
+              "the last change": 85
+            },
+            "inferred from the last change, verdict pending": {
+              "the last change": 17
+            },
+            "not established, verdict pending": {
+              "the last change": 6
+            },
+            "said elsewhere in the change, verdict pending": {
+              "the last change": 8
+            },
+            "not established, verdict pass": {
+              "the last change": 41,
+              "an earlier change": 3
+            },
+            "said elsewhere in the change, verdict fail": {
+              "the last change": 16
+            },
+            "told of an earlier change, verdict fail": {
+              "an earlier change": 1
+            }
           }
         }
       }

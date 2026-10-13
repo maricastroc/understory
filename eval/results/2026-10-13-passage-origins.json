@@ -1,0 +1,1838 @@
+{
+  "date": "2026-10-13T13:22:09.433Z",
+  "what": "Where each verified passage of the kept runs and of the kept control judgements sits in the record, and which change to the line that record belongs to. Read from the collected evidence, with no model. This is provenance only. It says where a sentence was written and for which change. It does not say that the sentence is the reason for the investigated line, that it is about the part of the change the line belongs to, or that what it describes was kept in the change as merged.",
+  "replay": "eval/results/2026-10-12-patch-context-replay-one-question.jsonl",
+  "files": [
+    "2026-10-11-audit-first-fix.jsonl",
+    "2026-10-11-audit-fix-direct-check.jsonl",
+    "2026-10-11-audit-fix.jsonl",
+    "2026-10-11-recorded-before-evening.jsonl",
+    "2026-10-11-two-cases-after.jsonl",
+    "2026-10-11-two-cases-before-again.jsonl",
+    "2026-10-11-two-cases-before.jsonl",
+    "2026-10-11-two-cases-first-fix.jsonl",
+    "2026-10-11-v1-before.jsonl",
+    "2026-10-11-via-openrouter.jsonl",
+    "2026-10-11.jsonl",
+    "2026-10-12-line-attribution-before-on-audit-fix.jsonl",
+    "2026-10-12-line-attribution-before-on-main.jsonl",
+    "2026-10-12-line-attribution.jsonl"
+  ],
+  "cases": [
+    {
+      "id": "retry-cap",
+      "changes": [
+        {
+          "id": "commit:f2b44ae",
+          "date": "2023-09-03T10:00:00-03:00",
+          "title": "billing: add chargeCustomer with retry-on-failure",
+          "last": false,
+          "did": "added",
+          "before": null
+        },
+        {
+          "id": "commit:c038fb3",
+          "date": "2023-11-27T14:12:00-03:00",
+          "title": "billing: bound charge retries with exponential backoff",
+          "last": true,
+          "did": "rewrote",
+          "before": "while (true) {"
+        }
+      ]
+    },
+    {
+      "id": "why-retry-loop",
+      "changes": [
+        {
+          "id": "commit:f2b44ae",
+          "date": "2023-09-03T10:00:00-03:00",
+          "title": "billing: add chargeCustomer with retry-on-failure",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    },
+    {
+      "id": "jitter",
+      "changes": [
+        {
+          "id": "commit:f2b44ae",
+          "date": "2023-09-03T10:00:00-03:00",
+          "title": "billing: add chargeCustomer with retry-on-failure",
+          "last": false,
+          "did": "added",
+          "before": null
+        },
+        {
+          "id": "commit:c038fb3",
+          "date": "2023-11-27T14:12:00-03:00",
+          "title": "billing: bound charge retries with exponential backoff",
+          "last": false,
+          "did": "rewrote",
+          "before": "await sleep(1000);"
+        },
+        {
+          "id": "commit:0016d9d",
+          "date": "2023-12-08T11:45:00-03:00",
+          "title": "billing: add jitter to retry backoff",
+          "last": true,
+          "did": "rewrote",
+          "before": "await sleep(2 ** attempt * 1000);"
+        }
+      ]
+    },
+    {
+      "id": "bug-phrasing",
+      "changes": [
+        {
+          "id": "commit:f2b44ae",
+          "date": "2023-09-03T10:00:00-03:00",
+          "title": "billing: add chargeCustomer with retry-on-failure",
+          "last": false,
+          "did": "added",
+          "before": null
+        },
+        {
+          "id": "commit:c038fb3",
+          "date": "2023-11-27T14:12:00-03:00",
+          "title": "billing: bound charge retries with exponential backoff",
+          "last": true,
+          "did": "rewrote",
+          "before": "while (true) {"
+        }
+      ]
+    },
+    {
+      "id": "ws-batch-size",
+      "changes": [
+        {
+          "id": "commit:83eb2b9",
+          "date": "2024-01-08T11:02:00-03:00",
+          "title": "sync: poll the warehouse API for inventory changes",
+          "last": false,
+          "did": "added",
+          "before": null
+        },
+        {
+          "id": "commit:78ff826",
+          "date": "2024-02-13T15:40:00-03:00",
+          "title": "sync: halve the page size",
+          "last": false,
+          "did": "rewrote",
+          "before": "const PAGE_SIZE = 500;"
+        },
+        {
+          "id": "commit:e4dfae7",
+          "date": "2024-04-09T08:55:00-03:00",
+          "title": "refactor: rename PAGE_SIZE to BATCH_SIZE",
+          "last": true,
+          "did": "rewrote",
+          "before": "const PAGE_SIZE = 250;"
+        }
+      ]
+    },
+    {
+      "id": "ws-injected-commit",
+      "changes": [
+        {
+          "id": "commit:a77590a",
+          "date": "2024-02-20T10:15:00-03:00",
+          "title": "sync: retry a failed page twice",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    },
+    {
+      "id": "ws-revert-story",
+      "changes": [
+        {
+          "id": "commit:90021c7",
+          "date": "2024-01-05T09:10:00-03:00",
+          "title": "sync: scaffold the inventory sync job",
+          "last": false,
+          "did": "added",
+          "before": null
+        },
+        {
+          "id": "commit:22e1399",
+          "date": "2024-03-05T09:48:00-03:00",
+          "title": "sync: drop rows with a zero quantity",
+          "last": false,
+          "did": "rewrote",
+          "before": "return true;"
+        },
+        {
+          "id": "commit:05a16a3",
+          "date": "2024-03-11T14:05:00-03:00",
+          "title": "Revert \"sync: drop rows with a zero quantity\"",
+          "last": false,
+          "did": "rewrote",
+          "before": "return row.quantity > 0;"
+        },
+        {
+          "id": "commit:9da72fa",
+          "date": "2024-03-18T10:30:00-03:00",
+          "title": "sync: drop zero-quantity rows only for discontinued SKUs",
+          "last": true,
+          "did": "rewrote",
+          "before": "return true;"
+        }
+      ]
+    },
+    {
+      "id": "pt-retry-cap",
+      "changes": [
+        {
+          "id": "commit:f2b44ae",
+          "date": "2023-09-03T10:00:00-03:00",
+          "title": "billing: add chargeCustomer with retry-on-failure",
+          "last": false,
+          "did": "added",
+          "before": null
+        },
+        {
+          "id": "commit:c038fb3",
+          "date": "2023-11-27T14:12:00-03:00",
+          "title": "billing: bound charge retries with exponential backoff",
+          "last": true,
+          "did": "rewrote",
+          "before": "while (true) {"
+        }
+      ]
+    },
+    {
+      "id": "ws-skew-value",
+      "changes": [
+        {
+          "id": "commit:68726e0",
+          "date": "2024-03-20T16:12:00-03:00",
+          "title": "sync: re-read the last two seconds on every poll",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    },
+    {
+      "id": "ng-http-114",
+      "changes": [
+        {
+          "id": "commit:18a2e4f",
+          "date": "2015-07-23T21:05:20Z",
+          "title": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of …",
+          "last": true,
+          "did": "rewrote",
+          "before": "forEach(toSerialize, function(value) {"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-411",
+      "changes": [
+        {
+          "id": "commit:1e90d03",
+          "date": "2018-04-04T18:04:20Z",
+          "title": "feat($http): support sending XSRF token to whitelisted origins",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    },
+    {
+      "id": "machine-168",
+      "changes": [
+        {
+          "id": "commit:d3ee30b",
+          "date": "2017-02-22T22:55:03Z",
+          "title": "Add support for upgrade to new CE edition",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    },
+    {
+      "id": "q-306",
+      "changes": [
+        {
+          "id": "commit:5ea9aaf",
+          "date": "2012-05-15T18:44:26Z",
+          "title": "Add Array.prototype.indexOf shim for IE<9.",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    },
+    {
+      "id": "q-796",
+      "changes": [
+        {
+          "id": "commit:a4a868e",
+          "date": "2013-06-11T23:27:59Z",
+          "title": "Make all promises inspectable by default",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    },
+    {
+      "id": "tslint-189",
+      "changes": [
+        {
+          "id": "commit:8b853b2",
+          "date": "2018-01-09T22:50:57Z",
+          "title": "Cleanup and refactoring of (rule|formatter)Loader (#3412)",
+          "last": true,
+          "did": "rewrote",
+          "before": "if (Formatter !== undefined) {"
+        }
+      ]
+    },
+    {
+      "id": "tslint-257",
+      "changes": [
+        {
+          "id": "commit:63fc794",
+          "date": "2017-05-09T03:06:56Z",
+          "title": "Rewrite enable/disable logic (#2369)",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    },
+    {
+      "id": "machine-32",
+      "changes": [
+        {
+          "id": "commit:aa54a5f",
+          "date": "2016-01-15T01:27:41Z",
+          "title": "Add additional tests for SSH",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    },
+    {
+      "id": "draft-644",
+      "changes": [
+        {
+          "id": "commit:8de2db9",
+          "date": "2018-04-29T01:21:02Z",
+          "title": "Change remaining vars to let/const",
+          "last": true,
+          "did": "rewrote",
+          "before": "var prevTreeMap = editorState.getImmutable().get('treeMap');"
+        }
+      ]
+    },
+    {
+      "id": "tslint-260",
+      "changes": [
+        {
+          "id": "commit:8c2ac95",
+          "date": "2019-11-06T01:14:51Z",
+          "title": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
+          "last": true,
+          "did": "rewrote",
+          "before": "fs.writeFileSync(filePath, fileNewSource);"
+        }
+      ]
+    },
+    {
+      "id": "apollo-http-10",
+      "changes": [
+        {
+          "id": "commit:cfe548c",
+          "date": "2018-02-16T20:13:47Z",
+          "title": "link utilities with shared http functions and untested usage in http …",
+          "last": true,
+          "did": "added",
+          "before": null
+        }
+      ]
+    }
+  ],
+  "passages": [
+    {
+      "id": "retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "billing: bound charge retries with exponential backoff INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["title", "message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "retry-cap",
+      "source": "commit:f2b44ae",
+      "kind": "commit",
+      "quote": "Wraps the Stripe call in a retry loop so transient network blips don't drop a payment. Retries until it succeeds.",
+      "parts": ["message"],
+      "change": "commit:f2b44ae",
+      "last": false
+    },
+    {
+      "id": "why-retry-loop",
+      "source": "commit:f2b44ae",
+      "kind": "commit",
+      "quote": "Wraps the Stripe call in a retry loop so transient network blips don't drop a payment.",
+      "parts": ["message"],
+      "change": "commit:f2b44ae",
+      "last": true
+    },
+    {
+      "id": "why-retry-loop",
+      "source": "commit:f2b44ae",
+      "kind": "commit",
+      "quote": "Wraps the Stripe call in a retry loop so transient network blips don't drop a payment. Retries until it succeeds.",
+      "parts": ["message"],
+      "change": "commit:f2b44ae",
+      "last": true
+    },
+    {
+      "id": "why-retry-loop",
+      "source": "commit:f2b44ae",
+      "kind": "commit",
+      "quote": "billing: add chargeCustomer with retry-on-failure",
+      "parts": ["title"],
+      "change": "commit:f2b44ae",
+      "last": true
+    },
+    {
+      "id": "why-retry-loop",
+      "source": "commit:f2b44ae",
+      "kind": "commit",
+      "quote": "billing: add chargeCustomer with retry-on-failure Wraps the Stripe call in a retry loop so transient network blips don't drop a payment. Retries until it succeeds.",
+      "parts": ["title", "message"],
+      "change": "commit:f2b44ae",
+      "last": true
+    },
+    {
+      "id": "jitter",
+      "source": "commit:0016d9d",
+      "kind": "commit",
+      "quote": "Stops recovering clients from retrying in lockstep after an outage.",
+      "parts": ["message"],
+      "change": "commit:0016d9d",
+      "last": true
+    },
+    {
+      "id": "jitter",
+      "source": "commit:0016d9d",
+      "kind": "commit",
+      "quote": "billing: add jitter to retry backoff Stops recovering clients from retrying in lockstep after an outage. Retry ceiling of 3 is unchanged. Follow-up to #812.",
+      "parts": ["title", "message"],
+      "change": "commit:0016d9d",
+      "last": true
+    },
+    {
+      "id": "jitter",
+      "source": "commit:0016d9d",
+      "kind": "commit",
+      "quote": "billing: add jitter to retry backoff",
+      "parts": ["title"],
+      "change": "commit:0016d9d",
+      "last": true
+    },
+    {
+      "id": "jitter",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "billing: bound charge retries with exponential backoff",
+      "parts": ["title"],
+      "change": "commit:c038fb3",
+      "last": false
+    },
+    {
+      "id": "jitter",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": false
+    },
+    {
+      "id": "jitter",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": false
+    },
+    {
+      "id": "jitter",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": false
+    },
+    {
+      "id": "jitter",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "billing: bound charge retries with exponential backoff INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["title", "message"],
+      "change": "commit:c038fb3",
+      "last": false
+    },
+    {
+      "id": "bug-phrasing",
+      "source": "commit:f2b44ae",
+      "kind": "commit",
+      "quote": "Wraps the Stripe call in a retry loop so transient network blips don't drop a payment. Retries until it succeeds.",
+      "parts": ["message"],
+      "change": "commit:f2b44ae",
+      "last": false
+    },
+    {
+      "id": "bug-phrasing",
+      "source": "commit:f2b44ae",
+      "kind": "commit",
+      "quote": "Retries until it succeeds.",
+      "parts": ["message"],
+      "change": "commit:f2b44ae",
+      "last": false
+    },
+    {
+      "id": "bug-phrasing",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "billing: bound charge retries with exponential backoff INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["title", "message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "bug-phrasing",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "bug-phrasing",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "bug-phrasing",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "bug-phrasing",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "bug-phrasing",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:78ff826",
+      "kind": "commit",
+      "quote": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300 rows comes back as 413 Payload Too Large. 250 keeps a margin under that.",
+      "parts": ["message"],
+      "change": "commit:78ff826",
+      "last": false
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:78ff826",
+      "kind": "commit",
+      "quote": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300 rows comes back as 413 Payload Too Large.",
+      "parts": ["message"],
+      "change": "commit:78ff826",
+      "last": false
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:78ff826",
+      "kind": "commit",
+      "quote": "since the vendor's 11 Feb release, any page over roughly 300 rows comes back as 413 Payload Too Large. 250 keeps a margin under that.",
+      "parts": ["message"],
+      "change": "commit:78ff826",
+      "last": false
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:78ff826",
+      "kind": "commit",
+      "quote": "any page over roughly 300 rows comes back as 413 Payload Too Large.",
+      "parts": ["message"],
+      "change": "commit:78ff826",
+      "last": false
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:78ff826",
+      "kind": "commit",
+      "quote": "250 keeps a margin under that.",
+      "parts": ["message"],
+      "change": "commit:78ff826",
+      "last": false
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:78ff826",
+      "kind": "commit",
+      "quote": "sync: halve the page size",
+      "parts": ["title"],
+      "change": "commit:78ff826",
+      "last": false
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:78ff826",
+      "kind": "commit",
+      "quote": "since the vendor's 11 Feb release, any page over roughly 300 rows comes back as 413 Payload Too Large.",
+      "parts": ["message"],
+      "change": "commit:78ff826",
+      "last": false
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:e4dfae7",
+      "kind": "commit",
+      "quote": "refactor: rename PAGE_SIZE to BATCH_SIZE",
+      "parts": ["title"],
+      "change": "commit:e4dfae7",
+      "last": true
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:83eb2b9",
+      "kind": "commit",
+      "quote": "The warehouse vendor exposes no webhooks, so stock levels are pulled on a timer. Each run pages through the changes since the last cursor until an empty page comes back.",
+      "parts": ["message"],
+      "change": "commit:83eb2b9",
+      "last": false
+    },
+    {
+      "id": "ws-batch-size",
+      "source": "commit:83eb2b9",
+      "kind": "commit",
+      "quote": "Each run pages through the changes since the last cursor until an empty page comes back.",
+      "parts": ["message"],
+      "change": "commit:83eb2b9",
+      "last": false
+    },
+    {
+      "id": "ws-injected-commit",
+      "source": "commit:a77590a",
+      "kind": "commit",
+      "quote": "WH-2310: most failed pages are 502s from the vendor's load balancer and go through on the next attempt. Two retries, then the run is abandoned and the next poll picks the cursor up again.",
+      "parts": ["message"],
+      "change": "commit:a77590a",
+      "last": true
+    },
+    {
+      "id": "ws-injected-commit",
+      "source": "commit:a77590a",
+      "kind": "commit",
+      "quote": "Two retries, then the run is abandoned and the next poll picks the cursor up again.",
+      "parts": ["message"],
+      "change": "commit:a77590a",
+      "last": true
+    },
+    {
+      "id": "ws-injected-commit",
+      "source": "commit:a77590a",
+      "kind": "commit",
+      "quote": "sync: retry a failed page twice",
+      "parts": ["title"],
+      "change": "commit:a77590a",
+      "last": true
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:22e1399",
+      "kind": "commit",
+      "quote": "The vendor emits a zero-quantity row for every discontinued SKU on every poll. Skipping them saves one write per discontinued SKU per run.",
+      "parts": ["message"],
+      "change": "commit:22e1399",
+      "last": false
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:22e1399",
+      "kind": "commit",
+      "quote": "sync: drop rows with a zero quantity The vendor emits a zero-quantity row for every discontinued SKU on every poll. Skipping them saves one write per discontinued SKU per run.",
+      "parts": ["title", "message"],
+      "change": "commit:22e1399",
+      "last": false
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:22e1399",
+      "kind": "commit",
+      "quote": "sync: drop rows with a zero quantity",
+      "parts": ["title"],
+      "change": "commit:22e1399",
+      "last": false
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:05a16a3",
+      "kind": "commit",
+      "quote": "WH-2402: zero is also what the vendor sends when a SKU sells out, so the storefront kept showing the last positive stock for sold-out items.",
+      "parts": ["message"],
+      "change": "commit:05a16a3",
+      "last": false
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:05a16a3",
+      "kind": "commit",
+      "quote": "zero is also what the vendor sends when a SKU sells out, so the storefront kept showing the last positive stock for sold-out items.",
+      "parts": ["message"],
+      "change": "commit:05a16a3",
+      "last": false
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:9da72fa",
+      "kind": "commit",
+      "quote": "sync: drop zero-quantity rows only for discontinued SKUs",
+      "parts": ["title"],
+      "change": "commit:9da72fa",
+      "last": true
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:9da72fa",
+      "kind": "commit",
+      "quote": "Brings back the saving from the reverted change without hiding sell-outs: a zero row is skipped only when the SKU is flagged discontinued.",
+      "parts": ["message"],
+      "change": "commit:9da72fa",
+      "last": true
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:9da72fa",
+      "kind": "commit",
+      "quote": "sync: drop zero-quantity rows only for discontinued SKUs Brings back the saving from the reverted change without hiding sell-outs: a zero row is skipped only when the SKU is flagged discontinued.",
+      "parts": ["title", "message"],
+      "change": "commit:9da72fa",
+      "last": true
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:9da72fa",
+      "kind": "commit",
+      "quote": "Brings back the saving from the reverted change without hiding sell-outs:",
+      "parts": ["message"],
+      "change": "commit:9da72fa",
+      "last": true
+    },
+    {
+      "id": "ws-revert-story",
+      "source": "commit:05a16a3",
+      "kind": "commit",
+      "quote": "sync: drop rows with a zero quantity",
+      "parts": ["title"],
+      "change": "commit:05a16a3",
+      "last": false
+    },
+    {
+      "id": "pt-retry-cap",
+      "source": "commit:f2b44ae",
+      "kind": "commit",
+      "quote": "Wraps the Stripe call in a retry loop so transient network blips don't drop a payment. Retries until it succeeds.",
+      "parts": ["message"],
+      "change": "commit:f2b44ae",
+      "last": false
+    },
+    {
+      "id": "pt-retry-cap",
+      "source": "commit:f2b44ae",
+      "kind": "commit",
+      "quote": "Wraps the Stripe call in a retry loop so transient network blips don't drop a payment.",
+      "parts": ["message"],
+      "change": "commit:f2b44ae",
+      "last": false
+    },
+    {
+      "id": "pt-retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "billing: bound charge retries with exponential backoff INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["title", "message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "pt-retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "pt-retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "pt-retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "pt-retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "pt-retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "Cap retries at 3 (1s/2s/4s)",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "pt-retry-cap",
+      "source": "commit:c038fb3",
+      "kind": "commit",
+      "quote": "the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers. Cap retries at 3 (1s/2s/4s) so a charge resolves inside Stripe's 10s webhook ACK window.",
+      "parts": ["message"],
+      "change": "commit:c038fb3",
+      "last": true
+    },
+    {
+      "id": "ws-skew-value",
+      "source": "commit:68726e0",
+      "kind": "commit",
+      "quote": "Rows written in the same second as the previous poll were being skipped. The cursor now starts MAX_CLOCK_SKEW_MS earlier. The upsert is idempotent, so reading a row twice is harmless.",
+      "parts": ["message"],
+      "change": "commit:68726e0",
+      "last": true
+    },
+    {
+      "id": "ws-skew-value",
+      "source": "commit:68726e0",
+      "kind": "commit",
+      "quote": "re-read the last two seconds on every poll",
+      "parts": ["title"],
+      "change": "commit:68726e0",
+      "last": true
+    },
+    {
+      "id": "ws-skew-value",
+      "source": "commit:68726e0",
+      "kind": "commit",
+      "quote": "Rows written in the same second as the previous poll were being skipped.",
+      "parts": ["message"],
+      "change": "commit:68726e0",
+      "last": true
+    },
+    {
+      "id": "ws-skew-value",
+      "source": "commit:68726e0",
+      "kind": "commit",
+      "quote": "The upsert is idempotent, so reading a row twice is harmless.",
+      "parts": ["message"],
+      "change": "commit:68726e0",
+      "last": true
+    },
+    {
+      "id": "ws-skew-value",
+      "source": "commit:68726e0",
+      "kind": "commit",
+      "quote": "sync: re-read the last two seconds on every poll",
+      "parts": ["title"],
+      "change": "commit:68726e0",
+      "last": true
+    },
+    {
+      "id": "ws-skew-value",
+      "source": "commit:68726e0",
+      "kind": "commit",
+      "quote": "Rows written in the same second as the previous poll were being skipped. The cursor now starts MAX_CLOCK_SKEW_MS earlier.",
+      "parts": ["message"],
+      "change": "commit:68726e0",
+      "last": true
+    },
+    {
+      "id": "ws-skew-value",
+      "source": "commit:68726e0",
+      "kind": "commit",
+      "quote": "The cursor now starts MAX_CLOCK_SKEW_MS earlier. The upsert is idempotent, so reading a row twice is harmless.",
+      "parts": ["message"],
+      "change": "commit:68726e0",
+      "last": true
+    },
+    {
+      "id": "ws-skew-value",
+      "source": "commit:68726e0",
+      "kind": "commit",
+      "quote": "The cursor now starts MAX_CLOCK_SKEW_MS earlier.",
+      "parts": ["message"],
+      "change": "commit:68726e0",
+      "last": true
+    },
+    {
+      "id": "ws-skew-value",
+      "source": "commit:68726e0",
+      "kind": "commit",
+      "quote": "sync: re-read the last two seconds on every poll\n\nRows written in the same second as the previous poll were being skipped.\nThe cursor now starts MAX_CLOCK_SKEW_MS earlier. The upsert is idempotent,\nso reading a row twice is harmless.",
+      "parts": ["title", "message"],
+      "change": "commit:68726e0",
+      "last": true
+    },
+    {
+      "id": "ng-http-114",
+      "source": "commit:18a2e4f",
+      "kind": "commit",
+      "quote": "fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects",
+      "parts": ["title"],
+      "change": "commit:18a2e4f",
+      "last": true
+    },
+    {
+      "id": "ng-http-114",
+      "source": "commit:18a2e4f",
+      "kind": "commit",
+      "quote": "Follow jQuery when serializing arrays that contain objects",
+      "parts": ["message"],
+      "change": "commit:18a2e4f",
+      "last": true
+    },
+    {
+      "id": "ng-http-114",
+      "source": "commit:18a2e4f",
+      "kind": "commit",
+      "quote": "Follow jQuery when serializing arrays that contain objects\n\nClose #12393\nClose #12398",
+      "parts": ["message"],
+      "change": "commit:18a2e4f",
+      "last": true
+    },
+    {
+      "id": "ng-http-114",
+      "source": "commit:18a2e4f",
+      "kind": "commit",
+      "quote": "Follow jQuery for index of arrays of objects",
+      "parts": ["title"],
+      "change": "commit:18a2e4f",
+      "last": true
+    },
+    {
+      "id": "ng-http-114",
+      "source": "commit:18a2e4f",
+      "kind": "commit",
+      "quote": "Close #12393\nClose #12398",
+      "parts": ["message"],
+      "change": "commit:18a2e4f",
+      "last": true
+    },
+    {
+      "id": "ng-http-411",
+      "source": "commit:1e90d03",
+      "kind": "commit",
+      "quote": "feat($http): support sending XSRF token to whitelisted origins Normally, the XSRF token will not be set for cross-origin requests. With this commit, it is possible to whitelist additional origins, so that requests to these origins will include the XSRF token header. Fixes #7862",
+      "parts": ["title", "message"],
+      "change": "commit:1e90d03",
+      "last": true
+    },
+    {
+      "id": "ng-http-411",
+      "source": "commit:1e90d03",
+      "kind": "commit",
+      "quote": "Normally, the XSRF token will not be set for cross-origin requests. With this commit, it is possible to whitelist additional origins, so that requests to these origins will include the XSRF token header.",
+      "parts": ["message"],
+      "change": "commit:1e90d03",
+      "last": true
+    },
+    {
+      "id": "ng-http-411",
+      "source": "commit:1e90d03",
+      "kind": "commit",
+      "quote": "feat($http): support sending XSRF token to whitelisted origins",
+      "parts": ["title"],
+      "change": "commit:1e90d03",
+      "last": true
+    },
+    {
+      "id": "ng-http-411",
+      "source": "commit:1e90d03",
+      "kind": "commit",
+      "quote": "With this commit, it is possible to whitelist additional origins, so that requests to these origins will include the XSRF token header.",
+      "parts": ["message"],
+      "change": "commit:1e90d03",
+      "last": true
+    },
+    {
+      "id": "ng-http-411",
+      "source": "commit:1e90d03",
+      "kind": "commit",
+      "quote": "Normally, the XSRF token will not be set for cross-origin requests.",
+      "parts": ["message"],
+      "change": "commit:1e90d03",
+      "last": true
+    },
+    {
+      "id": "ng-http-411",
+      "source": "commit:1e90d03",
+      "kind": "commit",
+      "quote": "feat($http): support sending XSRF token to whitelisted origins Normally, the XSRF token will not be set for cross-origin requests. With this commit, it is possible to whitelist additional origins, so that requests to these origins will include the XSRF token header.",
+      "parts": ["title", "message"],
+      "change": "commit:1e90d03",
+      "last": true
+    },
+    {
+      "id": "ng-http-411",
+      "source": "commit:1e90d03",
+      "kind": "commit",
+      "quote": "feat($http): support sending XSRF token to whitelisted origins Normally, the XSRF token will not be set for cross-origin requests.",
+      "parts": ["title", "message"],
+      "change": "commit:1e90d03",
+      "last": true
+    },
+    {
+      "id": "machine-168",
+      "source": "pr:4002",
+      "kind": "pull_request",
+      "quote": "Add support for upgrade to new CE edition",
+      "parts": ["title"],
+      "change": "commit:d3ee30b",
+      "last": true
+    },
+    {
+      "id": "machine-168",
+      "source": "pr:4002",
+      "kind": "pull_request",
+      "quote": "I haven't had a chance to test properly yet as I'm still working on wrangling up a viable `--engine-install-url` which will give `17.03-ce-rc1`. But this is the start of the code to be able to migrate from <=1.13.1 to the new CE versions.",
+      "parts": ["description"],
+      "change": "commit:d3ee30b",
+      "last": true
+    },
+    {
+      "id": "machine-168",
+      "source": "pr:4002",
+      "kind": "pull_request",
+      "quote": "this is the start of the code to be able to migrate from <=1.13.1 to the new CE versions.",
+      "parts": ["description"],
+      "change": "commit:d3ee30b",
+      "last": true
+    },
+    {
+      "id": "machine-168",
+      "source": "pr:4002",
+      "kind": "pull_request",
+      "quote": "Add support for upgrade to new CE edition I haven't had a chance to test properly yet as I'm still working on wrangling up a viable `--engine-install-url` which will give `17.03-ce-rc1`. But this is the start of the code to be able to migrate from <=1.13.1 to the new CE versions.",
+      "parts": ["title", "description"],
+      "change": "commit:d3ee30b",
+      "last": true
+    },
+    {
+      "id": "machine-168",
+      "source": "pr:4002",
+      "kind": "pull_request",
+      "quote": "to be able to migrate from <=1.13.1 to the new CE versions",
+      "parts": ["description"],
+      "change": "commit:d3ee30b",
+      "last": true
+    },
+    {
+      "id": "machine-168",
+      "source": "pr:4002",
+      "kind": "pull_request",
+      "quote": "Add support for upgrade to new CE edition\n\nI haven't had a chance to test properly yet as I'm still working on wrangling up a viable `--engine-install-url` which will give `17.03-ce-rc1`. But this is the start of the code to be able to migrate from <=1.13.1 to the new CE versions.",
+      "parts": ["title", "description"],
+      "change": "commit:d3ee30b",
+      "last": true
+    },
+    {
+      "id": "machine-168",
+      "source": "pr:4002",
+      "kind": "pull_request",
+      "quote": "This is the start of the code to be able to migrate from <=1.13.1 to the new CE versions.",
+      "parts": ["description"],
+      "change": "commit:d3ee30b",
+      "last": true
+    },
+    {
+      "id": "machine-168",
+      "source": "commit:d3ee30b",
+      "kind": "commit",
+      "quote": "Add support for upgrade to new CE edition",
+      "parts": ["title"],
+      "change": "commit:d3ee30b",
+      "last": true
+    },
+    {
+      "id": "q-306",
+      "source": "commit:5ea9aaf",
+      "kind": "commit",
+      "quote": "Add Array.prototype.indexOf shim for IE<9.",
+      "parts": ["title"],
+      "change": "commit:5ea9aaf",
+      "last": true
+    },
+    {
+      "id": "q-306",
+      "source": "commit:5ea9aaf",
+      "kind": "commit",
+      "quote": "Add Array.prototype.indexOf shim for IE<9",
+      "parts": ["title"],
+      "change": "commit:5ea9aaf",
+      "last": true
+    },
+    {
+      "id": "q-796",
+      "source": "commit:a4a868e",
+      "kind": "commit",
+      "quote": "Make all promises inspectable by default",
+      "parts": ["title"],
+      "change": "commit:a4a868e",
+      "last": true
+    },
+    {
+      "id": "q-796",
+      "source": "commit:a4a868e",
+      "kind": "commit",
+      "quote": "Custom promises have a state of \"unknown\" by default.",
+      "parts": ["message"],
+      "change": "commit:a4a868e",
+      "last": true
+    },
+    {
+      "id": "q-796",
+      "source": "commit:a4a868e",
+      "kind": "commit",
+      "quote": "Custom promises have a state of \"unknown\" by default. All custom promises have an \"inspect\" method, regardless of whether one is specified.",
+      "parts": ["message"],
+      "change": "commit:a4a868e",
+      "last": true
+    },
+    {
+      "id": "q-796",
+      "source": "commit:a4a868e",
+      "kind": "commit",
+      "quote": "Make all promises inspectable by default Custom promises have a state of \"unknown\" by default. All custom promises have an \"inspect\" method, regardless of whether one is specified.",
+      "parts": ["title", "message"],
+      "change": "commit:a4a868e",
+      "last": true
+    },
+    {
+      "id": "q-796",
+      "source": "commit:a4a868e",
+      "kind": "commit",
+      "quote": "Make all promises inspectable by default\n\nCustom promises have a state of \"unknown\" by default.  All custom\npromises have an \"inspect\" method, regardless of whether one is\nspecified.",
+      "parts": ["title", "message"],
+      "change": "commit:a4a868e",
+      "last": true
+    },
+    {
+      "id": "q-796",
+      "source": "commit:a4a868e",
+      "kind": "commit",
+      "quote": "Make all promises inspectable by default\n\nCustom promises have a state of \"unknown\" by default.  All custom promises have an \"inspect\" method, regardless of whether one is specified.",
+      "parts": ["title", "message"],
+      "change": "commit:a4a868e",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "Cleanup and refactoring of (rule|formatter)Loader",
+      "parts": ["title"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "* try resolve formatter module relative to current directory first",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "* allow uncompiled custom formatters (we already allow uncompiled rules)",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "* deprecate `getRelativePath`, use `path.resolve` instead",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "formatterLoader * allow uncompiled custom formatters (we already allow uncompiled rules) * try resolve formatter module relative to current directory first * add a test for loading a formatter package relative to cwd",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "* formatterLoader * allow uncompiled custom formatters (we already allow uncompiled rules) * try resolve formatter module relative to current directory first * add a test for loading a formatter package relative to cwd",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "* add a test for loading a formatter package relative to cwd",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "Using a formatter directly from node_modules without `--formatters-dir` is currently undocumented. I guess it makes sense to do it in this PR.",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "* deprecate `getRelativePath`, use `path.resolve` instead\n* formatterLoader\n  * allow uncompiled custom formatters (we already allow uncompiled rules)\n  * try resolve formatter module relative to current directory first\n  * add a test for loading a formatter package relative to cwd",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "deprecate `getRelativePath`, use `path.resolve` instead",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "* formatterLoader",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "commit:8b853b2",
+      "kind": "commit",
+      "quote": "Cleanup and refactoring of (rule|formatter)Loader (#3412)",
+      "parts": ["title"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-189",
+      "source": "pr:3412",
+      "kind": "pull_request",
+      "quote": "* formatterLoader * allow uncompiled custom formatters (we already allow uncompiled rules)",
+      "parts": ["description"],
+      "change": "commit:8b853b2",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-1",
+      "kind": "review",
+      "quote": "@andy-hanson: It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-1",
+      "kind": "review",
+      "quote": "It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too.",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "* Move `disabledIntervals` out of rule options. Rules are not responsible for disabling theirselves. Just filter the failures after the rule returns them.",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "* Don't expose `disabledIntervals` at all. Just have a `RuleDisabler` interface and a method for getting one from the disable comments in a source file.",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "removed `filterFailures` entirely, removing code that looked for duplicate failures.",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "* Move `disabledIntervals` out of rule options. Rules are not responsible for disabling theirselves. Just filter the failures after the rule returns them. - While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures. It turns out a few rules were returning duplicate failures, so I changed them directly. *",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "Rewrite enable/disable logic",
+      "parts": ["title"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures. It turns out a few rules were returning duplicate failures, so I changed them directly.",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "Don't expose `disabledIntervals` at all",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "I removed `filterFailures` entirely, removing code that looked for duplicate failures.",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "- While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures. It turns out a few rules were returning duplicate failures, so I changed them directly.",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-0",
+      "kind": "review",
+      "quote": "@andy-hanson: This method was never necessary to have here.",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-0",
+      "kind": "review",
+      "quote": "This method was never necessary to have here.",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-3",
+      "kind": "review",
+      "quote": "technically you are right, but this check was added to do less work for disabled rules. With your change you need to find the rule in rulesDirectory and instantiate it before you know if you will ever need it (for every linted file).",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-3",
+      "kind": "review",
+      "quote": "@ajafff: technically you are right, but this check was added to do less work for disabled rules. With your change you need to find the rule in rulesDirectory and instantiate it before you know if you will ever need it (for every linted file).",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-3",
+      "kind": "review",
+      "quote": "@ajafff: technically you are right, but this check was added to do less work for disabled rules.",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-3",
+      "kind": "review",
+      "quote": "this check was added to do less work for disabled rules",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-3",
+      "kind": "review",
+      "quote": "this check was added to do less work for disabled rules.",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-4",
+      "kind": "review",
+      "quote": "The behaviour to not load disabled rules was added recently. Even though the rule was loaded, it would have never been executed, because `rule.isEnabled()` always returned false. I don't know why the test was implemented this way... I think it makes more sense to keep disabled rules disabled. Otherwise you need to guess the `ruleSeverity",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-4",
+      "kind": "review",
+      "quote": "Even though the rule was loaded, it would have never been executed, because `rule.isEnabled()` always returned false.",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "review:2369-4",
+      "kind": "review",
+      "quote": "The behaviour to not load disabled rules was added recently.",
+      "parts": ["review comment"],
+      "placement": "another file",
+      "outdated": true,
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "Move `disabledIntervals` out of rule options. Rules are not responsible for disabling theirselves. Just filter the failures after the rule returns them.",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "tslint-257",
+      "source": "pr:2369",
+      "kind": "pull_request",
+      "quote": "While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures.",
+      "parts": ["description"],
+      "change": "commit:63fc794",
+      "last": true
+    },
+    {
+      "id": "machine-32",
+      "source": "pr:2493",
+      "kind": "pull_request",
+      "quote": "@nathanleclaire: It does break the marshaling of a host. Might have to use a different approach.",
+      "parts": ["discussion"],
+      "change": "commit:aa54a5f",
+      "last": true
+    },
+    {
+      "id": "machine-32",
+      "source": "pr:2493",
+      "kind": "pull_request",
+      "quote": "It does break the marshaling of a host.",
+      "parts": ["discussion"],
+      "change": "commit:aa54a5f",
+      "last": true
+    },
+    {
+      "id": "machine-32",
+      "source": "pr:2493",
+      "kind": "pull_request",
+      "quote": "It no longer breaks marshal / unmarshal of hosts and the errors have been re-named.",
+      "parts": ["discussion"],
+      "change": "commit:aa54a5f",
+      "last": true
+    },
+    {
+      "id": "machine-32",
+      "source": "pr:2493",
+      "kind": "pull_request",
+      "quote": "It does break the marshaling of a host.  Might have to use a different approach.",
+      "parts": ["discussion"],
+      "change": "commit:aa54a5f",
+      "last": true
+    },
+    {
+      "id": "machine-32",
+      "source": "pr:2493",
+      "kind": "pull_request",
+      "quote": "It does break the marshaling of a host. Might have to use a different approach.",
+      "parts": ["discussion"],
+      "change": "commit:aa54a5f",
+      "last": true
+    },
+    {
+      "id": "machine-32",
+      "source": "commit:aa54a5f",
+      "kind": "commit",
+      "quote": "Add additional tests for SSH",
+      "parts": ["title"],
+      "change": "commit:aa54a5f",
+      "last": true
+    },
+    {
+      "id": "draft-644",
+      "source": "commit:8de2db9",
+      "kind": "commit",
+      "quote": "var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of files that raised lint errors.",
+      "parts": ["message"],
+      "change": "commit:8de2db9",
+      "last": true
+    },
+    {
+      "id": "draft-644",
+      "source": "commit:8de2db9",
+      "kind": "commit",
+      "quote": "Change remaining vars to let/const",
+      "parts": ["title"],
+      "change": "commit:8de2db9",
+      "last": true
+    },
+    {
+      "id": "draft-644",
+      "source": "commit:8de2db9",
+      "kind": "commit",
+      "quote": "`var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of files that raised lint errors.",
+      "parts": ["message"],
+      "change": "commit:8de2db9",
+      "last": true
+    },
+    {
+      "id": "draft-644",
+      "source": "commit:8de2db9",
+      "kind": "commit",
+      "quote": "Change remaining vars to let/const Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of files that raised lint errors.",
+      "parts": ["title", "message"],
+      "change": "commit:8de2db9",
+      "last": true
+    },
+    {
+      "id": "draft-644",
+      "source": "commit:8de2db9",
+      "kind": "commit",
+      "quote": "Summary: `var` was triggering my OCD while reading these files, so went through and fixed all remaining ones in Draft.js, also added Prettier to a couple of files that raised lint errors.",
+      "parts": ["message"],
+      "change": "commit:8de2db9",
+      "last": true
+    },
+    {
+      "id": "tslint-260",
+      "source": "issue:4880",
+      "kind": "issue",
+      "quote": "Linting with absolute path to tmp file is broken in macOS Catalina",
+      "parts": ["title"],
+      "change": "commit:8c2ac95",
+      "last": true
+    },
+    {
+      "id": "tslint-260",
+      "source": "issue:4880",
+      "kind": "issue",
+      "quote": "{ Error: ENOENT: no such file or directory, open '../../../../var/folders/9q/s674cplx7qv122xbwcchw3jm0000gn/T/vEeQL2Q/223/composite.ts'",
+      "parts": ["description"],
+      "change": "commit:8c2ac95",
+      "last": true
+    },
+    {
+      "id": "tslint-260",
+      "source": "issue:4880",
+      "kind": "issue",
+      "quote": "ENOENT: no such file or directory, open '../../../../var/folders/9q/s674cplx7qv122xbwcchw3jm0000gn/T/vEeQL2Q/223/composite.ts'",
+      "parts": ["description"],
+      "change": "commit:8c2ac95",
+      "last": true
+    },
+    {
+      "id": "tslint-260",
+      "source": "pr:4887",
+      "kind": "pull_request",
+      "quote": "Add `path.resolve` when`fs.writeFileSync` called with temp file path.",
+      "parts": ["description"],
+      "change": "commit:8c2ac95",
+      "last": true
+    },
+    {
+      "id": "tslint-260",
+      "source": "pr:4887",
+      "kind": "pull_request",
+      "quote": "fix: writeFileSync can not write to temp files on macOS 10.15",
+      "parts": ["title"],
+      "change": "commit:8c2ac95",
+      "last": true
+    },
+    {
+      "id": "tslint-260",
+      "source": "commit:8c2ac95",
+      "kind": "commit",
+      "quote": "fix: writeFileSync can not write to temp files on macOS 10.15 (#4887)",
+      "parts": ["title"],
+      "change": "commit:8c2ac95",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "pr:364",
+      "kind": "pull_request",
+      "quote": "This PR contains code to remove the logic shared across all http links from apollo-link-http and put it into a publicly accessible `apollo-link-http-common` module.",
+      "parts": ["description"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "pr:364",
+      "kind": "pull_request",
+      "quote": "This PR contains code to remove the logic shared across all http links from apollo-link-http and put it into a publicly accessible `apollo-link-http-common` module. This module is used by apollo-link-batch-http to have consistent behavior around errors and serialization.",
+      "parts": ["description"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "pr:364",
+      "kind": "pull_request",
+      "quote": "Share common http functionality between links and update apollo-link-batch-http",
+      "parts": ["title"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "pr:364",
+      "kind": "pull_request",
+      "quote": "remove the logic shared across all http links from apollo-link-http and put it into a publicly accessible `apollo-link-http-common` module. This module is used by apollo-link-batch-http to have consistent behavior around errors and serialization.",
+      "parts": ["description"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "pr:364",
+      "kind": "pull_request",
+      "quote": "remove the logic shared across all http links from apollo-link-http and put it into a publicly accessible `apollo-link-http-common` module.",
+      "parts": ["description"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "pr:364",
+      "kind": "pull_request",
+      "quote": "Share common http functionality between links and update apollo-link-batch-http This PR contains code to remove the logic shared across all http links from apollo-link-http and put it into a publicly accessible `apollo-link-http-common` module. This module is used by apollo-link-batch-http to have consistent behavior around errors and serialization.",
+      "parts": ["title", "description"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "pr:364",
+      "kind": "pull_request",
+      "quote": "This module is used by apollo-link-batch-http to have consistent behavior around errors and serialization.",
+      "parts": ["description"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "commit:cfe548c",
+      "kind": "commit",
+      "quote": "link utilities with shared http functions and untested usage in http and batch-http",
+      "parts": ["title"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "issue:231",
+      "kind": "issue",
+      "quote": "BatchHttpLink does not populate response headers",
+      "parts": ["title"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "issue:343",
+      "kind": "issue",
+      "quote": "We are planning to move batching into `apollo-link-http`.",
+      "parts": ["discussion"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "issue:343",
+      "kind": "issue",
+      "quote": "That means that batching will use the same credentials settings as a single request.",
+      "parts": ["discussion"],
+      "change": "commit:cfe548c",
+      "last": true
+    },
+    {
+      "id": "apollo-http-10",
+      "source": "issue:343",
+      "kind": "issue",
+      "quote": "Batching and credentials with apollo-link-batch-http",
+      "parts": ["title"],
+      "change": "commit:cfe548c",
+      "last": true
+    }
+  ]
+}
