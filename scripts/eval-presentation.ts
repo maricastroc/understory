@@ -1,6 +1,7 @@
 import type { EntailmentStatus } from "@understory/core/types";
 import type { Judgement, WrittenClaim } from "./eval-audit-claims";
 import { type CaseFacts, crossTab, evidenceOf, specificityOf } from "./eval-link-states";
+import { type PassageOrigin, passageKey, sitsIn } from "./eval-passage-origin";
 import { type Adjudication, type RunRecord, type Verdict, runKey, verdictOf } from "./eval-report";
 
 export type Presentation =
@@ -161,7 +162,100 @@ export function answerRows(
   }));
 }
 
+export type PassageRow = {
+  from: string;
+  id: string;
+  row: string;
+  where: string;
+  change: "the last change" | "an earlier change" | "no change" | "not kept";
+};
+
+const NOT_KEPT = "not kept";
+
+function passageRow(
+  from: string,
+  id: string,
+  row: string,
+  origin: PassageOrigin | undefined,
+): PassageRow {
+  if (!origin) return { from, id, row, where: NOT_KEPT, change: NOT_KEPT };
+  const place = origin.placement ? `, ${origin.placement}` : "";
+  return {
+    from,
+    id,
+    row,
+    where: `${sitsIn(origin.kind, origin.parts)}${place}`,
+    change:
+      origin.change === null ? "no change" : origin.last ? "the last change" : "an earlier change",
+  };
+}
+
+export function controlPassages(
+  controls: WrittenClaim[],
+  judgements: Judgement[],
+  facts: Map<string, CaseFacts>,
+  origins: Map<string, PassageOrigin>,
+): PassageRow[] {
+  return controls.flatMap((control) =>
+    judgements
+      .filter((j) => j.kind && j.id === control.id && j.claim === control.text && j.quote)
+      .flatMap((j) => {
+        const as = presentationOf(facts.get(control.id), j.status, control.citations);
+        const row = `${groupOf(control)}, ${as}`;
+        const found = control.citations.flatMap(
+          (source) => origins.get(passageKey(control.id, source, j.quote as string)) ?? [],
+        );
+        return found.length
+          ? found.map((origin) => passageRow("controls", control.id, row, origin))
+          : [passageRow("controls", control.id, row, undefined)];
+      }),
+  );
+}
+
+export function answerPassages(
+  from: string,
+  runs: RunRecord[],
+  facts: Map<string, CaseFacts>,
+  origins: Map<string, PassageOrigin>,
+  manual: Manual = {},
+): PassageRow[] {
+  return runs.flatMap((run) => {
+    const presented = claimPresentations(run, facts.get(run.id));
+    const verdict = verdictFor(from, run, manual);
+    return (run.narrative?.entailment?.checks ?? []).flatMap((check) =>
+      check.quote && check.claim !== undefined
+        ? [
+            passageRow(
+              from,
+              run.id,
+              `${presented[check.claim] ?? "not established"}, verdict ${verdict}`,
+              origins.get(passageKey(run.id, check.citation, check.quote)),
+            ),
+          ]
+        : [],
+    );
+  });
+}
+
 type Table = Record<string, Record<string, number>>;
+
+export type OriginTables = { passages: number; where: Table; change: Table };
+
+export function originTables(rows: PassageRow[]): OriginTables {
+  return {
+    passages: rows.length,
+    where: crossTab(
+      rows,
+      (row) => row.row,
+      (row) => row.where,
+    ),
+    change: crossTab(
+      rows,
+      (row) => row.row,
+      (row) => row.change,
+    ),
+  };
+}
 
 function count<T>(rows: T[], keyOf: (row: T) => string): Record<string, number> {
   const totals: Record<string, number> = {};
@@ -344,5 +438,18 @@ export function answerLines(title: string, t: AnswerTables): string[] {
     "",
     "cases led the same way on every pass of a run",
     ...Object.entries(t.steady).map(([group, s]) => `  ${group}: ${s.same} of ${s.of}`),
+  ];
+}
+
+export const NOT_PERTINENCE =
+  "Where a passage sits and which change it belongs to are read from the record. Neither says that the passage is the reason for the investigated line.";
+
+export function originLines(title: string, t: OriginTables): string[] {
+  return [
+    "",
+    "",
+    `${title}: ${t.passages} verified passages`,
+    ...lines("where each passage sits in the record", t.where),
+    ...lines("the change each passage's record belongs to", t.change),
   ];
 }

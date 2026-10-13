@@ -3,19 +3,25 @@ import type { EntailmentStatus, VerifiedNarrative } from "@understory/core/types
 import { describe, expect, it } from "vitest";
 import type { Judgement, WrittenClaim } from "./eval-audit-claims";
 import type { CaseFacts } from "./eval-link-states";
+import { type PassageOrigin, passageKey } from "./eval-passage-origin";
 import { project } from "./eval-present";
 import {
+  NOT_PERTINENCE,
   POLICIES,
   answerLines,
+  answerPassages,
   answerRows,
   answerTables,
   claimPresentations,
   controlLines,
+  controlPassages,
   controlRows,
   controlTables,
   givesSentence,
   groupOf,
   leadOf,
+  originLines,
+  originTables,
   presentationOf,
   saidElsewhere,
   verdictFor,
@@ -387,9 +393,95 @@ describe("the answers, read against their kept verdicts", () => {
   });
 });
 
+describe("where a verified passage sits, beside what a claim would be presented as", () => {
+  const origin = (source: string, over: Partial<PassageOrigin>): PassageOrigin => ({
+    id: "a",
+    source,
+    kind: "pull_request",
+    quote: "the passage",
+    parts: ["description"],
+    change: "commit:last",
+    last: true,
+    ...over,
+  });
+  const origins = new Map(
+    [
+      origin("pr:7", { parts: ["discussion"] }),
+      origin("commit:first", {
+        kind: "commit",
+        parts: ["message"],
+        change: "commit:first",
+        last: false,
+      }),
+      origin("review:7-0", {
+        kind: "review",
+        parts: ["review comment"],
+        placement: "another file",
+      }),
+    ].map((o) => [passageKey(o.id, o.source, o.quote), o]),
+  );
+  const told = narrative([
+    { text: "t", citations: ["pr:7"], status: "supported" },
+    { text: "u", citations: ["commit:first"], status: "supported" },
+    { text: "v", citations: ["review:7-0"], status: "supported" },
+    { text: "w", citations: ["commit:last"], status: "supported" },
+  ]);
+  const rows = answerPassages("f.jsonl", [run("a", 0, told)], new Map([["a", facts()]]), origins);
+
+  it("says the part of the record and the change, and leaves the presentation as it was", () => {
+    expect(rows.map(({ row, where, change }) => [row, where, change])).toEqual([
+      ["inferred from the last change, verdict pass", "pull request discussion", "the last change"],
+      ["told of an earlier change, verdict pass", "commit message", "an earlier change"],
+      [
+        "said elsewhere in the change, verdict pass",
+        "review comment, another file",
+        "the last change",
+      ],
+      ["inferred from the last change, verdict pass", "not kept", "not kept"],
+    ]);
+    expect(claimPresentations(run("a", 0, told), facts())).toEqual([
+      "inferred from the last change",
+      "told of an earlier change",
+      "said elsewhere in the change",
+      "inferred from the last change",
+    ]);
+  });
+
+  it("looks a control's passage up in every source the control cites", () => {
+    const borrowed = control(
+      "a",
+      "gives the line a reason the source gives for another part of the change",
+      "not-supported",
+    );
+    const quoted = judged(borrowed, ["supported", "weak"]).map((j) => ({
+      ...j,
+      quote: "the passage",
+    }));
+    const found = controlPassages([borrowed], quoted, new Map([["a", facts()]]), origins);
+    expect(found.map(({ row, where }) => [row, where])).toEqual([
+      ["borrowed, inferred from the last change", "pull request discussion"],
+      ["borrowed, not established", "pull request discussion"],
+    ]);
+  });
+
+  it("counts the passages by where they sit and by the change they belong to", () => {
+    const tables = originTables(rows);
+    expect(tables.passages).toBe(4);
+    expect(tables.where["inferred from the last change, verdict pass"]).toEqual({
+      "pull request discussion": 1,
+      "not kept": 1,
+    });
+    expect(tables.change["told of an earlier change, verdict pass"]).toEqual({
+      "an earlier change": 1,
+    });
+    expect(originLines("A run", tables)).toContain("A run: 4 verified passages");
+    expect(NOT_PERTINENCE).toContain("Neither says that the passage is the reason");
+  });
+});
+
 describe("the kept presentation, recomputed from the kept files", () => {
   const kept = JSON.parse(readFileSync("eval/results/2026-10-12-presentation.json", "utf8"));
-  const again = JSON.parse(JSON.stringify(project(kept.facts, kept.replay)));
+  const again = JSON.parse(JSON.stringify(project(kept.facts, kept.replay, kept.origins)));
 
   it("gives the same rows and the same tables", () => {
     expect(again.files).toEqual(kept.files);
@@ -398,6 +490,48 @@ describe("the kept presentation, recomputed from the kept files", () => {
     expect(again.tables).toEqual(kept.tables);
     expect(kept.controls.length).toBe(212);
     expect(kept.answers.length).toBeGreaterThan(800);
+  });
+
+  it("presents every claim and every answer the same with the origins as without them", () => {
+    const bare = JSON.parse(JSON.stringify(project(kept.facts, kept.replay)));
+    expect(bare.tables.origins).toBeUndefined();
+    expect(bare.controls).toEqual(again.controls);
+    expect(bare.answers).toEqual(again.answers);
+    expect(bare.tables.controls).toEqual(again.tables.controls);
+    expect(bare.tables.runs).toEqual(again.tables.runs);
+  });
+
+  it("finds the origin of every verified passage of the kept runs and controls", () => {
+    const { controls, runs } = kept.tables.origins;
+    const tables = [controls, ...Object.values(runs)] as Array<{
+      where: Record<string, Record<string, number>>;
+    }>;
+    for (const table of tables)
+      for (const cells of Object.values(table.where)) {
+        expect(cells["not kept"]).toBeUndefined();
+        expect(cells["not located"]).toBeUndefined();
+      }
+  });
+
+  it("holds a borrowed reason and a true one in the same parts of the record", () => {
+    const { where, change } = kept.tables.origins.controls;
+    expect(where["borrowed, inferred from the last change"]).toEqual({
+      "pull request description": 12,
+      "pull request discussion": 6,
+    });
+    expect(where["true, inferred from the last change"]["pull request description"]).toBe(8);
+    expect(where["true, inferred from the last change"]["pull request discussion"]).toBeUndefined();
+    expect(change["true, told of an earlier change"]).toEqual({ "an earlier change": 19 });
+    expect(change["borrowed, inferred from the last change"]).toEqual({ "the last change": 18 });
+  });
+
+  it("is what eval/README.md publishes about where the controls' passages sit", () => {
+    const readme = readFileSync("eval/README.md", "utf8");
+    const published = new Set(readme.split("\n").map((line) => line.trim()));
+    expect(readme).toContain("(results/2026-10-13-passage-origins.json)");
+    expect(readme).toContain("**Provenance is not pertinence.**");
+    for (const line of originLines("Written controls", kept.tables.origins.controls))
+      expect(published).toContain(line.trim());
   });
 
   it("presents no borrowed or false control as documented, and no false one as an inference", () => {
