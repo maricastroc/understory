@@ -19,6 +19,7 @@ export type { VerifiedNarrative } from "./verified-narrative";
 export type {
   ChangeEntry,
   ChangeScope,
+  Explanation,
   Lineage,
   LineageEntry,
   LineageStop,
@@ -29,8 +30,10 @@ export type {
   Reading,
   Reason,
   ReasonScope,
+  RecordPart,
   Relation,
   Specificity,
+  Standing,
   State,
   Unsustained,
 } from "./reading";
