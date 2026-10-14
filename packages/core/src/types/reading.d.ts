@@ -50,9 +50,26 @@ export type State =
 
 export type ReasonScope = "line" | "change" | "earlier change" | "file";
 
-export type Passage = { source: string; text: string; placement?: Placement; outdated?: boolean };
+export type RecordPart =
+  "title" | "message" | "description" | "discussion" | "review summary" | "review comment";
 
-export type Reason = { claim: number; scope: ReasonScope; sentence?: string; passages: Passage[] };
+export type Passage = {
+  source: string;
+  text: string;
+  parts?: RecordPart[];
+  placement?: Placement;
+  outdated?: boolean;
+};
+
+export type Standing = "documented for the line" | "inferred";
+
+export type Reason = {
+  claim: number;
+  scope: ReasonScope;
+  standing?: Standing;
+  sentence?: string;
+  passages: Passage[];
+};
 
 export type ChangeEntry = {
   id: string;
@@ -72,10 +89,13 @@ export type Unsustained = {
   quality: Exclude<Quality, "stated by a cited source">;
 };
 
+export type Explanation = Standing | "not identified";
+
 export type Reading = {
   history: "the line" | "the file";
   changes: ChangeEntry[];
   earlier: LineageStop | "not read" | null;
+  explanation: Explanation;
   unsustained: Unsustained[];
   claims: Array<{ claim: number; quality: Quality; specificity: Specificity; state: State }>;
 };

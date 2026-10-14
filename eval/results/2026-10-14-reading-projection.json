@@ -1,0 +1,2474 @@
+{
+  "date": "2026-10-14T11:34:40.099Z",
+  "what": "The kept runs and the kept judgements of the written controls, read by the core's readAnswer on the evidence collection gives today, with no model. Before: the writer's sentence kept only where a source is linked directly to the line. Now: also kept as an inference when the record of a change to the line states the reason and nothing in the structure rules it out. An inference is not a proven reason for the line, and where a passage sits is not why it is the line's.",
+  "evidence": "eval/results/2026-10-14-reading-evidence.json",
+  "replay": "eval/results/2026-10-12-patch-context-replay-one-question.jsonl",
+  "files": [
+    "2026-10-11-audit-first-fix.jsonl",
+    "2026-10-11-audit-fix-direct-check.jsonl",
+    "2026-10-11-audit-fix.jsonl",
+    "2026-10-11-recorded-before-evening.jsonl",
+    "2026-10-11-two-cases-after.jsonl",
+    "2026-10-11-two-cases-before-again.jsonl",
+    "2026-10-11-two-cases-before.jsonl",
+    "2026-10-11-two-cases-first-fix.jsonl",
+    "2026-10-11-v1-before.jsonl",
+    "2026-10-11-via-openrouter.jsonl",
+    "2026-10-11.jsonl",
+    "2026-10-12-line-attribution-before-on-audit-fix.jsonl",
+    "2026-10-12-line-attribution-before-on-main.jsonl",
+    "2026-10-12-line-attribution.jsonl"
+  ],
+  "controls": [
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-168",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:d3ee30b"
+    },
+    {
+      "id": "machine-168",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:d3ee30b"
+    },
+    {
+      "id": "machine-168",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:d3ee30b"
+    },
+    {
+      "id": "machine-168",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:d3ee30b"
+    },
+    {
+      "id": "q-306",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:5ea9aaf"
+    },
+    {
+      "id": "q-306",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-306",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:5ea9aaf"
+    },
+    {
+      "id": "q-306",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:18a2e4f"
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": true,
+      "now": "documented for the line",
+      "change": "commit:a4a868e"
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": true,
+      "now": "documented for the line",
+      "change": "commit:a4a868e"
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": true,
+      "now": "documented for the line",
+      "change": "commit:a4a868e"
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": true,
+      "now": "documented for the line",
+      "change": "commit:a4a868e"
+    },
+    {
+      "id": "tslint-260",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8c2ac95"
+    },
+    {
+      "id": "tslint-260",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8c2ac95"
+    },
+    {
+      "id": "tslint-260",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8c2ac95"
+    },
+    {
+      "id": "tslint-260",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8c2ac95"
+    },
+    {
+      "id": "draft-644",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8de2db9"
+    },
+    {
+      "id": "draft-644",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8de2db9"
+    },
+    {
+      "id": "draft-644",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8de2db9"
+    },
+    {
+      "id": "draft-644",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8de2db9"
+    },
+    {
+      "id": "tslint-189",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-189",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-189",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-189",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "jitter",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:0016d9d"
+    },
+    {
+      "id": "jitter",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:0016d9d"
+    },
+    {
+      "id": "jitter",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:0016d9d"
+    },
+    {
+      "id": "jitter",
+      "kind": "true of the code and backed by a source",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:0016d9d"
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-189",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-189",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-189",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-189",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-306",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-306",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-306",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-306",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-168",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-168",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-168",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-168",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "draft-644",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "draft-644",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "draft-644",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "draft-644",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-260",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-260",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-260",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-260",
+      "kind": "says something the code or the patch contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-306",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-306",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-306",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-306",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-168",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-168",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-168",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-168",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-796",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-796",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-796",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-796",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-114",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-260",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-260",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-260",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-260",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "jitter",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "jitter",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "jitter",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "jitter",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives a reason no source gives",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:aa54a5f"
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:aa54a5f"
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:63fc794"
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:63fc794"
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:63fc794"
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line a reason the source gives for another part of the change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:63fc794"
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "q-796",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ng-http-411",
+      "kind": "true of the code, with no reason given",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-257",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8b853b2"
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8b853b2"
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8b853b2"
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8b853b2"
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8b853b2"
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8b853b2"
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8b853b2"
+    },
+    {
+      "id": "tslint-189",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:8b853b2"
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:aa54a5f"
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:aa54a5f"
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:aa54a5f"
+    },
+    {
+      "id": "machine-32",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:aa54a5f"
+    },
+    {
+      "id": "draft-644",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "draft-644",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "draft-644",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "draft-644",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line, in the source's words, the reason of another part of the same change",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "jitter",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "jitter",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "jitter",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "jitter",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "retry-cap",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "retry-cap",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "retry-cap",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "retry-cap",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "gives the last change the reason of another change in the line's history",
+      "group": "borrowed",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "context only",
+      "change": null
+    },
+    {
+      "id": "retry-cap",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:f2b44ae"
+    },
+    {
+      "id": "retry-cap",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:f2b44ae"
+    },
+    {
+      "id": "retry-cap",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:f2b44ae"
+    },
+    {
+      "id": "retry-cap",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:f2b44ae"
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:22e1399"
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:22e1399"
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:22e1399"
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:05a16a3"
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:05a16a3"
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:05a16a3"
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:05a16a3"
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:78ff826"
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:78ff826"
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:78ff826"
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:78ff826"
+    },
+    {
+      "id": "jitter",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:c038fb3"
+    },
+    {
+      "id": "jitter",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:c038fb3"
+    },
+    {
+      "id": "jitter",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:c038fb3"
+    },
+    {
+      "id": "jitter",
+      "kind": "true of an earlier version of the code and backed by the commit that wrote it",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for an earlier change",
+      "change": "commit:c038fb3"
+    },
+    {
+      "id": "retry-cap",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "retry-cap",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "retry-cap",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "retry-cap",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "weak",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-revert-story",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 1,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 0,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 2,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "ws-batch-size",
+      "kind": "says of an earlier version what the commit that wrote it contradicts",
+      "group": "false",
+      "pass": 3,
+      "status": "unsupported",
+      "before": false,
+      "now": "not established",
+      "change": null
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:cfe548c"
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:cfe548c"
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:cfe548c"
+    },
+    {
+      "id": "apollo-http-10",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": false,
+      "now": "inferred for the last change",
+      "change": "commit:cfe548c"
+    },
+    {
+      "id": "ws-injected-commit",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "group": "true",
+      "pass": 0,
+      "status": "supported",
+      "before": true,
+      "now": "documented for the line",
+      "change": "commit:a77590a"
+    },
+    {
+      "id": "ws-injected-commit",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "group": "true",
+      "pass": 3,
+      "status": "supported",
+      "before": true,
+      "now": "documented for the line",
+      "change": "commit:a77590a"
+    },
+    {
+      "id": "ws-injected-commit",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "group": "true",
+      "pass": 1,
+      "status": "supported",
+      "before": true,
+      "now": "documented for the line",
+      "change": "commit:a77590a"
+    },
+    {
+      "id": "ws-injected-commit",
+      "kind": "gives the line the reason the source gives for the part of the change it belongs to",
+      "group": "true",
+      "pass": 2,
+      "status": "supported",
+      "before": true,
+      "now": "documented for the line",
+      "change": "commit:a77590a"
+    }
+  ],
+  "tables": {
+    "controls": {
+      "judgements": 212,
+      "total": {
+        "true": 68,
+        "false": 88,
+        "borrowed": 56
+      },
+      "before": {
+        "true": 8
+      },
+      "now": {
+        "true": 50,
+        "borrowed": 18
+      },
+      "outcome": {
+        "true": {
+          "not established": 18,
+          "inferred for the last change": 23,
+          "documented for the line": 8,
+          "inferred for an earlier change": 19
+        },
+        "false": {
+          "not established": 88
+        },
+        "borrowed": {
+          "inferred for the last change": 18,
+          "not established": 37,
+          "context only": 1
+        }
+      },
+      "byKind": {
+        "true of the code and backed by a source": {
+          "not established": 17,
+          "inferred for the last change": 19,
+          "documented for the line": 4
+        },
+        "says something the code or the patch contradicts": {
+          "not established": 32
+        },
+        "gives a reason no source gives": {
+          "not established": 32
+        },
+        "gives the line a reason the source gives for another part of the change": {
+          "inferred for the last change": 6,
+          "not established": 2
+        },
+        "true of the code, with no reason given": {
+          "not established": 12
+        },
+        "gives the line, in the source's words, the reason of another part of the same change": {
+          "not established": 20,
+          "inferred for the last change": 12
+        },
+        "gives the last change the reason of another change in the line's history": {
+          "not established": 15,
+          "context only": 1
+        },
+        "true of an earlier version of the code and backed by the commit that wrote it": {
+          "inferred for an earlier change": 19,
+          "not established": 1
+        },
+        "says of an earlier version what the commit that wrote it contradicts": {
+          "not established": 12
+        },
+        "gives the line the reason the source gives for the part of the change it belongs to": {
+          "inferred for the last change": 4,
+          "documented for the line": 4
+        }
+      },
+      "borrowedAsAnInference": {
+        "machine-32": 6,
+        "tslint-257": 4,
+        "tslint-189": 8
+      },
+      "trueRecovered": {
+        "machine-168": 4,
+        "q-306": 2,
+        "ng-http-114": 1,
+        "tslint-260": 4,
+        "draft-644": 4,
+        "jitter": 8,
+        "retry-cap": 4,
+        "ws-revert-story": 7,
+        "ws-batch-size": 4,
+        "apollo-http-10": 4
+      },
+      "acrossChanges": {
+        "borrowed, gives the last change the reason of another change in the line's history": {
+          "not established": 15,
+          "context only": 1
+        },
+        "true, true of an earlier version of the code and backed by the commit that wrote it": {
+          "inferred for an earlier change (commit:f2b44ae)": 4,
+          "inferred for an earlier change (commit:22e1399)": 3,
+          "not established": 1,
+          "inferred for an earlier change (commit:05a16a3)": 4,
+          "inferred for an earlier change (commit:78ff826)": 4,
+          "inferred for an earlier change (commit:c038fb3)": 4
+        },
+        "false, says of an earlier version what the commit that wrote it contradicts": {
+          "not established": 12
+        }
+      }
+    },
+    "runs": {
+      "The pipeline as it is on main (2026-10-12-line-attribution.jsonl)": {
+        "runs": 144,
+        "total": {
+          "recorded, synthetic": 32,
+          "silent, synthetic": 16,
+          "out-of-scope, synthetic": 36,
+          "false-premise, synthetic": 12,
+          "recorded, real lines": 28,
+          "silent, real lines": 4,
+          "incidental, real lines": 16
+        },
+        "now": {
+          "recorded, synthetic": {
+            "inferred": 20,
+            "documented for the line": 12
+          },
+          "silent, synthetic": {
+            "abstained": 15,
+            "no answer": 1
+          },
+          "out-of-scope, synthetic": {
+            "out of scope": 35,
+            "abstained": 1
+          },
+          "false-premise, synthetic": {
+            "abstained": 11,
+            "no answer": 1
+          },
+          "recorded, real lines": {
+            "inferred": 17,
+            "not identified": 3,
+            "abstained": 4,
+            "documented for the line": 3,
+            "no answer": 1
+          },
+          "silent, real lines": {
+            "abstained": 4
+          },
+          "incidental, real lines": {
+            "abstained": 10,
+            "inferred": 4,
+            "not identified": 1,
+            "out of scope": 1
+          }
+        },
+        "before": {
+          "recorded, synthetic": 12,
+          "recorded, real lines": 3
+        },
+        "after": {
+          "recorded, synthetic": 32,
+          "recorded, real lines": 20,
+          "incidental, real lines": 4
+        },
+        "accepted": {
+          "recorded, synthetic": 32,
+          "silent, synthetic": 15,
+          "out-of-scope, synthetic": 36,
+          "false-premise, synthetic": 11,
+          "recorded, real lines": 20,
+          "silent, real lines": 4,
+          "incidental, real lines": 16
+        },
+        "acceptedBefore": {
+          "recorded, synthetic": 12,
+          "recorded, real lines": 3
+        },
+        "acceptedAfter": {
+          "recorded, synthetic": 32,
+          "recorded, real lines": 20,
+          "incidental, real lines": 4
+        },
+        "failedNow": {
+          "recorded, real lines": {
+            "not identified": 3,
+            "abstained": 4
+          }
+        },
+        "claims": {
+          "recorded, synthetic": {
+            "inferred for the last change": 24,
+            "documented for the line": 12,
+            "inferred for an earlier change": 13,
+            "not established": 4
+          },
+          "recorded, real lines": {
+            "not established": 12,
+            "inferred for the last change": 18,
+            "documented for the line": 5
+          },
+          "incidental, real lines": {
+            "inferred for the last change": 6,
+            "not established": 2
+          }
+        },
+        "spanningClaims": 1,
+        "sourcesNotCollectedToday": 0
+      },
+      "The kept runs of the pipelines before it (13 files)": {
+        "runs": 720,
+        "total": {
+          "recorded, synthetic": 197,
+          "silent, synthetic": 49,
+          "out-of-scope, synthetic": 111,
+          "false-premise, synthetic": 60,
+          "recorded, real lines": 211,
+          "silent, real lines": 12,
+          "incidental, real lines": 80
+        },
+        "now": {
+          "recorded, synthetic": {
+            "inferred": 119,
+            "documented for the line": 73,
+            "not identified": 4,
+            "no answer": 1
+          },
+          "silent, synthetic": {
+            "abstained": 37,
+            "inferred": 9,
+            "not identified": 3
+          },
+          "out-of-scope, synthetic": {
+            "out of scope": 92,
+            "abstained": 19
+          },
+          "false-premise, synthetic": {
+            "abstained": 47,
+            "out of scope": 12,
+            "no answer": 1
+          },
+          "recorded, real lines": {
+            "inferred": 133,
+            "abstained": 24,
+            "not identified": 27,
+            "documented for the line": 27
+          },
+          "silent, real lines": {
+            "abstained": 12
+          },
+          "incidental, real lines": {
+            "inferred": 41,
+            "not identified": 28,
+            "abstained": 11
+          }
+        },
+        "before": {
+          "recorded, synthetic": 73,
+          "recorded, real lines": 27
+        },
+        "after": {
+          "recorded, synthetic": 192,
+          "silent, synthetic": 9,
+          "recorded, real lines": 160,
+          "incidental, real lines": 41
+        },
+        "accepted": {
+          "recorded, synthetic": 191,
+          "silent, synthetic": 37,
+          "out-of-scope, synthetic": 111,
+          "recorded, real lines": 139,
+          "silent, real lines": 12,
+          "false-premise, synthetic": 47,
+          "incidental, real lines": 24
+        },
+        "acceptedBefore": {
+          "recorded, synthetic": 73,
+          "recorded, real lines": 27
+        },
+        "acceptedAfter": {
+          "recorded, synthetic": 191,
+          "recorded, real lines": 139,
+          "incidental, real lines": 8
+        },
+        "failedNow": {
+          "recorded, synthetic": {
+            "not identified": 4,
+            "inferred": 1
+          },
+          "silent, synthetic": {
+            "inferred": 9,
+            "not identified": 3
+          },
+          "recorded, real lines": {
+            "inferred": 21,
+            "abstained": 24,
+            "not identified": 27
+          },
+          "incidental, real lines": {
+            "inferred": 24,
+            "not identified": 16
+          }
+        },
+        "claims": {
+          "recorded, synthetic": {
+            "inferred for the last change": 132,
+            "documented for the line": 75,
+            "not established": 41,
+            "inferred for an earlier change": 139
+          },
+          "silent, synthetic": {
+            "inferred for the last change": 14,
+            "not established": 10
+          },
+          "recorded, real lines": {
+            "inferred for the last change": 178,
+            "not established": 121,
+            "documented for the line": 32
+          },
+          "incidental, real lines": {
+            "inferred for the last change": 72,
+            "not established": 82,
+            "context only": 19
+          }
+        },
+        "spanningClaims": 4,
+        "sourcesNotCollectedToday": 0
+      }
+    },
+    "documented": {
+      "documentedNow": 115,
+      "documentedInTheKeptProjection": 115,
+      "differ": []
+    }
+  }
+}
