@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { lineInvestigationFonts } from "@/components/line-investigation/fonts";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
-import { getLocale, serverOfferedLocales } from "@/i18n/server";
+import { getLocale } from "@/i18n/server";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,9 +15,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={locale} className={`${lineInvestigationFonts} h-full`}>
       <body className="min-h-full bg-li-paper font-li-body text-li-ink antialiased">
-        <LocaleProvider locale={locale} offered={serverOfferedLocales()}>
-          {children}
-        </LocaleProvider>
+        <LocaleProvider locale={locale}>{children}</LocaleProvider>
       </body>
     </html>
   );

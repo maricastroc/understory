@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useId, useMemo, useRef, useState, useTransition } from "react";
-import { useLocale, useMessages, useOfferedLocales } from "@/i18n/LocaleProvider";
-import { LOCALE_NAME, type Locale } from "@/i18n/locales";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import { LOCALE_NAME, LOCALES, type Locale } from "@/i18n/locales";
 import { setLocale } from "@/i18n/set-locale";
 import { Check, Languages } from "../icons";
 import { liButton } from "../line-investigation/parts/button-class";
@@ -10,7 +10,6 @@ import { useDismiss } from "./use-dismiss";
 
 export function LocaleMenu() {
   const locale = useLocale();
-  const offered = useOfferedLocales();
   const m = useMessages();
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
@@ -20,8 +19,6 @@ export function LocaleMenu() {
   const close = useCallback(() => setOpen(false), []);
   const refs = useMemo(() => [trigger, menu], []);
   useDismiss(open, refs, close);
-
-  if (offered.length < 2) return null;
 
   const dismiss = () => {
     setOpen(false);
@@ -60,7 +57,7 @@ export function LocaleMenu() {
           }}
           className="absolute top-10 right-0 z-40 w-44 border border-li-divider bg-li-paper py-1 shadow-li-lg"
         >
-          {offered.map((l) => (
+          {LOCALES.map((l) => (
             <li key={l}>
               <button
                 type="button"

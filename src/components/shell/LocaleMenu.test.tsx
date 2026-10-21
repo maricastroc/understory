@@ -8,9 +8,9 @@ import { LocaleMenu } from "./LocaleMenu";
 const setLocale = vi.hoisted(() => vi.fn(async () => {}));
 vi.mock("@/i18n/set-locale", () => ({ setLocale }));
 
-const menu = (locale: Locale, offered: Locale[] = ["en", "pt-BR"]) =>
+const menu = (locale: Locale) =>
   render(
-    <LocaleProvider locale={locale} offered={offered}>
+    <LocaleProvider locale={locale}>
       <LocaleMenu />
     </LocaleProvider>,
   );
@@ -18,11 +18,6 @@ const menu = (locale: Locale, offered: Locale[] = ["en", "pt-BR"]) =>
 afterEach(() => setLocale.mockClear());
 
 describe("LocaleMenu", () => {
-  it("is not shown while only one language is offered", () => {
-    const { container } = menu("en", ["en"]);
-    expect(container.innerHTML).toBe("");
-  });
-
   it("names itself and the current language in the interface's language", () => {
     menu("en");
     expect(screen.getByRole("button", { name: "Language: English" })).toBeTruthy();

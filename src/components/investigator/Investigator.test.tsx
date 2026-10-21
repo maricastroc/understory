@@ -117,7 +117,7 @@ describe("Investigator — a deep-linked line case", () => {
 });
 
 const inLocale = (locale: Locale) => (
-  <LocaleProvider locale={locale} offered={["en", "pt-BR"]}>
+  <LocaleProvider locale={locale}>
     <Investigator />
   </LocaleProvider>
 );

@@ -18,7 +18,7 @@ function Probe() {
 }
 
 const within = (locale: Locale) => (
-  <LocaleProvider locale={locale} offered={["en", "pt-BR"]}>
+  <LocaleProvider locale={locale}>
     <Probe />
   </LocaleProvider>
 );

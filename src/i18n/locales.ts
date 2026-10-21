@@ -24,11 +24,6 @@ export function answerLanguageOf(locale: Locale): NarrativeLanguage {
   return ANSWER_LANGUAGE[locale];
 }
 
-export function offeredLocales(env: Record<string, string | undefined>): Locale[] {
-  if (env.NODE_ENV !== "production" || env.UNDERSTORY_PT_BR === "1") return [...LOCALES];
-  return [DEFAULT_LOCALE];
-}
-
-export function localeFrom(value: string | undefined, offered: readonly Locale[]): Locale {
-  return isLocale(value) && offered.includes(value) ? value : DEFAULT_LOCALE;
+export function localeFrom(value: string | undefined): Locale {
+  return isLocale(value) ? value : DEFAULT_LOCALE;
 }
