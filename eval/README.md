@@ -1007,6 +1007,10 @@ models almost never answer "insufficient" (2 of 297) or "indeterminate" (none).
   spacing ignored against 5, and gave 4 empty answers against 1 for 120b. Stability is high on true
   clusters (12 of 12 agree two times in three for both) and lower on borrowed ones. A call takes
   1.9 to 2.2 s at the median on 120b and 1.2 to 1.3 s on 20b, about US$ 0.0008 and US$ 0.0004.
+- **Not adopted.** On 21 Oct 2026 the test was not adopted as a filter: it hides no true reason in
+  this sample, but the borrowed reasons it misses are missed by the very failure #49 describes, a
+  causal link the record does not make, and the sample is too small to size either side. The
+  product keeps a likely explanation as such, with its source, and #49 stays open.
 - **What this does not show.** Seven verifiable borrowed clusters of the same change, in four cases, three of them the
   prompt's own; twelve true ones, mostly easy; no run of the pipeline. The
   labels are one reader's. It cannot say how often the test would be right.
