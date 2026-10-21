@@ -1,7 +1,6 @@
 # A test of pertinence for issue 49: the proposed replay
 
-**Status: a proposal, not run.** No model has been asked anything in this design. Nothing here
-changes the audit, the prompts in production, the verdicts, the interface or what the app does.
+**Status: phase 1 run on the controls on 21 Oct 2026, exploratory; phase 2, on the runs, not run.** The results are in the [README](README.md#what-the-test-of-pertinence-did-on-the-controls). The design below is as it was proposed; the two rules added between the stages are said there. Nothing here changes the audit, the prompts in production, the verdicts, the interface or what the app does.
 
 The audit checks that a reason is in a cited source. It does not check that the reason is the
 line's. The core presents a credited change-level reason as a "Likely explanation", and the
