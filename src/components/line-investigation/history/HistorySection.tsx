@@ -206,7 +206,7 @@ export function HistorySection({
                   {gapLetter(g)} {gapTitle(g)}
                 </span>
                 <span className="w-fit max-w-160 bg-li-paper px-1 text-[12.5px] leading-[1.45] text-li-neutral-800">
-                  {gapBody(g, s.anchor)}
+                  {gapBody(g, s.anchor, !!layer)}
                 </span>
               </div>
             </div>

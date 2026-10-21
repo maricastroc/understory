@@ -13,6 +13,7 @@ import {
 import { Answer } from "../answer/Answer";
 import { tickText } from "../copy/artifact-copy";
 import { caseSubject } from "../copy/subject-copy";
+import { sourceNamer, whyCopy } from "../copy/why-copy";
 import { historyModel } from "../history/history-model";
 import { extentOf, readingLayer } from "../history/reading-layer";
 import { HistorySection } from "../history/HistorySection";
@@ -25,6 +26,7 @@ import { caseReducer, initialCaseState } from "../state/case-reducer";
 import { readKeyPreference, writeKeyPreference } from "./key-preference";
 import { TitleRow } from "./TitleRow";
 import { Toolbar } from "./Toolbar";
+import { whyModel } from "../why/why-model";
 import { useCaseKeyboard } from "./use-case-keyboard";
 import type { AnalysisLanguage, CasePhase } from "./types";
 
@@ -68,6 +70,15 @@ export function LineInvestigation({
   const subject = useMemo(
     () => caseSubject(view, result.evidence.anchor),
     [view, result.evidence.anchor],
+  );
+  const copied = useMemo(
+    () =>
+      view.reading
+        ? whyCopy(whyModel(view.reading), sourceNamer(view.artifacts))
+        : view.clauses.length && !view.clauses[0].silent
+          ? view.answer
+          : null,
+    [view],
   );
   const note = result.evidence.note;
   const [state, dispatch] = useReducer(caseReducer, undefined, () =>
@@ -188,7 +199,7 @@ export function LineInvestigation({
         <Toolbar
           history={summary}
           keyOpen={state.keyOpen}
-          answer={view.clauses.length && !view.clauses[0].silent ? view.answer : null}
+          answer={copied}
           onHistory={() => reveal(document.getElementById("history"), "start")}
           onToggleKey={() => dispatch({ type: "toggle-key" })}
         />

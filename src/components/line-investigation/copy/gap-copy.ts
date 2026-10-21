@@ -45,12 +45,14 @@ export function gapBasis(gap: ViewGap): string {
   return BASIS[gap.basis];
 }
 
-export function gapBody(gap: ViewGap, after: ViewArtifact): string {
+export function gapBody(gap: ViewGap, after: ViewArtifact, reading = false): string {
   const id = displayId(after);
   if (!gap.verified) {
     return `Nothing is shown before ${id}, but this was not verified. Understory does not treat it as silence.`;
   }
   if (gap.missing === "pull_request") {
+    if (reading)
+      return `Blame reaches ${id}, and no pull request, review or issue was found for it. The commit's own message is all the record holds.`;
     return `Blame reaches ${id}, but no pull request, review or issue explains it. Understory does not infer a reason here.`;
   }
   if (gap.missing === "review") {

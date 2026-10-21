@@ -1,5 +1,10 @@
 import { type RefObject, useEffect, useRef } from "react";
-import { checklistGlyph, checklistText, VERDICT_TITLE } from "../copy/verdict-copy";
+import {
+  checklistGlyph,
+  checklistText,
+  READING_ANSWERED,
+  VERDICT_TITLE,
+} from "../copy/verdict-copy";
 import type { ChecklistTone, InvestigationView } from "../model/types";
 
 const GLYPH: Record<ChecklistTone, string> = {
@@ -33,6 +38,7 @@ export function VerdictPopover({
   }, [onClose, anchor]);
 
   const headingId = `${id}-title`;
+  const answered = !!view.reading && view.verdict === "resolved";
   return (
     <div
       id={id}
@@ -42,7 +48,7 @@ export function VerdictPopover({
       className="absolute top-9.5 right-0 z-20 flex w-75 flex-col gap-2 border border-li-divider bg-li-paper p-3.5 text-[12.5px] shadow-li-lg"
     >
       <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
-        {VERDICT_TITLE[view.verdict]}
+        {answered ? READING_ANSWERED.title : VERDICT_TITLE[view.verdict]}
       </h2>
       <ul className="grid grid-cols-[16px_minmax(0,1fr)] gap-x-1.5 gap-y-1.25 text-li-neutral-800">
         {view.checklist.map((item, i) => (
@@ -63,7 +69,9 @@ export function VerdictPopover({
             </span>
           </div>
           <p className="text-[11.5px] text-li-text-subtle">
-            Computed from the checks above, never the model&apos;s self-assessment.
+            {answered
+              ? READING_ANSWERED.confidence
+              : "Computed from the checks above, never the model's self-assessment."}
           </p>
         </>
       )}

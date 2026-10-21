@@ -1,9 +1,20 @@
-import { type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  type ReactNode,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { AnalysisLanguage, CasePhase } from "../case/types";
 import { clauseDescription } from "../copy/clause-copy";
+import { WHY_TITLE, sourceNamer } from "../copy/why-copy";
 import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types";
 import { LANGUAGE_NAME, LanguageSwitch } from "../parts/LanguageSwitch";
 import { ClauseRow } from "./ClauseRow";
+import { ReadingWhy } from "./ReadingWhy";
+import { whyModel } from "./why-model";
 
 const HOVER_DELAY = 120;
 const LEAVE_DELAY = 160;
@@ -13,10 +24,14 @@ function showsClauses(view: InvestigationView, phase: CasePhase | undefined): bo
   return !(view.empty && (view.verdict === "not-recorded" || view.verdict === "evidence-only"));
 }
 
-function hintFor(view: InvestigationView, pinnedIndex: number | null, clauses: boolean): string {
+function hintFor(
+  pinnedIndex: number | null,
+  clauses: boolean,
+  noun: "clause" | "sentence",
+): string {
   if (pinnedIndex !== null) return `checking clause ${pinnedIndex + 1} · Esc returns here`;
   if (!clauses) return "";
-  return "select a clause to check its evidence";
+  return `select a ${noun} to check its evidence`;
 }
 
 export function WhyZone({
@@ -57,7 +72,16 @@ export function WhyZone({
   };
   useEffect(() => () => window.clearTimeout(intent.current), []);
   const pinnedIndex = view.clauses.findIndex((c) => c.id === pinned);
-  const clauses = showsClauses(view, phase);
+  const body = whyBody(view, phase, failure);
+  const plain = body === null;
+  const model = useMemo(
+    () => (view.reading && plain ? whyModel(view.reading) : null),
+    [view.reading, plain],
+  );
+  const source = useMemo(() => sourceNamer(view.artifacts), [view.artifacts]);
+  const clauses = model
+    ? model.changes.some((c) => c.entries.length > 0) || model.unsustained.length > 0
+    : showsClauses(view, phase);
 
   const move = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
     if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
@@ -75,12 +99,16 @@ export function WhyZone({
     <section aria-labelledby={headingId} className="flex flex-col">
       <div className="flex min-h-7 flex-wrap items-center gap-x-2.5 gap-y-1 pl-7">
         <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
-          Reconstructed why
+          {view.reading ? WHY_TITLE : "Reconstructed why"}
         </h2>
         <span aria-live="polite" className="text-xs text-li-text-subtle">
           {analysis?.rewriting
             ? `rewriting in ${LANGUAGE_NAME[analysis.selected]}…`
-            : hintFor(view, pinnedIndex >= 0 ? pinnedIndex : null, clauses)}
+            : hintFor(
+                pinnedIndex >= 0 ? pinnedIndex : null,
+                clauses,
+                model ? "sentence" : "clause",
+              )}
         </span>
         {analysis && (
           <div className="ml-auto">
@@ -92,8 +120,22 @@ export function WhyZone({
           </div>
         )}
       </div>
-      <WhyBody view={view} phase={phase} failure={failure} />
-      {clauses && (
+      {body}
+      {model && (
+        <ReadingWhy
+          model={model}
+          language={view.language}
+          clauses={view.clauses}
+          source={source}
+          effective={effective}
+          pinned={pinned}
+          onHover={onHover}
+          onPick={onPick}
+          evidenceId={evidenceId}
+          renderEvidence={renderEvidence}
+        />
+      )}
+      {!model && clauses && (
         <ol lang={view.language ?? undefined} className="relative mt-1 flex flex-col gap-1">
           {view.clauses.map((clause, i) => (
             <ClauseRow
@@ -149,15 +191,7 @@ function Skeleton({ caption }: { caption: string }) {
   );
 }
 
-function WhyBody({
-  view,
-  phase,
-  failure,
-}: {
-  view: InvestigationView;
-  phase?: CasePhase;
-  failure?: ReactNode;
-}) {
+function whyBody(view: InvestigationView, phase?: CasePhase, failure?: ReactNode): ReactNode {
   if (phase === "collecting") return <Skeleton caption="Collecting the line's history…" />;
   if (phase === "failed") return <div className="mt-1 flex flex-col gap-2.5 pl-7">{failure}</div>;
   if (view.empty && view.verdict !== "out-of-scope" && view.verdict !== "fabrication") {

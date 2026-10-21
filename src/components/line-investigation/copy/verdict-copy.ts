@@ -18,6 +18,13 @@ export const VERDICT_TITLE: Record<Verdict, string> = {
   resolved: "Why this is resolved",
 };
 
+export const READING_ANSWERED = {
+  label: "Answered",
+  title: "What was checked",
+  confidence:
+    "Computed from the checks above, never the model's self-assessment. It rates the answer's sources, not their link to this line.",
+};
+
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 export function checklistText(item: ChecklistItem): string {
