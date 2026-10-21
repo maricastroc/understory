@@ -4,11 +4,6 @@ import type { NarrativeLanguage } from "@understory/core/types";
 import { useId, useSyncExternalStore } from "react";
 import { SEGMENT_GROUP, segmentClass } from "./segment-class";
 
-export const LANGUAGE_NAME: Record<NarrativeLanguage, string> = {
-  en: "English",
-  pt: "Portuguese",
-};
-
 const noop = () => () => {};
 
 export function LanguageSwitch({

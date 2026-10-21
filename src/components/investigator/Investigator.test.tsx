@@ -1,5 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LocaleProvider } from "@/i18n/LocaleProvider";
+import type { Locale } from "@/i18n/locales";
 import { syntheticChargeLines } from "../line-investigation/fixtures/synthetic-charge-file";
 import { syntheticRetryCap } from "../line-investigation/fixtures/synthetic-retry-cap";
 import { Investigator } from "./Investigator";
@@ -111,5 +113,92 @@ describe("Investigator — a deep-linked line case", () => {
     await within(region).findByText("select a clause to check its evidence");
     expect(clauses(region)).toHaveLength(count);
     expect(why()).toBe(region);
+  });
+});
+
+const inLocale = (locale: Locale) => (
+  <LocaleProvider locale={locale} offered={["en", "pt-BR"]}>
+    <Investigator />
+  </LocaleProvider>
+);
+
+const requests = (api: ReturnType<typeof stubApi>, path: string) =>
+  api.calls.filter((c) => c.path === path);
+
+describe("Investigator — the interface language and the answer language", () => {
+  beforeEach(() => window.localStorage.clear());
+
+  it("asks for the answer in the interface's language when none was chosen", async () => {
+    const api = stubApi();
+    render(inLocale("pt-BR"));
+    await screen.findByText("Collecting the line's history…");
+    expect(api.digLanguage()).toBe("pt");
+    expect(window.localStorage.getItem("gi:lang")).toBeNull();
+  });
+
+  it("asks in the language chosen before, whatever the interface", async () => {
+    window.localStorage.setItem("gi:lang", "en");
+    const api = stubApi();
+    render(inLocale("pt-BR"));
+    await screen.findByText("Collecting the line's history…");
+    expect(api.digLanguage()).toBe("en");
+  });
+
+  it("leaves an answer as it is when only the interface language changes", async () => {
+    const api = stubApi();
+    const { rerender } = render(inLocale("en"));
+    await screen.findByText("Collecting the line's history…");
+    await act(async () => {
+      api.evidence();
+      api.final("en");
+    });
+    const region = why();
+    await waitFor(() => expect(clauses(region).length).toBeGreaterThan(0));
+
+    rerender(inLocale("pt-BR"));
+    const analysis = within(region).getByRole("group", { name: "Análise" });
+    expect(within(analysis).getByRole("button", { name: "EN" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+    expect(region.querySelector("ol")!.getAttribute("lang")).toBe("en");
+    expect(requests(api, "/api/narrate")).toHaveLength(0);
+    expect(requests(api, "/api/dig")).toHaveLength(1);
+    expect(window.localStorage.getItem("gi:lang")).toBeNull();
+  });
+
+  it("rewrites the answer when its own language is changed, in either interface", async () => {
+    const api = stubApi();
+    render(inLocale("pt-BR"));
+    await screen.findByText("Collecting the line's history…");
+    await act(async () => {
+      api.evidence();
+      api.final("en");
+    });
+    const region = why();
+    await waitFor(() => expect(clauses(region).length).toBeGreaterThan(0));
+    expect(requests(api, "/api/narrate")).toHaveLength(0);
+
+    const analysis = within(region).getByRole("group", { name: "Análise" });
+    fireEvent.click(within(analysis).getByRole("button", { name: "PT" }));
+    await within(region).findByText("reescrevendo em português…");
+    expect(requests(api, "/api/narrate").map((c) => c.body?.language)).toEqual(["pt"]);
+    expect(window.localStorage.getItem("gi:lang")).toBe("pt");
+    await act(async () => api.narrate("pt"));
+    await waitFor(() => expect(region.querySelector("ol")!.getAttribute("lang")).toBe("pt"));
+  });
+
+  it("brings an answer into the language chosen before, as it always did", async () => {
+    window.localStorage.setItem("gi:lang", "pt");
+    const api = stubApi();
+    render(inLocale("en"));
+    await screen.findByText("Collecting the line's history…");
+    expect(api.digLanguage()).toBe("pt");
+    await act(async () => {
+      api.evidence();
+      api.final("en");
+    });
+    await waitFor(() =>
+      expect(requests(api, "/api/narrate").map((c) => c.body?.language)).toEqual(["pt"]),
+    );
   });
 });

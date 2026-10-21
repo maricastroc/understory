@@ -3,9 +3,10 @@
 import { useSearchParams } from "next/navigation";
 import { narrativeLanguage } from "@understory/core/narrative-language";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import { answerLanguageOf } from "@/i18n/locales";
 import { ErrorState } from "../ErrorState";
 import { liButton } from "../line-investigation/parts/button-class";
-import { LANGUAGE_NAME } from "../line-investigation/parts/LanguageSwitch";
 import { Composer } from "../composer/Composer";
 import type { ComposerPrefill } from "../composer/composer-prefill";
 import { useRepo } from "../composer/use-repo";
@@ -21,7 +22,7 @@ import { railFooterInfo } from "../shell/rail-footer-info";
 import { repoDisplayName } from "../shell/repo-display-name";
 import { lineRailItems } from "../shell/rail-items";
 import type { RailItem, RepoSummary } from "../shell/types";
-import { readLanguage, useLanguage } from "../use-language";
+import { readExplicitLanguage, useLanguage } from "../use-language";
 import { CaseFailure } from "./CaseFailure";
 import { CaseView } from "./CaseView";
 import { DEEP_LINK_QUESTION, LINE_QUESTION } from "./default-question";
@@ -61,7 +62,9 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
 
   const repo = useRepo();
   const params = useSearchParams();
-  const { language, setLanguage } = useLanguage();
+  const locale = useLocale();
+  const m = useMessages();
+  const { language, explicit, setLanguage } = useLanguage();
   const [token, setToken] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [prefill, setPrefill] = useState<ComposerPrefill | null>(null);
@@ -84,7 +87,7 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
           question: DEEP_LINK_QUESTION,
         },
         undefined,
-        readLanguage(),
+        readExplicitLanguage() ?? answerLanguageOf(locale),
       );
     } else {
       void repo.open(repoPath);
@@ -101,15 +104,16 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
   }, [loaded, params, selectCase]);
 
   const rewriteTarget = (() => {
-    if (!current || current.pending || current.rewriting || !current.result.narrative) return null;
+    if (!explicit || !current || current.pending || current.rewriting) return null;
+    if (!current.result.narrative) return null;
     const written = narrativeLanguage(current.result.narrative);
-    if (!written || written === language || current.rewriteError?.language === language)
+    if (!written || written === explicit || current.rewriteError?.language === explicit)
       return null;
     return current.caseId;
   })();
   useEffect(() => {
-    if (rewriteTarget) void rewrite(rewriteTarget, language);
-  }, [rewriteTarget, language, rewrite]);
+    if (rewriteTarget && explicit) void rewrite(rewriteTarget, explicit);
+  }, [rewriteTarget, explicit, rewrite]);
 
   const tokenValue = token.trim() || undefined;
   const collecting = !!draft && !draft.error;
@@ -238,7 +242,11 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
 
   const analysisOf = (entry: Entry) =>
     entry.result.narrative && !entry.pending
-      ? { selected: language, rewriting: !!entry.rewriting, onSelect: setLanguage }
+      ? {
+          selected: explicit ?? narrativeLanguage(entry.result.narrative) ?? language,
+          rewriting: !!entry.rewriting,
+          onSelect: setLanguage,
+        }
       : undefined;
 
   const drill = (entry: Entry) => (anchor: Parameters<typeof drillInto>[2]) =>
@@ -327,22 +335,24 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
 
           {busy && <LoadingCard />}
 
-          {(lineCase || anchoredCase) && current?.rewriteError?.language === language && (
-            <p
-              role="status"
-              className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-li-text-subtle"
-            >
-              Could not rewrite this analysis in {LANGUAGE_NAME[language]}:{" "}
-              {current.rewriteError.message}
-              <button
-                type="button"
-                onClick={() => void rewrite(current.caseId, language)}
-                className={liButton("ghost", "", "sm")}
+          {(lineCase || anchoredCase) &&
+            explicit &&
+            current?.rewriteError?.language === explicit && (
+              <p
+                role="status"
+                className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-li-text-subtle"
               >
-                Try again
-              </button>
-            </p>
-          )}
+                {m.languages.rewriteFailed(m.languages.name[explicit])}{" "}
+                {current.rewriteError.message}
+                <button
+                  type="button"
+                  onClick={() => void rewrite(current.caseId, explicit)}
+                  className={liButton("ghost", "", "sm")}
+                >
+                  {m.common.tryAgain}
+                </button>
+              </p>
+            )}
 
           {draftCase && draft ? (
             <LiveLineInvestigation
