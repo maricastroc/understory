@@ -7,11 +7,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import type { AnalysisLanguage, CasePhase } from "../case/types";
 import { clauseDescription } from "../copy/clause-copy";
 import { WHY_TITLE, sourceNamer } from "../copy/why-copy";
 import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types";
-import { LANGUAGE_NAME, LanguageSwitch } from "../parts/LanguageSwitch";
+import { LanguageSwitch } from "../parts/LanguageSwitch";
 import { ClauseRow } from "./ClauseRow";
 import { ReadingWhy } from "./ReadingWhy";
 import { whyModel } from "./why-model";
@@ -61,6 +62,7 @@ export function WhyZone({
   analysis?: AnalysisLanguage;
   renderEvidence?: (clause: ViewClause, id: string) => ReactNode;
 }) {
+  const m = useMessages();
   const headingId = useId();
   const evidenceId = useId();
   const buttons = useRef(new Map<string, HTMLButtonElement>());
@@ -103,7 +105,7 @@ export function WhyZone({
         </h2>
         <span aria-live="polite" className="text-xs text-li-text-subtle">
           {analysis?.rewriting
-            ? `rewriting in ${LANGUAGE_NAME[analysis.selected]}…`
+            ? m.languages.rewriting(m.languages.name[analysis.selected])
             : hintFor(
                 pinnedIndex >= 0 ? pinnedIndex : null,
                 clauses,
@@ -113,7 +115,7 @@ export function WhyZone({
         {analysis && (
           <div className="ml-auto">
             <LanguageSwitch
-              label="Analysis"
+              label={m.languages.analysis}
               language={analysis.selected}
               onChange={analysis.onSelect}
             />

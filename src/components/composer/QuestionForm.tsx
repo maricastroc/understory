@@ -2,6 +2,7 @@
 
 import type { SymbolSpan } from "@understory/core/collect/symbol";
 import { useId, useState } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
 import { SECTION_RULE } from "./composer-classes";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
@@ -30,6 +31,7 @@ export function QuestionForm({
   onRunWider: () => void;
 }) {
   const id = useId();
+  const m = useMessages();
   const { language, setLanguage } = useLanguage();
   const [asking, setAsking] = useState(question.trim().length > 0);
 
@@ -96,7 +98,7 @@ export function QuestionForm({
           <span className="text-li-text-subtle">(optional)</span>
         </button>
       )}
-      <LanguageSwitch label="Answer in" language={language} onChange={setLanguage} />
+      <LanguageSwitch label={m.languages.answerIn} language={language} onChange={setLanguage} />
       <button type="submit" className={liButton("primary", "w-full", "lg")}>
         <BlueprintCorners />
         {runLabel} →
