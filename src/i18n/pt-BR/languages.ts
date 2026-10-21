@@ -3,7 +3,7 @@ import type { Messages } from "../messages";
 export const languages: Messages["languages"] = {
   interface: "Idioma",
   answerIn: "Responder em",
-  analysis: "Análise",
+  analysis: "Idioma da análise",
   name: {
     en: "inglês",
     pt: "português",

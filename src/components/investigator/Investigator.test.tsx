@@ -156,7 +156,7 @@ describe("Investigator — the interface language and the answer language", () =
     await waitFor(() => expect(clauses(region).length).toBeGreaterThan(0));
 
     rerender(inLocale("pt-BR"));
-    const analysis = within(region).getByRole("group", { name: "Análise" });
+    const analysis = within(region).getByRole("group", { name: "Idioma da análise" });
     expect(within(analysis).getByRole("button", { name: "EN" }).getAttribute("aria-pressed")).toBe(
       "true",
     );
@@ -178,7 +178,7 @@ describe("Investigator — the interface language and the answer language", () =
     await waitFor(() => expect(clauses(region).length).toBeGreaterThan(0));
     expect(requests(api, "/api/narrate")).toHaveLength(0);
 
-    const analysis = within(region).getByRole("group", { name: "Análise" });
+    const analysis = within(region).getByRole("group", { name: "Idioma da análise" });
     fireEvent.click(within(analysis).getByRole("button", { name: "PT" }));
     await within(region).findByText("reescrevendo em português…");
     expect(requests(api, "/api/narrate").map((c) => c.body?.language)).toEqual(["pt"]);

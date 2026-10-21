@@ -110,20 +110,33 @@ test("Portuguese, picked on the landing, is served from the first byte after a r
   expect((await cookieOf(context))?.value).toBe("en");
 });
 
-test("the app renders in Portuguese without a mismatch on hydration", async ({
-  page,
-  context,
-  baseURL,
-}) => {
-  await context.addCookies([{ name: "understory-locale", value: "pt-BR", url: baseURL! }]);
-  const requests = await serve(page);
-  const problems = watchHydration(page);
-  await page.goto(`/app?repo=acme/payments-service&file=${FILE}&line=4`);
-  await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
-  await expect(page.getByRole("group", { name: "Análise" })).toBeVisible({ timeout: 60_000 });
-  expect(requests("/api/dig").map((r) => r.language)).toEqual(["pt"]);
-  expect(problems).toEqual([]);
-});
+for (const width of [1440, 390]) {
+  test(`the app renders in Portuguese at ${width}: no hydration mismatch, no overflow, axe with contrast`, async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await context.addCookies([{ name: "understory-locale", value: "pt-BR", url: baseURL! }]);
+    await page.setViewportSize({ width, height: 900 });
+    const requests = await serve(page);
+    const problems = watchHydration(page);
+    await page.goto(`/app?repo=acme/payments-service&file=${FILE}&line=4`);
+    await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
+    const switcher = page.getByRole("group", { name: "Idioma da análise" });
+    await expect(switcher).toBeVisible({ timeout: 60_000 });
+    expect(requests("/api/dig").map((r) => r.language)).toEqual(["pt"]);
+    const box = (await switcher.boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
+    const overflow = await page.evaluate(() => {
+      const main = document.querySelector("main")!;
+      return main.scrollWidth - main.clientWidth;
+    });
+    expect(overflow).toBeLessThanOrEqual(0);
+    await page.mouse.move(0, 0);
+    expect(await axeViolations(page, { within: "main", settleMs: 400 })).toEqual([]);
+    expect(problems).toEqual([]);
+  });
+}
 
 test("changing the interface on a case keeps the answer and calls no model", async ({ page }) => {
   const requests = await serve(page, "en");
@@ -134,7 +147,7 @@ test("changing the interface on a case keeps the answer and calls no model", asy
 
   await pick(page, "Language: English", "Português");
   await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
-  const análise = page.getByRole("group", { name: "Análise" });
+  const análise = page.getByRole("group", { name: "Idioma da análise" });
   await expect(análise.getByRole("button", { name: "EN" })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByText("The retry cap was set to three after the outage.")).toBeVisible();
   expect(requests("/api/dig")).toHaveLength(1);
@@ -158,7 +171,9 @@ test("an answer language chosen before survives the interface, both ways", async
   await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
   const requests = await serve(page, "en");
   await page.goto(`/app?repo=acme/payments-service&file=${FILE}&line=4`);
-  await expect(page.getByRole("group", { name: "Análise" })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("group", { name: "Idioma da análise" })).toBeVisible({
+    timeout: 60_000,
+  });
   expect(requests("/api/dig").map((r) => r.language)).toEqual(["en"]);
   expect(await answerLanguage(page)).toBe("en");
   await pick(page, "Idioma: Português", "English");
