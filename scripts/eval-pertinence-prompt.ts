@@ -155,13 +155,27 @@ function block(rows: MapRow[]): Set<MapRow> {
   return out;
 }
 
-export function settle(answer: PertinenceAnswer, map: string): Settled {
+export type Match = "exact" | "spacing";
+
+const loose = (text: string) => text.replace(`  ${LINE_MARK}`, "").replace(/\s+/g, " ").trim();
+
+function cite(rows: MapRow[], row: string, match: Match): MapRow | undefined {
+  const wanted = row.replace(`  ${LINE_MARK}`, "").trimEnd();
+  const exact = rows.find((r) => r.text.trimEnd() === wanted);
+  if (exact || match === "exact") return exact;
+  const spaced = rows.filter((r) => loose(r.text) === loose(row));
+  if (spaced.length === 1) return spaced[0];
+  if (spaced.length > 1) return undefined;
+  const unsigned = rows.filter((r) => loose(r.text.slice(1)) === loose(row));
+  return unsigned.length === 1 ? unsigned[0] : undefined;
+}
+
+export function settle(answer: PertinenceAnswer, map: string, match: Match = "exact"): Settled {
   if (answer.verdict === "not_in_change") return "not in the change";
   if (answer.verdict === "insufficient") return "insufficient evidence";
   if (answer.verdict === "indeterminate") return "indeterminate";
   const rows = rowsOfMap(map);
-  const wanted = answer.row.replace(`  ${LINE_MARK}`, "").trimEnd();
-  const cited = rows.find((r) => r.text.trimEnd() === wanted);
+  const cited = cite(rows, answer.row, match);
   if (!cited) return "row not in the map";
   const own = block(rows);
   const home = rows.find((r) => r.line)?.path;

@@ -163,6 +163,27 @@ describe("settling an answer, with no model", () => {
     ).toBe("row not in the map");
   });
 
+  it("finds a row copied with other spacing, or without its sign, only when the spacing rule is asked for and one row fits", () => {
+    const line = row("Formatter === undefined");
+    const respaced = line.replace(/^\+ +/, "+ ");
+    const unsigned = line.replace(/^\+ +/, "");
+    for (const copy of [respaced, unsigned, `${respaced}  ← the investigated line`]) {
+      expect(settle({ verdict: "the_line", row: copy, reason: "" }, MAP)).toBe(
+        "row not in the map",
+      );
+      expect(settle({ verdict: "the_line", row: copy, reason: "" }, MAP, "spacing")).toBe(
+        "the line's part",
+      );
+    }
+    expect(
+      settle(
+        { verdict: "the_line", row: "+ 140 if (Formatter === null) {", reason: "" },
+        MAP,
+        "spacing",
+      ),
+    ).toBe("row not in the map");
+  });
+
   it("keeps the three answers that cite no row apart", () => {
     expect(settle({ verdict: "not_in_change", row: "", reason: "" }, MAP)).toBe(
       "not in the change",
