@@ -44,6 +44,7 @@ npm run eval -- --repeat 2 --via openrouter --out eval/results/run.jsonl
 npm run eval:report -- eval/results/run.jsonl eval/results/run.review.json
 npm run eval:audit -- eval/results/run.jsonl --repeat 4 --via openrouter --out eval/results/replay.jsonl
 npm run eval:audit -- eval/results/run.jsonl eval/audit-controls.json --repeat 4 --via openrouter --out eval/results/replay.jsonl
+npm run eval:walk -- eval/results/walk.json 3
 ```
 
 Needs `GROQ_API_KEY` and `GITHUB_TOKEN` in `.env.local` or `.env`; the cases on real repositories read
@@ -860,6 +861,41 @@ Read with these:
   passage quoted for `machine-168` is the title of its commit and of its pull request.
 - No source is read for this beyond what collection already returns, and nothing here is
   judged: 161 passages in 20 cases, every one located.
+
+### How long the walk takes, and whether it is cancelled
+
+Run on 21 Oct 2026, with no model. `npm run eval:walk -- <out.json> [passes]` collects each case
+of the gold set once and walks back through its line's history three times with the limits the
+app uses (six requests, four seconds, three earlier changes). On a hosted repository it walks
+three more times with the time limit cut to 300 ms, to see what happens to a request in flight
+on a real network ([`results/2026-10-21-walk-latency.json`](results/2026-10-21-walk-latency.json)).
+The same script run on `main` before #71 is kept beside it
+([`results/2026-10-21-walk-latency-before-71.json`](results/2026-10-21-walk-latency-before-71.json)).
+
+| Repository                     | Walks           | p50    | p95      | Max      | Requests per walk       |
+| ------------------------------ | --------------- | ------ | -------- | -------- | ----------------------- |
+| Hosted, through the GitHub API | 36, on 12 cases | 377 ms | 2,617 ms | 2,690 ms | 1 in 24, 3 in 6, 5 in 6 |
+| Seeded, through git            | 72, on 24 cases | 69 ms  | 145 ms   | 170 ms   | none over HTTP          |
+
+- **Within its limits.** No walk reached the four-second limit or the ceiling of six requests.
+  33 of the 36 hosted walks reached the change that added the line. The three of `tslint-189`
+  stop at `no patch`: the third commit they read comes back without a patch for the file.
+- **Cancelled when cut.** With the limit at 300 ms, each of the 36 hosted walks stopped at the
+  limit with one request in flight, and that request was aborted at the cut, between 301 and
+  304 ms. Before #71 the same 36 requests ran to their end, each with a 200, between 8 and
+  132 ms after the walk had returned.
+- **Beside the answer.** The answer's time is the one kept for each case in the current run,
+  for the writer and the audit through OpenRouter pinned to Groq: 1.9 s at the median over all
+  cases. Only `tslint-189` walks for longer than its answers took, 2.2 to 2.7 s against a
+  median of 1.4 s. The app sends the answer before it waits for the walk, so there the earlier
+  history arrives about a second after the answer.
+- **The first request.** On a hosted repository the walk first reads again the commit that last
+  changed the line, which collection already has. That request takes 363 ms at the median and
+  39% of the hosted walks' time, and in 24 of the 36 walks, where that commit added the line, it
+  is the whole walk. Reusing what collection returned would save it; nothing here changes that.
+- **What it does not show.** Twelve real lines from six repositories, on one network, in one
+  afternoon. The answers' times come from another day and another route: the app calls Groq
+  directly.
 
 ### What this does not show
 
