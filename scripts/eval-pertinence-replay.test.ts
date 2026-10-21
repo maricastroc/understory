@@ -45,7 +45,7 @@ describe("the replay's inputs, fixed before it runs", () => {
       ["ws-batch-size", "another change", "borrowed"],
       ["ws-revert-story", "another change", "borrowed"],
     ]);
-    for (const i of inputs) expect(i.passages[0].parts.length, i.id).toBeGreaterThan(0);
+    for (const i of inputs) expect(i.passages[0].parts ?? [], i.id).not.toEqual([]);
   });
 
   it("keeps the two sets apart", () => {
