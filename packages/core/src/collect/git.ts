@@ -221,6 +221,11 @@ export async function commitScope(
   };
 }
 
+export async function commitPatch(repoPath: string, sha: string): Promise<string> {
+  if (!isCommitSha(sha)) throw new Error(`Not a commit sha: ${sha}`);
+  return git(repoPath, ["show", "--format=", "-M", "--unified=3", sha]);
+}
+
 export async function filePatch(
   repoPath: string,
   sha: string,

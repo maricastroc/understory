@@ -1,0 +1,131 @@
+{
+  "what": "For each written control that borrows a reason, the part of the history the reason belongs to, read from the patches before any model was asked about it. A control that gives the line its own reason is expected to be about the line's part of its change, and is not listed. Drafted with an AI assistant from the patches and the pull request texts, for a reader to disagree with. 'row' is a changed row of that file's patch, given to check whether a context still holds it; null where the patch does not let one row be pointed to with confidence.",
+  "belongs": [
+    "the line's part",
+    "another part of the same file",
+    "another file",
+    "not in the change",
+    "another change"
+  ],
+  "controls": [
+    {
+      "id": "machine-32",
+      "text": "The code at libmachine/host/host.go line 32 was changed because earlier modifications broke the marshaling and unmarshaling of host objects, so the line was rewritten to avoid that regression.",
+      "belongs": "not in the change",
+      "where": null,
+      "why": "The pull request's discussion is about an approach it dropped. The merged commit adds the SSHClientCreator types and touches no marshaling."
+    },
+    {
+      "id": "machine-32",
+      "text": "This type was added so that hosts can still be marshaled and unmarshaled, which an earlier approach had broken.",
+      "belongs": "not in the change",
+      "where": null,
+      "why": "As above: the discussion says the revised pull request no longer breaks marshaling, and nothing in the merged change is about it."
+    },
+    {
+      "id": "tslint-257",
+      "text": "This line was added by commit 63fc794 so that rules are no longer responsible for disabling themselves and failures are filtered after a rule returns them.",
+      "belongs": "another part of the same file",
+      "where": {
+        "path": "src/linter.ts",
+        "row": "return removeDisabledFailures(sourceFile, failures);"
+      },
+      "why": "The enable/disable rewrite: in linter.ts it is getAllFailures filtering what the rules return, a hunk apart from the line, which reads a file to apply fixes. enableDisableRules.ts carries the rest."
+    },
+    {
+      "id": "tslint-257",
+      "text": "This line was added while filterFailures was removed entirely, to remove the code that looked for duplicate failures.",
+      "belongs": "another file",
+      "where": {
+        "path": "src/language/rule/abstractRule.ts",
+        "row": "protected filterFailures(failures: RuleFailure[]) { return failures; }"
+      },
+      "why": "filterFailures is emptied in abstractRule.ts and its call removed in eoflineRule.ts."
+    },
+    {
+      "id": "tslint-257",
+      "text": "This line was added because it is not necessary to check ruleSeverity here, since isEnabled() will do that too.",
+      "belongs": "another file",
+      "where": {
+        "path": "src/ruleLoader.ts",
+        "row": "if (ruleOptions.ruleSeverity === \"off\") {"
+      },
+      "why": "The review comment is about the ruleSeverity check, which the change moves in ruleLoader.ts."
+    },
+    {
+      "id": "tslint-189",
+      "text": "The condition was rewritten to allow uncompiled custom formatters, as uncompiled rules were already allowed.",
+      "belongs": "another file",
+      "where": {
+        "path": "src/formatterLoader.ts",
+        "row": "fullPath = require.resolve(formatterPath);"
+      },
+      "why": "loadFormatter resolves a custom formatter with node's resolution, so one written in TypeScript can be loaded. The line only inverts its comparison."
+    },
+    {
+      "id": "tslint-189",
+      "text": "The condition was rewritten so that the formatter module is first resolved relative to the current directory.",
+      "belongs": "another file",
+      "where": {
+        "path": "src/formatterLoader.ts",
+        "row": "src = resolve.sync(name, {basedir: process.cwd()});"
+      },
+      "why": "loadFormatterModule first looks in the linted project's dependencies."
+    },
+    {
+      "id": "draft-644",
+      "text": "The declaration was rewritten because the file raised lint errors, so Prettier was added to it.",
+      "belongs": "another file",
+      "where": {
+        "path": "src/component/selection/getSampleSelectionMocksForTesting.js",
+        "row": " * @format"
+      },
+      "why": "The commit adds the @format header to two test helpers; the line is one of the var to const rewrites."
+    },
+    {
+      "id": "apollo-http-10",
+      "text": "This import was added so that a query's batch can be changed with the batchKey constructor option.",
+      "belongs": "another file",
+      "where": {
+        "path": "packages/apollo-link-batch/src/batchLink.ts",
+        "row": "batchKey?: (Operation) => string;"
+      },
+      "why": "batchKey is added to the batch link's options."
+    },
+    {
+      "id": "apollo-http-10",
+      "text": "This import was added to fix a bug in apollo-link-batch for multiple subscribers on a single request.",
+      "belongs": "another file",
+      "where": null,
+      "why": "The fix is somewhere in apollo-link-batch and apollo-link-batch-http; the patch does not let one row be pointed to with confidence."
+    },
+    {
+      "id": "jitter",
+      "text": "Jitter was added to the delay because the unbounded loop had resubmitted charges during a Stripe outage and double-billed 214 customers.",
+      "belongs": "another change",
+      "where": { "commit": "commit:c038fb3" },
+      "why": "That is the reason the retries were capped."
+    },
+    {
+      "id": "retry-cap",
+      "text": "The retries were capped at three to stop recovering clients from retrying in lockstep after an outage.",
+      "belongs": "another change",
+      "where": { "commit": "commit:0016d9d" },
+      "why": "That is the reason jitter was added."
+    },
+    {
+      "id": "ws-batch-size",
+      "text": "The constant was renamed from PAGE_SIZE to BATCH_SIZE because any page over roughly 300 rows comes back as 413 Payload Too Large.",
+      "belongs": "another change",
+      "where": { "commit": "commit:78ff826" },
+      "why": "That is the reason the size was halved."
+    },
+    {
+      "id": "ws-revert-story",
+      "text": "The sync job first dropped every row with a zero quantity because zero is also what the vendor sends when a SKU sells out.",
+      "belongs": "another change",
+      "where": { "commit": "commit:05a16a3" },
+      "why": "That is the reason the drop was reverted."
+    }
+  ]
+}

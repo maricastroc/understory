@@ -1,0 +1,2267 @@
+{
+  "date": "2026-10-21T13:43:41.852Z",
+  "commit": "e0e4364",
+  "what": "How long the walk back through a line's history takes, and what it sends, on the cases of the gold set, with no model. Each case is collected once, then walked with the limits the app uses and again with the time limit cut to 300 ms, to see the requests in flight cancelled on a real network. A hosted repository is walked through the GitHub API, a seeded one through git. The answer's time is the one kept for the same case in the current run, through OpenRouter pinned to Groq. The app runs the walk beside the writer and the audit and sends the answer before it waits for the walk, so a walk longer than the answer only brings the earlier history after it.",
+  "answers": "eval/results/2026-10-12-line-attribution.jsonl",
+  "limits": {
+    "earlier": 3,
+    "requests": 6,
+    "ms": 4000
+  },
+  "passes": 3,
+  "summary": {
+    "seeded · 4000 ms": {
+      "walks": 72,
+      "cases": 24,
+      "ms": {
+        "p50": 88,
+        "p95": 156,
+        "max": 176
+      },
+      "stopped": {
+        "the line was added": 72
+      },
+      "requests": {
+        "max": 0,
+        "byWalk": {
+          "0": 72
+        },
+        "outcomes": {}
+      },
+      "ranOnAfterTheWalk": 0,
+      "firstRequestMs": {
+        "p50": null,
+        "shareOfWalk": null
+      },
+      "longerThanTheAnswer": {
+        "compared": 72,
+        "walks": []
+      }
+    },
+    "hosted · 4000 ms": {
+      "walks": 36,
+      "cases": 12,
+      "ms": {
+        "p50": 374,
+        "p95": 2305,
+        "max": 2353
+      },
+      "stopped": {
+        "the line was added": 33,
+        "no patch": 3
+      },
+      "requests": {
+        "max": 5,
+        "byWalk": {
+          "1": 24,
+          "3": 6,
+          "5": 6
+        },
+        "outcomes": {
+          "200": 72
+        }
+      },
+      "ranOnAfterTheWalk": 0,
+      "firstRequestMs": {
+        "p50": 359,
+        "shareOfWalk": 0.41
+      },
+      "longerThanTheAnswer": {
+        "compared": 36,
+        "walks": ["tslint-189#0", "tslint-189#1", "tslint-189#2"]
+      }
+    },
+    "hosted · 300 ms": {
+      "walks": 36,
+      "cases": 12,
+      "ms": {
+        "p50": 301,
+        "p95": 302,
+        "max": 302
+      },
+      "stopped": {
+        "time limit": 36
+      },
+      "requests": {
+        "max": 1,
+        "byWalk": {
+          "1": 36
+        },
+        "outcomes": {
+          "200": 36
+        }
+      },
+      "ranOnAfterTheWalk": 36,
+      "firstRequestMs": {
+        "p50": 361,
+        "shareOfWalk": 1.21
+      },
+      "longerThanTheAnswer": {
+        "compared": 36,
+        "walks": []
+      }
+    }
+  },
+  "walks": [
+    {
+      "id": "retry-cap",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 62,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "retry-cap",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 162,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "retry-cap",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 92,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "why-retry-loop",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 22,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "why-retry-loop",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 51,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "why-retry-loop",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 52,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "jitter",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 83,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "jitter",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 122,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "jitter",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 120,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "bug-phrasing",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 61,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "bug-phrasing",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 99,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "bug-phrasing",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 96,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "refund-silent",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 22,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "refund-silent",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 60,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "refund-silent",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 52,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "oos-love",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 52,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-love",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 88,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-love",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 93,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-france",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 52,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-france",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 87,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-france",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 92,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-poem",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 50,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-poem",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 81,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-poem",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 102,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "ws-batch-size",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 89,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "ws-batch-size",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 121,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "ws-batch-size",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 119,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "ws-injected-commit",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 21,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "ws-injected-commit",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 53,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "ws-injected-commit",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 61,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "ws-revert-story",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 114,
+      "stopped": "the line was added",
+      "entries": 4,
+      "requests": []
+    },
+    {
+      "id": "ws-revert-story",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 156,
+      "stopped": "the line was added",
+      "entries": 4,
+      "requests": []
+    },
+    {
+      "id": "ws-revert-story",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 156,
+      "stopped": "the line was added",
+      "entries": 4,
+      "requests": []
+    },
+    {
+      "id": "pt-retry-cap",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 55,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "pt-retry-cap",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 91,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "pt-retry-cap",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 89,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "ws-poll-interval",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 53,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "ws-poll-interval",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 95,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "ws-poll-interval",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 98,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "ws-skew-value",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 22,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "ws-skew-value",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 54,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "ws-skew-value",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 53,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "demo-error-type",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 23,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "demo-error-type",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 43,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "demo-error-type",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 58,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "oos-refactor",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 54,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-refactor",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 96,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-refactor",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 88,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-write-tests",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 21,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "oos-write-tests",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 52,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "oos-write-tests",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 65,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": []
+    },
+    {
+      "id": "oos-vendor-ceo",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 59,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-vendor-ceo",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 94,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-vendor-ceo",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 99,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-other-subsystem",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 76,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-other-subsystem",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 102,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-other-subsystem",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 92,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-advice",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 118,
+      "stopped": "the line was added",
+      "entries": 4,
+      "requests": []
+    },
+    {
+      "id": "oos-advice",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 172,
+      "stopped": "the line was added",
+      "entries": 4,
+      "requests": []
+    },
+    {
+      "id": "oos-advice",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 140,
+      "stopped": "the line was added",
+      "entries": 4,
+      "requests": []
+    },
+    {
+      "id": "oos-system-prompt",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 69,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-system-prompt",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 93,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "oos-system-prompt",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 94,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "fp-batch-raised",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 83,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "fp-batch-raised",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 136,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "fp-batch-raised",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 128,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "fp-jitter-removed",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 135,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "fp-jitter-removed",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 176,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "fp-jitter-removed",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 136,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": []
+    },
+    {
+      "id": "fp-cap-raised-by-reviewer",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 65,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "fp-cap-raised-by-reviewer",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 99,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "fp-cap-raised-by-reviewer",
+      "group": "seeded",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 109,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": []
+    },
+    {
+      "id": "ng-http-114",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 1584,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 359,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 360,
+          "settled": 1253,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1259,
+          "settled": 1583,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-114",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 1858,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 357,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 359,
+          "settled": 1382,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1498,
+          "settled": 1857,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-114",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 1894,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 347,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 348,
+          "settled": 1514,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1519,
+          "settled": 1892,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-114",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 351,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-114",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 379,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-114",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 369,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-411",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 370,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 369,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-411",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 368,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 366,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-411",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 374,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 372,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-411",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 366,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-411",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 353,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "ng-http-411",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 300,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 373,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-168",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 378,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 376,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-168",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 363,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 363,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-168",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 334,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 333,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-168",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 336,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-168",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 346,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-168",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 363,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-306",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 370,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 369,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-306",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 338,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 337,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-306",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 344,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 343,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-306",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 395,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-306",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 319,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-306",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 1,
+          "settled": 338,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-796",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 339,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 338,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-796",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 325,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 325,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-796",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 323,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 322,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-796",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 309,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-796",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 3,
+          "settled": 348,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "q-796",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 365,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-110",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 430,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 416,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-110",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 728,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 436,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-110",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 448,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 433,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-110",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 422,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-110",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 434,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-110",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 421,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-189",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 2254,
+      "stopped": "no patch",
+      "entries": 3,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 329,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 330,
+          "settled": 1022,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1023,
+          "settled": 1391,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 1394,
+          "settled": 1899,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1900,
+          "settled": 2253,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-189",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 2305,
+      "stopped": "no patch",
+      "entries": 3,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 362,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 363,
+          "settled": 883,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 885,
+          "settled": 1264,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 1402,
+          "settled": 1906,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1907,
+          "settled": 2304,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-189",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 2151,
+      "stopped": "no patch",
+      "entries": 3,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 380,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 381,
+          "settled": 881,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 883,
+          "settled": 1297,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 1300,
+          "settled": 1807,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1809,
+          "settled": 2150,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-189",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 300,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 361,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-189",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 350,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-189",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 358,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-257",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 375,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 372,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-257",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 358,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 357,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-257",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 342,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 340,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-257",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 300,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 337,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-257",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 300,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 356,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-257",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 300,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 335,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-32",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 356,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 355,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-32",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 335,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 335,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-32",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 458,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 457,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-32",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 419,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-32",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 300,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 346,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "machine-32",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 385,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-644",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 1442,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 414,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 418,
+          "settled": 933,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 935,
+          "settled": 1383,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-644",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 1613,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 380,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 385,
+          "settled": 888,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 890,
+          "settled": 1335,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-644",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 1469,
+      "stopped": "the line was added",
+      "entries": 2,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 385,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 388,
+          "settled": 876,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 878,
+          "settled": 1326,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-644",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 350,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-644",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 367,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "draft-644",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 383,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-260",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 2181,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 338,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 339,
+          "settled": 900,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 902,
+          "settled": 1265,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 1267,
+          "settled": 1821,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1823,
+          "settled": 2179,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-260",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 2353,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 351,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 353,
+          "settled": 993,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 994,
+          "settled": 1321,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 1322,
+          "settled": 1864,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1866,
+          "settled": 2216,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-260",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 2114,
+      "stopped": "the line was added",
+      "entries": 3,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 354,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 355,
+          "settled": 854,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 855,
+          "settled": 1221,
+          "outcome": "200"
+        },
+        {
+          "kind": "blame",
+          "began": 1225,
+          "settled": 1736,
+          "outcome": "200"
+        },
+        {
+          "kind": "commit",
+          "began": 1737,
+          "settled": 2110,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-260",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 385,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-260",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 328,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "tslint-260",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 369,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "apollo-http-10",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 0,
+      "ms": 359,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 357,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "apollo-http-10",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 1,
+      "ms": 362,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 359,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "apollo-http-10",
+      "group": "hosted",
+      "limit": 4000,
+      "pass": 2,
+      "ms": 370,
+      "stopped": "the line was added",
+      "entries": 1,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 367,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "apollo-http-10",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 0,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 392,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "apollo-http-10",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 1,
+      "ms": 302,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 369,
+          "outcome": "200"
+        }
+      ]
+    },
+    {
+      "id": "apollo-http-10",
+      "group": "hosted",
+      "limit": 300,
+      "pass": 2,
+      "ms": 301,
+      "stopped": "time limit",
+      "entries": 0,
+      "requests": [
+        {
+          "kind": "commit",
+          "began": 0,
+          "settled": 338,
+          "outcome": "200"
+        }
+      ]
+    }
+  ]
+}
