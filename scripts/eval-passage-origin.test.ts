@@ -6,18 +6,17 @@ import {
   reviewArtifact,
 } from "@understory/core/collect/github/artifacts";
 import { type Comment, foldComments } from "@understory/core/collect/github/comments";
+import { commentOf } from "@understory/core/reading";
+import { partsOf, segmentsOf } from "@understory/core/record-part";
 import type { Artifact, Evidence, VerifiedNarrative } from "@understory/core/types";
 import { describe, expect, it } from "vitest";
 import {
   type KeptOrigins,
   type PassageOrigin,
   changesOf,
-  commentHolding,
   originIndex,
-  partsOf,
   passageKey,
   passageOrigin,
-  segmentsOf,
   sitsIn,
 } from "./eval-passage-origin";
 
@@ -271,7 +270,7 @@ describe("tslint-257, the collected case", () => {
         change: "commit:63fc794",
         last: true,
       });
-    expect(commentHolding(review, "a comment nobody made")).toBeNull();
+    expect(commentOf(review, "a comment nobody made")).toBeUndefined();
   });
 
   it("tells the description of the pull request from its discussion", () => {
