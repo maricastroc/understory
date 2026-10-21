@@ -9,9 +9,14 @@ import { CodeSpecimen } from "../specimen/CodeSpecimen";
 import { SPECIMEN_LAYOUTS } from "../specimen/use-specimen-layout";
 import { LineInvestigation } from "./LineInvestigation";
 
-const CASES = {
+const CASES: Record<string, DigResult> = {
   ...(kept.cases as unknown as Record<string, DigResult>),
-  ...(controls.cases as unknown as Record<string, DigResult>),
+  ...Object.fromEntries(
+    Object.entries(controls.cases as unknown as Record<string, DigResult>).map(([id, result]) => [
+      `control-${id}`,
+      result,
+    ]),
+  ),
 };
 const NOW = Date.parse("2026-10-12T12:00:00Z");
 
@@ -106,7 +111,7 @@ describe("the why zone with the reading", () => {
   });
 
   it("tslint-189: the borrowed reason shown as a likely explanation, with the pull request item it rests on", () => {
-    setup("tslint-189", true);
+    setup("control-tslint-189", true);
     expect(changes()).toEqual([
       { at: "last", head: "last change · 8b853b2 · 9 Jan 2018 · rewrote this line" },
     ]);
@@ -141,7 +146,7 @@ describe("the why zone with the reading", () => {
   });
 
   it("opens a sentence's evidence under it, as the clauses did", () => {
-    setup("tslint-189", true);
+    setup("control-tslint-189", true);
     const row = within(zone()).getByRole("button", { name: /uncompiled custom formatters/ });
     fireEvent.click(row);
     expect(row.getAttribute("aria-expanded")).toBe("true");
@@ -149,7 +154,7 @@ describe("the why zone with the reading", () => {
   });
 
   it("calls the verdict an answer, without the check, and says what its confidence rates", () => {
-    setup("tslint-189", true);
+    setup("control-tslint-189", true);
     expect(chip().textContent).toContain("Answered");
     expect(chip().querySelector("svg")).toBeNull();
     fireEvent.click(chip());
@@ -182,10 +187,79 @@ describe("the why zone with the reading", () => {
     "tslint-257",
     "ng-http-411",
     "ws-revert-story",
-    "tslint-189",
+    "control-tslint-189",
+    "control-tslint-257",
+    "control-machine-32",
+    "control-apollo-http-10",
+    "control-draft-644",
   ])
     it(`has no axe violations, ${id}`, async () => {
       const { container } = setup(id, true);
       expect((await axe(container)).violations).toEqual([]);
     });
+});
+
+const note = () => document.querySelector("[data-likely-note]");
+const openSentence = (name: RegExp) =>
+  fireEvent.click(within(zone()).getByRole("button", { name }));
+
+describe("validating the reading before it reaches the case screen", () => {
+  const presented = (id: string) => CASES[id].narrative!.claims[0].text;
+
+  for (const id of ["control-tslint-189", "control-tslint-257", "control-machine-32"])
+    it(`${id}: a borrowed or open reason is a likely explanation, never documented, and its source says what is interpretation`, () => {
+      setup(id, true);
+      const row = within(zone()).getByRole("button", { name: /Likely explanation/ });
+      expect(row.textContent).toContain(presented(id));
+      expect(zone().textContent).not.toContain("Documented for this line");
+      expect(chip().textContent).toContain("Answered");
+      expect(chip().querySelector("svg")).toBeNull();
+      fireEvent.click(row);
+      expect(note()?.textContent).toBe(
+        "The passage documents the change it belongs to. Its link to this line is Understory's interpretation.",
+      );
+      const panel = screen.getByRole("region", { name: /^EVIDENCE · CLAUSE 1/ });
+      expect(panel.textContent).toContain("Quote found verbatim in the source");
+      expect(within(panel).getByRole("button", { name: /Show in history/ })).toBeTruthy();
+    });
+
+  for (const id of ["control-apollo-http-10", "control-draft-644", "ng-http-114"])
+    it(`${id}: a true reason of a change with other parts is kept as a likely explanation, word for word`, () => {
+      setup(id, true);
+      expect(
+        within(zone()).getByRole("button", { name: /Likely explanation/ }).textContent,
+      ).toContain(presented(id));
+    });
+
+  it("q-796 and ws-revert-story: a reason documented for the line stays documented, and its source carries no note", () => {
+    setup("q-796", true);
+    const rows = within(zone()).getAllByRole("button", { name: /Documented for this line/ });
+    expect(rows).toHaveLength(2);
+    fireEvent.click(rows[0]);
+    expect(screen.getByRole("region", { name: /^EVIDENCE · CLAUSE 1/ })).toBeTruthy();
+    expect(note()).toBeNull();
+  });
+
+  it("ws-revert-story: the documented reason and the likely ones keep their own marks", () => {
+    setup("ws-revert-story", true);
+    openSentence(/Documented for this line/);
+    expect(note()).toBeNull();
+    fireEvent.click(within(zone()).getByRole("button", { name: /Documented for this line/ }));
+    openSentence(/However, zero quantity/);
+    expect(note()).not.toBeNull();
+  });
+
+  it("tslint-257: the change's record kept without a sentence carries no note", () => {
+    setup("tslint-257", true);
+    openSentence(/From this change's record/);
+    expect(screen.getByRole("region", { name: /^EVIDENCE · CLAUSE 3/ })).toBeTruthy();
+    expect(note()).toBeNull();
+  });
+
+  it("without the reading, the evidence of the same sentence carries no note", () => {
+    setup("control-tslint-189");
+    fireEvent.click(document.querySelector<HTMLButtonElement>('li[data-clause="c0"] > button')!);
+    expect(screen.getByRole("region", { name: /^EVIDENCE · CLAUSE 1/ })).toBeTruthy();
+    expect(note()).toBeNull();
+  });
 });

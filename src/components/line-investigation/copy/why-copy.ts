@@ -6,6 +6,9 @@ import { factText, placeText, scopeText } from "./reading-copy";
 
 export const WHY_TITLE = "What the history supports";
 
+export const LIKELY_NOTE =
+  "The passage documents the change it belongs to. Its link to this line is Understory's interpretation.";
+
 export const NOT_IDENTIFIED = "No reason for this line is established in the record.";
 
 const STANDING: Record<Standing, string> = {

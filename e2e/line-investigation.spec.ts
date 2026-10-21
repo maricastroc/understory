@@ -177,6 +177,8 @@ for (const state of [
   "kept-ws-revert-story",
   "kept-ng-http-411",
   "control-tslint-189",
+  "control-tslint-257",
+  "control-machine-32",
 ]) {
   for (const width of [1440, 390]) {
     test(`the reading in the history, ${state} at ${width}: axe with contrast, no page overflow`, async ({
