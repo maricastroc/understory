@@ -42,12 +42,15 @@ export type Belongs =
   | "another part of the same file"
   | "another file"
   | "not in the change"
-  | "another change";
+  | "another change"
+  | "interpretive";
 
 export type Expectation = {
   id: string;
   text: string;
   belongs: Belongs;
+  basis: "verifiable" | "interpretive";
+  accept: string[];
   where: { path: string; row: string } | { commit: string } | null;
   why: string;
 };
