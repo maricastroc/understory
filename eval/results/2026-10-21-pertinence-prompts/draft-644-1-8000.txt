@@ -1,0 +1,260 @@
+The line under investigation, as numbered in this change: src/model/immutable/EditorState.js:544
+  const prevTreeMap = editorState.getImmutable().get('treeMap');
+What this change did to it: rewrote it; before, it read: var prevTreeMap = editorState.getImmutable().get('treeMap');
+
+The sentence under review (it claims the reason; it may be wrong):
+  The declaration was rewritten from var to const by commit 8de2db9, which changed the remaining vars in Draft.js to let/const because var was triggering the author’s OCD.
+
+The passage it rests on:
+  [commit:8de2db9 · commit, title] “Change remaining vars to let/const”
+
+The change: commit:8de2db9 · Change remaining vars to let/const · 85 files
+src/model/immutable/EditorState.js · modified · +57 −57
+@@ -19,13 +19,13 @@ import type {EditorChangeType} from 'EditorChangeType';
+… 12 more changed rows not shown
+@@ -43,7 +43,7 @@ type EditorStateRecordType = {
+… 2 more changed rows not shown
+@@ -59,7 +59,7 @@ var defaultRecord: EditorStateRecordType = {
+… 2 more changed rows not shown
+@@ -75,7 +75,7 @@ class EditorState {
+… 2 more changed rows not shown
+@@ -89,8 +89,8 @@ class EditorState {
+… 4 more changed rows not shown
+@@ -99,20 +99,20 @@ class EditorState {
+… 12 more changed rows not shown
+@@ -133,7 +133,7 @@ class EditorState {
+… 2 more changed rows not shown
+@@ -221,13 +221,13 @@ class EditorState {
+… 6 more changed rows not shown
+@@ -241,18 +241,18 @@ class EditorState {
+… 10 more changed rows not shown
+@@ -301,10 +301,10 @@ class EditorState {
+… 8 more changed rows not shown
+@@ -324,7 +324,7 @@ class EditorState {
+… 2 more changed rows not shown
+@@ -345,8 +345,8 @@ class EditorState {
+… 4 more changed rows not shown
+@@ -362,10 +362,10 @@ class EditorState {
+… 8 more changed rows not shown
+@@ -388,7 +388,7 @@ class EditorState {
+… 2 more changed rows not shown
+@@ -398,7 +398,7 @@ class EditorState {
+… 2 more changed rows not shown
+@@ -421,14 +421,14 @@ class EditorState {
+… 8 more changed rows not shown
+@@ -455,14 +455,14 @@ class EditorState {
+… 8 more changed rows not shown
+@@ -540,8 +540,8 @@ function regenerateTreeForNewBlocks( · holds the investigated line
+   540   const contentState = editorState
+   541     .getCurrentContent()
+   542     .set('entityMap', newEntityMap);
+-  543   var prevBlockMap = contentState.getBlockMap();
+-  544   var prevTreeMap = editorState.getImmutable().get('treeMap');
++  543   const prevBlockMap = contentState.getBlockMap();
++  544   const prevTreeMap = editorState.getImmutable().get('treeMap');  ← the investigated line
+   545   return prevTreeMap.merge(
+   546     newBlockMap
+   547       .toSeq()
+@@ -587,7 +587,7 @@ function mustBecomeBoundary(
+… 2 more changed rows not shown
+@@ -600,9 +600,9 @@ function getInlineStyleForCollapsedSelection(
+… 6 more changed rows not shown
+@@ -624,9 +624,9 @@ function getInlineStyleForNonCollapsedSelection(
+… 6 more changed rows not shown
+@@ -647,7 +647,7 @@ function lookUpwardForInlineStyle(
+… 2 more changed rows not shown
+src/component/contents/DraftEditorLeaf.react.js · modified · +3 −3
+@@ -17,11 +17,11 @@ import type {DraftInlineStyle} from 'DraftInlineStyle';
+… 6 more changed rows not shown
+src/component/handlers/composition/DraftEditorCompositionHandler.js · modified · +1 −1
+@@ -45,7 +45,7 @@ let resolved = false;
+… 2 more changed rows not shown
+src/component/handlers/drag/DraftEditorDragHandler.js · modified · +2 −2
+@@ -39,7 +39,7 @@ function getSelectionForEvent(
+… 2 more changed rows not shown
+@@ -62,7 +62,7 @@ function getSelectionForEvent(
+… 2 more changed rows not shown
+src/component/handlers/edit/commands/SecondaryClipboard.js · modified · +13 −13
+@@ -15,27 +15,27 @@
+… 22 more changed rows not shown
+@@ -49,7 +49,7 @@ var SecondaryClipboard = {
+… 2 more changed rows not shown
+@@ -67,7 +67,7 @@ var SecondaryClipboard = {
+… 2 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandBackspaceToStartOfLine.js · modified · +8 −8
+@@ -12,26 +12,26 @@
+… 16 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandBackspaceWord.js · modified · +11 −11
+@@ -12,33 +12,33 @@
+… 22 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandDeleteWord.js · modified · +11 −11
+@@ -12,29 +12,29 @@
+… 22 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandInsertNewline.js · modified · +3 −3
+@@ -12,11 +12,11 @@
+… 6 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandMoveSelectionToEndOfBlock.js · modified · +5 −5
+@@ -12,18 +12,18 @@
+… 10 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandMoveSelectionToStartOfBlock.js · modified · +3 −3
+@@ -12,7 +12,7 @@
+… 2 more changed rows not shown
+@@ -22,8 +22,8 @@ var EditorState = require('EditorState');
+… 4 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandPlainBackspace.js · modified · +11 −11
+@@ -12,26 +12,26 @@
+… 20 more changed rows not shown
+… 1 more hunk not shown
+src/component/handlers/edit/commands/keyCommandPlainDelete.js · modified · +11 −11
+@@ -12,26 +12,26 @@
+… 20 more changed rows not shown
+… 1 more hunk not shown
+src/component/handlers/edit/commands/keyCommandTransposeCharacters.js · modified · +18 −18
+@@ -12,39 +12,39 @@
+… 22 more changed rows not shown
+… 1 more hunk not shown
+src/component/handlers/edit/commands/keyCommandUndo.js · modified · +3 −3
+@@ -12,21 +12,21 @@
+… 6 more changed rows not shown
+src/component/handlers/edit/commands/moveSelectionBackward.js · modified · +8 −8
+… 1 more hunk not shown
+src/component/handlers/edit/commands/moveSelectionForward.js · modified · +7 −7
+… 1 more hunk not shown
+src/component/handlers/edit/commands/removeTextWithStrategy.js · modified · +4 −4
+… 2 more hunks not shown
+src/component/handlers/edit/editOnBeforeInput.js · modified · +21 −21
+… 7 more hunks not shown
+src/component/handlers/edit/editOnBlur.js · modified · +3 −3
+… 1 more hunk not shown
+src/component/handlers/edit/editOnCompositionStart.js · modified · +1 −1
+… 1 more hunk not shown
+src/component/handlers/edit/editOnCopy.js · modified · +3 −3
+… 1 more hunk not shown
+src/component/handlers/edit/editOnFocus.js · modified · +5 −5
+… 1 more hunk not shown
+src/component/handlers/edit/editOnInput.js · modified · +23 −23
+… 7 more hunks not shown
+src/component/handlers/edit/editOnKeyDown.js · modified · +22 −22
+… 4 more hunks not shown
+src/component/handlers/edit/editOnPaste.js · modified · +30 −28
+… 5 more hunks not shown
+src/component/handlers/edit/editOnSelect.js · modified · +6 −6
+… 2 more hunks not shown
+src/component/handlers/edit/getFragmentFromSelection.js · modified · +2 −2
+… 1 more hunk not shown
+src/component/selection/DraftOffsetKey.js · modified · +3 −3
+… 2 more hunks not shown
+src/component/selection/expandRangeToStartOfLine.js · modified · +21 −20
+… 6 more hunks not shown
+src/component/selection/findAncestorOffsetKey.js · modified · +2 −2
+… 1 more hunk not shown
+src/component/selection/getDraftEditorSelection.js · modified · +2 −2
+… 2 more hunks not shown
+src/component/selection/getDraftEditorSelectionWithNodes.js · modified · +18 −18
+… 7 more hunks not shown
+src/component/selection/getRangeBoundingClientRect.js · modified · +8 −8
+… 3 more hunks not shown
+src/component/selection/getRangeClientRects.js · modified · +9 −9
+… 3 more hunks not shown
+src/component/selection/getSampleSelectionMocksForTesting.js · modified · +1 −1
+@@ -6,6 +6,7 @@
+… 1 more changed row not shown
+… 1 more hunk not shown
+src/component/selection/getSampleSelectionMocksForTestingNestedBlocks.js · modified · +1 −0
+… 1 more hunk not shown
+src/component/selection/getSelectionOffsetKeyForNode.js · modified · +3 −3
+… 1 more hunk not shown
+src/component/selection/getUpdatedSelectionState.js · modified · +18 −18
+… 4 more hunks not shown
+src/component/selection/isSelectionAtLeafStart.js · modified · +6 −6
+… 2 more hunks not shown
+src/component/selection/setDraftEditorSelection.js · modified · +19 −19
+… 7 more hunks not shown
+src/component/utils/KeyBindingUtil.js · modified · +3 −3
+… 1 more hunk not shown
+src/component/utils/getDefaultKeyBinding.js · modified · +6 −6
+… 1 more hunk not shown
+src/component/utils/getTextContentFromFiles.js · modified · +7 −7
+… 4 more hunks not shown
+src/component/utils/isSoftNewlineEvent.js · modified · +1 −1
+… 1 more hunk not shown
+src/component/utils/splitTextIntoTextBlocks.js · modified · +1 −1
+… 1 more hunk not shown
+src/model/decorators/CompositeDraftDecorator.js · modified · +11 −11
+… 5 more hunks not shown
+src/model/encoding/DraftStringKey.js · modified · +1 −1
+… 1 more hunk not shown
+src/model/encoding/createCharacterList.js · modified · +5 −5
+… 1 more hunk not shown
+src/model/encoding/decodeEntityRanges.js · modified · +6 −6
+… 2 more hunks not shown
+src/model/encoding/decodeInlineStyleRanges.js · modified · +6 −6
+… 2 more hunks not shown
+src/model/encoding/encodeEntityRanges.js · modified · +6 −6
+… 2 more hunks not shown
+src/model/encoding/encodeInlineStyleRanges.js · modified · +10 −10
+… 4 more hunks not shown
+src/model/encoding/sanitizeDraftText.js · modified · +1 −1
+… 1 more hunk not shown
+src/model/entity/DraftEntity.js · modified · +12 −12
+… 5 more hunks not shown
+src/model/entity/DraftEntityInstance.js · modified · +3 −3
+… 1 more hunk not shown
+src/model/entity/DraftEntityMutability.js · modified · +1 −1
+… 1 more hunk not shown
+src/model/entity/__mocks__/DraftEntity.js · modified · +3 −3
+… 1 more hunk not shown
+src/model/entity/getEntityKeyForSelection.js · modified · +7 −7
+… 3 more hunks not shown
+src/model/entity/getTextAfterNearestEntity.js · modified · +1 −1
+… 1 more hunk not shown
+src/model/immutable/BlockMapBuilder.js · modified · +3 −3
+… 1 more hunk not shown
+src/model/immutable/BlockTree.js · modified · +19 −19
+… 6 more hunks not shown
+src/model/immutable/CharacterMetadata.js · modified · +11 −11
+… 4 more hunks not shown
+src/model/immutable/ContentBlock.js · modified · +2 −2
+… 1 more hunk not shown
+src/model/immutable/ContentBlockNode.js · modified · +2 −2
+… 1 more hunk not shown
+src/model/immutable/ContentState.js · modified · +4 −4
+… 3 more hunks not shown
+src/model/immutable/EditorBidiService.js · modified · +9 −9
+… 2 more hunks not shown
+src/model/immutable/SelectionState.js · modified · +9 −9
+… 3 more hunks not shown
+src/model/immutable/findRangesImmutable.js · modified · +1 −1
+… 1 more hunk not shown
+src/model/modifier/DraftEntitySegments.js · modified · +11 −11
+… 3 more hunks not shown
+src/model/modifier/DraftModifier.js · modified · +29 −26
+… 7 more hunks not shown
+src/model/modifier/DraftRemovableWord.js · modified · +10 −10
+… 3 more hunks not shown
+src/model/modifier/RichTextEditorUtil.js · modified · +41 −41
+… 14 more hunks not shown
+src/model/modifier/getCharacterRemovalRange.js · modified · +15 −15
+… 6 more hunks not shown
+src/model/modifier/getRangesForDraftEntity.js · modified · +2 −2
+… 2 more hunks not shown
+src/model/paste/__mocks__/getSafeBodyFromHTML.js · modified · +2 −2
+… 1 more hunk not shown
+src/model/paste/getSafeBodyFromHTML.js · modified · +4 −4
+… 1 more hunk not shown
+src/model/transaction/ContentStateInlineStyle.js · modified · +13 −13
+… 3 more hunks not shown
+src/model/transaction/adjustBlockDepthForContentState.js · modified · +5 −5
+… 1 more hunk not shown
+src/model/transaction/applyEntityToContentBlock.js · modified · +2 −2
+… 1 more hunk not shown
+src/model/transaction/applyEntityToContentState.js · modified · +2 −2
+… 1 more hunk not shown
+src/model/transaction/insertIntoList.js · modified · +2 −2
+… 1 more hunk not shown
+src/model/transaction/insertTextIntoContentState.js · modified · +12 −12
+… 3 more hunks not shown
+src/model/transaction/modifyBlockForContentState.js · modified · +4 −4
+… 1 more hunk not shown
+src/model/transaction/removeEntitiesAtEdges.js · modified · +23 −23
+… 3 more hunks not shown

@@ -28,6 +28,7 @@
     "eval:project": "tsx scripts/eval-project.ts",
     "eval:origins": "tsx scripts/eval-origins.ts",
     "eval:pertinence": "tsx scripts/eval-pertinence.ts",
+    "eval:pertinence-replay": "tsx scripts/eval-pertinence-replay.ts",
     "eval:present": "tsx scripts/eval-present.ts",
     "eval:readings": "tsx scripts/eval-readings.ts",
     "eval:sample": "tsx scripts/eval-sample.ts",

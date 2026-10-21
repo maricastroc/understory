@@ -1,0 +1,168 @@
+The line under investigation, as numbered in this change: src/linter.ts:185
+  const oldSource = fs.readFileSync(filePath, "utf-8");
+What this change did to it: added it
+
+The sentence under review (it claims the reason; it may be wrong):
+  This line was added by commit 63fc794 so that rules are no longer responsible for disabling themselves and failures are filtered after a rule returns them.
+
+The passage it rests on:
+  [pr:2369 · pull request, description] “* Move `disabledIntervals` out of rule options. Rules are not responsible for disabling theirselves. Just filter the failures after the rule returns them.”
+
+The change: commit:63fc794 · Rewrite enable/disable logic (#2369) · 17 files
+src/linter.ts · modified · +77 −77
+@@ -29,15 +29,15 @@ import {
+-   32 import { EnableDisableRulesWalker } from "./enableDisableRules";
++   32 import { removeDisabledFailures } from "./enableDisableRules";
+⋯
+-   37 import { Fix, IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
+… 3 more changed rows not shown
+@@ -90,38 +90,25 @@ class Linter {
+-   93         let sourceFile = this.getSourceFile(fileName, source);
++   93         const sourceFile = this.getSourceFile(fileName, source);
+⋯
++   95         const enabledRules = this.getEnabledRules(configuration, isJs);
+… 28 more changed rows not shown
+@@ -158,74 +145,74 @@ class Linter { · holds the investigated line
++  177     protected applyFixes(sourceFilePath: string, source: string, fixableFailures: RuleFailure[]): string {
++  178         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
++  179         fixesByFile.forEach((fileFixes, filePath) => {
++  180             let fileNewSource: string;
++  181             if (filePath === sourceFilePath) {
++  182                 source = Replacement.applyFixes(source, fileFixes);
++  183                 fileNewSource = source;
++  184             } else {
++  185                 const oldSource = fs.readFileSync(filePath, "utf-8");  ← the investigated line
++  186                 fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
++  187             }
++  188             fs.writeFileSync(filePath, fileNewSource, "utf-8");
++  189         });
++  190 
++  191         return source;
++  192     }
++  193 
+… 79 more changed rows not shown
+@@ -246,13 +233,26 @@ class Linter {
+-  249 
+-  250     private containsRule(rules: RuleFailure[], rule: RuleFailure) {
+-  251         return rules.some((r) => r.equals(rule));
+… 18 more changed rows not shown
+src/configs/all.ts · modified · +1 −1
+@@ -243,7 +243,7 @@ for (const key in rules) {
+-  246     if (Rule === "not-found") {
++  246     if (Rule === undefined) {
+src/configuration.ts · modified · +1 −1
+@@ -485,7 +485,7 @@ export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptio
+-  488             disabledIntervals: [],
++  488             disabledIntervals: [], // deprecated, so just provide an empty array.
+src/enableDisableRules.ts · modified · +116 −107
+@@ -15,133 +15,142 @@
+-   18 // tslint:disable prefer-switch
+-   19 // (waiting on https://github.com/palantir/tslint/pull/2369)
++   18 // tslint:disable object-literal-sort-keys
+… 220 more changed rows not shown
+src/language/rule/abstractRule.ts · modified · +8 −13
+@@ -17,7 +17,6 @@
+-   20 import {doesIntersect} from "../utils";
+@@ -41,7 +40,7 @@ export abstract class AbstractRule implements IRule {
+-   44         return this.filterFailures(walker.getFailures());
++   43         return walker.getFailures();
+@@ -61,17 +60,13 @@ export abstract class AbstractRule implements IRule {
+-   64         return this.filterFailures(ctx.failures);
++   63         return ctx.failures;
+⋯
+-   67     protected filterFailures(failures: RuleFailure[]): RuleFailure[] {
+… 15 more changed rows not shown
+src/language/rule/rule.ts · modified · +10 −1
+@@ -99,9 +99,18 @@ export interface IOptions {
+-  102     disabledIntervals: IDisabledInterval[];
++  102     /**
++  103      * @deprecated
+… 8 more changed rows not shown
+src/language/utils.ts · modified · +3 −2
+@@ -19,14 +19,15 @@ import * as path from "path";
+-   22 import {IDisabledInterval, RuleFailure} from "./rule/rule";
++   22 import {IDisabledInterval, RuleFailure} from "./rule/rule"; // tslint:disable-line deprecation
+⋯
+-   29 export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]) {
+… 2 more changed rows not shown
+src/ruleLoader.ts · modified · +31 −78
+@@ -20,45 +20,40 @@ import * as path from "path";
+-   23 import { IDisabledInterval, IOptions, IRule, RuleConstructor } from "./language/rule/rule";
+-   24 import { arrayify, camelize, dedent } from "./utils";
++   23 import { IOptions, IRule, RuleConstructor } from "./language/rule/rule";
+… 42 more changed rows not shown
+@@ -88,24 +83,13 @@ export function loadRules(ruleOptionsList: IOptions[],
+-   91 export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | "not-found" {
++   86 export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | undefined {
+⋯
+-   93     let Rule: RuleConstructor | "not-found";
+… 16 more changed rows not shown
+@@ -133,56 +117,25 @@ function loadRule(directory: string, ruleName: string): RuleConstructor | "not-f
+-  136 function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | "not-found" {
++  120 function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | undefined {
+⋯
+-  141         return cachedRule;
+… 42 more changed rows not shown
+src/rules/eoflineRule.ts · modified · +1 −3
+@@ -48,8 +48,6 @@ export class Rule extends Lint.Rules.AbstractRule {
+-   51         return this.filterFailures([
+-   52             new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix),
+-   53         ]);
+… 1 more changed row not shown
+src/rules/maxFileLineCountRule.ts · modified · +9 −13
+@@ -37,27 +37,23 @@ export class Rule extends Lint.Rules.AbstractRule {
+-   40     public static FAILURE_STRING_FACTORY(lineCount: number, lineLimit: number) {
+-   41         return `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. `
+-   42              + `Consider breaking this file up into smaller parts`;
+… 19 more changed rows not shown
+src/rules/noInferredEmptyObjectTypeRule.ts · modified · +3 −5
+@@ -55,11 +55,9 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
+-   58                 typeArgs.forEach((a) => {
+-   59                     if (this.isEmptyObjectInterface(a)) {
+-   60                         this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
+… 5 more changed rows not shown
+src/rules/typedefRule.ts · modified · +0 −8
+@@ -156,14 +156,6 @@ class TypedefWalker extends Lint.RuleWalker {
+-  159         switch (node.initializer.kind) {
+-  160             case ts.SyntaxKind.ArrowFunction:
+-  161             case ts.SyntaxKind.FunctionExpression:
+… 5 more changed rows not shown
+src/rules/whitespaceRule.ts · modified · +4 −0
+@@ -257,6 +257,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
++  260         // TODO: this rule occasionally adds duplicate failures.
++  261         if (ctx.failures.some((f) => f.getStartPosition().getPosition() === position)) {
++  262             return;
+… 1 more changed row not shown
+src/utils.ts · modified · +11 −0
+@@ -127,6 +127,17 @@ export function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Eq
++  130 /** Returns the first non-`undefined` result. */
++  131 export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U | undefined {
++  132     for (const element of inputs) {
+… 8 more changed rows not shown
+test/ruleLoaderTests.ts · modified · +17 −22
+@@ -19,9 +19,7 @@ import { assert } from "chai";
+-   22 
+⋯
+-   24 import { IEnableDisablePosition } from "../src/ruleLoader";
+@@ -35,23 +33,31 @@ describe("Rule Loader", () => {
+-   38             { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
++   36             { ruleName: "forin", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+… 14 more changed rows not shown
+@@ -61,33 +67,22 @@ describe("Rule Loader", () => {
+-   64         const rules = loadRules(withOptions, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
++   70         const rules = loadRules(withOptions, [builtRulesDir]);
+… 17 more changed rows not shown
+@@ -97,7 +92,7 @@ describe("Rule Loader", () => {
+-  100         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir, true);
++   95         const rules = loadRules(validConfiguration, builtRulesDir, true);
+test/rules/max-file-line-count/default/test.ts.lint · modified · +1 −1
+@@ -1,5 +1,4 @@
+-    2 ~ [This file has 23 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this file up into smaller parts]
+@@ -21,3 +20,4 @@ namespace App {
++   23 ~ [This file has 22 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this file up into smaller parts]
+test/rules/max-file-line-count/disabled/test.ts.lint · modified · +2 −1
+@@ -1,6 +1,7 @@
+-    1 /* tslint:disable:max-file-line-count */
+⋯
++    3 /* tslint:disable:max-file-line-count */
++    4 

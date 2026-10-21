@@ -1,5 +1,5 @@
 {
-  "what": "For each written control that borrows a reason, the part of the history the reason belongs to, read from the patches before any model was asked about it. A control that gives the line its own reason is expected to be about the line's part of its change, and is not listed. Drafted with an AI assistant from the patches and the pull request texts, for a reader to disagree with. 'row' is a changed row of that file's patch, given to check whether a context still holds it; null where the patch does not let one row be pointed to with confidence.",
+  "what": "For each written control the core presents today as a likely explanation, and for each written control that borrows a reason, the part of the history its reason belongs to, read from the patches and the record before any model was asked about it. 'basis' is 'verifiable' where the patch or the record shows it, and 'interpretive' where the reading depends on judgement. 'accept' lists the settled answers that count as right; it is empty for an interpretive one, which is reported and never scored. 'row' is a changed row the reason is carried out by; null where no single row can be shown. Drafted with an AI assistant from the patches and the pull request texts, for a reader to disagree with.",
   "belongs": [
     "the line's part",
     "another part of the same file",
@@ -7,20 +7,32 @@
     "not in the change",
     "another change"
   ],
+  "revisions": [
+    "2026-10-21, before any model was asked: machine-32 moves from 'not in the change' to interpretive. The merged change does carry the revised approach the discussion says no longer breaks marshaling (the creator kept in a package variable, row 26, beside the line), so the reason is in the change; whether it covers the type on the line is a judgement.",
+    "2026-10-21: tslint-257's review comment now points to the row the comment was made on, from its own diff hunk, instead of the row that replaced it.",
+    "2026-10-21: apollo-http-10's multiple-subscribers reason becomes interpretive: code about unsubscribing sits in the line's file as well as in the batch links, and no row can be shown as the fix.",
+    "2026-10-21: the true controls presented today are listed with their basis, instead of being assumed to be the line's part.",
+    "2026-10-21: the eight verifiable borrowed controls not presented today are given a change and a passage for the validation set, before any model was asked about them."
+  ],
+  "validation": "The eight verifiable borrowed controls the app does not present today, written down on 2026-10-21 before any model was asked about them, to check whether the question holds beyond the cases it was written against. Each has the change it is asked under and the passage, copied from its source, it would rest on. In the four of 'another change', the passage comes from a commit other than the change shown, so an answer can follow from the ids alone; the app never sends such a pair, because the core keeps a reason under its own change. They are run and reported apart, and are not counted as evidence that the question generalises.",
   "controls": [
     {
       "id": "machine-32",
       "text": "The code at libmachine/host/host.go line 32 was changed because earlier modifications broke the marshaling and unmarshaling of host objects, so the line was rewritten to avoid that regression.",
-      "belongs": "not in the change",
+      "belongs": "interpretive",
       "where": null,
-      "why": "The pull request's discussion is about an approach it dropped. The merged commit adds the SSHClientCreator types and touches no marshaling."
+      "why": "The passage is the discussion's first word on an approach the pull request then revised; the revision it says no longer breaks marshaling is in the merged change, as the creator kept in a package variable (row 26) rather than on the host. The type on the line is the default creator, there so tests can put a fake one in its place (commands/ssh_test.go). Whether the marshaling reason covers the type, or only where the creator is kept, is a judgement.",
+      "basis": "interpretive",
+      "accept": []
     },
     {
       "id": "machine-32",
       "text": "This type was added so that hosts can still be marshaled and unmarshaled, which an earlier approach had broken.",
-      "belongs": "not in the change",
+      "belongs": "interpretive",
       "where": null,
-      "why": "As above: the discussion says the revised pull request no longer breaks marshaling, and nothing in the merged change is about it."
+      "why": "The passage is the discussion's first word on an approach the pull request then revised; the revision it says no longer breaks marshaling is in the merged change, as the creator kept in a package variable (row 26) rather than on the host. The type on the line is the default creator, there so tests can put a fake one in its place (commands/ssh_test.go). Whether the marshaling reason covers the type, or only where the creator is kept, is a judgement.",
+      "basis": "interpretive",
+      "accept": []
     },
     {
       "id": "tslint-257",
@@ -30,7 +42,9 @@
         "path": "src/linter.ts",
         "row": "return removeDisabledFailures(sourceFile, failures);"
       },
-      "why": "The enable/disable rewrite: in linter.ts it is getAllFailures filtering what the rules return, a hunk apart from the line, which reads a file to apply fixes. enableDisableRules.ts carries the rest."
+      "why": "The enable/disable rewrite: in linter.ts it is getAllFailures filtering what the rules return, a hunk apart from the line, which reads a file to apply fixes. enableDisableRules.ts carries the rest.",
+      "basis": "verifiable",
+      "accept": ["another part of the same file"]
     },
     {
       "id": "tslint-257",
@@ -40,7 +54,17 @@
         "path": "src/language/rule/abstractRule.ts",
         "row": "protected filterFailures(failures: RuleFailure[]) { return failures; }"
       },
-      "why": "filterFailures is emptied in abstractRule.ts and its call removed in eoflineRule.ts."
+      "why": "filterFailures is emptied in abstractRule.ts and its call removed in eoflineRule.ts.",
+      "basis": "verifiable",
+      "accept": ["another file"],
+      "validation": {
+        "change": "commit:63fc794",
+        "passage": {
+          "source": "pr:2369",
+          "text": "While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures."
+        },
+        "group": "same change"
+      }
     },
     {
       "id": "tslint-257",
@@ -48,9 +72,20 @@
       "belongs": "another file",
       "where": {
         "path": "src/ruleLoader.ts",
-        "row": "if (ruleOptions.ruleSeverity === \"off\") {"
+        "row": "if (ruleOptions.ruleSeverity !== \"off\" || enableDisableRuleMap) {"
       },
-      "why": "The review comment is about the ruleSeverity check, which the change moves in ruleLoader.ts."
+      "why": "The review comment was made on src/ruleLoader.ts, on this row of the version it reviewed, as its own diff hunk shows.",
+      "basis": "verifiable",
+      "accept": ["another file"],
+      "validation": {
+        "change": "commit:63fc794",
+        "passage": {
+          "source": "review:2369-1",
+          "text": "It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too."
+        },
+        "group": "same change",
+        "note": "In the app this passage never reaches the test: a review comment made in another file is kept as context since #67."
+      }
     },
     {
       "id": "tslint-189",
@@ -60,7 +95,9 @@
         "path": "src/formatterLoader.ts",
         "row": "fullPath = require.resolve(formatterPath);"
       },
-      "why": "loadFormatter resolves a custom formatter with node's resolution, so one written in TypeScript can be loaded. The line only inverts its comparison."
+      "why": "loadFormatter resolves a custom formatter with node's resolution, so one written in TypeScript can be loaded. The line only inverts its comparison.",
+      "basis": "verifiable",
+      "accept": ["another file"]
     },
     {
       "id": "tslint-189",
@@ -70,7 +107,9 @@
         "path": "src/formatterLoader.ts",
         "row": "src = resolve.sync(name, {basedir: process.cwd()});"
       },
-      "why": "loadFormatterModule first looks in the linted project's dependencies."
+      "why": "loadFormatterModule first looks in the linted project's dependencies.",
+      "basis": "verifiable",
+      "accept": ["another file"]
     },
     {
       "id": "draft-644",
@@ -80,7 +119,17 @@
         "path": "src/component/selection/getSampleSelectionMocksForTesting.js",
         "row": " * @format"
       },
-      "why": "The commit adds the @format header to two test helpers; the line is one of the var to const rewrites."
+      "why": "The commit adds the @format header to two test helpers; the line is one of the var to const rewrites.",
+      "basis": "verifiable",
+      "accept": ["another file"],
+      "validation": {
+        "change": "commit:8de2db9",
+        "passage": {
+          "source": "commit:8de2db9",
+          "text": "also added Prettier to a couple of files that raised lint errors."
+        },
+        "group": "same change"
+      }
     },
     {
       "id": "apollo-http-10",
@@ -90,42 +139,211 @@
         "path": "packages/apollo-link-batch/src/batchLink.ts",
         "row": "batchKey?: (Operation) => string;"
       },
-      "why": "batchKey is added to the batch link's options."
+      "why": "batchKey is added to the batch link's options.",
+      "basis": "verifiable",
+      "accept": ["another file"],
+      "validation": {
+        "change": "commit:cfe548c",
+        "passage": {
+          "source": "pr:364",
+          "text": "This PR also add the ability to change a query's batch with the `batchKey` constructor option."
+        },
+        "group": "same change"
+      }
     },
     {
       "id": "apollo-http-10",
       "text": "This import was added to fix a bug in apollo-link-batch for multiple subscribers on a single request.",
-      "belongs": "another file",
+      "belongs": "interpretive",
       "where": null,
-      "why": "The fix is somewhere in apollo-link-batch and apollo-link-batch-http; the patch does not let one row be pointed to with confidence."
+      "why": "The pull request also fixes a bug in apollo-link-batch for multiple subscribers. Code about unsubscribing is moved in the line's own file as well as changed in the batch links, and no row can be shown as the fix. The line imports a helper moved to the shared module.",
+      "basis": "interpretive",
+      "accept": []
     },
     {
       "id": "jitter",
       "text": "Jitter was added to the delay because the unbounded loop had resubmitted charges during a Stripe outage and double-billed 214 customers.",
       "belongs": "another change",
-      "where": { "commit": "commit:c038fb3" },
-      "why": "That is the reason the retries were capped."
+      "where": {
+        "commit": "commit:c038fb3"
+      },
+      "why": "That is the reason the retries were capped.",
+      "basis": "verifiable",
+      "accept": ["not in the change"],
+      "validation": {
+        "change": "commit:0016d9d",
+        "passage": {
+          "source": "commit:c038fb3",
+          "text": "INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers."
+        },
+        "group": "another change"
+      }
     },
     {
       "id": "retry-cap",
       "text": "The retries were capped at three to stop recovering clients from retrying in lockstep after an outage.",
       "belongs": "another change",
-      "where": { "commit": "commit:0016d9d" },
-      "why": "That is the reason jitter was added."
+      "where": {
+        "commit": "commit:0016d9d"
+      },
+      "why": "That is the reason jitter was added.",
+      "basis": "verifiable",
+      "accept": ["not in the change"],
+      "validation": {
+        "change": "commit:c038fb3",
+        "passage": {
+          "source": "commit:0016d9d",
+          "text": "Stops recovering clients from retrying in lockstep after an outage."
+        },
+        "group": "another change",
+        "note": "commit:0016d9d did not touch this line, so it is not in this case's evidence; its text is read from the jitter case, the same repository."
+      }
     },
     {
       "id": "ws-batch-size",
       "text": "The constant was renamed from PAGE_SIZE to BATCH_SIZE because any page over roughly 300 rows comes back as 413 Payload Too Large.",
       "belongs": "another change",
-      "where": { "commit": "commit:78ff826" },
-      "why": "That is the reason the size was halved."
+      "where": {
+        "commit": "commit:78ff826"
+      },
+      "why": "That is the reason the size was halved.",
+      "basis": "verifiable",
+      "accept": ["not in the change"],
+      "validation": {
+        "change": "commit:e4dfae7",
+        "passage": {
+          "source": "commit:78ff826",
+          "text": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300 rows comes back as 413 Payload Too Large."
+        },
+        "group": "another change"
+      }
     },
     {
       "id": "ws-revert-story",
       "text": "The sync job first dropped every row with a zero quantity because zero is also what the vendor sends when a SKU sells out.",
       "belongs": "another change",
-      "where": { "commit": "commit:05a16a3" },
-      "why": "That is the reason the drop was reverted."
+      "where": {
+        "commit": "commit:05a16a3"
+      },
+      "why": "That is the reason the drop was reverted.",
+      "basis": "verifiable",
+      "accept": ["not in the change"],
+      "validation": {
+        "change": "commit:22e1399",
+        "passage": {
+          "source": "commit:05a16a3",
+          "text": "WH-2402: zero is also what the vendor sends when a SKU sells out, so the storefront kept showing the last positive stock for sold-out items."
+        },
+        "group": "another change"
+      }
+    },
+    {
+      "id": "machine-168",
+      "text": "This method was added by commit d3ee30b as part of pull request #4002, which adds support for upgrading to the new CE edition.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "One purpose across seven files: DockerVersion, on the line, is what the provisioners call to upgrade."
+    },
+    {
+      "id": "q-306",
+      "text": "This line returns the current index when the array element equals the searched value, as part of the Array.prototype.indexOf shim added for IE<9.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "One file, one purpose: the line is a row of the shim."
+    },
+    {
+      "id": "ng-http-114",
+      "text": "The line was rewritten to take an index argument in the forEach callback, in the commit that makes the serializer follow jQuery for the index of arrays of objects.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "The code and its test: the line is the callback that now takes the index."
+    },
+    {
+      "id": "tslint-260",
+      "text": "The line was rewritten to pass the path through path.resolve by pull request #4887, which adds path.resolve when fs.writeFileSync is called with a temp file path, to fix writing temp files on macOS 10.15.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "The code and its test: the line is the call that now passes through path.resolve."
+    },
+    {
+      "id": "draft-644",
+      "text": "The declaration was rewritten from var to const by commit 8de2db9, which changed the remaining vars in Draft.js to let/const because var was triggering the author’s OCD.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "Two purposes in 85 files: the line is one of the var to const rewrites, not one of the two files given @format."
+    },
+    {
+      "id": "jitter",
+      "text": "The delay was rewritten to add jitter by commit 0016d9d, which stops recovering clients from retrying in lockstep after an outage.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "One file, one purpose: the line is the delay that now adds jitter."
+    },
+    {
+      "id": "apollo-http-10",
+      "text": "This import was added because the logic shared across the HTTP links was moved out of apollo-link-http into the publicly accessible apollo-link-http-common module.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "Several purposes in 12 files: the line imports createSignalIfSupported from the shared module the pull request creates."
+    },
+    {
+      "id": "retry-cap",
+      "text": "At first the Stripe call was retried until it succeeded, so that transient network blips would not drop a payment.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "An earlier change of one file, one purpose: the retry loop the line belonged to."
+    },
+    {
+      "id": "ws-revert-story",
+      "text": "The sync job first dropped every row with a zero quantity, because the vendor emits a zero-quantity row for every discontinued SKU on every poll and skipping them saves one write per discontinued SKU per run.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "An earlier change of one file, one purpose: the drop the line made."
+    },
+    {
+      "id": "ws-revert-story",
+      "text": "That change was reverted because zero is also what the vendor sends when a SKU sells out, so the storefront kept showing the last positive stock for sold-out items.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "An earlier change of one file, one purpose: the revert of the line."
+    },
+    {
+      "id": "ws-batch-size",
+      "text": "Before it was renamed, the page size was halved to 250, because since the vendor's 11 Feb release any page over roughly 300 rows comes back as 413 Payload Too Large.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "An earlier change of one file, one purpose: the line's value halved."
+    },
+    {
+      "id": "jitter",
+      "text": "Before jitter was added, the retries were capped at three with delays of 1s, 2s and 4s, so that a charge resolves inside Stripe's 10s webhook ACK window.",
+      "belongs": "the line's part",
+      "basis": "verifiable",
+      "accept": ["the line's part"],
+      "where": null,
+      "why": "An earlier change of one file, one purpose: the cap and its delays."
     }
   ]
 }

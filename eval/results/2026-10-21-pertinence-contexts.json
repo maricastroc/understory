@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-21T14:16:14.403Z",
-  "commit": "8084159",
+  "date": "2026-10-21T14:36:09.678Z",
+  "commit": "41234dc",
   "what": "What a test of pertinence would be shown for each sentence the core presents today as a likely explanation, and what the cap on its size would cut. For each change such a sentence sits under, every file the change touched and each hunk, with the hunk that changed the investigated line marked and kept whole, and the changed rows of the others spread across them within a budget. Read from the commits, with no model; nothing here is judged. Where a borrowed reason belongs is read from the expectations written before any model was asked, and checked against what each budget keeps.",
   "evidence": "eval/results/2026-10-14-reading-evidence.json",
   "replay": "eval/results/2026-10-12-patch-context-replay-one-question.jsonl",
@@ -143,7 +143,7 @@
           "2000": false,
           "4000": false,
           "8000": false,
-          "16000": true,
+          "16000": false,
           "32000": true,
           "all": true
         }
@@ -226,8 +226,8 @@
     "control:9:0 | commit:0016d9d | true | the line's part",
     "control:9:3 | commit:0016d9d | true | the line's part",
     "control:9:2 | commit:0016d9d | true | the line's part",
-    "control:26:0 | commit:aa54a5f | borrowed | not in the change",
-    "control:26:1 | commit:aa54a5f | borrowed | not in the change",
+    "control:26:0 | commit:aa54a5f | borrowed | interpretive",
+    "control:26:1 | commit:aa54a5f | borrowed | interpretive",
     "control:27:1 | commit:63fc794 | borrowed | another part of the same file",
     "control:27:3 | commit:63fc794 | borrowed | another part of the same file",
     "control:27:2 | commit:63fc794 | borrowed | another part of the same file",
@@ -240,10 +240,10 @@
     "control:34:0 | commit:8b853b2 | borrowed | another file",
     "control:34:3 | commit:8b853b2 | borrowed | another file",
     "control:34:2 | commit:8b853b2 | borrowed | another file",
-    "control:35:1 | commit:aa54a5f | borrowed | not in the change",
-    "control:35:0 | commit:aa54a5f | borrowed | not in the change",
-    "control:35:2 | commit:aa54a5f | borrowed | not in the change",
-    "control:35:3 | commit:aa54a5f | borrowed | not in the change",
+    "control:35:1 | commit:aa54a5f | borrowed | interpretive",
+    "control:35:0 | commit:aa54a5f | borrowed | interpretive",
+    "control:35:2 | commit:aa54a5f | borrowed | interpretive",
+    "control:35:3 | commit:aa54a5f | borrowed | interpretive",
     "control:43:0 | commit:f2b44ae | true | the line's part",
     "control:43:2 | commit:f2b44ae | true | the line's part",
     "control:43:1 | commit:f2b44ae | true | the line's part",
@@ -1749,9 +1749,7 @@
             "clipped": 0
           },
           "found": true,
-          "holds": [
-            "tslint-257 · This line was added because it is not necessary to check ruleSeverity here, since isEnabled() will do that too."
-          ]
+          "holds": []
         },
         "32000": {
           "chars": 32052,

@@ -914,9 +914,11 @@ that another part of the same file, or of the same hunk, can be told from the li
 
 Where a borrowed reason belongs was read from the patches and written down before any model is
 asked, in [`pertinence-expectations.json`](pertinence-expectations.json), for the 14 written
-controls that borrow one: another part of the same file, another file, not in the change at all
-(`machine-32`, an approach the pull request dropped), or another change. Two cannot be pointed to
-one row and say so.
+controls that borrow one and the 12 true ones presented today: another part of the same file,
+another file, not in the change, or another change. Each says whether the patch or the record
+shows it or whether it is a judgement; three are judgements and are never scored. The test
+proposed on these contexts, its question, how its answers are settled and scored, and its cost,
+are in [`pertinence-replay.md`](pertinence-replay.md), and what it did on the controls is below.
 
 - **What would be tested.** 656 sentences: from the written controls, 18 borrowed reasons and 23
   true ones under the last change, and 19 true ones under an earlier change; from the current
@@ -948,6 +950,70 @@ one row and say so.
   together are 275,413. On GitHub, collection already receives every file of the last change in
   one response, keeps the line's own patch and drops the rest. Here the eval asks the same
   endpoint again, and nothing is added to the evidence.
+
+### What the test of pertinence did on the controls
+
+Run on 21 Oct 2026, exploratory, as proposed in [`pertinence-replay.md`](pertinence-replay.md):
+`gpt-oss-120b` and `gpt-oss-20b` through OpenRouter pinned to Groq, three calls per input, with
+the prompt fixed beforehand (hash `75f47b5c3464`). Nothing in the app changed. Every call is kept,
+invalid and inconclusive ones included:
+[`results/2026-10-21-pertinence-replay-design.jsonl`](results/2026-10-21-pertinence-replay-design.jsonl)
+for the controls the app presents today, which the prompt was written against, and
+[`results/2026-10-21-pertinence-replay-validation.jsonl`](results/2026-10-21-pertinence-replay-validation.jsonl)
+for the eight borrowed controls set aside before the run, with the prompt unchanged. The report
+is [`results/2026-10-21-pertinence-replay-report.json`](results/2026-10-21-pertinence-replay-report.json).
+297 calls, US$ 0.213.
+
+Two rules were added after the first stage and before the second, and are reported beside the
+ones designed. A cited row is also found with its spacing ignored: the models collapse the
+padding of the row number, so 55 of 216 answers of 120b fail the exact match and 5 fail this one.
+And a cluster is also counted hidden when most of its calls hide: under the designed rule, a
+cluster split between two hiding answers ties and hides nothing. The counts below use both.
+
+Each cluster counts once, whatever its number of calls. Hiding is the strict rule: a located
+other part, or a reason not in the change. The two looser rules change one count, because the
+models almost never answer "insufficient" (2 of 297) or "indeterminate" (none).
+
+| Clusters hidden                                  | 120b | 20b | 120b without the writer's sentence |
+| ------------------------------------------------ | ---- | --- | ---------------------------------- |
+| Borrowed, verifiable, the prompt's own cases (3) | 1    | 2   | 3                                  |
+| Borrowed, verifiable, set aside, same change (4) | 2    | 2   | 2                                  |
+| Borrowed, set aside, another change (4)          | 0    | 0   | 0                                  |
+| True, presented today (12)                       | 0    | 0   | 0                                  |
+| Interpretive, `machine-32` (2), reported only    | 1    | 1   | 2                                  |
+
+- **What it caught.** A reason that names something carried out elsewhere: `tslint-257`'s enable/disable rewrite (every call of 120b, four of six of 20b), its
+  `ruleSeverity` review comment and `apollo-http-10`'s `batchKey`, both set aside and caught by both
+  models in every variant.
+- **What it hid wrongly: nothing.** No true reason was hidden by either model, nor by 120b without the
+  sentence or at a smaller budget. Ten of the twelve are changes with one purpose, so this is the easy
+  side of the question.
+- **What it missed, by building a causal link that is not there.** `draft-644`'s Prettier reason:
+  "Converted var to const to fix lint errors after adding Prettier", in every valid answer of every
+  variant. `tslint-189`, with the sentence, citing the line it inverts as what "allows uncompiled
+  custom formatters" (11 calls across its two reasons). And the four reasons of another change, given to the line in 35 of 36 calls: "renamed constant to avoid 413 Payload Too Large errors", "Added jitter to backoff to
+  prevent double-billing". The app never sends those four pairs, since the core keeps a reason
+  under its own change, but the mechanism is the same: given a plausible reason and one change,
+  the model reads it as the line's. 85 calls cite a real row with a wrong relation; 20 of them
+  are `tslint-257` citing other files the reason is in fact carried out in, a label narrower than
+  the reason rather than a misreading.
+- **The writer's sentence pulls toward the line.** Without it, 120b caught both `tslint-189`
+  reasons it missed with it. On the set-aside controls removing it changed nothing, and it did not
+  rescue `draft-644` or any reason of another change.
+- **Context size.** Cutting to 16,000 or 8,000 characters hid no true reason, and on the set-aside
+  controls caught 3 of 4 instead of 2. `tslint-189` was missed at 8,000 as at 32,000.
+- **The models.** 20b caught one more of the prompt's own cases but put the right row in the
+  right category less often (10 of 12 true clusters against 12), left 11 answers unsettled with
+  spacing ignored against 5, and gave 4 empty answers against 1 for 120b. Stability is high on true
+  clusters (12 of 12 agree two times in three for both) and lower on borrowed ones. A call takes
+  1.9 to 2.2 s at the median on 120b and 1.2 to 1.3 s on 20b, about US$ 0.0008 and US$ 0.0004.
+- **Not adopted.** On 21 Oct 2026 the test was not adopted as a filter: it hides no true reason in
+  this sample, but the borrowed reasons it misses are missed by the very failure #49 describes, a
+  causal link the record does not make, and the sample is too small to size either side. The
+  product keeps a likely explanation as such, with its source, and #49 stays open.
+- **What this does not show.** Seven verifiable borrowed clusters of the same change, in four cases, three of them the
+  prompt's own; twelve true ones, mostly easy; no run of the pipeline. The
+  labels are one reader's. It cannot say how often the test would be right.
 
 ### What this does not show
 

@@ -42,14 +42,23 @@ export type Belongs =
   | "another part of the same file"
   | "another file"
   | "not in the change"
-  | "another change";
+  | "another change"
+  | "interpretive";
 
 export type Expectation = {
   id: string;
   text: string;
   belongs: Belongs;
+  basis: "verifiable" | "interpretive";
+  accept: string[];
   where: { path: string; row: string } | { commit: string } | null;
   why: string;
+  validation?: {
+    change: string;
+    passage: { source: string; text: string };
+    group: string;
+    note?: string;
+  };
 };
 
 export type Answer =
@@ -411,7 +420,7 @@ export function tabulate(
   );
 }
 
-async function filesOf(
+export async function filesOf(
   ev: Evidence,
   sha: string,
 ): Promise<{ files: ChangedFile[]; read: ChangeRecord["read"] }> {

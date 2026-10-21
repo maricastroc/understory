@@ -54,13 +54,38 @@ const record = (id: string, change?: string) =>
   kept.changes.find((r) => r.id === id && (change ? r.change === change : r.last))!;
 
 describe("the expectations, written before any model was asked", () => {
-  it("place every control that borrows a reason, and nothing else", () => {
+  it("place every control that borrows a reason, and every true control presented today", () => {
     const borrowed = controls.filter(
       (c) =>
         /^gives the (line|last change)/.test(c.kind) &&
         !/the part of the change it belongs to/.test(c.kind),
     );
-    expect(expectations.map(expectationKey).sort()).toEqual(borrowed.map(expectationKey).sort());
+    const presentedTrue = new Set(
+      items
+        .filter((i) => i.set === "controls" && i.group === "true")
+        .map((i) => expectationKey({ id: i.id, text: i.claim })),
+    );
+    expect(
+      expectations
+        .filter((e) => e.belongs !== "the line's part")
+        .map(expectationKey)
+        .sort(),
+    ).toEqual(borrowed.map(expectationKey).sort());
+    expect(
+      new Set(expectations.filter((e) => e.belongs === "the line's part").map(expectationKey)),
+    ).toEqual(presentedTrue);
+  });
+
+  it("score only what can be shown, and keep the interpretive ones out of the score", () => {
+    for (const e of expectations)
+      expect(e.basis === "interpretive" ? e.accept : e.accept.length, expectationKey(e)).toEqual(
+        e.basis === "interpretive" ? [] : 1,
+      );
+    expect(expectations.filter((e) => e.basis === "interpretive").map((e) => e.id)).toEqual([
+      "machine-32",
+      "machine-32",
+      "apollo-http-10",
+    ]);
   });
 
   it("point each located reason to a row the change really changed", () => {
@@ -109,7 +134,7 @@ describe("the analysis", () => {
     ).toEqual([
       ["tslint-257", "another part of the same file", 4, "32000"],
       ["tslint-257", "another file", 0, "32000"],
-      ["tslint-257", "another file", 0, "16000"],
+      ["tslint-257", "another file", 0, "32000"],
       ["tslint-189", "another file", 4, "16000"],
       ["tslint-189", "another file", 4, "16000"],
       ["draft-644", "another file", 0, "32000"],
