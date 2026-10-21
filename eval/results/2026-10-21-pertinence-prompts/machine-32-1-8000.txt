@@ -1,0 +1,162 @@
+The line under investigation, as numbered in this change: libmachine/host/host.go:33
+  type StandardSSHClientCreator struct {
+What this change did to it: added it
+
+The sentence under review (it claims the reason; it may be wrong):
+  The code at libmachine/host/host.go line 32 was changed because earlier modifications broke the marshaling and unmarshaling of host objects, so the line was rewritten to avoid that regression.
+
+The passage it rests on:
+  [pr:2493 · pull request, discussion] “It does break the marshaling of a host. Might have to use a different approach.”
+
+The change: commit:aa54a5f · Add additional tests for SSH · 4 files
+libmachine/host/host.go · modified · +24 −7
+@@ -21,10 +21,23 @@ import ( · holds the investigated line
+-   24 	validHostNamePattern              = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9\-\.]*$`)
+-   25 	errMachineMustBeRunningForUpgrade = errors.New("Error: machine must be running to upgrade.")
++   24 	validHostNamePattern                               = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9\-\.]*$`)
++   25 	errMachineMustBeRunningForUpgrade                  = errors.New("Error: machine must be running to upgrade.")
++   26 	stdSSHClientCreator               SSHClientCreator = &StandardSSHClientCreator{}
+    27 )
+    28 
++   29 type SSHClientCreator interface {
++   30 	CreateSSHClient(d drivers.Driver) (ssh.Client, error)
++   31 }
++   32 
++   33 type StandardSSHClientCreator struct {  ← the investigated line
++   34 	drivers.Driver
++   35 }
++   36 
++   37 func SetSSHClientCreator(creator SSHClientCreator) {
++   38 	stdSSHClientCreator = creator
++   39 }
++   40 
+@@ -58,22 +71,26 @@ func (h *Host) RunSSHCommand(command string) (string, error) {
+-   61 	addr, err := h.Driver.GetSSHHostname()
++   74 	return stdSSHClientCreator.CreateSSHClient(h.Driver)
++   75 }
++   76 
++   77 func (creator *StandardSSHClientCreator) CreateSSHClient(d drivers.Driver) (ssh.Client, error) {
++   78 	addr, err := d.GetSSHHostname()
+⋯
+-   66 	port, err := h.Driver.GetSSHPort()
++   83 	port, err := d.GetSSHPort()
+⋯
+-   72 	if h.Driver.GetSSHKeyPath() != "" {
+-   73 		auth.Keys = []string{h.Driver.GetSSHKeyPath()}
++   89 	if d.GetSSHKeyPath() != "" {
++   90 		auth.Keys = []string{d.GetSSHKeyPath()}
+⋯
+-   76 	return ssh.NewClient(h.Driver.GetSSHUsername(), addr, port, auth)
++   93 	return ssh.NewClient(d.GetSSHUsername(), addr, port, auth)
+commands/ssh.go · modified · +9 −1
+@@ -7,6 +7,14 @@ import (
++   10 type errStateInvalidForSSH struct {
++   11 	HostName string
++   12 }
++   13 
++   14 func (e errStateInvalidForSSH) Error() string {
++   15 	return fmt.Sprintf("Error: Cannot run SSH command: Host %q is not running", e.HostName)
++   16 }
++   17 
+@@ -31,7 +39,7 @@ func cmdSSH(c CommandLine, api libmachine.API) error {
+-   34 		return fmt.Errorf("Error: Cannot run SSH command: Host %q is not running", host.Name)
++   42 		return errStateInvalidForSSH{host.Name}
+commands/ssh_test.go · modified · +63 −4
+@@ -4,17 +4,36 @@ import (
++    7 	"github.com/docker/machine/drivers/fakedriver"
+⋯
++    9 	"github.com/docker/machine/libmachine/drivers"
++   10 	"github.com/docker/machine/libmachine/host"
+⋯
++   12 	"github.com/docker/machine/libmachine/ssh"
++   13 	"github.com/docker/machine/libmachine/ssh/sshtest"
++   14 	"github.com/docker/machine/libmachine/state"
+⋯
++   18 type FakeSSHClientCreator struct {
++   19 	client ssh.Client
++   20 }
++   21 
++   22 func (fsc *FakeSSHClientCreator) CreateSSHClient(d drivers.Driver) (ssh.Client, error) {
++   23 	if fsc.client == nil {
++   24 		fsc.client = &sshtest.FakeClient{}
++   25 	}
++   26 	return fsc.client, nil
++   27 }
++   28 
+⋯
+-   14 		commandLine CommandLine
+-   15 		api         libmachine.API
+-   16 		expectedErr error
+-   17 		helpShown   bool
++   31 		commandLine   CommandLine
++   32 		api           libmachine.API
++   33 		expectedErr   error
++   34 		helpShown     bool
++   35 		clientCreator host.SSHClientCreator
++   36 		expectedShell []string
+@@ -39,14 +58,54 @@ func TestCmdSSH(t *testing.T) {
++   61 		{
++   62 			commandLine: &commandstest.FakeCommandLine{
++   63 				CliArgs: []string{"default", "df", "-h"},
++   64 			},
++   65 			api: &libmachinetest.FakeAPI{
++   66 				Hosts: []*host.Host{
++   67 					{
++   68 						Name: "default",
++   69 						Driver: &fakedriver.Driver{
++   70 							MockState: state.Running,
++   71 						},
++   72 					},
++   73 				},
++   74 			},
++   75 			expectedErr:   nil,
++   76 			clientCreator: &FakeSSHClientCreator{},
++   77 			expectedShell: []string{"df", "-h"},
++   78 		},
++   79 		{
++   80 			commandLine: &commandstest.FakeCommandLine{
++   81 				CliArgs: []string{"default"},
++   82 			},
++   83 			api: &libmachinetest.FakeAPI{
++   84 				Hosts: []*host.Host{
++   85 					{
++   86 						Name: "default",
++   87 						Driver: &fakedriver.Driver{
++   88 							MockState: state.Stopped,
++   89 						},
++   90 					},
++   91 				},
++   92 			},
++   93 			expectedErr: errStateInvalidForSSH{"default"},
++   94 		},
+⋯
++   98 		host.SetSSHClientCreator(tc.clientCreator)
++   99 
+⋯
++  106 
++  107 		if fcc, ok := tc.clientCreator.(*FakeSSHClientCreator); ok {
++  108 			assert.Equal(t, tc.expectedShell, fcc.client.(*sshtest.FakeClient).ActivatedShell)
++  109 		}
+libmachine/ssh/sshtest/fake_client.go · added · +21 −0
+@@ -0,0 +1,21 @@
++    1 package sshtest
++    2 
++    3 type CmdResult struct {
++    4 	Out string
++    5 	Err error
++    6 }
++    7 
++    8 type FakeClient struct {
++    9 	ActivatedShell []string
++   10 	Outputs        map[string]CmdResult
++   11 }
++   12 
++   13 func (fsc *FakeClient) Output(command string) (string, error) {
++   14 	outerr := fsc.Outputs[command]
++   15 	return outerr.Out, outerr.Err
++   16 }
++   17 
++   18 func (fsc *FakeClient) Shell(args ...string) error {
++   19 	fsc.ActivatedShell = args
++   20 	return nil
++   21 }

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { type ChangedFile, changeMap, renderChangeMap } from "@understory/core/collect/change-map";
 import { describe, expect, it } from "vitest";
 import {
@@ -53,6 +54,13 @@ describe("the question", () => {
     ]);
     expect(PERTINENCE_SYSTEM).toContain("not from the words they share with the passage");
     expect(PERTINENCE_SYSTEM).toContain("do not take its\nword for it");
+  });
+
+  it("is the one the design and the rendered examples quote, word for word", () => {
+    expect(readFileSync("eval/pertinence-replay.md", "utf8")).toContain(PERTINENCE_SYSTEM);
+    expect(readFileSync("eval/results/2026-10-21-pertinence-prompts/system.txt", "utf8")).toBe(
+      `${PERTINENCE_SYSTEM}\n`,
+    );
   });
 
   it("is rendered from the line, the sentence, the passages and the map, in that order", () => {

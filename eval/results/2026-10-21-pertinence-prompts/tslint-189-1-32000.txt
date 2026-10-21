@@ -1,0 +1,209 @@
+The line under investigation, as numbered in this change: src/linter.ts:147
+  if (Formatter === undefined) {
+What this change did to it: rewrote it; before, it read: if (Formatter !== undefined) {
+
+The sentence under review (it claims the reason; it may be wrong):
+  The condition was rewritten to allow uncompiled custom formatters, as uncompiled rules were already allowed.
+
+The passage it rests on:
+  [pr:3412 · pull request, description] “* formatterLoader * allow uncompiled custom formatters (we already allow uncompiled rules)”
+
+The change: commit:8b853b2 · Cleanup and refactoring of (rule|formatter)Loader (#3412) · 9 files
+src/linter.ts · modified · +3 −9
+@@ -24,7 +24,6 @@ import {
+-   27     getRelativePath,
+@@ -33,7 +32,6 @@ import { removeDisabledFailures } from "./enableDisableRules";
+-   36 import { IFormatter } from "./language/formatter/formatter";
+@@ -144,16 +142,12 @@ export class Linter { · holds the investigated line
+-  147         let formatter: IFormatter;
+-  148         const formattersDirectory = getRelativePath(this.options.formattersDirectory);
+-  149 
+   145         const formatterName = this.options.formatter !== undefined ? this.options.formatter : "prose";
+-  151         const Formatter = findFormatter(formatterName, formattersDirectory);
+-  152         if (Formatter !== undefined) {
+-  153             formatter = new Formatter();
+-  154         } else {
++  146         const Formatter = findFormatter(formatterName, this.options.formattersDirectory);
++  147         if (Formatter === undefined) {  ← the investigated line
+   148             throw new Error(`formatter '${formatterName}' not found`);
+   149         }
++  150         const formatter = new Formatter();
+   151 
+   152         const output = formatter.format(this.failures, this.fixes);
+   153 
+src/configuration.ts · modified · +7 −4
+@@ -338,7 +338,11 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
+-  341 // returns the absolute path (contrary to what the name implies)
++  341 /**
++  342  * returns the absolute path (contrary to what the name implies)
++  343  *
++  344  * @deprecated use `path.resolve` instead
++  345  */
+@@ -371,15 +375,14 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
+-  374             const absolutePath = getRelativePath(dir, relativeTo);
++  378             const absolutePath = relativeTo === undefined ? path.resolve(dir) : path.resolve(relativeTo, dir);
+⋯
+-  381         })
+-  382         .filter((dir) => dir !== undefined) as string[];
++  385         });
+src/formatterLoader.ts · modified · +28 −15
+@@ -17,11 +17,11 @@
++   20 import * as resolve from "resolve";
+⋯
+-   23 const moduleDirectory = path.dirname(module.filename);
+-   24 const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, ".", "formatters");
++   24 const CORE_FORMATTERS_DIRECTORY = path.resolve(__dirname, "formatters");
+@@ -31,7 +31,7 @@ export function findFormatter(name: string | FormatterConstructor, formattersDir
+-   34         let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
++   34         let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName, true);
+@@ -52,24 +52,37 @@ export function findFormatter(name: string | FormatterConstructor, formattersDir
+-   55 function loadFormatter(...paths: string[]): FormatterConstructor | undefined {
+-   56     const formatterPath = paths.reduce((p, c) => path.join(p, c), "");
+-   57     const fullPath = path.resolve(moduleDirectory, formatterPath);
+-   58 
+-   59     if (fs.existsSync(`${fullPath}.js`)) {
+-   60         const formatterModule = require(fullPath) as { Formatter: FormatterConstructor };
+-   61         return formatterModule.Formatter;
++   55 function loadFormatter(directory: string, name: string, isCore?: boolean): FormatterConstructor | undefined {
++   56     const formatterPath = path.resolve(path.join(directory, name));
++   57     let fullPath: string;
++   58     if (isCore) {
++   59         fullPath = `${formatterPath}.js`;
++   60         if (!fs.existsSync(fullPath)) {
++   61             return undefined;
++   62         }
++   63     } else {
++   64         // Resolve using node's path resolution to allow developers to write custom formatters in TypeScript which can be loaded by TS-Node
++   65         try {
++   66             fullPath = require.resolve(formatterPath);
++   67         } catch {
++   68             return undefined;
++   69         }
+⋯
+-   63 
+-   64     return undefined;
++   71     return (require(fullPath) as { Formatter: FormatterConstructor }).Formatter;
+⋯
+-   70         src = require.resolve(name);
+-   71     } catch (e) {
+-   72         return undefined;
++   77         // first try to find a module in the dependencies of the currently linted project
++   78         src = resolve.sync(name, {basedir: process.cwd()});
++   79     } catch {
++   80         try {
++   81             // if there is no local module, try relative to the installation of TSLint (might be global)
++   82             src = require.resolve(name);
++   83         } catch {
++   84             return undefined;
++   85         }
+src/ruleLoader.ts · modified · +11 −27
+@@ -18,13 +18,11 @@
+-   21 import { getRelativePath } from "./configuration";
+⋯
+-   26 const moduleDirectory = path.dirname(module.filename);
+-   27 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
++   25 const CORE_RULES_DIRECTORY = path.resolve(__dirname, "rules");
+@@ -107,28 +105,14 @@ function transformName(name: string): string {
+-  110     const ruleFullPath = getRuleFullPath(directory, ruleName);
+-  111     if (ruleFullPath !== undefined) {
+-  112         const ruleModule = require(ruleFullPath) as { Rule: RuleConstructor } | undefined;
+-  113         if (ruleModule !== undefined) {
+-  114             return ruleModule.Rule;
+-  115         }
+-  116     }
+-  117     return "not-found";
+-  118 }
+-  119 
+-  120 /**
+-  121  * Returns the full path to a rule file. Path to rules are resolved using nodes path resolution.
+-  122  * This allows developers to write custom rules in TypeScript, which then can be loaded by TS-Node.
+-  123  * @param directory - An absolute path to a directory of rules
+-  124  * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
+-  125  */
+-  126 function getRuleFullPath(directory: string, ruleName: string): string | undefined {
++  108     let ruleFullPath: string;
+⋯
+-  128         return require.resolve(path.join(directory, ruleName));
+-  129     } catch (e) {
+-  130         return undefined;
++  110         // Resolve using node's path resolution to allow developers to write custom rules in TypeScript which can be loaded by TS-Node
++  111         ruleFullPath = require.resolve(path.join(directory, ruleName));
++  112     } catch {
++  113         return "not-found";
+⋯
++  115     return (require(ruleFullPath) as { Rule: RuleConstructor }).Rule;
+@@ -140,15 +124,15 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath?: bool
+-  143     let absolutePath: string | undefined = directory;
++  127     let absolutePath: string = directory;
+⋯
+-  145         absolutePath = getRelativePath(directory);
+-  146         if (absolutePath !== undefined && !fs.existsSync(absolutePath)) {
++  129         if (!fs.existsSync(directory)) {
+⋯
++  132         absolutePath = path.resolve(directory);
+⋯
+-  151     const Rule = absolutePath === undefined ? "not-found" : loadRule(absolutePath, ruleName);
++  135     const Rule = loadRule(absolutePath, ruleName);
+test/config/package.json · modified · +2 −1
+@@ -3,6 +3,7 @@
+-    6     "tslint-test-custom-rules": "../external/tslint-test-custom-rules"
++    6     "tslint-test-custom-rules": "../external/tslint-test-custom-rules",
++    7     "tslint-test-custom-formatter": "../external/tslint-test-custom-formatter"
+test/executable/executableTests.ts · modified · +17 −0
+@@ -133,6 +133,23 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
++  136     describe("Custom formatters", () => {
++  137         it("can be loaded from node_modules", (done) => {
++  138             execCli(
++  139                 ["-c", "tslint-custom-rules-with-dir.json", "../../src/test.ts", "-t", "tslint-test-custom-formatter"],
++  140                 {
++  141                     cwd: "./test/config",
++  142                 },
++  143                 (err, stdout) => {
++  144                     assert.isNotNull(err, "process should exit with error");
++  145                     assert.strictEqual(err.code, 2, "error code should be 2");
++  146                     assert.include(stdout, "hello from custom formatter", "stdout should contain output of custom formatter");
++  147                     done();
++  148                 },
++  149             );
++  150         });
++  151     });
++  152 
+test/external/tslint-test-custom-formatter/formatter.js · added · +24 −0
+@@ -0,0 +1,24 @@
++    1 "use strict";
++    2 var __extends = (this && this.__extends) || (function () {
++    3     var extendStatics = Object.setPrototypeOf ||
++    4         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
++    5         function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
++    6     return function (d, b) {
++    7         extendStatics(d, b);
++    8         function __() { this.constructor = d; }
++    9         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
++   10     };
++   11 })();
++   12 Object.defineProperty(exports, "__esModule", { value: true });
++   13 var lint_1 = require("tslint");
++   14 var Formatter = /** @class */ (function (_super) {
++   15     __extends(Formatter, _super);
++   16     function Formatter() {
++   17         return _super !== null && _super.apply(this, arguments) || this;
++   18     }
++   19     Formatter.prototype.format = function () {
++   20         return "hello from custom formatter";
++   21     };
++   22     return Formatter;
++   23 }(lint_1.Formatters.AbstractFormatter));
++   24 exports.Formatter = Formatter;
+test/external/tslint-test-custom-formatter/package.json · added · +7 −0
+@@ -0,0 +1,7 @@
++    1 {
++    2   "name": "tslint-test-custom-formatter",
++    3   "version": "0.0.1",
++    4   "private": true,
++    5   "main": "formatter.js",
++    6   "scripts": {}
++    7 }
+test/utils.ts · modified · +1 −1
+@@ -29,7 +29,7 @@ export function getSourceFile(fileName: string): ts.SourceFile {
+-   32     const formattersDirectory = path.join(path.dirname(module.filename), "../src/formatters");
++   32     const formattersDirectory = path.join(__dirname, "../src/formatters");

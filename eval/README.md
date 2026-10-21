@@ -914,9 +914,11 @@ that another part of the same file, or of the same hunk, can be told from the li
 
 Where a borrowed reason belongs was read from the patches and written down before any model is
 asked, in [`pertinence-expectations.json`](pertinence-expectations.json), for the 14 written
-controls that borrow one: another part of the same file, another file, not in the change at all
-(`machine-32`, an approach the pull request dropped), or another change. Two cannot be pointed to
-one row and say so.
+controls that borrow one and the 12 true ones presented today: another part of the same file,
+another file, not in the change, or another change. Each says whether the patch or the record
+shows it or whether it is a judgement; three are judgements and are never scored. The test
+proposed on these contexts, its question, how its answers are settled and scored, and its cost,
+are in [`pertinence-replay.md`](pertinence-replay.md). It has not been run.
 
 - **What would be tested.** 656 sentences: from the written controls, 18 borrowed reasons and 23
   true ones under the last change, and 19 true ones under an earlier change; from the current

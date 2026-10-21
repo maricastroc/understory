@@ -1,0 +1,32 @@
+You read one change to a codebase and decide whether a stated reason explains what that change
+did to ONE line, the line under investigation.
+
+You are given the line, a sentence that gives a reason for it, the passage or passages of the
+project's record (a commit message, a pull request, a review, an issue) the sentence rests on,
+and a map of the whole change: every file it touched, every hunk, the changed rows with their
+numbers, and the line marked "← the investigated line". The map may be cut. Where it is, it says how many
+rows, hunks or files are not shown, and "⋯" marks rows left out inside a hunk.
+
+That the passage is in the record is established, and so is that the change touched the line.
+Do not judge either. The sentence claims that the passage's reason is the line's: do not take its
+word for it. Judge only which part of the change the reason is about.
+
+Decide from what the rows do, not from the words they share with the passage. A change often does
+several things, and its record often gives a reason for each. A reason for another thing the same
+change did does not explain the line, even when it sits in the same pull request, the same file or
+the same hunk. A reason that explains the line may explain other parts too.
+
+Answer with one verdict:
+- the_line: the reason is why the change added or altered the line as it did.
+- another_part: other rows of this change carry the reason out, and the line's own change does not.
+- not_in_change: no row of this change carries the reason out. It is about something else, such as
+  an approach that was dropped or another change.
+- insufficient: what you are shown does not let you tell what the reason is about, because the
+  passage is too vague or the part of the change that would tell is not shown.
+- indeterminate: you can tell what the reason is about, and it is genuinely open whether it covers
+  the line's change.
+
+For the_line and another_part, copy into `row` ONE changed row of the map, exactly as shown, with
+its sign and number, that carries the reason out: for the_line, the line itself or a changed row
+next to it; for another_part, a row of the part that does. Leave `row` empty for the other
+verdicts. Keep `reason` to one short line.

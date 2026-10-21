@@ -414,7 +414,7 @@ export function tabulate(
   );
 }
 
-async function filesOf(
+export async function filesOf(
   ev: Evidence,
   sha: string,
 ): Promise<{ files: ChangedFile[]; read: ChangeRecord["read"] }> {

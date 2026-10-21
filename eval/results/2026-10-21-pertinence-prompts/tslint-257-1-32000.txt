@@ -1,0 +1,626 @@
+The line under investigation, as numbered in this change: src/linter.ts:185
+  const oldSource = fs.readFileSync(filePath, "utf-8");
+What this change did to it: added it
+
+The sentence under review (it claims the reason; it may be wrong):
+  This line was added by commit 63fc794 so that rules are no longer responsible for disabling themselves and failures are filtered after a rule returns them.
+
+The passage it rests on:
+  [pr:2369 · pull request, description] “Move `disabledIntervals` out of rule options. Rules are not responsible for disabling theirselves. Just filter the failures after the rule returns them.”
+
+The change: commit:63fc794 · Rewrite enable/disable logic (#2369) · 17 files
+src/linter.ts · modified · +77 −77
+@@ -29,15 +29,15 @@ import {
+-   32 import { EnableDisableRulesWalker } from "./enableDisableRules";
++   32 import { removeDisabledFailures } from "./enableDisableRules";
+⋯
+-   37 import { Fix, IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
++   37 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
+⋯
+-   40 import { arrayify, dedent } from "./utils";
++   40 import { arrayify, dedent, flatMap } from "./utils";
+@@ -90,38 +90,25 @@ class Linter {
+-   93         let sourceFile = this.getSourceFile(fileName, source);
++   93         const sourceFile = this.getSourceFile(fileName, source);
+⋯
++   95         const enabledRules = this.getEnabledRules(configuration, isJs);
+⋯
+-   96         const enabledRules = this.getEnabledRules(sourceFile, configuration, isJs);
+-   97         let hasLinterRun = false;
+-   98         let fileFailures: RuleFailure[] = [];
+-   99 
+-  100         if (this.options.fix) {
+-  101             for (const rule of enabledRules) {
+-  102                 const ruleFailures = this.applyRule(rule, sourceFile);
+-  103                 source = this.applyFixes(fileName, source, ruleFailures);
+-  104                 sourceFile = this.getSourceFile(fileName, source);
+-  105                 fileFailures = fileFailures.concat(ruleFailures);
+-  106             }
+-  107             hasLinterRun = true;
++   97         let fileFailures = this.getAllFailures(sourceFile, enabledRules);
++   98         if (!fileFailures.length) {
++   99             // Usual case: no errors.
++  100             return;
+⋯
+-  110         // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off
+-  111         if (!hasLinterRun || this.fixes.length > 0) {
+-  112             fileFailures = [];
+-  113             for (const rule of enabledRules) {
+-  114                 const ruleFailures = this.applyRule(rule, sourceFile);
+-  115                 if (ruleFailures.length > 0) {
+-  116                     fileFailures = fileFailures.concat(ruleFailures);
+-  117                 }
+-  118             }
++  103         if (this.options.fix && fileFailures.some((f) => f.hasFix())) {
++  104             fileFailures = this.applyAllFixes(enabledRules, fileFailures, sourceFile, fileName);
+⋯
++  111 
+@@ -158,74 +145,74 @@ class Linter { · holds the investigated line
+-  161     // Applies fixes to the files where the failures are reported.
+-  162     // Returns the content of the source file which AST needs to be reloaded.
+-  163     protected applyFixes(sourceFilePath: string, sourceContent: string, ruleFailures: RuleFailure[]) {
+-  164       const fixesPerFile: {[file: string]: Fix[]} = ruleFailures
+-  165           .reduce((accum: {[file: string]: Fix[]}, c) => {
+-  166               const currentFileName = c.getFileName();
+-  167               const fix = c.getFix();
+-  168               if (fix) {
+-  169                   accum[currentFileName] = accum[currentFileName] || [];
+-  170                   accum[currentFileName].push(fix);
+-  171               }
+-  172               return accum;
+-  173           }, {});
++  148     private getAllFailures(sourceFile: ts.SourceFile, enabledRules: IRule[]): RuleFailure[] {
++  149         const failures = flatMap(enabledRules, (rule) => this.applyRule(rule, sourceFile));
++  150         return removeDisabledFailures(sourceFile, failures);
++  151     }
+⋯
+-  175       const hasFixes = Object.keys(fixesPerFile).length > 0;
+-  176       let result = sourceContent;
++  153     private applyAllFixes(
++  154             enabledRules: IRule[], fileFailures: RuleFailure[], sourceFile: ts.SourceFile, sourceFileName: string): RuleFailure[] {
++  155         // When fixing, we need to be careful as a fix in one rule may affect other rules.
++  156         // So fix each rule separately.
++  157         let source: string = sourceFile.text;
++  158 
++  159         for (const rule of enabledRules) {
++  160             const hasFixes = fileFailures.some((f) => f.hasFix() && f.getRuleName() === rule.getOptions().ruleName);
++  161             if (hasFixes) {
++  162                 // Get new failures in case the file changed.
++  163                 const updatedFailures = removeDisabledFailures(sourceFile, this.applyRule(rule, sourceFile));
++  164                 const fixableFailures = updatedFailures.filter((f) => f.hasFix());
++  165                 this.fixes = this.fixes.concat(fixableFailures);
++  166                 source = this.applyFixes(sourceFileName, source, fixableFailures);
++  167                 sourceFile = this.getSourceFile(sourceFileName, source);
++  168             }
++  169         }
+⋯
+-  178       if (hasFixes) {
+-  179           this.fixes = this.fixes.concat(ruleFailures);
+-  180           Object.keys(fixesPerFile).forEach((currentFileName: string) => {
+-  181               const fixesForFile = fixesPerFile[currentFileName];
+-  182               let source = fs.readFileSync(currentFileName, { encoding: "utf-8" });
+-  183               source = Replacement.applyFixes(source, fixesForFile);
+-  184               fs.writeFileSync(currentFileName, source, { encoding: "utf-8" });
+-  185               if (sourceFilePath === currentFileName) {
+-  186                   result = source;
+-  187               }
+-  188           });
+-  189       }
+-  190       return result;
++  171         // If there were fixes, get the *new* list of failures.
++  172         return this.getAllFailures(sourceFile, enabledRules);
+⋯
+-  193     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
+-  194         let ruleFailures: RuleFailure[] = [];
++  175     // Only "protected" because a test directly accesses it.
++  176     // tslint:disable-next-line member-ordering
++  177     protected applyFixes(sourceFilePath: string, source: string, fixableFailures: RuleFailure[]): string {
++  178         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
++  179         fixesByFile.forEach((fileFixes, filePath) => {
++  180             let fileNewSource: string;
++  181             if (filePath === sourceFilePath) {
++  182                 source = Replacement.applyFixes(source, fileFixes);
++  183                 fileNewSource = source;
++  184             } else {
++  185                 const oldSource = fs.readFileSync(filePath, "utf-8");  ← the investigated line
++  186                 fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
++  187             }
++  188             fs.writeFileSync(filePath, fileNewSource, "utf-8");
++  189         });
++  190 
++  191         return source;
++  192     }
++  193 
++  194     private applyRule(rule: IRule, sourceFile: ts.SourceFile): RuleFailure[] {
+⋯
+-  197                 ruleFailures = rule.applyWithProgram(sourceFile, this.program);
++  197                 return rule.applyWithProgram(sourceFile, this.program);
+⋯
+-  199                 ruleFailures = rule.apply(sourceFile);
++  199                 return rule.apply(sourceFile);
+⋯
++  207             return [];
+⋯
+-  208 
+-  209         const fileFailures: RuleFailure[] = [];
+-  210         for (const ruleFailure of ruleFailures) {
+-  211             if (!this.containsRule(this.failures, ruleFailure)) {
+-  212                 fileFailures.push(ruleFailure);
+-  213             }
+-  214         }
+-  215         return fileFailures;
+⋯
+-  218     private getEnabledRules(sourceFile: ts.SourceFile, configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
++  211     private getEnabledRules(configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
+⋯
+-  220 
+-  221         // walk the code first to find all the intervals where rules are disabled
+-  222         const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, ruleOptionsList).getEnableDisableRuleMap();
+-  223 
+⋯
+-  226         const configuredRules = loadRules(ruleOptionsList, enableDisableRuleMap, rulesDirectories, isJs);
+-  227 
+-  228         return configuredRules.filter((r) => r.isEnabled());
++  215         return loadRules(ruleOptionsList, rulesDirectories, isJs);
+@@ -246,13 +233,26 @@ class Linter {
+-  249 
+-  250     private containsRule(rules: RuleFailure[], rule: RuleFailure) {
+-  251         return rules.some((r) => r.equals(rule));
+-  252     }
+⋯
++  242 
++  243 function createMultiMap<T, K, V>(inputs: T[], getPair: (input: T) => [K, V] | undefined): Map<K, V[]> {
++  244     const map = new Map<K, V[]>();
++  245     for (const input of inputs) {
++  246         const pair = getPair(input);
++  247         if (pair !== undefined) {
++  248             const [k, v] = pair;
++  249             const vs = map.get(k);
++  250             if (vs !== undefined) {
++  251                 vs.push(v);
++  252             } else {
++  253                 map.set(k, [v]);
++  254             }
++  255         }
++  256     }
++  257     return map;
++  258 }
+src/configs/all.ts · modified · +1 −1
+@@ -243,7 +243,7 @@ for (const key in rules) {
+-  246     if (Rule === "not-found") {
++  246     if (Rule === undefined) {
+src/configuration.ts · modified · +1 −1
+@@ -485,7 +485,7 @@ export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptio
+-  488             disabledIntervals: [],
++  488             disabledIntervals: [], // deprecated, so just provide an empty array.
+src/enableDisableRules.ts · modified · +116 −107
+@@ -15,133 +15,142 @@
+-   18 // tslint:disable prefer-switch
+-   19 // (waiting on https://github.com/palantir/tslint/pull/2369)
++   18 // tslint:disable object-literal-sort-keys
+⋯
+-   23 import { IOptions } from "./language/rule/rule";
++   22 import { RuleFailure } from "./language/rule/rule";
+⋯
+-   25 import { IEnableDisablePosition } from "./ruleLoader";
+-   26 
+-   27 export class EnableDisableRulesWalker {
+-   28     private enableDisableRuleMap: Map<string, IEnableDisablePosition[]>;
+-   29     private enabledRules: string[];
+-   30 
+-   31     constructor(private sourceFile: ts.SourceFile, ruleOptionsList: IOptions[]) {
+-   32         this.enableDisableRuleMap = new Map<string, IEnableDisablePosition[]>();
+-   33         this.enabledRules = [];
+-   34         for (const ruleOptions of ruleOptionsList) {
+-   35             if (ruleOptions.ruleSeverity !== "off") {
+-   36                 this.enabledRules.push(ruleOptions.ruleName);
+-   37                 this.enableDisableRuleMap.set(ruleOptions.ruleName, [{
+-   38                     isEnabled: true,
+-   39                     position: 0,
+-   40                 }]);
+-   41             }
+-   42         }
+-   43     }
+-   44 
+-   45     public getEnableDisableRuleMap() {
+-   46         utils.forEachComment(this.sourceFile, (fullText, comment) => {
+-   47             const commentText = comment.kind === ts.SyntaxKind.SingleLineCommentTrivia
+-   48                 ? fullText.substring(comment.pos + 2, comment.end)
+-   49                 : fullText.substring(comment.pos + 2, comment.end - 2);
+-   50             return this.handleComment(commentText, comment);
+-   51         });
+-   52 
+-   53         return this.enableDisableRuleMap;
++   24 export function removeDisabledFailures(sourceFile: ts.SourceFile, failures: RuleFailure[]): RuleFailure[] {
++   25     if (!failures.length) {
++   26         // Usually there won't be failures anyway, so no need to look for "tslint:disable".
++   27         return failures;
+⋯
+-   56     private getStartOfLinePosition(position: number, lineOffset = 0) {
+-   57         const line = ts.getLineAndCharacterOfPosition(this.sourceFile, position).line + lineOffset;
+-   58         const lineStarts = this.sourceFile.getLineStarts();
+-   59         if (line >= lineStarts.length) {
+-   60             // next line ends with eof or there is no next line
+-   61             // undefined switches the rule until the end and avoids an extra array entry
+-   62             return undefined;
+-   63         }
+-   64         return lineStarts[line];
+-   65     }
+-   66 
+-   67     private switchRuleState(ruleName: string, isEnabled: boolean, start: number, end?: number): void {
+-   68         const ruleStateMap = this.enableDisableRuleMap.get(ruleName);
+-   69         if (ruleStateMap === undefined || // skip switches for unknown or disabled rules
+-   70             isEnabled === ruleStateMap[ruleStateMap.length - 1].isEnabled // no need to add switch points if there is no change
+-   71         ) {
+-   72             return;
+-   73         }
+-   74 
+-   75         ruleStateMap.push({
+-   76             isEnabled,
+-   77             position: start,
++   30     const failingRules = new Set(failures.map((f) => f.getRuleName()));
++   31     const map = getDisableMap(sourceFile, failingRules);
++   32     return failures.filter((failure) => {
++   33         const disabledIntervals = map.get(failure.getRuleName());
++   34         return !disabledIntervals || !disabledIntervals.some(({ pos, end }) => {
++   35             const failPos = failure.getStartPosition().getPosition();
++   36             const failEnd = failure.getEndPosition().getPosition();
++   37             return failEnd >= pos && (end === -1 || failPos <= end);
+⋯
++   39     });
++   40 }
+⋯
+-   80         if (end) {
+-   81             // we only get here when rule state changes therefore we can safely use opposite state
+-   82             ruleStateMap.push({
+-   83                 isEnabled: !isEnabled,
+-   84                 position: end,
+-   85             });
++   42 /**
++   43  * The map will have an array of TextRange for each disable of a rule in a file.
++   44  * (It will have no entry if the rule is never disabled, meaning all arrays are non-empty.)
++   45  */
++   46 function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): ReadonlyMap<string, ts.TextRange[]> {
++   47     const map = new Map<string, ts.TextRange[]>();
++   48 
++   49     utils.forEachComment(sourceFile, (fullText, comment) => {
++   50         const commentText = comment.kind === ts.SyntaxKind.SingleLineCommentTrivia
++   51             ? fullText.substring(comment.pos + 2, comment.end)
++   52             : fullText.substring(comment.pos + 2, comment.end - 2);
++   53         const parsed = parseComment(commentText);
++   54         if (parsed) {
++   55             const { rulesList, isEnabled, modifier } = parsed;
++   56             const switchRange = getSwitchRange(modifier, comment, sourceFile);
++   57             if (switchRange) {
++   58                 const rulesToSwitch = rulesList === "all" ? Array.from(failingRules) : rulesList.filter((r) => failingRules.has(r));
++   59                 for (const ruleToSwitch of rulesToSwitch) {
++   60                     switchRuleState(ruleToSwitch, isEnabled, switchRange.pos, switchRange.end);
++   61                 }
++   62             }
+⋯
+-   87     }
+-   88 
+-   89     private handleComment(commentText: string, range: ts.TextRange) {
+-   90         // regex is: start of string followed by any amount of whitespace
+-   91         // followed by tslint and colon
+-   92         // followed by either "enable" or "disable"
+-   93         // followed optionally by -line or -next-line
+-   94         // followed by either colon, whitespace or end of string
+-   95         const match = /^\s*tslint:(enable|disable)(?:-(line|next-line))?(:|\s|$)/.exec(commentText);
+-   96         if (match !== null) {
+-   97             // remove everything matched by the previous regex to get only the specified rules
+-   98             // split at whitespaces
+-   99             // filter empty items coming from whitespaces at start, at end or empty list
+-  100             let rulesList = commentText.substr(match[0].length)
+-  101                 .split(/\s+/)
+-  102                 .filter((rule) => !!rule);
+-  103             if (rulesList.length === 0 && match[3] === ":") {
+… 109 more changed rows not shown
+src/language/rule/abstractRule.ts · modified · +8 −13
+@@ -17,7 +17,6 @@
+-   20 import {doesIntersect} from "../utils";
+@@ -41,7 +40,7 @@ export abstract class AbstractRule implements IRule {
+-   44         return this.filterFailures(walker.getFailures());
++   43         return walker.getFailures();
+@@ -61,17 +60,13 @@ export abstract class AbstractRule implements IRule {
+-   64         return this.filterFailures(ctx.failures);
++   63         return ctx.failures;
+⋯
+-   67     protected filterFailures(failures: RuleFailure[]): RuleFailure[] {
+-   68         const result: RuleFailure[] = [];
+-   69         for (const failure of failures) {
+-   70             // don't add failures for a rule if the failure intersects an interval where that rule is disabled
+-   71             if (!doesIntersect(failure, this.options.disabledIntervals) && !result.some((f) => f.equals(failure))) {
+-   72                 result.push(failure);
+-   73             }
+-   74         }
+-   75         return result;
+-   76     }
++   66     /**
++   67      * @deprecated
++   68      * Failures will be filtered based on `tslint:disable` comments by tslint.
++   69      * This method now does nothing.
++   70      */
++   71     protected filterFailures(failures: RuleFailure[]) { return failures; }
+src/language/rule/rule.ts · modified · +10 −1
+@@ -99,9 +99,18 @@ export interface IOptions {
+-  102     disabledIntervals: IDisabledInterval[];
++  102     /**
++  103      * @deprecated
++  104      * Tslint now handles disables itself.
++  105      * This will be empty.
++  106      */
++  107     disabledIntervals: IDisabledInterval[]; // tslint:disable-line deprecation
+⋯
++  110 /**
++  111  * @deprecated
++  112  * These are now handled internally.
++  113  */
+src/language/utils.ts · modified · +3 −2
+@@ -19,14 +19,15 @@ import * as path from "path";
+-   22 import {IDisabledInterval, RuleFailure} from "./rule/rule";
++   22 import {IDisabledInterval, RuleFailure} from "./rule/rule"; // tslint:disable-line deprecation
+⋯
+-   29 export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]) {
++   29 /** @deprecated See IDisabledInterval. */
++   30 export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]): boolean { // tslint:disable-line deprecation
+src/ruleLoader.ts · modified · +31 −78
+@@ -20,45 +20,40 @@ import * as path from "path";
+-   23 import { IDisabledInterval, IOptions, IRule, RuleConstructor } from "./language/rule/rule";
+-   24 import { arrayify, camelize, dedent } from "./utils";
++   23 import { IOptions, IRule, RuleConstructor } from "./language/rule/rule";
++   24 import { arrayify, camelize, dedent, find } from "./utils";
+⋯
+-   30 export interface IEnableDisablePosition {
+-   31     isEnabled: boolean;
+-   32     position: number;
+-   33 }
+-   34 
+⋯
+-   36                           enableDisableRuleMap: Map<string, IEnableDisablePosition[]>,
+⋯
++   38         if (ruleOptions.ruleSeverity === "off") {
++   39             // Perf: don't bother finding the rule if it's disabled.
++   40             continue;
++   41         }
++   42 
+⋯
+-   45         const enableDisableRules = enableDisableRuleMap.get(ruleName);
+-   46         if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap) {
+-   47             const Rule = findRule(ruleName, rulesDirectories);
+-   48             if (Rule === "not-found") {
+-   49                 notFoundRules.push(ruleName);
+-   50             } else {
+-   51                 if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
+-   52                     notAllowedInJsRules.push(ruleName);
+-   53                 } else {
+-   54                     const ruleSpecificList = enableDisableRules || [];
+-   55                     ruleOptions.disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
+-   56                     rules.push(new Rule(ruleOptions));
+-   57 
+-   58                     if (Rule.metadata && Rule.metadata.deprecationMessage) {
+-   59                         showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+-   60                     }
+-   61                 }
++   44         const Rule = findRule(ruleName, rulesDirectories);
++   45         if (Rule === undefined) {
++   46             notFoundRules.push(ruleName);
++   47         } else if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
++   48             notAllowedInJsRules.push(ruleName);
++   49         } else {
++   50             const rule = new Rule(ruleOptions);
++   51             if (rule.isEnabled()) {
++   52                 rules.push(rule);
++   53             }
++   54 
++   55             if (Rule.metadata && Rule.metadata.deprecationMessage) {
++   56                 showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+@@ -88,24 +83,13 @@ export function loadRules(ruleOptionsList: IOptions[],
+-   91 export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | "not-found" {
++   86 export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | undefined {
+⋯
+-   93     let Rule: RuleConstructor | "not-found";
+-   94 
+⋯
+-   96     Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
+-   97 
+-   98     if (Rule === "not-found") {
++   89     const Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
++   90     return Rule !== undefined ? Rule :
+⋯
+-  100         for (const dir of arrayify(rulesDirectories)) {
+-  101             Rule = loadCachedRule(dir, camelizedName, true);
+-  102             if (Rule !== "not-found") {
+-  103                 break;
+-  104             }
+-  105         }
+-  106     }
+-  107 
+-  108     return Rule;
++   92         find(arrayify(rulesDirectories), (dir) => loadCachedRule(dir, camelizedName, true));
+@@ -133,56 +117,25 @@ function loadRule(directory: string, ruleName: string): RuleConstructor | "not-f
+-  136 function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | "not-found" {
++  120 function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | undefined {
+⋯
+-  141         return cachedRule;
++  125         return cachedRule === "not-found" ? undefined : cachedRule;
+⋯
+-  148         if (absolutePath != null) {
+-  149             if (!fs.existsSync(absolutePath)) {
+-  150                 throw new Error(`Could not find custom rule directory: ${directory}`);
+-  151             }
++  132         if (absolutePath !== undefined && !fs.existsSync(absolutePath)) {
++  133             throw new Error(`Could not find custom rule directory: ${directory}`);
+⋯
+-  155     let Rule: RuleConstructor | "not-found" = "not-found";
+-  156     if (absolutePath !== undefined) {
+-  157         Rule = loadRule(absolutePath, ruleName);
+-  158     }
+-  159     cachedRules.set(fullPath, Rule);
+-  160     return Rule;
+-  161 }
+-  162 
+-  163 /**
+-  164  * creates disabled intervals for rule based on list of switchers for it
+-  165  * @param ruleSpecificList - contains all switchers for rule states sorted top-down and strictly alternating between enabled and disabled
+-  166  */
+-  167 function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[]) {
+-  168     const disabledIntervalList: IDisabledInterval[] = [];
+-  169     // starting from second element in the list since first is always enabled in position 0;
+-  170     let i = 1;
++  137     const Rule = absolutePath === undefined ? "not-found" : loadRule(absolutePath, ruleName);
+⋯
+-  172     while (i < ruleSpecificList.length) {
+-  173         const startPosition = ruleSpecificList[i].position;
+-  174 
+-  175         // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval
+-  176         // set endPosition as Infinity in case when last switch for rule in a file is disabled
+-  177         const endPosition = ruleSpecificList[i + 1] ? ruleSpecificList[i + 1].position : Infinity;
+-  178 
+-  179         disabledIntervalList.push({
+-  180             endPosition,
+-  181             startPosition,
+-  182         });
+-  183 
+-  184         i += 2;
+-  185     }
+-  186 
+-  187     return disabledIntervalList;
++  139     cachedRules.set(fullPath, Rule);
++  140     return Rule === "not-found" ? undefined : Rule;
+src/rules/eoflineRule.ts · modified · +1 −3
+@@ -48,8 +48,6 @@ export class Rule extends Lint.Rules.AbstractRule {
+-   51         return this.filterFailures([
+-   52             new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix),
+-   53         ]);
++   51         return [new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix)];
+src/rules/maxFileLineCountRule.ts · modified · +9 −13
+@@ -37,27 +37,23 @@ export class Rule extends Lint.Rules.AbstractRule {
+-   40     public static FAILURE_STRING_FACTORY(lineCount: number, lineLimit: number) {
+-   41         return `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. `
+-   42              + `Consider breaking this file up into smaller parts`;
++   40     public static FAILURE_STRING(lineCount: number, lineLimit: number) {
++   41         return `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. ` +
++   42             `Consider breaking this file up into smaller parts`;
+⋯
+-   50         const ruleFailures: Lint.RuleFailure[] = [];
+-   51         const ruleArguments = this.getOptions().ruleArguments;
+-   52         const lineLimit = ruleArguments[0] as number;
++   50         const lineLimit = this.ruleArguments[0] as number;
+⋯
+-   54         const disabledIntervals = this.getOptions().disabledIntervals;
+-   55 
+-   56         if (lineCount > lineLimit && disabledIntervals.length === 0) {
+-   57             const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
+-   58             ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString,
+-   59               this.getOptions().ruleName));
++   52         if (lineCount <= lineLimit) {
++   53             return [];
+⋯
+-   61         return ruleFailures;
++   55 
++   56         const len = sourceFile.text.length;
++   57         return [new Lint.RuleFailure(sourceFile, len - 1, len, Rule.FAILURE_STRING(lineCount, lineLimit), this.ruleName)];
+src/rules/noInferredEmptyObjectTypeRule.ts · modified · +3 −5
+@@ -55,11 +55,9 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
+-   58                 typeArgs.forEach((a) => {
+-   59                     if (this.isEmptyObjectInterface(a)) {
+-   60                         this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
+-   61                     }
+-   62                 });
++   58                 if (typeArgs.some((a) => this.isEmptyObjectInterface(a))) {
++   59                     this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
++   60                 }
+src/rules/typedefRule.ts · modified · +0 −8
+@@ -156,14 +156,6 @@ class TypedefWalker extends Lint.RuleWalker {
+-  159         switch (node.initializer.kind) {
+-  160             case ts.SyntaxKind.ArrowFunction:
+-  161             case ts.SyntaxKind.FunctionExpression:
+-  162                 this.handleCallSignature(node.initializer as ts.FunctionExpression);
+-  163                 break;
+-  164             default:
+-  165                 break;
+-  166         }
+src/rules/whitespaceRule.ts · modified · +4 −0
+@@ -257,6 +257,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
++  260         // TODO: this rule occasionally adds duplicate failures.
++  261         if (ctx.failures.some((f) => f.getStartPosition().getPosition() === position)) {
++  262             return;
++  263         }
+src/utils.ts · modified · +11 −0
+@@ -127,6 +127,17 @@ export function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Eq
++  130 /** Returns the first non-`undefined` result. */
++  131 export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U | undefined {
++  132     for (const element of inputs) {
++  133         const result = getResult(element);
++  134         if (result !== undefined) {
++  135             return result;
++  136         }
++  137     }
++  138     return undefined;
++  139 }
++  140 
+test/ruleLoaderTests.ts · modified · +17 −22
+@@ -19,9 +19,7 @@ import { assert } from "chai";
+-   22 
+⋯
+-   24 import { IEnableDisablePosition } from "../src/ruleLoader";
+@@ -35,23 +33,31 @@ describe("Rule Loader", () => {
+-   38             { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
++   36             { ruleName: "forin", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+⋯
+-   40             { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
++   38             { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error", disabledIntervals: [] },
+⋯
+-   43         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir);
++   41         const rules = loadRules(validConfiguration, builtRulesDir);
+⋯
++   45     it("ignores off rules", () => {
++   46         const validConfiguration: IOptions[] = [
++   47             { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
++   48         ];
++   49         const rules = loadRules(validConfiguration, builtRulesDir);
++   50         assert.equal(rules.length, 0);
++   51     });
++   52 
+⋯
+-   54         const rules = loadRules(invalidConfiguration, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
++   60         const rules = loadRules(invalidConfiguration, [builtRulesDir]);
+@@ -61,33 +67,22 @@ describe("Rule Loader", () => {
+-   64         const rules = loadRules(withOptions, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
++   70         const rules = loadRules(withOptions, [builtRulesDir]);
+⋯
+-   70     it("loads disabled rules if rule in enableDisableRuleMap", () => {
+-   71         const validConfiguration: IOptions[] = [
+-   72             { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
+-   73         ];
+-   74 
+-   75         const enableDisableMap = new Map<string, IEnableDisablePosition[]>();
+-   76         enableDisableMap.set("forin", [{ isEnabled: true, position: 4 }]);
+-   77         const rules = loadRules(validConfiguration, enableDisableMap, builtRulesDir);
+-   78         assert.equal(rules.length, 1);
+-   79     });
+-   80 
+⋯
+-   85             { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
++   80             { ruleName: "forin", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+⋯
+-   87             { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
++   82             { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error", disabledIntervals: [] },
+⋯
+-   90         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
++   85         const rules = loadRules(validConfiguration, [builtRulesDir]);
+@@ -97,7 +92,7 @@ describe("Rule Loader", () => {
+-  100         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir, true);
++   95         const rules = loadRules(validConfiguration, builtRulesDir, true);
+test/rules/max-file-line-count/default/test.ts.lint · modified · +1 −1
+@@ -1,5 +1,4 @@
+-    2 ~ [This file has 23 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this file up into smaller parts]
+@@ -21,3 +20,4 @@ namespace App {
++   23 ~ [This file has 22 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this file up into smaller parts]
+test/rules/max-file-line-count/disabled/test.ts.lint · modified · +2 −1
+@@ -1,6 +1,7 @@
+-    1 /* tslint:disable:max-file-line-count */
+⋯
++    3 /* tslint:disable:max-file-line-count */
++    4 

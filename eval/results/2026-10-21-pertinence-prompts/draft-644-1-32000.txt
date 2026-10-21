@@ -1,0 +1,820 @@
+The line under investigation, as numbered in this change: src/model/immutable/EditorState.js:544
+  const prevTreeMap = editorState.getImmutable().get('treeMap');
+What this change did to it: rewrote it; before, it read: var prevTreeMap = editorState.getImmutable().get('treeMap');
+
+The sentence under review (it claims the reason; it may be wrong):
+  The declaration was rewritten from var to const by commit 8de2db9, which changed the remaining vars in Draft.js to let/const because var was triggering the author’s OCD.
+
+The passage it rests on:
+  [commit:8de2db9 · commit, title] “Change remaining vars to let/const”
+
+The change: commit:8de2db9 · Change remaining vars to let/const · 85 files
+src/model/immutable/EditorState.js · modified · +57 −57
+@@ -19,13 +19,13 @@ import type {EditorChangeType} from 'EditorChangeType';
+-   22 var BlockTree = require('BlockTree');
+-   23 var ContentState = require('ContentState');
+… 10 more changed rows not shown
+@@ -43,7 +43,7 @@ type EditorStateRecordType = {
+-   46 var defaultRecord: EditorStateRecordType = {
++   46 const defaultRecord: EditorStateRecordType = {
+@@ -59,7 +59,7 @@ var defaultRecord: EditorStateRecordType = {
+-   62 var EditorStateRecord = Record(defaultRecord);
++   62 const EditorStateRecord = Record(defaultRecord);
+@@ -75,7 +75,7 @@ class EditorState {
+-   78     var firstKey = contentState
++   78     const firstKey = contentState
+@@ -89,8 +89,8 @@ class EditorState {
+-   92     var {currentContent, decorator} = config;
+-   93     var recordConfig = {
+… 2 more changed rows not shown
+@@ -99,20 +99,20 @@ class EditorState {
+-  102     var map = editorState.getImmutable().withMutations(state => {
+-  103       var existingDecorator = state.get('decorator');
+… 10 more changed rows not shown
+@@ -133,7 +133,7 @@ class EditorState {
+-  136       var existingContent = editorState.getCurrentContent();
++  136       const existingContent = editorState.getCurrentContent();
+@@ -221,13 +221,13 @@ class EditorState {
+-  224     var override = this.getInlineStyleOverride();
++  224     const override = this.getInlineStyleOverride();
+… 4 more changed rows not shown
+@@ -241,18 +241,18 @@ class EditorState {
+-  244     var firstKey = this.getCurrentContent()
++  244     const firstKey = this.getCurrentContent()
+… 8 more changed rows not shown
+@@ -301,10 +301,10 @@ class EditorState {
+-  304     var content = editorState.getCurrentContent();
+-  305     var lastBlock = content.getLastBlock();
+… 6 more changed rows not shown
+@@ -324,7 +324,7 @@ class EditorState {
+-  327     var afterSelectionMove = EditorState.moveSelectionToEnd(editorState);
++  327     const afterSelectionMove = EditorState.moveSelectionToEnd(editorState);
+@@ -345,8 +345,8 @@ class EditorState {
+-  348     var forceSelection = changeType !== 'insert-characters';
+-  349     var directionMap = EditorBidiService.getDirectionMap(
+… 2 more changed rows not shown
+@@ -362,10 +362,10 @@ class EditorState {
+-  365     var selection = editorState.getSelection();
+-  366     var currentContent = editorState.getCurrentContent();
+… 6 more changed rows not shown
+@@ -388,7 +388,7 @@ class EditorState {
+-  391     var overrideChangeTypes = [
++  391     const overrideChangeTypes = [
+@@ -398,7 +398,7 @@ class EditorState {
+-  401     var editorStateChanges = {
++  401     const editorStateChanges = {
+@@ -421,14 +421,14 @@ class EditorState {
+-  424     var undoStack = editorState.getUndoStack();
+-  425     var newCurrentContent = undoStack.peek();
+… 6 more changed rows not shown
+@@ -455,14 +455,14 @@ class EditorState {
+-  458     var redoStack = editorState.getRedoStack();
+-  459     var newCurrentContent = redoStack.peek();
+… 6 more changed rows not shown
+@@ -540,8 +540,8 @@ function regenerateTreeForNewBlocks( · holds the investigated line
+   540   const contentState = editorState
+   541     .getCurrentContent()
+   542     .set('entityMap', newEntityMap);
+-  543   var prevBlockMap = contentState.getBlockMap();
+-  544   var prevTreeMap = editorState.getImmutable().get('treeMap');
++  543   const prevBlockMap = contentState.getBlockMap();
++  544   const prevTreeMap = editorState.getImmutable().get('treeMap');  ← the investigated line
+   545   return prevTreeMap.merge(
+   546     newBlockMap
+   547       .toSeq()
+@@ -587,7 +587,7 @@ function mustBecomeBoundary(
+-  590   var lastChangeType = editorState.getLastChangeType();
++  590   const lastChangeType = editorState.getLastChangeType();
+@@ -600,9 +600,9 @@ function getInlineStyleForCollapsedSelection(
+-  603   var startKey = selection.getStartKey();
+-  604   var startOffset = selection.getStartOffset();
+… 4 more changed rows not shown
+@@ -624,9 +624,9 @@ function getInlineStyleForNonCollapsedSelection(
+-  627   var startKey = selection.getStartKey();
+-  628   var startOffset = selection.getStartOffset();
+… 4 more changed rows not shown
+@@ -647,7 +647,7 @@ function lookUpwardForInlineStyle(
+-  650   var lastNonEmpty = content
++  650   const lastNonEmpty = content
+src/component/contents/DraftEditorLeaf.react.js · modified · +3 −3
+@@ -17,11 +17,11 @@ import type {DraftInlineStyle} from 'DraftInlineStyle';
+-   20 var React = require('React');
+-   21 var ReactDOM = require('ReactDOM');
+… 4 more changed rows not shown
+src/component/handlers/composition/DraftEditorCompositionHandler.js · modified · +1 −1
+@@ -45,7 +45,7 @@ let resolved = false;
+-   48 var DraftEditorCompositionHandler = {
++   48 const DraftEditorCompositionHandler = {
+src/component/handlers/drag/DraftEditorDragHandler.js · modified · +2 −2
+@@ -39,7 +39,7 @@ function getSelectionForEvent(
+-   42     var dropRange = document.caretRangeFromPoint(event.x, event.y);
++   42     const dropRange = document.caretRangeFromPoint(event.x, event.y);
+@@ -62,7 +62,7 @@ function getSelectionForEvent(
+-   65 var DraftEditorDragHandler = {
++   65 const DraftEditorDragHandler = {
+src/component/handlers/edit/commands/SecondaryClipboard.js · modified · +13 −13
+@@ -15,27 +15,27 @@
+-   18 var DraftModifier = require('DraftModifier');
+-   19 var EditorState = require('EditorState');
+… 20 more changed rows not shown
+@@ -49,7 +49,7 @@ var SecondaryClipboard = {
+-   52     var afterRemoval = DraftModifier.removeRange(
++   52     const afterRemoval = DraftModifier.removeRange(
+@@ -67,7 +67,7 @@ var SecondaryClipboard = {
+-   70     var newContent = DraftModifier.replaceWithFragment(
++   70     const newContent = DraftModifier.replaceWithFragment(
+src/component/handlers/edit/commands/keyCommandBackspaceToStartOfLine.js · modified · +8 −8
+@@ -12,26 +12,26 @@
+-   15 var EditorState = require('EditorState');
++   15 const EditorState = require('EditorState');
+… 14 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandBackspaceWord.js · modified · +11 −11
+@@ -12,33 +12,33 @@
+-   15 var DraftRemovableWord = require('DraftRemovableWord');
+-   16 var EditorState = require('EditorState');
+… 20 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandDeleteWord.js · modified · +11 −11
+@@ -12,29 +12,29 @@
+-   15 var DraftRemovableWord = require('DraftRemovableWord');
+-   16 var EditorState = require('EditorState');
+… 20 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandInsertNewline.js · modified · +3 −3
+@@ -12,11 +12,11 @@
+-   15 var DraftModifier = require('DraftModifier');
+-   16 var EditorState = require('EditorState');
+… 4 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandMoveSelectionToEndOfBlock.js · modified · +5 −5
+@@ -12,18 +12,18 @@
+-   15 var EditorState = require('EditorState');
++   15 const EditorState = require('EditorState');
+… 8 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandMoveSelectionToStartOfBlock.js · modified · +3 −3
+@@ -12,7 +12,7 @@
+-   15 var EditorState = require('EditorState');
++   15 const EditorState = require('EditorState');
+@@ -22,8 +22,8 @@ var EditorState = require('EditorState');
+-   25   var selection = editorState.getSelection();
+-   26   var startKey = selection.getStartKey();
+… 2 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandPlainBackspace.js · modified · +11 −11
+@@ -12,26 +12,26 @@
+-   15 var EditorState = require('EditorState');
+-   16 var UnicodeUtils = require('UnicodeUtils');
+… 18 more changed rows not shown
+@@ -44,7 +44,7 @@ function keyCommandPlainBackspace(editorState: EditorState): EditorState {
+-   47   var selection = editorState.getSelection();
++   47   const selection = editorState.getSelection();
+src/component/handlers/edit/commands/keyCommandPlainDelete.js · modified · +11 −11
+@@ -12,26 +12,26 @@
+-   15 var EditorState = require('EditorState');
+-   16 var UnicodeUtils = require('UnicodeUtils');
+… 18 more changed rows not shown
+@@ -44,7 +44,7 @@ function keyCommandPlainDelete(editorState: EditorState): EditorState {
+-   47   var selection = editorState.getSelection();
++   47   const selection = editorState.getSelection();
+src/component/handlers/edit/commands/keyCommandTransposeCharacters.js · modified · +18 −18
+@@ -12,39 +12,39 @@
+-   15 var DraftModifier = require('DraftModifier');
+-   16 var EditorState = require('EditorState');
+… 20 more changed rows not shown
+@@ -57,28 +57,28 @@ function keyCommandTransposeCharacters(editorState: EditorState): EditorState {
+-   60   var movedFragment = getContentStateFragment(content, removalRange);
+-   61   var afterRemoval = DraftModifier.removeRange(
+… 12 more changed rows not shown
+src/component/handlers/edit/commands/keyCommandUndo.js · modified · +3 −3
+@@ -12,21 +12,21 @@
+-   15 var EditorState = require('EditorState');
++   15 const EditorState = require('EditorState');
+… 4 more changed rows not shown
+src/component/handlers/edit/commands/moveSelectionBackward.js · modified · +8 −8
+@@ -27,21 +27,21 @@ function moveSelectionBackward(
+-   30   var selection = editorState.getSelection();
+-   31   var content = editorState.getCurrentContent();
+… 14 more changed rows not shown
+src/component/handlers/edit/commands/moveSelectionForward.js · modified · +7 −7
+@@ -27,15 +27,15 @@ function moveSelectionForward(
+-   30   var selection = editorState.getSelection();
+-   31   var key = selection.getStartKey();
+… 12 more changed rows not shown
+src/component/handlers/edit/commands/removeTextWithStrategy.js · modified · +4 −4
+@@ -17,7 +17,7 @@ import type {DraftRemovalDirection} from 'DraftRemovalDirection';
+-   20 var DraftModifier = require('DraftModifier');
++   20 const DraftModifier = require('DraftModifier');
+@@ -28,9 +28,9 @@ function removeTextWithStrategy(
+-   31   var selection = editorState.getSelection();
+-   32   var content = editorState.getCurrentContent();
+… 4 more changed rows not shown
+src/component/handlers/edit/editOnBeforeInput.js · modified · +21 −21
+@@ -15,16 +15,16 @@
+-   18 var BlockTree = require('BlockTree');
+-   19 var DraftModifier = require('DraftModifier');
+… 14 more changed rows not shown
+@@ -33,9 +33,9 @@ var setImmediate = require('setImmediate');
+-   36 var FF_QUICKFIND_CHAR = "'";
+-   37 var FF_QUICKFIND_LINK_CHAR = '/';
+… 4 more changed rows not shown
+@@ -54,7 +54,7 @@ function replaceText(
+-   57   var contentState = DraftModifier.replaceText(
++   57   const contentState = DraftModifier.replaceText(
+@@ -84,7 +84,7 @@ function editOnBeforeInput(
+-   87   var chars = e.data;
++   87   const chars = e.data;
+@@ -108,18 +108,18 @@ function editOnBeforeInput(
+-  111   var selection = editorState.getSelection();
+-  112   var selectionStart = selection.getStartOffset();
+… 8 more changed rows not shown
+@@ -149,7 +149,7 @@ function editOnBeforeInput(
+-  152   var newEditorState = replaceText(
+… 1 more changed row not shown
+@@ -190,10 +190,10 @@ function editOnBeforeInput(
+-  193     var originalFingerprint = BlockTree.getFingerprint(
+… 3 more changed rows not shown
+src/component/handlers/edit/editOnBlur.js · modified · +3 −3
+@@ -40,13 +40,13 @@ function editOnBlur(editor: DraftEditor, e: SyntheticEvent<>): void {
+-   43   var editorState = editor._latestEditorState;
+… 5 more changed rows not shown
+src/component/handlers/edit/editOnCompositionStart.js · modified · +1 −1
+@@ -14,7 +14,7 @@
+-   17 var EditorState = require('EditorState');
+… 1 more changed row not shown
+src/component/handlers/edit/editOnCopy.js · modified · +3 −3
+@@ -14,16 +14,16 @@
+-   17 var getFragmentFromSelection = require('getFragmentFromSelection');
+… 5 more changed rows not shown
+src/component/handlers/edit/editOnFocus.js · modified · +5 −5
+@@ -14,17 +14,17 @@
+-   17 var EditorState = require('EditorState');
+… 9 more changed rows not shown
+src/component/handlers/edit/editOnInput.js · modified · +23 −23
+@@ -14,18 +14,18 @@
+-   17 var DraftModifier = require('DraftModifier');
+… 15 more changed rows not shown
+@@ -45,9 +45,9 @@ function editOnInput(editor: DraftEditor): void {
+-   48   var domSelection = global.getSelection();
+… 3 more changed rows not shown
+@@ -85,18 +85,18 @@ function editOnInput(editor: DraftEditor): void {
+-   88   var domText = anchorNode.textContent;
+… 15 more changed rows not shown
+@@ -115,10 +115,10 @@ function editOnInput(editor: DraftEditor): void {
+-  118   var selection = editorState.getSelection();
+… 3 more changed rows not shown
+@@ -143,7 +143,7 @@ function editOnInput(editor: DraftEditor): void {
+-  146   var anchorOffset, focusOffset, startOffset, endOffset;
+… 1 more changed row not shown
+@@ -160,7 +160,7 @@ function editOnInput(editor: DraftEditor): void {
+-  163     var charDelta = domText.length - modelText.length;
+… 1 more changed row not shown
+@@ -171,7 +171,7 @@ function editOnInput(editor: DraftEditor): void {
+-  174   var contentWithAdjustedDOMSelection = newContent.merge({
+… 1 more changed row not shown
+src/component/handlers/edit/editOnKeyDown.js · modified · +22 −22
+@@ -15,27 +15,27 @@
+-   18 var DraftModifier = require('DraftModifier');
+… 35 more changed rows not shown
+@@ -84,8 +84,8 @@ function onKeyCommand(
+-   87   var keyCode = e.which;
+… 3 more changed rows not shown
+@@ -163,7 +163,7 @@ function editOnKeyDown(editor: DraftEditor, e: SyntheticKeyboardEvent<>): void {
+-  166   var command = editor.props.keyBindingFn(e);
+… 1 more changed row not shown
+@@ -189,7 +189,7 @@ function editOnKeyDown(editor: DraftEditor, e: SyntheticKeyboardEvent<>): void {
+-  192   var newState = onKeyCommand(command, editorState);
+… 1 more changed row not shown
+src/component/handlers/edit/editOnPaste.js · modified · +30 −28
+@@ -16,30 +16,30 @@ import type {BlockMap} from 'BlockMap';
+-   19 var BlockMapBuilder = require('BlockMapBuilder');
+… 27 more changed rows not shown
+@@ -56,27 +56,27 @@ function editOnPaste(editor: DraftEditor, e: SyntheticClipboardEvent<>): void {
+-   59         var editorState = editor._latestEditorState;
+… 13 more changed rows not shown
+@@ -150,14 +150,14 @@ function editOnPaste(editor: DraftEditor, e: SyntheticClipboardEvent<>): void {
+-  153       var htmlFragment = DraftPasteProcessor.processHTML(
+… 3 more changed rows not shown
+@@ -172,23 +172,25 @@ function editOnPaste(editor: DraftEditor, e: SyntheticClipboardEvent<>): void {
+-  175     var character = CharacterMetadata.create({
+… 9 more changed rows not shown
+@@ -198,7 +200,7 @@ function insertFragment(
+-  201   var newContent = DraftModifier.replaceWithFragment(
+… 1 more changed row not shown
+src/component/handlers/edit/editOnSelect.js · modified · +6 −6
+@@ -15,10 +15,10 @@
+-   18 var EditorState = require('EditorState');
+… 5 more changed rows not shown
+@@ -39,18 +39,18 @@ function editOnSelect(editor: DraftEditor): void {
+-   42   var editorState = editor.props.editorState;
+… 5 more changed rows not shown
+src/component/handlers/edit/getFragmentFromSelection.js · modified · +2 −2
+@@ -15,10 +15,10 @@
+-   18 var getContentStateFragment = require('getContentStateFragment');
+… 3 more changed rows not shown
+src/component/selection/DraftOffsetKey.js · modified · +3 −3
+@@ -14,9 +14,9 @@
+-   17 var KEY_DELIMITER = '-';
+… 3 more changed rows not shown
+@@ -26,7 +26,7 @@ var DraftOffsetKey = {
+-   29     var [blockKey, decoratorKey, leafKey] = offsetKey.split(KEY_DELIMITER);
+… 1 more changed row not shown
+src/component/selection/expandRangeToStartOfLine.js · modified · +21 −20
+@@ -10,17 +10,17 @@
+-   13 var UnicodeUtils = require('UnicodeUtils');
+… 9 more changed rows not shown
+@@ -34,7 +34,7 @@ function getLineHeightPx(element: Element): number {
+-   37   var rect = div.getBoundingClientRect();
+… 1 more changed row not shown
+@@ -56,13 +56,13 @@ function areRectsOnOneLine(
+-   59   var minTop = Infinity;
+… 11 more changed rows not shown
+@@ -114,11 +114,11 @@ function expandRangeToStartOfLine(range: Range): Range {
+-  117   var containingElement = range.startContainer;
+… 3 more changed rows not shown
+@@ -131,8 +131,8 @@ function expandRangeToStartOfLine(range: Range): Range {
+-  134   var bestContainer = range.endContainer;
+… 3 more changed rows not shown
+@@ -161,13 +161,14 @@ function expandRangeToStartOfLine(range: Range): Range {
+-  164   var currentContainer = bestContainer;
+… 8 more changed rows not shown
+src/component/selection/findAncestorOffsetKey.js · modified · +2 −2
+@@ -12,15 +12,15 @@
+-   15 var getSelectionOffsetKeyForNode = require('getSelectionOffsetKeyForNode');
+… 3 more changed rows not shown
+src/component/selection/getDraftEditorSelection.js · modified · +2 −2
+@@ -15,7 +15,7 @@
+-   18 var getDraftEditorSelectionWithNodes = require('getDraftEditorSelectionWithNodes');
+… 1 more changed row not shown
+@@ -25,7 +25,7 @@ function getDraftEditorSelection(
+-   28   var selection = global.getSelection();
+… 1 more changed row not shown
+src/component/selection/getDraftEditorSelectionWithNodes.js · modified · +18 −18
+@@ -15,11 +15,11 @@
+-   18 var findAncestorOffsetKey = require('findAncestorOffsetKey');
+… 9 more changed rows not shown
+@@ -38,8 +38,8 @@ function getDraftEditorSelectionWithNodes(
+-   41   var anchorIsTextNode = anchorNode.nodeType === Node.TEXT_NODE;
+… 3 more changed rows not shown
+@@ -57,9 +57,9 @@ function getDraftEditorSelectionWithNodes(
+-   60   var anchorPoint = null;
+-   61   var focusPoint = null;
+… 4 more changed rows not shown
+@@ -155,7 +155,7 @@ function getPointForNonTextNode(
+-  158   var offsetKey: ?string = findAncestorOffsetKey(node);
+… 1 more changed row not shown
+@@ -181,19 +181,19 @@ function getPointForNonTextNode(
+-  184     var key: ?string = null;
+… 9 more changed rows not shown
+@@ -204,7 +204,7 @@ function getPointForNonTextNode(
+-  207     var lastLeaf = getLastLeaf(nodeBeforeCursor);
+… 1 more changed row not shown
+@@ -222,7 +222,7 @@ function getPointForNonTextNode(
+-  225   var textContent = node.textContent;
+… 1 more changed row not shown
+src/component/selection/getRangeBoundingClientRect.js · modified · +8 −8
+@@ -12,7 +12,7 @@
+-   15 var getRangeClientRects = require('getRangeClientRects');
+… 1 more changed row not shown
+@@ -31,11 +31,11 @@ function getRangeBoundingClientRect(range: Range): FakeClientRect {
+-   34   var rects = getRangeClientRects(range);
+… 9 more changed rows not shown
+@@ -47,8 +47,8 @@ function getRangeBoundingClientRect(range: Range): FakeClientRect {
+-   50     for (var ii = 1; ii < rects.length; ii++) {
+… 3 more changed rows not shown
+src/component/selection/getRangeClientRects.js · modified · +9 −9
+@@ -12,11 +12,11 @@
+-   15 var UserAgent = require('UserAgent');
+… 5 more changed rows not shown
+@@ -25,23 +25,23 @@ var isChrome = UserAgent.isBrowser('Chrome');
+-   28   var tempRange = range.cloneRange();
+… 9 more changed rows not shown
+@@ -60,7 +60,7 @@ function getRangeClientRectsChrome(range: Range): Array<ClientRect> {
+-   63 var getRangeClientRects = isChrome
+… 1 more changed row not shown
+src/component/selection/getSampleSelectionMocksForTesting.js · modified · +1 −1
+@@ -6,6 +6,7 @@
++    9  * @format
+@@ -15,7 +16,6 @@ const ContentBlock = require('ContentBlock');
+-   18 
+src/component/selection/getSampleSelectionMocksForTestingNestedBlocks.js · modified · +1 −0
+@@ -6,6 +6,7 @@
++    9  * @format
+src/component/selection/getSelectionOffsetKeyForNode.js · modified · +3 −3
+@@ -18,12 +18,12 @@
+-   21     var offsetKey = node.getAttribute('data-offset-key');
+… 5 more changed rows not shown
+src/component/selection/getUpdatedSelectionState.js · modified · +18 −18
+@@ -15,9 +15,9 @@
+-   18 var DraftOffsetKey = require('DraftOffsetKey');
+… 3 more changed rows not shown
+@@ -26,7 +26,7 @@ function getUpdatedSelectionState(
+-   29   var selection: SelectionState = nullthrows(editorState.getSelection());
+… 1 more changed row not shown
+@@ -36,25 +36,25 @@ function getUpdatedSelectionState(
+-   39   var anchorPath = DraftOffsetKey.decode(anchorKey);
+… 21 more changed rows not shown
+@@ -64,17 +64,17 @@ function getUpdatedSelectionState(
+-   67   var isBackward = false;
+… 7 more changed rows not shown
+src/component/selection/isSelectionAtLeafStart.js · modified · +6 −6
+@@ -15,12 +15,12 @@
+-   18   var selection = editorState.getSelection();
+… 9 more changed rows not shown
+@@ -30,7 +30,7 @@ function isSelectionAtLeafStart(editorState: EditorState): boolean {
+-   33         var leafStart = leaf.get('start');
+… 1 more changed row not shown
+src/component/selection/setDraftEditorSelection.js · modified · +19 −19
+@@ -28,7 +28,7 @@ function getAnonymizedDOM(
+-   31   var anonymized = anonymizeTextWithin(node, getNodeLabels);
+… 1 more changed row not shown
+@@ -47,7 +47,7 @@ function anonymizeTextWithin(
+-   50     var length = node.textContent.length;
+… 1 more changed row not shown
+@@ -56,12 +56,12 @@ function anonymizeTextWithin(
+-   59   var clone = node.cloneNode();
+… 5 more changed rows not shown
+@@ -117,30 +117,30 @@ function setDraftEditorSelection(
+-  120   var selection = global.getSelection();
+… 19 more changed rows not shown
+@@ -204,8 +204,8 @@ function setDraftEditorSelection(
+-  207       var storedFocusNode = selection.focusNode;
+… 3 more changed rows not shown
+@@ -302,7 +302,7 @@ function addFocusToSelection(
+-  305     var range = selection.getRangeAt(0);
+… 1 more changed row not shown
+@@ -314,7 +314,7 @@ function addPointToSelection(
+-  317   var range = document.createRange();
+… 1 more changed row not shown
+src/component/utils/KeyBindingUtil.js · modified · +3 −3
+@@ -12,11 +12,11 @@
+-   15 var UserAgent = require('UserAgent');
+… 5 more changed rows not shown
+src/component/utils/getDefaultKeyBinding.js · modified · +6 −6
+@@ -14,18 +14,18 @@
+-   17 var KeyBindingUtil = require('KeyBindingUtil');
+… 11 more changed rows not shown
+src/component/utils/getTextContentFromFiles.js · modified · +7 −7
+@@ -14,16 +14,16 @@
+-   17 var TEXT_CLIPPING_REGEX = /\.textClipping$/;
+… 5 more changed rows not shown
+@@ -32,8 +32,8 @@ function getTextContentFromFiles(
+-   35   var readCount = 0;
+… 3 more changed rows not shown
+@@ -55,7 +55,7 @@ function readFile(file: File, callback: (contents: string) => void): void {
+-   58     var contents = '';
+… 1 more changed row not shown
+@@ -67,7 +67,7 @@ function readFile(file: File, callback: (contents: string) => void): void {
+-   70   var reader = new FileReader();
+… 1 more changed row not shown
+src/component/utils/isSoftNewlineEvent.js · modified · +1 −1
+@@ -12,7 +12,7 @@
+-   15 var Keys = require('Keys');
+… 1 more changed row not shown
+src/component/utils/splitTextIntoTextBlocks.js · modified · +1 −1
+@@ -12,7 +12,7 @@
+-   15 var NEWLINE_REGEX = /\r\n?|\n/g;
+… 1 more changed row not shown
+src/model/decorators/CompositeDraftDecorator.js · modified · +11 −11
+@@ -16,11 +16,11 @@ import type {BlockNodeRecord} from 'BlockNodeRecord';
+-   19 var Immutable = require('immutable');
+… 5 more changed rows not shown
+@@ -55,12 +55,12 @@ class CompositeDraftDecorator {
+-   58     var decorations = Array(block.getText().length).fill(null);
+… 7 more changed rows not shown
+@@ -76,12 +76,12 @@ class CompositeDraftDecorator {
+-   79     var componentKey = parseInt(key.split(DELIMITER)[0], 10);
+… 3 more changed rows not shown
+@@ -95,7 +95,7 @@ function canOccupySlice(
+-   98   for (var ii = start; ii < end; ii++) {
+… 1 more changed row not shown
+@@ -113,7 +113,7 @@ function occupySlice(
+-  116   for (var ii = start; ii < end; ii++) {
+… 1 more changed row not shown
+src/model/encoding/DraftStringKey.js · modified · +1 −1
+@@ -12,7 +12,7 @@
+-   15 var DraftStringKey = {
+… 1 more changed row not shown
+src/model/encoding/createCharacterList.js · modified · +5 −5
+@@ -14,17 +14,17 @@
+-   17 var CharacterMetadata = require('CharacterMetadata');
+… 9 more changed rows not shown
+src/model/encoding/decodeEntityRanges.js · modified · +6 −6
+@@ -12,9 +12,9 @@
+-   15 var UnicodeUtils = require('UnicodeUtils');
+… 3 more changed rows not shown
+@@ -23,14 +23,14 @@ function decodeEntityRanges(
+-   26   var entities = Array(text.length).fill(null);
+… 7 more changed rows not shown
+src/model/encoding/decodeInlineStyleRanges.js · modified · +6 −6
+@@ -12,10 +12,10 @@
+-   15 var {OrderedSet} = require('immutable');
+… 5 more changed rows not shown
+@@ -28,11 +28,11 @@ function decodeInlineStyleRanges(
+-   31   var styles = Array(text.length).fill(EMPTY_SET);
+… 5 more changed rows not shown
+src/model/encoding/encodeEntityRanges.js · modified · +6 −6
+@@ -15,10 +15,10 @@
+-   18 var DraftStringKey = require('DraftStringKey');
+… 5 more changed rows not shown
+@@ -27,12 +27,12 @@ function encodeEntityRanges(
+-   30   var encoded = [];
+… 5 more changed rows not shown
+src/model/encoding/encodeInlineStyleRanges.js · modified · +10 −10
+@@ -17,13 +17,13 @@ import type {DraftInlineStyle} from 'DraftInlineStyle';
+-   20 var UnicodeUtils = require('UnicodeUtils');
+… 9 more changed rows not shown
+@@ -34,10 +34,10 @@ function getEncodedInlinesForType(
+-   37   var ranges = [];
+… 3 more changed rows not shown
+@@ -47,7 +47,7 @@ function getEncodedInlinesForType(
+-   50       var text = block.getText();
+… 1 more changed row not shown
+@@ -66,11 +66,11 @@ function getEncodedInlinesForType(
+-   69   var styleList = block
+… 3 more changed rows not shown
+src/model/encoding/sanitizeDraftText.js · modified · +1 −1
+@@ -12,7 +12,7 @@
+-   15 var REGEX_BLOCK_DELIMITER = new RegExp('\r', 'g');
+… 1 more changed row not shown
+src/model/entity/DraftEntity.js · modified · +12 −12
+@@ -13,15 +13,15 @@
+-   16 var DraftEntityInstance = require('DraftEntityInstance');
+… 11 more changed rows not shown
+@@ -95,7 +95,7 @@ export type DraftEntityMapObject = {
+-   98 var DraftEntity: DraftEntityMapObject = {
+… 1 more changed row not shown
+@@ -219,7 +219,7 @@ var DraftEntity: DraftEntityMapObject = {
+-  222     var key = '' + ++instanceKey;
+… 1 more changed row not shown
+@@ -228,7 +228,7 @@ var DraftEntity: DraftEntityMapObject = {
+-  231     var instance = instances.get(key);
+… 1 more changed row not shown
+@@ -242,9 +242,9 @@ var DraftEntity: DraftEntityMapObject = {
+-  245     var instance = DraftEntity.__get(key);
+… 5 more changed rows not shown
+src/model/entity/DraftEntityInstance.js · modified · +3 −3
+@@ -16,11 +16,11 @@
+-   19 var Immutable = require('immutable');
+… 5 more changed rows not shown
+src/model/entity/DraftEntityMutability.js · modified · +1 −1
+@@ -12,7 +12,7 @@
+-   15 var ComposedEntityMutability = require('ComposedEntityMutability');
+… 1 more changed row not shown
+src/model/entity/__mocks__/DraftEntity.js · modified · +3 −3
+@@ -9,15 +9,15 @@
+-   12 var DraftEntity = jest.genMockFromModule('DraftEntity');
+… 5 more changed rows not shown
+src/model/entity/getEntityKeyForSelection.js · modified · +7 −7
+@@ -25,11 +25,11 @@ function getEntityKeyForSelection(
+-   28   var entityKey;
+… 5 more changed rows not shown
+@@ -40,9 +40,9 @@ function getEntityKeyForSelection(
+-   43   var startKey = targetSelection.getStartKey();
+… 5 more changed rows not shown
+@@ -58,7 +58,7 @@ function getEntityKeyForSelection(
+-   61     var entity = entityMap.__get(entityKey);
+… 1 more changed row not shown
+src/model/entity/getTextAfterNearestEntity.js · modified · +1 −1
+@@ -22,7 +22,7 @@ function getTextAfterNearestEntity(
+-   25   var start = offset;
+… 1 more changed row not shown
+src/model/immutable/BlockMapBuilder.js · modified · +3 −3
+@@ -15,11 +15,11 @@
+-   18 var Immutable = require('immutable');
+… 5 more changed rows not shown
+src/model/immutable/BlockTree.js · modified · +19 −19
+@@ -17,28 +17,28 @@ import type CharacterMetadata from 'CharacterMetadata';
+-   20 var Immutable = require('immutable');
+… 17 more changed rows not shown
+@@ -50,9 +50,9 @@ var defaultDecoratorRange: {
+-   53 var DecoratorRange = Record(defaultDecoratorRange);
+… 3 more changed rows not shown
+@@ -61,7 +61,7 @@ var BlockTree = {
+-   64     var textLength = block.getLength();
+… 1 more changed row not shown
+@@ -73,12 +73,12 @@ var BlockTree = {
+-   76     var leafSets = [];
+… 5 more changed rows not shown
+@@ -102,8 +102,8 @@ var BlockTree = {
+-  105         var decoratorKey = leafSet.get('decoratorKey');
+… 3 more changed rows not shown
+@@ -120,8 +120,8 @@ function generateLeaves(
+-  123   var leaves = [];
+… 3 more changed rows not shown
+src/model/immutable/CharacterMetadata.js · modified · +11 −11
+@@ -14,7 +14,7 @@
+-   17 var {Map, OrderedSet, Record} = require('immutable');
+… 1 more changed row not shown
+@@ -27,12 +27,12 @@ type CharacterMetadataConfig = {
+-   30 var defaultRecord: CharacterMetadataConfig = {
+… 3 more changed rows not shown
+@@ -51,23 +51,23 @@ class CharacterMetadata extends CharacterMetadataRecord {
+-   54     var withStyle = record.set('style', record.getStyle().add(style));
+… 5 more changed rows not shown
+@@ -91,21 +91,21 @@ class CharacterMetadata extends CharacterMetadataRecord {
+-   94     var configMap = Map(defaultConfig).merge(config);
+… 9 more changed rows not shown
+src/model/immutable/ContentBlock.js · modified · +2 −2
+@@ -84,12 +84,12 @@ class ContentBlock extends ContentBlockRecord implements BlockNode {
+-   87     var character = this.getCharacterList().get(offset);
+… 3 more changed rows not shown
+src/model/immutable/ContentBlockNode.js · modified · +2 −2
+@@ -111,12 +111,12 @@ class ContentBlockNode extends Record(defaultRecord) implements BlockNode {
+-  114     var character = this.getCharacterList().get(offset);
+… 3 more changed rows not shown
+src/model/immutable/ContentState.js · modified · +4 −4
+@@ -71,7 +71,7 @@ class ContentState extends ContentStateRecord {
+-   74     var block: BlockNodeRecord = this.getBlockMap().get(key);
+… 1 more changed row not shown
+@@ -133,7 +133,7 @@ class ContentState extends ContentStateRecord {
+-  136     var blockMap = this.getBlockMap();
+… 1 more changed row not shown
+@@ -177,8 +177,8 @@ class ContentState extends ContentStateRecord {
+-  180     var blockMap = BlockMapBuilder.createFromArray(theBlocks);
+… 3 more changed rows not shown
+src/model/immutable/EditorBidiService.js · modified · +9 −9
+@@ -14,16 +14,16 @@
+-   17 var Immutable = require('immutable');
+… 11 more changed rows not shown
+@@ -34,11 +34,11 @@ var EditorBidiService = {
+-   37     var blockMap = content.getBlockMap();
+… 5 more changed rows not shown
+src/model/immutable/SelectionState.js · modified · +9 −9
+@@ -12,11 +12,11 @@
+-   15 var Immutable = require('immutable');
+… 5 more changed rows not shown
+@@ -32,7 +32,7 @@ var defaultRecord: {
+-   35 var SelectionStateRecord = Record(defaultRecord);
+… 1 more changed row not shown
+@@ -84,20 +84,20 @@ class SelectionState extends SelectionStateRecord {
+-   87     var anchorKey = this.getAnchorKey();
+… 9 more changed rows not shown
+src/model/immutable/findRangesImmutable.js · modified · +1 −1
+@@ -31,7 +31,7 @@ function findRangesImmutable<T>(
+-   34   var cursor: number = 0;
+… 1 more changed row not shown
+src/model/modifier/DraftEntitySegments.js · modified · +11 −11
+@@ -38,15 +38,15 @@ import type {DraftRemovalDirection} from 'DraftRemovalDirection';
+-   41 var DraftEntitySegments = {
+… 3 more changed rows not shown
+@@ -58,13 +58,13 @@ var DraftEntitySegments = {
+-   61     var segmentStart = entityStart;
+… 11 more changed rows not shown
+@@ -83,9 +83,9 @@ var DraftEntitySegments = {
+-   86     var entityEnd = entityStart + text.length;
+… 5 more changed rows not shown
+src/model/modifier/DraftModifier.js · modified · +29 −26
+@@ -20,21 +20,21 @@ import type {DraftRemovalDirection} from 'DraftRemovalDirection';
+-   23 var CharacterMetadata = require('CharacterMetadata');
+… 27 more changed rows not shown
+@@ -48,21 +48,21 @@ const {OrderedSet} = Immutable;
+-   51 var DraftModifier = {
+… 7 more changed rows not shown
+@@ -100,9 +100,9 @@ var DraftModifier = {
+-  103     var movedFragment = getContentStateFragment(contentState, removalRange);
+… 3 more changed rows not shown
+@@ -120,8 +120,11 @@ var DraftModifier = {
+-  123     var withoutEntities = removeEntitiesAtEdges(contentState, targetRange);
+… 6 more changed rows not shown
+@@ -182,7 +185,7 @@ var DraftModifier = {
+-  185     var withoutEntities = removeEntitiesAtEdges(
+… 1 more changed row not shown
+@@ -193,8 +196,8 @@ var DraftModifier = {
+-  196     var withoutEntities = removeEntitiesAtEdges(contentState, selectionState);
+… 3 more changed rows not shown
+@@ -264,7 +267,7 @@ var DraftModifier = {
+-  267     var withoutEntities = removeEntitiesAtEdges(contentState, selectionState);
+… 1 more changed row not shown
+src/model/modifier/DraftRemovableWord.js · modified · +10 −10
+@@ -12,21 +12,21 @@
+-   15 var TokenizeUtil = require('TokenizeUtil');
+… 9 more changed rows not shown
+@@ -39,9 +39,9 @@ var DELETE_STRING =
+-   42 var DELETE_REGEX = new RegExp(DELETE_STRING);
+… 3 more changed rows not shown
+@@ -54,16 +54,16 @@ var BACKSPACE_STRING =
+-   57 var BACKSPACE_REGEX = new RegExp(BACKSPACE_STRING);
+… 5 more changed rows not shown
+src/model/modifier/RichTextEditorUtil.js · modified · +41 −41
+@@ -26,21 +26,21 @@ const nullthrows = require('nullthrows');
+-   29     var selection = editorState.getSelection();
+… 5 more changed rows not shown
+@@ -79,15 +79,15 @@ const RichTextEditorUtil = {
+-   82     var contentState = DraftModifier.insertText(
+… 3 more changed rows not shown
+@@ -104,7 +104,7 @@ const RichTextEditorUtil = {
+-  107     var selection = editorState.getSelection();
+… 1 more changed row not shown
+@@ -114,13 +114,13 @@ const RichTextEditorUtil = {
+-  117     var content = editorState.getCurrentContent();
+… 7 more changed rows not shown
+@@ -134,7 +134,7 @@ const RichTextEditorUtil = {
+-  137     var withoutBlockStyle = RichTextEditorUtil.tryToRemoveBlockStyle(
+… 1 more changed row not shown
+@@ -194,27 +194,27 @@ const RichTextEditorUtil = {
+-  197     var selection = editorState.getSelection();
+… 13 more changed rows not shown
+@@ -228,18 +228,18 @@ const RichTextEditorUtil = {
+-  231     var selection = editorState.getSelection();
+… 11 more changed rows not shown
+@@ -250,7 +250,7 @@ const RichTextEditorUtil = {
+-  253     var hasAtomicBlock = content
+… 1 more changed row not shown
+@@ -261,7 +261,7 @@ const RichTextEditorUtil = {
+-  264     var typeToSet =
+… 1 more changed row not shown
+@@ -274,9 +274,9 @@ const RichTextEditorUtil = {
+-  277     var selection = editorState.getSelection();
+… 5 more changed rows not shown
+@@ -295,8 +295,8 @@ const RichTextEditorUtil = {
+-  298     var selection = editorState.getSelection();
+… 3 more changed rows not shown
+@@ -312,8 +312,8 @@ const RichTextEditorUtil = {
+-  315     var content = editorState.getCurrentContent();
+… 3 more changed rows not shown
+@@ -339,7 +339,7 @@ const RichTextEditorUtil = {
+-  342     var withoutLink = DraftModifier.applyEntity(
+… 1 more changed row not shown
+@@ -353,15 +353,15 @@ const RichTextEditorUtil = {
+-  356     var selection = editorState.getSelection();
+… 13 more changed rows not shown
+src/model/modifier/getCharacterRemovalRange.js · modified · +15 −15
+@@ -17,10 +17,10 @@ import type {DraftRemovalDirection} from 'DraftRemovalDirection';
+-   20 var DraftEntitySegments = require('DraftEntitySegments');
+… 5 more changed rows not shown
+@@ -38,14 +38,14 @@ function getCharacterRemovalRange(
+-   41   var start = selectionState.getStartOffset();
+… 9 more changed rows not shown
+@@ -121,10 +121,10 @@ function getEntityRemovalRange(
+-  124   var start = selectionState.getStartOffset();
+… 7 more changed rows not shown
+@@ -134,7 +134,7 @@ function getEntityRemovalRange(
+-  137   var entityRanges = getRangesForDraftEntity(block, entityKey).filter(
+… 1 more changed row not shown
+@@ -143,7 +143,7 @@ function getEntityRemovalRange(
+-  146   var entityRange = entityRanges[0];
+… 1 more changed row not shown
+@@ -164,7 +164,7 @@ function getEntityRemovalRange(
+-  167   var removalRange = DraftEntitySegments.getRemovalRange(
+… 1 more changed row not shown
+src/model/modifier/getRangesForDraftEntity.js · modified · +2 −2
+@@ -15,7 +15,7 @@
+-   18 var invariant = require('invariant');
+… 1 more changed row not shown
+@@ -29,7 +29,7 @@ function getRangesForDraftEntity(
+-   32   var ranges = [];
+… 1 more changed row not shown
+src/model/paste/__mocks__/getSafeBodyFromHTML.js · modified · +2 −2
+@@ -12,8 +12,8 @@
+-   15   var fragment = document.createElement('body');
+… 3 more changed rows not shown
+src/model/paste/getSafeBodyFromHTML.js · modified · +4 −4
+@@ -12,19 +12,19 @@
+-   15 var UserAgent = require('UserAgent');
+… 7 more changed rows not shown
+src/model/transaction/ContentStateInlineStyle.js · modified · +13 −13
+@@ -15,10 +15,10 @@
+-   18 var CharacterMetadata = require('CharacterMetadata');
+… 5 more changed rows not shown
+@@ -42,19 +42,19 @@ function modifyInlineStyle(
+-   45   var blockMap = contentState.getBlockMap();
+… 15 more changed rows not shown
+@@ -64,8 +64,8 @@ function modifyInlineStyle(
+-   67       var chars = block.getCharacterList();
+… 3 more changed rows not shown
+src/model/transaction/adjustBlockDepthForContentState.js · modified · +5 −5
+@@ -21,16 +21,16 @@ function adjustBlockDepthForContentState(
+-   24   var startKey = selectionState.getStartKey();
+… 9 more changed rows not shown
+src/model/transaction/applyEntityToContentBlock.js · modified · +2 −2
+@@ -14,15 +14,15 @@
+-   17 var CharacterMetadata = require('CharacterMetadata');
+… 3 more changed rows not shown
+src/model/transaction/applyEntityToContentState.js · modified · +2 −2
+@@ -15,9 +15,9 @@
+-   18 var Immutable = require('immutable');
+… 3 more changed rows not shown
+src/model/transaction/insertIntoList.js · modified · +2 −2
+@@ -31,8 +31,8 @@ function insertIntoList<T>(
+-   34     var head = targetList.slice(0, offset);
+… 3 more changed rows not shown
+src/model/transaction/insertTextIntoContentState.js · modified · +12 −12
+@@ -12,12 +12,12 @@
+-   15 var Immutable = require('immutable');
+… 7 more changed rows not shown
+@@ -34,18 +34,18 @@ function insertTextIntoContentState(
+-   37   var len = text.length;
+… 13 more changed rows not shown
+@@ -57,7 +57,7 @@ function insertTextIntoContentState(
+-   60   var newOffset = offset + len;
+… 1 more changed row not shown
+src/model/transaction/modifyBlockForContentState.js · modified · +4 −4
+@@ -25,10 +25,10 @@ function modifyBlockForContentState(
+-   28   var startKey = selectionState.getStartKey();
+… 7 more changed rows not shown
+src/model/transaction/removeEntitiesAtEdges.js · modified · +23 −23
+@@ -18,37 +18,37 @@ import type {EntityMap} from 'EntityMap';
+-   21 var CharacterMetadata = require('CharacterMetadata');
+… 27 more changed rows not shown
+@@ -77,7 +77,7 @@ function getRemovalRange(
+-   80   var removalRange;
+… 1 more changed row not shown
+@@ -110,17 +110,17 @@ function removeForBlock(
+-  113   var chars = block.getCharacterList();
+… 15 more changed rows not shown
