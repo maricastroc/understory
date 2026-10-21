@@ -10,9 +10,10 @@ const exec = promisify(execFile);
 const RS = "\x1e";
 const FS = "\x1f";
 
-async function git(repoPath: string, args: string[]): Promise<string> {
+async function git(repoPath: string, args: string[], signal?: AbortSignal): Promise<string> {
   const { stdout } = await exec("git", ["-C", repoPath, ...args], {
     maxBuffer: 64 * 1024 * 1024,
+    ...(signal ? { signal } : {}),
   });
   return stdout.toString();
 }
@@ -171,17 +172,18 @@ export async function commitAt(
   repoPath: string,
   sha: string,
   filePath: string,
+  signal?: AbortSignal,
 ): Promise<{ date: string; title: string; message: string; parent: string | null; patch: string }> {
   if (!isCommitSha(sha)) throw new Error(`Not a commit sha: ${sha}`);
   const [parents, date, title, ...body] = (
-    await git(repoPath, ["log", "-1", "--format=%P%n%aI%n%s%n%b", sha])
+    await git(repoPath, ["log", "-1", "--format=%P%n%aI%n%s%n%b", sha], signal)
   ).split("\n");
   return {
     date: date ?? "",
     title: title ?? "",
     message: [title ?? "", ...body].join("\n").trim(),
     parent: parents?.split(" ")[0] || null,
-    patch: await filePatch(repoPath, sha, filePath),
+    patch: await filePatch(repoPath, sha, filePath, signal),
   };
 }
 
@@ -190,17 +192,14 @@ export async function ownerAt(
   sha: string,
   filePath: string,
   line: number,
+  signal?: AbortSignal,
 ): Promise<string | null> {
   if (!isCommitSha(sha)) throw new Error(`Not a commit sha: ${sha}`);
-  const out = await git(repoPath, [
-    "blame",
-    "-L",
-    `${line},${line}`,
-    "--porcelain",
-    sha,
-    "--",
-    filePath,
-  ]);
+  const out = await git(
+    repoPath,
+    ["blame", "-L", `${line},${line}`, "--porcelain", sha, "--", filePath],
+    signal,
+  );
   const owner = out.split(/\s/)[0] ?? "";
   return isCommitSha(owner) ? owner : null;
 }
@@ -222,9 +221,14 @@ export async function commitScope(
   };
 }
 
-export async function filePatch(repoPath: string, sha: string, filePath: string): Promise<string> {
+export async function filePatch(
+  repoPath: string,
+  sha: string,
+  filePath: string,
+  signal?: AbortSignal,
+): Promise<string> {
   if (!isCommitSha(sha)) throw new Error(`Not a commit sha: ${sha}`);
-  return git(repoPath, ["show", "--format=", "--unified=3", sha, "--", filePath]);
+  return git(repoPath, ["show", "--format=", "--unified=3", sha, "--", filePath], signal);
 }
 
 export async function blameWindowLocal(

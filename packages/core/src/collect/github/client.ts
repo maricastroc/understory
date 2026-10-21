@@ -21,8 +21,11 @@ function hint(status: number): string {
   return "";
 }
 
-export async function rest<T>(path: string): Promise<T> {
-  const res = await fetch(`${API}${path}`, { headers: headers() });
+export async function rest<T>(path: string, opts: { signal?: AbortSignal } = {}): Promise<T> {
+  const res = await fetch(
+    `${API}${path}`,
+    opts.signal ? { headers: headers(), signal: opts.signal } : { headers: headers() },
+  );
   if (!res.ok) throw new Error(`GitHub API ${res.status}${hint(res.status)}`);
   return (await res.json()) as T;
 }
@@ -43,7 +46,7 @@ export type GraphqlResult<T> = {
 export async function graphqlResult<T>(
   query: string,
   variables: Record<string, unknown>,
-  opts: { attempts?: number; timeoutMs?: number } = {},
+  opts: { attempts?: number; timeoutMs?: number; signal?: AbortSignal } = {},
 ): Promise<GraphqlResult<T>> {
   if (!resolveToken()) {
     throw new Error(
@@ -54,10 +57,14 @@ export async function graphqlResult<T>(
   const attempts = opts.attempts ?? 3;
   let lastError: Error = new Error("GitHub GraphQL request failed");
 
+  const outer = opts.signal;
   for (let attempt = 0; attempt < attempts; attempt++) {
     if (attempt > 0) await new Promise((r) => setTimeout(r, 400 * attempt));
+    if (outer?.aborted) throw new Error("GitHub GraphQL cancelled");
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? 22_000);
+    const cancel = () => ctrl.abort();
+    outer?.addEventListener("abort", cancel, { once: true });
     try {
       const res = await fetch(`${API}/graphql`, {
         method: "POST",
@@ -74,6 +81,7 @@ export async function graphqlResult<T>(
       return { data: json.data ?? null, errors: json.errors ?? [] };
     } catch (e) {
       const err = e instanceof Error ? e : new Error(String(e));
+      if (outer?.aborted) throw new Error("GitHub GraphQL cancelled");
       if (err.name === "AbortError") {
         lastError = new Error("GitHub GraphQL timeout");
         continue;
@@ -81,14 +89,19 @@ export async function graphqlResult<T>(
       throw err;
     } finally {
       clearTimeout(timer);
+      outer?.removeEventListener("abort", cancel);
     }
   }
 
   throw lastError;
 }
 
-export async function graphql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
-  const { data, errors } = await graphqlResult<T>(query, variables);
+export async function graphql<T>(
+  query: string,
+  variables: Record<string, unknown>,
+  opts: { attempts?: number; signal?: AbortSignal } = {},
+): Promise<T> {
+  const { data, errors } = await graphqlResult<T>(query, variables, opts);
   if (errors.length) throw new Error(`GitHub GraphQL: ${errors[0].message}`);
   if (!data) throw new Error("GitHub GraphQL: empty response");
   return data;

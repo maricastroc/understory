@@ -2,17 +2,19 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { lineBefore } from "./code-context";
 import { collect } from "./index";
 import {
   type CommitAt,
   type LineageProvider,
   LINEAGE_LIMITS,
+  githubLineage,
   lineageOf,
   localLineage,
   walkLineage,
 } from "./lineage";
+import { runWithTokens } from "./token-context";
 
 const swap = (from: string, to: string) => `@@ -2,1 +2,1 @@\n-${from}\n+${to}`;
 const commit = (over: Partial<CommitAt>): CommitAt => ({
@@ -134,6 +136,54 @@ describe("walkLineage — back through the changes to one line", () => {
     expect(cut.entries.map((e) => e.sha)).toEqual(["c3"]);
   });
 
+  it("aborts the request in flight when its time limit is reached", async () => {
+    const seen: AbortSignal[] = [];
+    const stuck: LineageProvider = {
+      commit: (_sha, _path, signal) => {
+        seen.push(signal);
+        return new Promise<CommitAt>((_, reject) =>
+          signal.addEventListener("abort", () => reject(new Error("aborted"))),
+        );
+      },
+      owner: async () => null,
+    };
+    const late = await walkLineage(START, stuck, { ...LINEAGE_LIMITS, ms: 30 });
+    expect(late).toEqual({ entries: [], stopped: "time limit" });
+    expect(seen).toHaveLength(1);
+    expect(seen[0].aborted).toBe(true);
+  });
+
+  it("aborts the request in flight when the reader leaves", async () => {
+    const seen: AbortSignal[] = [];
+    const gone = new AbortController();
+    const hanging: LineageProvider = {
+      commit: async () => THREE.c3,
+      owner: (_ref, _path, _line, signal) => {
+        seen.push(signal);
+        return new Promise<string | null>(() => {});
+      },
+    };
+    const walking = walkLineage(START, hanging, LINEAGE_LIMITS, gone.signal);
+    await vi.waitFor(() => expect(seen).toHaveLength(1));
+    expect(seen[0].aborted).toBe(false);
+    gone.abort();
+    expect((await walking).stopped).toBe("cancelled");
+    expect(seen[0].aborted).toBe(true);
+  });
+
+  it("leaves nothing listening on the reader's signal once it is done", async () => {
+    const gone = new AbortController();
+    const remove = vi.spyOn(gone.signal, "removeEventListener");
+    const lineage = await walkLineage(
+      START,
+      history(THREE, OWNERS).provider,
+      LINEAGE_LIMITS,
+      gone.signal,
+    );
+    expect(lineage.stopped).toBe("the line was added");
+    expect(remove).toHaveBeenCalledWith("abort", expect.any(Function));
+  });
+
   it("says so when the patch is missing, the commit cannot be read or the line cannot be followed", async () => {
     const noPatch = history({ c3: commit({ parent: "p3" }) }, {});
     expect((await walkLineage(START, noPatch.provider)).stopped).toBe("no patch");
@@ -159,6 +209,129 @@ describe("walkLineage — back through the changes to one line", () => {
     expect(renamed.calls).toContain("commit c2 old.ts");
     expect(lineage.entries[0].message).toHaveLength(1_200);
     expect(lineage.stopped).toBe("the line was added");
+  });
+});
+
+describe("githubLineage — the walk's requests to GitHub", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  type Call = { url: string; signal: AbortSignal | undefined };
+
+  function github(answer: (url: string, body: string) => Response | Promise<Response>) {
+    const calls: Call[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        calls.push({ url, signal: init?.signal ?? undefined });
+        return answer(url, String(init?.body ?? ""));
+      }),
+    );
+    return calls;
+  }
+
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+
+  const commitAnswer = (i: number) =>
+    json({
+      parents: [{ sha: `p${i}` }],
+      commit: { message: `change ${i}`, committer: { date: "2024-01-01T00:00:00Z" } },
+      files: [{ filename: "a.ts", patch: swap(`v${i - 1};`, `v${i};`) }],
+    });
+
+  const ownerAnswer = (i: number) =>
+    json({
+      data: {
+        repository: {
+          object: {
+            blame: { ranges: [{ startingLine: 1, endingLine: 9, commit: { oid: `c${i - 1}` } }] },
+          },
+        },
+      },
+    });
+
+  const shaOf = (url: string) => Number(url.match(/commits\/c(\d+)$/)?.[1]);
+  const refOf = (body: string) => Number((JSON.parse(body).variables.e as string).slice(1));
+
+  it("never sends more than six requests to GitHub, however long the history", async () => {
+    const calls = github((url, body) =>
+      url.endsWith("/graphql") ? ownerAnswer(refOf(body)) : commitAnswer(shaOf(url)),
+    );
+    const lineage = await runWithTokens({ github: "t" }, () =>
+      walkLineage({ sha: "c20", path: "a.ts", text: "v20;" }, githubLineage("o", "r"), {
+        earlier: 50,
+        requests: 6,
+        ms: 4_000,
+      }),
+    );
+    expect(calls.length).toBeLessThanOrEqual(6);
+    expect(lineage.stopped).toBe("request limit");
+    expect(lineage.entries.map((e) => e.sha)).toEqual(["c20", "c19", "c18"]);
+  });
+
+  it("does not retry a failed request inside the walk, so a retry never goes past the ceiling", async () => {
+    const calls = github((url) =>
+      url.endsWith("/graphql") ? json({ message: "bad gateway" }, 502) : commitAnswer(20),
+    );
+    const lineage = await runWithTokens({ github: "t" }, () =>
+      walkLineage({ sha: "c20", path: "a.ts", text: "v20;" }, githubLineage("o", "r")),
+    );
+    expect(calls.map((c) => (c.url.endsWith("/graphql") ? "graphql" : "rest"))).toEqual([
+      "rest",
+      "graphql",
+    ]);
+    expect(lineage.entries).toHaveLength(1);
+  });
+
+  it("hands each request the walk's signal, and cuts the one in flight at the time limit", async () => {
+    const calls = github(
+      () =>
+        new Promise<Response>((_, reject) =>
+          calls
+            .at(-1)!
+            .signal!.addEventListener("abort", () =>
+              reject(Object.assign(new Error("aborted"), { name: "AbortError" })),
+            ),
+        ),
+    );
+    const lineage = await runWithTokens({ github: "t" }, () =>
+      walkLineage({ sha: "c20", path: "a.ts", text: "v20;" }, githubLineage("o", "r"), {
+        ...LINEAGE_LIMITS,
+        ms: 30,
+      }),
+    );
+    expect(lineage.stopped).toBe("time limit");
+    expect(calls).toHaveLength(1);
+    expect(calls[0].signal?.aborted).toBe(true);
+  });
+
+  it("cuts a blame query in flight when the reader leaves, without trying it again", async () => {
+    const gone = new AbortController();
+    const calls = github((url) =>
+      url.endsWith("/graphql")
+        ? new Promise<Response>((_, reject) =>
+            calls
+              .at(-1)!
+              .signal!.addEventListener("abort", () =>
+                reject(Object.assign(new Error("aborted"), { name: "AbortError" })),
+              ),
+          )
+        : commitAnswer(20),
+    );
+    const walking = runWithTokens({ github: "t" }, () =>
+      walkLineage(
+        { sha: "c20", path: "a.ts", text: "v20;" },
+        githubLineage("o", "r"),
+        LINEAGE_LIMITS,
+        gone.signal,
+      ),
+    );
+    await vi.waitFor(() => expect(calls).toHaveLength(2));
+    gone.abort();
+    expect((await walking).stopped).toBe("cancelled");
+    await new Promise((r) => setTimeout(r, 450));
+    expect(calls).toHaveLength(2);
+    expect(calls[1].signal?.aborted).toBe(true);
   });
 });
 
@@ -218,6 +391,16 @@ describe("the walk on a real local repository", () => {
       ["cap at 9", "added", null],
     ]);
     expect(lineage.stopped).toBe("the line was added");
+  });
+
+  it("stops the git process when the walk is cut", async () => {
+    const head = git(["rev-parse", "HEAD"], "2021-02-03T00:00:00Z");
+    const gone = new AbortController();
+    gone.abort();
+    await expect(localLineage(dir).commit(head, "cap.ts", gone.signal)).rejects.toThrow();
+    await expect(localLineage(dir).owner(head, "cap.ts", 2, gone.signal)).rejects.toThrow();
+    const open = new AbortController();
+    await expect(localLineage(dir).owner(head, "cap.ts", 2, open.signal)).resolves.toBe(head);
   });
 
   it("starts from collected evidence, and gives nothing for a range of lines", async () => {
