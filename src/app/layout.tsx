@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { lineInvestigationFonts } from "@/components/line-investigation/fonts";
+import { LocaleProvider } from "@/i18n/LocaleProvider";
+import { getLocale, serverOfferedLocales } from "@/i18n/server";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,11 +10,14 @@ export const metadata: Metadata = {
     "Reconstruct the historical reason behind code decisions — grounded in git, built to say so when the record is silent.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
   return (
-    <html lang="en" className={`${lineInvestigationFonts} h-full`}>
+    <html lang={locale} className={`${lineInvestigationFonts} h-full`}>
       <body className="min-h-full bg-li-paper font-li-body text-li-ink antialiased">
-        {children}
+        <LocaleProvider locale={locale} offered={serverOfferedLocales()}>
+          {children}
+        </LocaleProvider>
       </body>
     </html>
   );
