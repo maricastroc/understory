@@ -22,8 +22,8 @@ export type CommitAt = {
 };
 
 export type LineageProvider = {
-  commit(sha: string, path: string): Promise<CommitAt>;
-  owner(ref: string, path: string, line: number): Promise<string | null>;
+  commit(sha: string, path: string, signal: AbortSignal): Promise<CommitAt>;
+  owner(ref: string, path: string, line: number, signal: AbortSignal): Promise<string | null>;
 };
 
 export type LineageStart = { sha: string; path: string; text: string };
@@ -48,10 +48,13 @@ export async function walkLineage(
           ? "request limit"
           : null;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let leave = () => {};
   const cut = new Promise<LineageStop>((resolve) => {
+    leave = () => resolve("cancelled");
     timer = setTimeout(() => resolve("time limit"), Math.max(0, limits.ms - (now() - began)));
-    signal?.addEventListener("abort", () => resolve("cancelled"), { once: true });
+    signal?.addEventListener("abort", leave, { once: true });
   });
+  const halt = new AbortController();
   const within = <T>(work: Promise<T>): Promise<{ got: T } | { stop: LineageStop } | null> =>
     Promise.race([
       work.then(
@@ -62,6 +65,8 @@ export async function walkLineage(
     ]);
   const done = (stopped: LineageStop): Lineage => {
     clearTimeout(timer);
+    signal?.removeEventListener("abort", leave);
+    halt.abort();
     return { entries, stopped };
   };
 
@@ -69,7 +74,7 @@ export async function walkLineage(
     const before = blocked(1);
     if (before) return done(before);
     requests++;
-    const read = await within(provider.commit(sha, path));
+    const read = await within(provider.commit(sha, path, halt.signal));
     if (!read) return done("no patch");
     if ("stop" in read) return done(read.stop);
     const commit = read.got;
@@ -96,7 +101,9 @@ export async function walkLineage(
     const next = blocked(2);
     if (next) return done(next);
     requests++;
-    const owned = await within(provider.owner(commit.parent, commit.previousPath ?? path, earlier));
+    const owned = await within(
+      provider.owner(commit.parent, commit.previousPath ?? path, earlier, halt.signal),
+    );
     if (owned && "stop" in owned) return done(owned.stop);
     if (!owned?.got) return done("line not located");
     sha = owned.got;
@@ -126,9 +133,10 @@ type CommitAnswer = {
 
 export function githubLineage(owner: string, repo: string): LineageProvider {
   return {
-    async commit(sha, path) {
+    async commit(sha, path, signal) {
       const d = await rest<CommitAnswer>(
         `/repos/${owner}/${repo}/commits/${encodeURIComponent(sha)}`,
+        { signal },
       );
       const file = d.files?.find((f) => f.filename === path);
       const message = d.commit?.message ?? "";
@@ -141,8 +149,12 @@ export function githubLineage(owner: string, repo: string): LineageProvider {
         previousPath: file?.previous_filename ?? null,
       };
     },
-    async owner(ref, path, line) {
-      const d = await graphql<OwnerAnswer>(OWNER_QUERY, { o: owner, r: repo, e: ref, p: path });
+    async owner(ref, path, line, signal) {
+      const d = await graphql<OwnerAnswer>(
+        OWNER_QUERY,
+        { o: owner, r: repo, e: ref, p: path },
+        { attempts: 1, signal },
+      );
       const range = d.repository?.object?.blame?.ranges.find(
         (r) => r.startingLine <= line && line <= r.endingLine,
       );
@@ -153,8 +165,8 @@ export function githubLineage(owner: string, repo: string): LineageProvider {
 
 export function localLineage(repoPath: string): LineageProvider {
   return {
-    commit: (sha, path) => commitAt(repoPath, sha, path),
-    owner: (ref, path, line) => ownerAt(repoPath, ref, path, line),
+    commit: (sha, path, signal) => commitAt(repoPath, sha, path, signal),
+    owner: (ref, path, line, signal) => ownerAt(repoPath, ref, path, line, signal),
   };
 }
 
