@@ -7,6 +7,7 @@ import { liButton } from "../line-investigation/parts/button-class";
 import { AccountButton } from "./AccountButton";
 import { BrandMark } from "./BrandMark";
 import { HeaderSearch } from "./HeaderSearch";
+import { LocaleMenu } from "./LocaleMenu";
 import { RepoSelector } from "./RepoSelector";
 import type { RailItem, RepoSummary } from "./types";
 
@@ -72,6 +73,7 @@ export function AppHeader({
             {newLabel}
           </button>
         )}
+        <LocaleMenu />
         <AccountButton user={user} signIn="ghost" />
       </div>
     </header>

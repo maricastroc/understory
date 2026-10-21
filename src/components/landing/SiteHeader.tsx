@@ -3,6 +3,7 @@
 import { useAuth } from "../investigator/use-auth";
 import { AccountButton } from "../shell/AccountButton";
 import { BrandMark } from "../shell/BrandMark";
+import { LocaleMenu } from "../shell/LocaleMenu";
 import { CONTAINER } from "./parts/landing-classes";
 import { PrimaryLink } from "./parts/PrimaryLink";
 
@@ -16,6 +17,7 @@ export function SiteHeader() {
           code archaeology
         </span>
         <nav aria-label="Main" className="ml-auto flex items-center gap-2">
+          <LocaleMenu />
           <PrimaryLink href="/app">Explain a line</PrimaryLink>
           <AccountButton user={user} signIn="ghost" />
         </nav>

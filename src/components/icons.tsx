@@ -9,6 +9,7 @@ import {
   GitBranch,
   GitCommitHorizontal,
   GitPullRequest,
+  Languages,
   Lock,
   Menu,
   MessageSquare,
@@ -65,4 +66,5 @@ export {
   ChevronRight,
   ChevronLeft,
   Menu,
+  Languages,
 };
