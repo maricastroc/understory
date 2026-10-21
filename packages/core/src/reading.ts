@@ -1,9 +1,11 @@
 import { owningCommit } from "./provenance";
+import { FOLDED_COMMENT, partsOf } from "./record-part";
 import type {
   Artifact,
   ChangeEntry,
   EntailmentStatus,
   Evidence,
+  Explanation,
   Passage,
   PlacedComment,
   Placement,
@@ -12,6 +14,7 @@ import type {
   ReasonScope,
   Relation,
   Specificity,
+  Standing,
   State,
   VerifiedNarrative,
 } from "./types";
@@ -69,7 +72,7 @@ const oneLine = (ev: Evidence): number | undefined =>
 const flat = (text: string) => text.replace(/\s+/g, " ").trim();
 
 function commentOf(source: Artifact, quote: string): PlacedComment | undefined {
-  const wanted = flat(quote);
+  const wanted = flat(quote).replace(FOLDED_COMMENT, "");
   const holding = (source.comments ?? []).filter((c) => flat(c.body).includes(wanted));
   return holding.length === 1 ? holding[0] : undefined;
 }
@@ -196,6 +199,33 @@ function changesOf(ev: Evidence): ChangeEntry[] {
   return [...shown, ...only].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 }
 
+type Scoped = { entry: ChangeEntry; passage: Passage; scope: ReasonScope };
+
+type Carrier = { entry: ChangeEntry; scope: ReasonScope; standing: Standing };
+
+function carrierOf(scoped: Scoped[], citedChanges: Set<string>): Carrier | null {
+  const direct = scoped.find((each) => each.scope === "line");
+  if (direct) return { entry: direct.entry, scope: "line", standing: "documented for the line" };
+  const able = scoped.filter(
+    (each) =>
+      (each.scope === "change" || each.scope === "earlier change") &&
+      each.passage.placement !== "another file",
+  );
+  const latest = able.find((each) => each.entry.last);
+  if (latest) return { entry: latest.entry, scope: latest.scope, standing: "inferred" };
+  const [only] = able;
+  if (!only || citedChanges.size !== 1 || !citedChanges.has(only.entry.id)) return null;
+  return { entry: only.entry, scope: only.scope, standing: "inferred" };
+}
+
+function explanationOf(changes: ChangeEntry[]): Explanation {
+  const standings = changes.flatMap((change) =>
+    change.reasons.flatMap((reason) => (reason.standing ? [reason.standing] : [])),
+  );
+  if (standings.includes("documented for the line")) return "documented for the line";
+  return standings.length ? "inferred" : "not identified";
+}
+
 export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): Reading | null {
   if (!ev.location) return null;
   const byId = new Map(ev.artifacts.map((a) => [a.id, a]));
@@ -217,6 +247,7 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
         ? null
         : ev.lineage.stopped
       : "not read",
+    explanation: "not identified",
     unsustained: [],
     claims: [],
   };
@@ -250,11 +281,13 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
       if (!source || !commit || !check.quote) continue;
       const quote = check.quote;
       const comment = commentOf(source, quote);
+      const parts = partsOf(source, quote);
       byChange.set(commit.id, [
         ...(byChange.get(commit.id) ?? []),
         {
           source: source.id,
           text: quote,
+          ...(parts.length ? { parts } : {}),
           ...(comment
             ? {
                 placement: placementOf(comment, file, line, oneLine(ev)),
@@ -264,7 +297,7 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
         },
       ]);
     }
-    const scoped = [...byChange].flatMap(([commitId, passages]) => {
+    const scoped: Scoped[] = [...byChange].flatMap(([commitId, passages]) => {
       const entry = changes.find((change) => change.id === commitId);
       return entry
         ? passages.map((passage) => ({ entry, passage, scope: scopeOf(entry, passage) }))
@@ -283,6 +316,14 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
               ? "the change that last changed the line"
               : linked;
     reading.claims.push({ claim: at, quality, specificity, state: stateOf(quality, specificity) });
+    const citedChanges = new Set(
+      cited.flatMap((id) => {
+        const source = byId.get(id);
+        const commit = source ? commitOf(source, byId) : null;
+        return commit ? [commit.id] : [];
+      }),
+    );
+    const carrier = carrierOf(scoped, citedChanges);
     for (const { entry, passage, scope } of scoped) {
       const reason = entry.reasons.find((r) => r.claim === at && r.scope === scope);
       if (reason) reason.passages.push(passage);
@@ -290,10 +331,13 @@ export function readAnswer(ev: Evidence, narrative: VerifiedNarrative | null): R
         entry.reasons.push({
           claim: at,
           scope,
-          ...(scope === "line" ? { sentence: claim.text } : {}),
+          ...(carrier && carrier.entry === entry && carrier.scope === scope
+            ? { standing: carrier.standing, sentence: claim.text }
+            : {}),
           passages: [passage],
         });
     }
   });
+  reading.explanation = explanationOf(changes);
   return reading;
 }

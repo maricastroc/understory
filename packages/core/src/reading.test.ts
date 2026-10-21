@@ -133,13 +133,15 @@ describe("readAnswer — the sequence and what each change records", () => {
     expect(reading.changes[2]).toMatchObject({ did: "rewrote", before: "return true;" });
   });
 
-  it("never gives the reason of an earlier commit to the last one", () => {
+  it("keeps an earlier commit's reason under that commit, never under the last one", () => {
     const reading = readAnswer(evidence(), narrative(STORY))!;
     const [early, , latest] = reading.changes;
     expect(early.reasons).toEqual([
       {
         claim: 0,
         scope: "earlier change",
+        standing: "inferred",
+        sentence: STORY[0].text,
         passages: [{ source: first.id, text: "saves one write" }],
       },
     ]);
@@ -150,15 +152,28 @@ describe("readAnswer — the sequence and what each change records", () => {
         for (const passage of reason.passages) expect(byId.get(passage.source)?.id).toBe(change.id);
   });
 
-  it("shows the writer's sentence only where the link to the line is specific", () => {
+  it("keeps the writer's sentence, documented where the link to the line is direct and inferred otherwise", () => {
     const alone = readAnswer(evidence(), narrative(STORY))!;
-    expect(alone.changes[2].reasons[0]).toMatchObject({ scope: "line", sentence: STORY[1].text });
-    expect(alone.changes[0].reasons[0].sentence).toBeUndefined();
+    expect(alone.changes[2].reasons[0]).toMatchObject({
+      scope: "line",
+      standing: "documented for the line",
+      sentence: STORY[1].text,
+    });
+    expect(alone.changes[0].reasons[0]).toMatchObject({
+      standing: "inferred",
+      sentence: STORY[0].text,
+    });
+    expect(alone.explanation).toBe("documented for the line");
     const wide = evidence();
     wide.code!.change!.scope = { files: 9, lines: 157, block: 2 };
     const among = readAnswer(wide, narrative(STORY))!;
-    expect(among.changes[2].reasons[0].scope).toBe("change");
-    expect(among.changes[2].reasons[0].sentence).toBeUndefined();
+    expect(among.changes[2].reasons[0]).toMatchObject({
+      scope: "change",
+      standing: "inferred",
+      sentence: STORY[1].text,
+    });
+    expect(among.claims[1].state).toBe("recorded for the change, no specific link shown");
+    expect(among.explanation).toBe("inferred");
   });
 
   it("keeps a review comment made in another file, with its scope and its place", () => {
@@ -172,17 +187,21 @@ describe("readAnswer — the sequence and what each change records", () => {
         quote: "skip them only when discontinued",
       },
     ];
-    const reason = readAnswer(ev, narrative(told))!.changes[2].reasons[0];
+    const reading = readAnswer(ev, narrative(told))!;
+    const reason = reading.changes[2].reasons[0];
     expect(reason.scope).toBe("change");
     expect(reason.sentence).toBeUndefined();
+    expect(reason.standing).toBeUndefined();
     expect(reason.passages).toEqual([
       {
         source: "review:7-0",
         text: "skip them only when discontinued",
+        parts: ["review comment"],
         placement: "another file",
         outdated: true,
       },
     ]);
+    expect(reading.explanation).toBe("not identified");
   });
 
   it("ties a reason to the line only when the comment was made on that line, and is current", () => {
@@ -210,8 +229,11 @@ describe("readAnswer — the sequence and what each change records", () => {
     expect(on.claims[0].specificity).toBe("direct: a review comment on the line");
     for (const placed of [{}, { line: 4, outdated: true }, { line: 7, outdated: false }]) {
       const near = wide(placed);
-      expect(near.changes[2].reasons[0].scope).toBe("change");
-      expect(near.changes[2].reasons[0].sentence).toBeUndefined();
+      expect(near.changes[2].reasons[0]).toMatchObject({
+        scope: "change",
+        standing: "inferred",
+        sentence: "Because reviewers asked.",
+      });
       expect(near.changes[2].reasons[0].passages[0].placement).toBe("in its hunk");
       expect(near.claims[0].state).toBe("recorded for the change, no specific link shown");
     }
@@ -319,6 +341,7 @@ describe("readAnswer — the direct link belongs to the source that carries it",
       {
         claim: 0,
         scope: "line",
+        standing: "documented for the line",
         sentence: "Because of this.",
         passages: [{ source: last.id, text: "body" }],
       },
@@ -329,14 +352,20 @@ describe("readAnswer — the direct link belongs to the source that carries it",
     });
   });
 
-  it("does not lend that link to the pull request's description or to a linked issue", () => {
+  it("does not lend that link to the pull request's description or to a linked issue, and keeps the sentence as an inference", () => {
     for (const source of [pull, issue]) {
       const reading = readAnswer(
         alone(pull, issue),
         narrative(one([source.id], { [source.id]: "body" })),
       )!;
       expect(reading.changes[2].reasons).toEqual([
-        { claim: 0, scope: "change", passages: [{ source: source.id, text: "body" }] },
+        {
+          claim: 0,
+          scope: "change",
+          standing: "inferred",
+          sentence: "Because of this.",
+          passages: [{ source: source.id, text: "body" }],
+        },
       ]);
       expect(reading.claims[0]).toMatchObject(BORROWED);
       expect(reading.unsustained).toEqual([]);
@@ -345,14 +374,15 @@ describe("readAnswer — the direct link belongs to the source that carries it",
 
   it("does not lend it to a review comment made near the line, elsewhere or in another file", () => {
     const places = [
-      [{ path: "src/dedupe.ts", line: 7 }, "in its hunk"],
+      [{ path: "src/dedupe.ts", line: 7 }, "in its hunk", true],
       [
         { path: "src/dedupe.ts", diffHunk: "@@ -9 +9 @@\n+other();", line: 9 },
         "same file, elsewhere",
+        true,
       ],
-      [{ path: "src/other.ts", line: 4 }, "another file"],
+      [{ path: "src/other.ts", line: 4 }, "another file", false],
     ] as const;
-    for (const [comment, placement] of places) {
+    for (const [comment, placement, inferred] of places) {
       const reading = readAnswer(
         alone(pull, placed(comment)),
         narrative(one(["review:7-0"], { "review:7-0": SAID })),
@@ -361,7 +391,16 @@ describe("readAnswer — the direct link belongs to the source that carries it",
         {
           claim: 0,
           scope: "change",
-          passages: [{ source: "review:7-0", text: SAID, placement, outdated: false }],
+          ...(inferred ? { standing: "inferred", sentence: "Because of this." } : {}),
+          passages: [
+            {
+              source: "review:7-0",
+              text: SAID,
+              parts: ["review comment"],
+              placement,
+              outdated: false,
+            },
+          ],
         },
       ]);
       expect(reading.claims[0]).toMatchObject(BORROWED);
@@ -395,10 +434,15 @@ describe("readAnswer — the direct link belongs to the source that carries it",
       {
         claim: 0,
         scope: "line",
+        standing: "documented for the line",
         sentence: "Because of this.",
-        passages: [{ source: last.id, text: "body of commit" }],
+        passages: [{ source: last.id, text: "body of commit", parts: ["title"] }],
       },
-      { claim: 0, scope: "change", passages: [{ source: pull.id, text: "body of pr" }] },
+      {
+        claim: 0,
+        scope: "change",
+        passages: [{ source: pull.id, text: "body of pr", parts: ["title"] }],
+      },
     ]);
     expect(reading.claims[0].state).toBe("directly linked to the line");
   });
@@ -409,7 +453,13 @@ describe("readAnswer — the direct link belongs to the source that carries it",
       narrative(one([last.id, pull.id], { [last.id]: null, [pull.id]: "body of pr" })),
     )!;
     expect(reading.changes[2].reasons).toEqual([
-      { claim: 0, scope: "change", passages: [{ source: pull.id, text: "body of pr" }] },
+      {
+        claim: 0,
+        scope: "change",
+        standing: "inferred",
+        sentence: "Because of this.",
+        passages: [{ source: pull.id, text: "body of pr", parts: ["title"] }],
+      },
     ]);
     expect(reading.claims[0]).toMatchObject(BORROWED);
   });
@@ -453,6 +503,196 @@ describe("readAnswer — the direct link belongs to the source that carries it",
     for (const id of [pull.id, issue.id, "review:7-0"])
       expect(specificityOf(facts, [id])).toBe("the change that last changed the line");
     expect(specificityOf(facts, [pull.id, last.id])).toBe("direct: the change is this block alone");
+  });
+});
+
+describe("readAnswer — which change a sentence is kept under", () => {
+  const story = (cites: string[], quotes: Record<string, string | null>): Told[] => [
+    { text: "Because of this.", cites, status: "supported", quotes },
+  ];
+
+  it("keeps no sentence for a claim that cites two earlier changes and is verified in one", () => {
+    const reading = readAnswer(
+      evidence(),
+      narrative(story([first.id, revert.id], { [first.id]: "saves one write", [revert.id]: null })),
+    )!;
+    expect(reading.changes[0].reasons).toEqual([
+      {
+        claim: 0,
+        scope: "earlier change",
+        passages: [{ source: first.id, text: "saves one write" }],
+      },
+    ]);
+    expect(reading.changes[1].reasons).toEqual([]);
+    expect(reading.explanation).toBe("not identified");
+  });
+
+  it("keeps a story told up to the last change under the last change, each passage under its own", () => {
+    const wide = evidence();
+    wide.code!.change!.scope = { files: 9, lines: 157, block: 2 };
+    const reading = readAnswer(
+      wide,
+      narrative(
+        story([revert.id, last.id], {
+          [revert.id]: "zero means sold out",
+          [last.id]: "only discontinued",
+        }),
+      ),
+    )!;
+    expect(reading.changes[1].reasons).toEqual([
+      {
+        claim: 0,
+        scope: "earlier change",
+        passages: [{ source: revert.id, text: "zero means sold out" }],
+      },
+    ]);
+    expect(reading.changes[2].reasons).toEqual([
+      {
+        claim: 0,
+        scope: "change",
+        standing: "inferred",
+        sentence: "Because of this.",
+        passages: [{ source: last.id, text: "only discontinued" }],
+      },
+    ]);
+  });
+
+  it("keeps no sentence for a claim that cites the last change and an earlier one but is verified only in the earlier", () => {
+    const reading = readAnswer(
+      evidence(),
+      narrative(
+        story([last.id, revert.id], { [last.id]: null, [revert.id]: "zero means sold out" }),
+      ),
+    )!;
+    expect(reading.changes[1].reasons).toEqual([
+      {
+        claim: 0,
+        scope: "earlier change",
+        passages: [{ source: revert.id, text: "zero means sold out" }],
+      },
+    ]);
+    expect(reading.changes[2].reasons).toEqual([]);
+    expect(reading.explanation).toBe("not identified");
+  });
+
+  it("keeps the sentence under an earlier change only when that is the one change the claim cites", () => {
+    const reading = readAnswer(
+      evidence(),
+      narrative(story([revert.id], { [revert.id]: "zero means sold out" })),
+    )!;
+    expect(reading.changes[1].reasons[0]).toMatchObject({
+      scope: "earlier change",
+      standing: "inferred",
+      sentence: "Because of this.",
+    });
+    expect(reading.changes[0].reasons).toEqual([]);
+    expect(reading.changes[2].reasons).toEqual([]);
+    expect(reading.explanation).toBe("inferred");
+  });
+
+  it("keeps no sentence from the file's history, which may not be the line's", () => {
+    const reading = readAnswer(evidence({ coverage: { granularity: "file" } }), narrative(STORY))!;
+    const kept = reading.changes.flatMap((c) => c.reasons.filter((r) => r.sentence));
+    expect(kept).toEqual([]);
+    expect(reading.explanation).toBe("not identified");
+  });
+
+  it("keeps no sentence for a claim the audit did not credit, however directly it is linked", () => {
+    const told: Told[] = [
+      { text: "Because of this.", cites: [last.id], status: "weak", quote: "only discontinued" },
+    ];
+    const reading = readAnswer(evidence(), narrative(told))!;
+    expect(reading.changes.flatMap((c) => c.reasons)).toEqual([]);
+    expect(reading.unsustained).toEqual([
+      { claim: 0, text: "Because of this.", quality: "insufficient" },
+    ]);
+    expect(reading.explanation).toBe("not identified");
+  });
+
+  it("says the best explanation it can present, and nothing when the answer abstains or is missing", () => {
+    expect(readAnswer(evidence(), narrative(STORY))!.explanation).toBe("documented for the line");
+    for (const told of [null, narrative([])])
+      expect(readAnswer(evidence(), told)!.explanation).toBe("not identified");
+  });
+});
+
+describe("readAnswer — where each passage sits in its record", () => {
+  const titled = (over: Partial<Artifact>) =>
+    artifact("pr:7", "pull_request", "2024-03-17T00:00:00Z", { parentId: last.id, ...over });
+  const pr = titled({
+    body: "Drop sold-out rows\n\nKeep the saving without hiding sell-outs.\n\n— discussion —\n@ana: This drops what the storefront needs.",
+  });
+  const commit = {
+    ...last,
+    body: "sync: drop zero rows only for discontinued SKUs\n\nBrings back the saving.",
+  };
+  const among = () => {
+    const ev = evidence({ artifacts: [first, revert, commit, pr] });
+    ev.code!.change!.scope = { files: 9, lines: 157, block: 2 };
+    return ev;
+  };
+  const read = (cites: string, quote: string) =>
+    readAnswer(
+      among(),
+      narrative([{ text: "Because of this.", cites: [cites], status: "supported", quote }]),
+    )!.changes[2].reasons[0];
+
+  it("names the title, the message, the description and the discussion", () => {
+    expect(
+      read(commit.id, "sync: drop zero rows only for discontinued SKUs").passages[0].parts,
+    ).toEqual(["title"]);
+    expect(read(commit.id, "Brings back the saving.").passages[0].parts).toEqual(["message"]);
+    expect(read(pr.id, "Keep the saving without hiding sell-outs.").passages[0].parts).toEqual([
+      "description",
+    ]);
+    expect(read(pr.id, "This drops what the storefront needs.").passages[0].parts).toEqual([
+      "discussion",
+    ]);
+  });
+
+  it("decides nothing by it: a title does not make a reason documented, a discussion does not exclude one", () => {
+    for (const [source, quote] of [
+      [commit.id, "sync: drop zero rows only for discontinued SKUs"],
+      [pr.id, "This drops what the storefront needs."],
+    ] as const)
+      expect(read(source, quote)).toMatchObject({
+        scope: "change",
+        standing: "inferred",
+        sentence: "Because of this.",
+      });
+  });
+
+  it("places a review comment the audit quoted with the prefix the collector gives it", () => {
+    const comment = {
+      body: "skip them only when discontinued",
+      path: "src/dedupe.ts",
+      diffHunk: HUNK,
+      outdated: false,
+      line: 4,
+    };
+    const review = artifact("review:7-0", "review", "2024-03-17T00:00:00Z", {
+      parentId: pr.id,
+      body: "@someone: skip them only when discontinued",
+      comments: [comment],
+    });
+    const ev = evidence({ artifacts: [first, revert, commit, pr, review] });
+    ev.code!.change!.scope = { files: 9, lines: 157, block: 2 };
+    const reading = readAnswer(
+      ev,
+      narrative([
+        {
+          text: "Because reviewers asked.",
+          cites: [review.id],
+          status: "supported",
+          quote: "@someone: skip them only when discontinued",
+        },
+      ]),
+    )!;
+    expect(reading.changes[2].reasons[0]).toMatchObject({
+      scope: "line",
+      standing: "documented for the line",
+      passages: [{ placement: "on the line", parts: ["review comment"] }],
+    });
   });
 });
 
