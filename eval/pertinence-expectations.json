@@ -11,8 +11,10 @@
     "2026-10-21, before any model was asked: machine-32 moves from 'not in the change' to interpretive. The merged change does carry the revised approach the discussion says no longer breaks marshaling (the creator kept in a package variable, row 26, beside the line), so the reason is in the change; whether it covers the type on the line is a judgement.",
     "2026-10-21: tslint-257's review comment now points to the row the comment was made on, from its own diff hunk, instead of the row that replaced it.",
     "2026-10-21: apollo-http-10's multiple-subscribers reason becomes interpretive: code about unsubscribing sits in the line's file as well as in the batch links, and no row can be shown as the fix.",
-    "2026-10-21: the true controls presented today are listed with their basis, instead of being assumed to be the line's part."
+    "2026-10-21: the true controls presented today are listed with their basis, instead of being assumed to be the line's part.",
+    "2026-10-21: the eight verifiable borrowed controls not presented today are given a change and a passage for the validation set, before any model was asked about them."
   ],
+  "validation": "The eight verifiable borrowed controls the app does not present today, written down on 2026-10-21 before any model was asked about them, to check whether the question holds beyond the cases it was written against. Each has the change it is asked under and the passage, copied from its source, it would rest on. In the four of 'another change', the passage comes from a commit other than the change shown, so an answer can follow from the ids alone; the app never sends such a pair, because the core keeps a reason under its own change. They are run and reported apart, and are not counted as evidence that the question generalises.",
   "controls": [
     {
       "id": "machine-32",
@@ -54,7 +56,15 @@
       },
       "why": "filterFailures is emptied in abstractRule.ts and its call removed in eoflineRule.ts.",
       "basis": "verifiable",
-      "accept": ["another file"]
+      "accept": ["another file"],
+      "validation": {
+        "change": "commit:63fc794",
+        "passage": {
+          "source": "pr:2369",
+          "text": "While doing this, I removed `filterFailures` entirely, removing code that looked for duplicate failures."
+        },
+        "group": "same change"
+      }
     },
     {
       "id": "tslint-257",
@@ -66,7 +76,16 @@
       },
       "why": "The review comment was made on src/ruleLoader.ts, on this row of the version it reviewed, as its own diff hunk shows.",
       "basis": "verifiable",
-      "accept": ["another file"]
+      "accept": ["another file"],
+      "validation": {
+        "change": "commit:63fc794",
+        "passage": {
+          "source": "review:2369-1",
+          "text": "It's not necessary to check `ruleSeverity` here since `isEnabled()` will do that too."
+        },
+        "group": "same change",
+        "note": "In the app this passage never reaches the test: a review comment made in another file is kept as context since #67."
+      }
     },
     {
       "id": "tslint-189",
@@ -102,7 +121,15 @@
       },
       "why": "The commit adds the @format header to two test helpers; the line is one of the var to const rewrites.",
       "basis": "verifiable",
-      "accept": ["another file"]
+      "accept": ["another file"],
+      "validation": {
+        "change": "commit:8de2db9",
+        "passage": {
+          "source": "commit:8de2db9",
+          "text": "also added Prettier to a couple of files that raised lint errors."
+        },
+        "group": "same change"
+      }
     },
     {
       "id": "apollo-http-10",
@@ -114,7 +141,15 @@
       },
       "why": "batchKey is added to the batch link's options.",
       "basis": "verifiable",
-      "accept": ["another file"]
+      "accept": ["another file"],
+      "validation": {
+        "change": "commit:cfe548c",
+        "passage": {
+          "source": "pr:364",
+          "text": "This PR also add the ability to change a query's batch with the `batchKey` constructor option."
+        },
+        "group": "same change"
+      }
     },
     {
       "id": "apollo-http-10",
@@ -134,7 +169,15 @@
       },
       "why": "That is the reason the retries were capped.",
       "basis": "verifiable",
-      "accept": ["not in the change"]
+      "accept": ["not in the change"],
+      "validation": {
+        "change": "commit:0016d9d",
+        "passage": {
+          "source": "commit:c038fb3",
+          "text": "INC-1187: the unbounded loop resubmitted charges during a Stripe outage and double-billed 214 customers."
+        },
+        "group": "another change"
+      }
     },
     {
       "id": "retry-cap",
@@ -145,7 +188,16 @@
       },
       "why": "That is the reason jitter was added.",
       "basis": "verifiable",
-      "accept": ["not in the change"]
+      "accept": ["not in the change"],
+      "validation": {
+        "change": "commit:c038fb3",
+        "passage": {
+          "source": "commit:0016d9d",
+          "text": "Stops recovering clients from retrying in lockstep after an outage."
+        },
+        "group": "another change",
+        "note": "commit:0016d9d did not touch this line, so it is not in this case's evidence; its text is read from the jitter case, the same repository."
+      }
     },
     {
       "id": "ws-batch-size",
@@ -156,7 +208,15 @@
       },
       "why": "That is the reason the size was halved.",
       "basis": "verifiable",
-      "accept": ["not in the change"]
+      "accept": ["not in the change"],
+      "validation": {
+        "change": "commit:e4dfae7",
+        "passage": {
+          "source": "commit:78ff826",
+          "text": "WH-2291: since the vendor's 11 Feb release, any page over roughly 300 rows comes back as 413 Payload Too Large."
+        },
+        "group": "another change"
+      }
     },
     {
       "id": "ws-revert-story",
@@ -167,7 +227,15 @@
       },
       "why": "That is the reason the drop was reverted.",
       "basis": "verifiable",
-      "accept": ["not in the change"]
+      "accept": ["not in the change"],
+      "validation": {
+        "change": "commit:22e1399",
+        "passage": {
+          "source": "commit:05a16a3",
+          "text": "WH-2402: zero is also what the vendor sends when a SKU sells out, so the storefront kept showing the last positive stock for sold-out items."
+        },
+        "group": "another change"
+      }
     },
     {
       "id": "machine-168",

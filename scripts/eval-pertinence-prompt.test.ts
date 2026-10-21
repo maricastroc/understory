@@ -97,6 +97,34 @@ describe("the question", () => {
   });
 });
 
+describe("the request without the writer's sentence", () => {
+  it("says no sentence is given and changes nothing else", () => {
+    const input = {
+      line: { path: "a.ts", number: 1, text: "x();", did: "added" as const, before: null },
+      sentence: "It was added for a reason.",
+      passages: [{ source: "commit:a", kind: "commit", parts: ["title"], text: "add x" }],
+      change: { id: "commit:a", title: "add x", files: 1 },
+      map: MAP,
+    };
+    const without = renderPertinence({ ...input, sentence: null });
+    expect(without).toContain(
+      "The sentence under review: none is given. Judge the reason the passage gives.",
+    );
+    expect(without).not.toContain("It was added for a reason.");
+    expect(
+      without.replace(
+        /\nThe sentence under review: none is given\. Judge the reason the passage gives\./,
+        "",
+      ),
+    ).toBe(
+      renderPertinence(input).replace(
+        /\nThe sentence under review \(it claims the reason; it may be wrong\):\n {2}It was added for a reason\./,
+        "",
+      ),
+    );
+  });
+});
+
 describe("settling an answer, with no model", () => {
   const row = (needle: string) => rowsOfMap(MAP).find((r) => r.text.includes(needle))!.text;
 

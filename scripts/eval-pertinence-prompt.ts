@@ -52,7 +52,7 @@ export type PertinenceInput = {
     did: "added" | "rewrote" | "respaced" | null;
     before: string | null;
   };
-  sentence: string;
+  sentence: string | null;
   passages: Array<{ source: string; kind: string; parts: string[]; text: string }>;
   change: { id: string; title: string; files: number };
   map: string;
@@ -73,8 +73,12 @@ export function renderPertinence(input: PertinenceInput): string {
     `  ${input.line.text.trim()}`,
     `What this change did to it: ${didText(input.line)}`,
     "",
-    "The sentence under review (it claims the reason; it may be wrong):",
-    `  ${input.sentence}`,
+    ...(input.sentence === null
+      ? ["The sentence under review: none is given. Judge the reason the passage gives."]
+      : [
+          "The sentence under review (it claims the reason; it may be wrong):",
+          `  ${input.sentence}`,
+        ]),
     "",
     `The passage${input.passages.length === 1 ? "" : "s"} it rests on:`,
     ...input.passages.map(

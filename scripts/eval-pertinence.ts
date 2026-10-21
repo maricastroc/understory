@@ -53,6 +53,12 @@ export type Expectation = {
   accept: string[];
   where: { path: string; row: string } | { commit: string } | null;
   why: string;
+  validation?: {
+    change: string;
+    passage: { source: string; text: string };
+    group: string;
+    note?: string;
+  };
 };
 
 export type Answer =
