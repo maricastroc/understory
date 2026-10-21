@@ -93,6 +93,10 @@ export function units(
 const hides = (modal: Unit["modal"], hidden: Settled[]) =>
   modal !== "split" && modal !== "invalid answer" && hidden.includes(modal);
 
+export const mostHide = (u: Pick<Unit, "answers">, hidden: Settled[]) =>
+  u.answers.filter((a) => a !== "invalid answer" && hidden.includes(a)).length * 2 >
+  u.answers.length;
+
 export function tables(all: Unit[]) {
   const sets = [...new Set(all.map((u) => `${u.stage} · ${u.group}`))].sort();
   const models = [...new Set(all.map((u) => u.model))].sort();
@@ -101,6 +105,9 @@ export function tables(all: Unit[]) {
     clusters: rows.length,
     hiddenUnder: Object.fromEntries(
       HIDING.map(([policy, hidden]) => [policy, rows.filter((u) => hides(u.modal, hidden)).length]),
+    ),
+    hiddenByMostCalls: Object.fromEntries(
+      HIDING.map(([policy, hidden]) => [policy, rows.filter((u) => mostHide(u, hidden)).length]),
     ),
     rightCategory: rows.filter((u) => u.label && u.label.accept.includes(u.modal as string)).length,
     split: rows.filter((u) => u.modal === "split").length,
@@ -131,6 +138,9 @@ export function tables(all: Unit[]) {
         variant: u.variant,
         cut: u.cut,
         modal: u.modal,
+        hiddenByMostCalls: Object.fromEntries(
+          HIDING.map(([policy, hidden]) => [policy, mostHide(u, hidden)]),
+        ),
         agreement: Math.round(u.agreement * 100) / 100,
         answers: u.answers.join(", "),
         right:
