@@ -30,6 +30,7 @@
     "eval:present": "tsx scripts/eval-present.ts",
     "eval:readings": "tsx scripts/eval-readings.ts",
     "eval:sample": "tsx scripts/eval-sample.ts",
+    "eval:walk": "tsx scripts/eval-walk.ts",
     "seed:demo": "bash scripts/seed-demo.sh",
     "seed:eval": "bash scripts/seed-eval.sh",
     "test": "vitest run",
