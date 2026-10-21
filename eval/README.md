@@ -45,6 +45,7 @@ npm run eval:report -- eval/results/run.jsonl eval/results/run.review.json
 npm run eval:audit -- eval/results/run.jsonl --repeat 4 --via openrouter --out eval/results/replay.jsonl
 npm run eval:audit -- eval/results/run.jsonl eval/audit-controls.json --repeat 4 --via openrouter --out eval/results/replay.jsonl
 npm run eval:walk -- eval/results/walk.json 3
+npm run eval:pertinence -- eval/results/pertinence.json
 ```
 
 Needs `GROQ_API_KEY` and `GITHUB_TOKEN` in `.env.local` or `.env`; the cases on real repositories read
@@ -896,6 +897,57 @@ The same script run on `main` before #71 is kept beside it
 - **What it does not show.** Twelve real lines from six repositories, on one network, in one
   afternoon. The answers' times come from another day and another route: the app calls Groq
   directly.
+
+### What a test of pertinence would be shown
+
+Prepared on 21 Oct 2026 for issue 49, with no model. Nothing here is judged, and no test of
+pertinence exists yet. `npm run eval:pertinence -- <out.json>` takes every sentence the core
+presents today as a likely explanation and builds what a test would be shown to say whether the
+sentence's reason is the line's or belongs elsewhere
+([`results/2026-10-21-pertinence-contexts.json`](results/2026-10-21-pertinence-contexts.json)):
+the sentence, its verified passages with their place in the record, the line, and a map of the
+change it sits under. The map names every file the change touched and every hunk. The hunk that
+holds the line is marked, with six rows on each side and the line itself marked. The other
+changed rows are spread across the hunks within a budget, one row of each hunk at a time, the
+line's own hunk first and its rows by distance from the line. Each row carries its number, so
+that another part of the same file, or of the same hunk, can be told from the line.
+
+Where a borrowed reason belongs was read from the patches and written down before any model is
+asked, in [`pertinence-expectations.json`](pertinence-expectations.json), for the 14 written
+controls that borrow one: another part of the same file, another file, not in the change at all
+(`machine-32`, an approach the pull request dropped), or another change. Two cannot be pointed to
+one row and say so.
+
+- **What would be tested.** 656 sentences: from the written controls, 18 borrowed reasons and 23
+  true ones under the last change, and 19 true ones under an earlier change; from the current
+  run, 61; from the earlier pipelines, 535. All sit under 24 changes, every one read, with the
+  line found in each.
+- **A borrowed reason can sit in the line's own hunk.** The enable/disable reason given to
+  `tslint-257` sits 35 rows above the line, in the same hunk.
+- **What the budget cuts.** The smallest budget that keeps every row a presented borrowed reason
+  belongs to is 32,000 characters:
+
+  | Budget    | Changes cut elsewhere | In the line's hunk | `tslint-189` | `tslint-257` |
+  | --------- | --------------------- | ------------------ | ------------ | ------------ |
+  | 8,000     | 5 of 24               | 3                  | cut          | cut          |
+  | 16,000    | 4                     | 2                  | kept         | cut          |
+  | 32,000    | 3                     | 1                  | kept         | kept         |
+  | unbounded | 0                     | 0                  | kept         | kept         |
+
+  At 32,000 the three still cut are `draft-644` (85 files), `tslint-257` and `apollo-http-10`,
+  and 87 of the 656 sentences sit under them. A context is then 1,217 characters at the median
+  and 39,208 at most.
+
+- **What a cut does to an answer.** Whether the context was cut is recorded for each sentence,
+  apart from whatever a model answers. A replay will keep "insufficient evidence" and
+  "indeterminate" apart from each other and from an answer given on a cut context, and will
+  count, by case, the borrowed reasons still shown and the true ones hidden under each rule of
+  hiding, without choosing one in advance.
+- **Kept out of the evidence.** An answer's evidence is 2,665 characters at the median and 26,089
+  at most. The map of a large change at 32,000 is up to 38,535, and the 24 changes' patches
+  together are 275,413. On GitHub, collection already receives every file of the last change in
+  one response, keeps the line's own patch and drops the rest. Here the eval asks the same
+  endpoint again, and nothing is added to the evidence.
 
 ### What this does not show
 
