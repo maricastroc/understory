@@ -26,8 +26,8 @@ function Location({ view, reserve }: { view: InvestigationView; reserve: boolean
   const line =
     loc.startLine === loc.endLine ? `:${loc.startLine}` : `:${loc.startLine}–${loc.endLine}`;
   return (
-    <div className="flex shrink-0 items-center gap-1.5 font-li-mono text-xs text-li-text-subtle">
-      {dir && <span>{dir}</span>}
+    <div className="flex shrink-0 flex-wrap items-center gap-x-1.5 gap-y-1 font-li-mono text-xs text-li-text-subtle max-[820px]:min-w-0 max-[820px]:shrink">
+      {dir && <span className="min-w-0 break-all">{dir}</span>}
       <span className="text-li-ink">{file}</span>
       <span className="bg-li-datum-strong px-1.5 py-px text-li-ink">{line}</span>
       {view.pinnedSha ? (
