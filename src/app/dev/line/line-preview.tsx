@@ -11,6 +11,7 @@ import {
   syntheticChargeBlame,
   syntheticChargeLines,
 } from "@/components/line-investigation/fixtures/synthetic-charge-file";
+import controls from "@/components/line-investigation/fixtures/control-cases.json";
 import kept from "@/components/line-investigation/fixtures/kept-cases.json";
 import { syntheticCases } from "@/components/line-investigation/fixtures/synthetic-cases";
 import {
@@ -79,6 +80,13 @@ const STATES: Record<string, () => DigResult> = {
 };
 
 const KEPT = kept.cases as unknown as Record<string, DigResult>;
+const CONTROLS = controls.cases as unknown as Record<string, DigResult>;
+
+function realCase(state: string): DigResult | null {
+  if (state.startsWith("kept-")) return KEPT[state.slice(5)] ?? null;
+  if (state.startsWith("control-")) return CONTROLS[state.slice(8)] ?? null;
+  return null;
+}
 
 export function LinePreview({
   state,
@@ -93,7 +101,7 @@ export function LinePreview({
   const [menuOpen, setMenuOpen] = useState(false);
   const phase = PHASES[state];
   const pending = state === "pending" || !!phase;
-  const keptCase = state.startsWith("kept-") ? (KEPT[state.slice(5)] ?? null) : null;
+  const keptCase = realCase(state);
   const result = keptCase ?? (STATES[state] ?? STATES.resolved)();
   const loc = result.evidence.location!;
   const signedIn = user === "synthetic" ? SYNTHETIC_USER : null;

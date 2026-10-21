@@ -21,10 +21,11 @@ const PLACE: Record<NonNullable<PassageScope["placement"]>, string> = {
   "another file": "comment made in another file",
 };
 
+export const placeText = (placement: NonNullable<PassageScope["placement"]>, outdated?: boolean) =>
+  `${PLACE[placement]}${outdated && placement !== "another file" ? ", on an earlier version" : ""}`;
+
 export function scopeText(scope: PassageScope): string {
-  const place = scope.placement
-    ? `${PLACE[scope.placement]}${scope.outdated && scope.placement !== "another file" ? ", on an earlier version" : ""}`
-    : null;
+  const place = scope.placement ? placeText(scope.placement, scope.outdated) : null;
   return [SCOPE[scope.scope], place].filter(Boolean).join(" · ");
 }
 

@@ -171,7 +171,13 @@ test("the reading stays out of the history until it is switched on", async ({ pa
   await expect(page.locator('#history [data-artifact="commit:2420a0a"]')).toHaveCount(0);
 });
 
-for (const state of ["kept-ng-http-114", "kept-tslint-257", "kept-ws-revert-story"]) {
+for (const state of [
+  "kept-ng-http-114",
+  "kept-tslint-257",
+  "kept-ws-revert-story",
+  "kept-ng-http-411",
+  "control-tslint-189",
+]) {
   for (const width of [1440, 390]) {
     test(`the reading in the history, ${state} at ${width}: axe with contrast, no page overflow`, async ({
       page,
@@ -188,3 +194,19 @@ for (const state of ["kept-ng-http-114", "kept-tslint-257", "kept-ws-revert-stor
     });
   }
 }
+
+test("the why zone with the reading tells the changes apart, newest first, as the history does", async ({
+  page,
+}) => {
+  await open(page, 1440, "kept-ws-revert-story", true);
+  const why = page.getByRole("region", { name: "What the history supports" });
+  await expect(why.locator("[data-why-change]")).toHaveText([
+    /^last change · 9da72fa/,
+    /^earlier change · 05a16a3/,
+    /^earlier change · 22e1399/,
+  ]);
+  await expect(page.getByRole("button", { name: /^Answered/ })).toBeVisible();
+  const code = await box(page, "section[data-datum-y]");
+  const zone = (await why.boundingBox())!;
+  expect(code.x + code.width).toBeLessThan(zone.x);
+});

@@ -266,7 +266,7 @@ export function ClauseEvidence({
             <span className="text-[15px] font-semibold text-li-ink">{gapTitle(source.gap)}</span>
           </div>
           <QuoteBlock
-            body={gapBody(source.gap, source.after)}
+            body={gapBody(source.gap, source.after, !!view.reading)}
             range={null}
             tone={source.gap.verified ? "gap" : "unverified"}
           />

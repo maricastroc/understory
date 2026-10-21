@@ -95,6 +95,7 @@ export function TitleRow({
           <div ref={anchor} className="relative">
             <VerdictButton
               verdict={view.verdict}
+              reading={!!view.reading}
               open={verdictOpen}
               controls={popoverId}
               onToggle={onToggleVerdict}
