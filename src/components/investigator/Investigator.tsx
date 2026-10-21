@@ -33,7 +33,7 @@ import { casePaths } from "./case-paths";
 import { recentRepos } from "./recent-repos";
 import { DEFAULT_REPO, DEMO_LINE, type Entry, useInvestigation } from "./use-investigation";
 
-export function Investigator() {
+export function Investigator({ reading = false }: { reading?: boolean } = {}) {
   const user = useAuth();
   const {
     repoPath,
@@ -349,6 +349,7 @@ export function Investigator() {
               key={draft.key}
               result={draftCase}
               repoPath={draft.form.repoPath}
+              reading={reading}
               pending
               token={tokenValue}
               phase={draft.error ? "failed" : "collecting"}
@@ -368,6 +369,7 @@ export function Investigator() {
               key={current.mountKey ?? current.caseId}
               result={current.result}
               repoPath={current.form.repoPath}
+              reading={reading}
               pending={current.pending ?? false}
               analysis={analysisOf(current)}
               token={tokenValue}

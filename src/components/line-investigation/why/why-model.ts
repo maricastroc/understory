@@ -73,6 +73,11 @@ export function whyModel(reading: Reading): WhyModel {
   };
 }
 
+export const standingOf = (reading: Reading | null | undefined, claim: number): Standing | null =>
+  reading?.changes
+    .flatMap((change) => change.reasons)
+    .find((reason) => reason.claim === claim && reason.standing)?.standing ?? null;
+
 export const presented = (model: WhyModel) =>
   model.changes.flatMap((change) =>
     change.entries.flatMap((entry) =>

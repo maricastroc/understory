@@ -7,10 +7,12 @@ import { commitRole } from "../copy/subject-copy";
 import type { CaseSubject, ClauseSource } from "../copy/types";
 import { MiniCore } from "../drawer/MiniCore";
 import { QuoteBlock } from "../drawer/QuoteBlock";
+import { LIKELY_NOTE } from "../copy/why-copy";
 import { sourceLinkLabel } from "../drawer/source-link";
 import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types";
 import { EvidenceLetter } from "../parts/EvidenceLetter";
 import { liButton } from "../parts/button-class";
+import { standingOf } from "./why-model";
 
 const TONE = {
   evidence: "text-li-evidence-ink",
@@ -115,6 +117,14 @@ function ArtifactBody({
           tone={source.quote ? "verified" : "unverified"}
         />
         <p className={`text-[12.5px] font-semibold ${TONE[status.tone]}`}>{status.text}</p>
+        {source.quote && standingOf(view.reading, clause.index) === "inferred" && (
+          <p
+            data-likely-note
+            className="-mt-1.5 max-w-140 text-[12.5px] leading-[1.45] text-li-text-subtle"
+          >
+            {LIKELY_NOTE}
+          </p>
+        )}
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"

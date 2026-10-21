@@ -21,7 +21,9 @@ export function LiveLineInvestigation({
   parent,
   phase,
   failure,
+  reading = false,
 }: {
+  reading?: boolean;
   result: DigResult;
   repoPath: string;
   pending: boolean;
@@ -68,6 +70,7 @@ export function LiveLineInvestigation({
       parent={parent}
       phase={phase}
       failure={failure}
+      reading={reading}
     />
   );
 }
