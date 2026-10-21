@@ -71,7 +71,7 @@ const oneLine = (ev: Evidence): number | undefined =>
 
 const flat = (text: string) => text.replace(/\s+/g, " ").trim();
 
-function commentOf(source: Artifact, quote: string): PlacedComment | undefined {
+export function commentOf(source: Artifact, quote: string): PlacedComment | undefined {
   const wanted = flat(quote).replace(FOLDED_COMMENT, "");
   const holding = (source.comments ?? []).filter((c) => flat(c.body).includes(wanted));
   return holding.length === 1 ? holding[0] : undefined;
