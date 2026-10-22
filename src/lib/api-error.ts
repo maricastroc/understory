@@ -25,21 +25,6 @@ export type ApiFailure = {
   installUrl?: string;
 };
 
-const PROVIDER_STATUS = /\b(GitHub|GitLab) (?:API|GraphQL) (\d{3})\b/;
-
-export function providerFailure(message: string): Pick<ApiFailure, "code" | "host"> {
-  if (message.startsWith("Not a git repository:")) return { code: "not-a-repository" };
-  const match = PROVIDER_STATUS.exec(message);
-  if (!match) return { code: "failed" };
-  const host = match[1] as Host;
-  const status = Number(match[2]);
-  if (status === 429) return { code: "rate-limited", host };
-  if (status === 404) return { code: "not-found", host };
-  if (host === "GitLab" && status === 401) return { code: "not-found", host };
-  if (status >= 500) return { code: "server", host };
-  return { code: "failed", host };
-}
-
 const isCode = (value: unknown): value is ApiErrorCode =>
   typeof value === "string" && (API_ERROR_CODES as readonly string[]).includes(value);
 

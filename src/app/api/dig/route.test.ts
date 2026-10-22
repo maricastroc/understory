@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { GitHubApiError } from "@understory/core/collect/github/client";
 
 const mocks = vi.hoisted(() => ({
   collect: vi.fn(),
@@ -231,10 +232,17 @@ describe("/api/dig — a collection that fails says what kind of failure it is",
     });
   });
 
-  it("leaves a 403 unnamed rather than calling it a rate limit", async () => {
-    mocks.collect.mockRejectedValue(new Error("GitHub API 403 — rate limited"));
+  it("calls a GitHub 403 a rate limit only when core read it as one", async () => {
+    const refused = (headers: Record<string, string>) =>
+      new GitHubApiError("API", new Response(null, { status: 403, headers }));
+    mocks.collect.mockRejectedValue(refused({ "x-ratelimit-remaining": "0" }));
+    expect((await failure()).body).toMatchObject({ code: "rate-limited", host: "GitHub" });
+    mocks.collect.mockRejectedValue(refused({}));
     const { body } = await failure();
     expect(body).toMatchObject({ code: "failed", host: "GitHub" });
+    expect(body.error).toBe(
+      "GitHub API 403 — refused; check that the token can read this repository",
+    );
   });
 
   it("gives the GitHub App's address apart from the message when it can help", async () => {

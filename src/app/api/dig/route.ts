@@ -13,7 +13,7 @@ import { narrate } from "@understory/core/investigate";
 import { getModel } from "@understory/core/llm";
 import { ensureHistoryStore } from "@/lib/history-store";
 import { AI_DAILY_LIMIT_REACHED } from "@/lib/ai-limit";
-import { providerFailure } from "@/lib/api-error";
+import { providerFailure } from "@/lib/provider-failure";
 import { consumeAiDailyLimit, rateLimit } from "@/lib/ratelimit";
 import type { ArtifactRef, Evidence } from "@understory/core/types";
 
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
       {
         error: `${message}${hint}`,
         detail: message,
-        ...providerFailure(message),
+        ...providerFailure(e),
         ...(hint && link ? { installUrl: link } : {}),
       },
       { status: 400 },
