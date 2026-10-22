@@ -374,3 +374,35 @@ export const drawer: Messages["drawer"] = {
   reviewState: (state) => `Estado da revisão: ${state}`,
   issueState: { open: "aberta", closed: "fechada" },
 };
+
+export const history: Messages["history"] = {
+  count: {
+    commit: (n) => (n === 1 ? "1 commit" : `${n} commits`),
+    pull_request: (n) => (n === 1 ? "1 PR" : `${n} PRs`),
+    review: (n) => (n === 1 ? "1 revisão" : `${n} revisões`),
+    issue: (n) => (n === 1 ? "1 issue" : `${n} issues`),
+  },
+  quiet: (n) =>
+    n === 1
+      ? "1 mudança anterior que a resposta não cita"
+      : `${n} mudanças anteriores que a resposta não cita`,
+  absences: (n) => (n === 1 ? "1 ausência" : `${n} ausências`),
+  show: (n) => (n === 1 ? "Mostrar" : `Mostrar as ${n}`),
+  changes: (n) => (n === 1 ? "1 mudança" : `${n} mudanças`),
+  extent: (to, depth, changes, artifacts) => `hoje ±0 → ${to} ${depth} · ${changes} · ${artifacts}`,
+  origin: "origem",
+  oldestRead: "limite da leitura",
+  at: (date) => `em ${date}`,
+  tracing: (n, letters) => `seguindo a afirmação ${n} · ${letters}`,
+  backToClause: (n) => `Voltar à afirmação ${n}`,
+  backToAnswer: "Voltar à resposta",
+  newestFirst: "Histórico, do mais recente para o mais antigo",
+  earlierList: "Mudanças anteriores nesta linha, encontradas ao segui-la para trás",
+  before: "antes:",
+  commitMessage: "a mensagem do commit",
+  deep: (age) => `${age} de profundidade`,
+  alsoCollected: "Também coletados, fora do histórico da linha",
+  quotedFor: (n) => `citada pela afirmação ${n}`,
+  backWithSource: (n, id) => `Voltar à afirmação ${n} com ${id} como fonte`,
+  clauseChip: (n) => `afirmação ${n}`,
+};

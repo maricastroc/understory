@@ -62,6 +62,11 @@ export function formatPlainDay(t: Time, iso: string): string {
   return p ? t.plainDate(p.day, t.monthNames[p.month] ?? String(p.month + 1), p.year) : iso;
 }
 
+export function formatMonthYear(t: Time, iso: string): string {
+  const p = dateParts(iso);
+  return p ? t.monthYear(t.monthNames[p.month] ?? String(p.month + 1), p.year) : iso;
+}
+
 export function formatDecimal(locale: Locale, value: number, digits: number): string {
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: digits,

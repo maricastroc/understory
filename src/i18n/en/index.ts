@@ -9,6 +9,7 @@ import {
   clause,
   drawer,
   gap,
+  history,
   questions,
   reading,
   source,
@@ -42,4 +43,5 @@ export const en = {
   questions,
   accessible,
   drawer,
+  history,
 };

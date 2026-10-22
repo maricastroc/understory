@@ -10,4 +10,5 @@ export const time = {
     `${String(day).padStart(2, "0")} ${month} ${year}`,
   dayMonth: (day: number, month: string) => `${day} ${month}`,
   plainDate: (day: number, month: string, year: number) => `${day} ${month} ${year}`,
+  monthYear: (month: string, year: number) => `${month} ${year}`,
 };

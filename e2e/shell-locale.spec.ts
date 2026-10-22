@@ -33,7 +33,10 @@ for (const width of [1440, 390]) {
     await portuguese(page, baseURL!);
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/dev/line?state=resolved&user=guest");
-    await page.locator('ol[aria-label="History, newest first"] button').first().waitFor();
+    await page
+      .locator('ol[aria-label="Histórico, do mais recente para o mais antigo"] button')
+      .first()
+      .waitFor();
     await page.evaluate(() => document.fonts.ready);
     await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
     await expect.poll(() => overflow(page)).toBeLessThanOrEqual(0);
