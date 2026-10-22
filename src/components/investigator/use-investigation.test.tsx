@@ -87,7 +87,10 @@ describe("useInvestigation — a line case before its evidence arrives", () => {
     await act(async () => {
       await result.current.investigate(FORM);
     });
-    expect(result.current.draft).toMatchObject({ error: "Request failed", form: FORM });
+    expect(result.current.draft).toMatchObject({
+      error: { code: "server", detail: "Request failed" },
+      form: FORM,
+    });
     expect(result.current.error).toBeNull();
     expect(result.current.view).toBe("case");
     const key = result.current.draft!.key;
@@ -104,7 +107,12 @@ describe("useInvestigation — a line case before its evidence arrives", () => {
   });
 
   it("leaves drill-downs on the old path: no draft, error back in the composer", async () => {
-    stubFetch(async () => Response.json({ error: "Not found" }, { status: 404 }));
+    stubFetch(async () =>
+      Response.json(
+        { error: "GitHub API 404", code: "not-found", host: "GitHub" },
+        { status: 400 },
+      ),
+    );
     const { result } = await mounted();
 
     await act(async () => {
@@ -116,7 +124,11 @@ describe("useInvestigation — a line case before its evidence arrives", () => {
       );
     });
     expect(result.current.draft).toBeNull();
-    expect(result.current.error).toBe("Not found");
+    expect(result.current.error).toEqual({
+      code: "not-found",
+      detail: "GitHub API 404",
+      host: "GitHub",
+    });
     expect(result.current.view).toBe("browse");
   });
 });
@@ -174,7 +186,11 @@ describe("useInvestigation — rewriting a case in another language", () => {
 
   it("keeps the text it has and says why when the rewrite fails", async () => {
     const { result } = await opened(async () =>
-      Response.json({ narrative: null, error: "AI reconstruction is temporarily unavailable." }),
+      Response.json({
+        narrative: null,
+        error: "AI reconstruction is temporarily unavailable.",
+        code: "ai-unavailable",
+      }),
     );
     const id = result.current.current!.caseId;
     await act(async () => {
@@ -182,7 +198,7 @@ describe("useInvestigation — rewriting a case in another language", () => {
     });
     expect(result.current.current?.rewriteError).toEqual({
       language: "pt",
-      message: "AI reconstruction is temporarily unavailable.",
+      failure: { code: "ai-unavailable", detail: "AI reconstruction is temporarily unavailable." },
     });
     expect(result.current.current?.rewriting).toBeNull();
     expect(result.current.current?.result.narrative).toEqual(syntheticRetryCap.narrative);

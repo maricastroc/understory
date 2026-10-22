@@ -1,6 +1,8 @@
 "use client";
 
 import { useId } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
+import type { ApiFailure } from "@/lib/api-error";
 import { ErrorState } from "../ErrorState";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
 import { liButton } from "../line-investigation/parts/button-class";
@@ -9,8 +11,6 @@ import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { RepoShortcuts } from "./RepoShortcuts";
 import type { RecentRepo } from "./types/recent-repo";
 import { RepoAccess } from "./RepoAccess";
-
-const PRIVATE = /404|not found|\b403\b|private|permission|forbidden/i;
 
 export function RepoStage({
   repoPath,
@@ -31,7 +31,7 @@ export function RepoStage({
   onEdit: (v: string) => void;
   onOpen: () => void;
   connecting: boolean;
-  error: string | null;
+  error: ApiFailure | null;
   token: string;
   onTokenChange: (v: string) => void;
   signedIn: boolean;
@@ -43,7 +43,8 @@ export function RepoStage({
 }) {
   const inputId = useId();
   const statusId = useId();
-  const needsAccess = !!error && PRIVATE.test(error);
+  const m = useMessages();
+  const needsAccess = error?.code === "not-found";
 
   return (
     <section aria-label="Open a repository" className="flex max-w-190 flex-col gap-3">
@@ -113,7 +114,14 @@ export function RepoStage({
           onRetry={onOpen}
         />
       )}
-      {error && !needsAccess && <ErrorState message={error} onRetry={onOpen} signedIn={signedIn} />}
+      {error && !needsAccess && (
+        <ErrorState
+          failure={error}
+          title={m.errors.repository}
+          onRetry={onOpen}
+          signedIn={signedIn}
+        />
+      )}
       {!connecting && !error && (
         <div className="mt-8">
           <RepoShortcuts

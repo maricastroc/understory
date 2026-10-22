@@ -1,5 +1,6 @@
 "use client";
 
+import { useMessages } from "@/i18n/LocaleProvider";
 import type { DigResult } from "@understory/core/types";
 import { useMemo, useState } from "react";
 import { CaseFailure } from "@/components/investigator/CaseFailure";
@@ -97,6 +98,7 @@ export function LinePreview({
   user: string | null;
   reading?: boolean;
 }) {
+  const m = useMessages();
   const layout = useSpecimenLayout();
   const [menuOpen, setMenuOpen] = useState(false);
   const phase = PHASES[state];
@@ -114,8 +116,8 @@ export function LinePreview({
     [result, pending, phase],
   );
   const lineItems = useMemo(
-    () => lineRailItems(entries, { activeId: phase ? null : ACTIVE, now: NOW }),
-    [entries, phase],
+    () => lineRailItems(entries, { activeId: phase ? null : ACTIVE, now: NOW, m }),
+    [entries, phase, m],
   );
 
   const renderSpecimen: SpecimenSlot = (slot) => (
@@ -167,7 +169,7 @@ export function LinePreview({
           items={lineItems}
           onSelect={() => setMenuOpen(false)}
           onRemove={() => {}}
-          footer={railFooterInfo(signedIn, !!signedIn)}
+          footer={railFooterInfo(signedIn, !!signedIn, m)}
           onClose={onClose}
         />
       )}
@@ -188,7 +190,7 @@ export function LinePreview({
           failure={
             phase === "failed" ? (
               <CaseFailure
-                message="Request failed (502)"
+                failure={{ code: "server", detail: "HTTP 502" }}
                 signedIn={!!signedIn}
                 onRetry={() => {}}
                 onBack={() => {}}

@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { messagesFor } from "@/i18n/messages";
 import { axe } from "@/test/axe";
 import { syntheticCases } from "../line-investigation/fixtures/synthetic-cases";
 import { SYNTHETIC_NOW } from "../line-investigation/fixtures/synthetic-retry-cap";
@@ -11,6 +12,7 @@ import type { RailItem } from "./types";
 const lines = lineRailItems(syntheticCases, {
   activeId: "GI-2049",
   now: Date.parse(SYNTHETIC_NOW),
+  m: messagesFor("en"),
 });
 const footer = { name: "Guest", initials: "?", subline: "Sign in to save line cases" };
 

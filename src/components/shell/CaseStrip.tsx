@@ -1,3 +1,4 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import { StatusGlyph } from "./StatusGlyph";
 import type { RailItem } from "./types";
 
@@ -10,8 +11,10 @@ export function CaseStrip({
   expanded: boolean;
   onOpen: () => void;
 }) {
+  const m = useMessages();
   const current = items.find((item) => item.current);
-  const label = `Show investigations, ${items.length}${current ? `. Open: ${current.title}` : ""}`;
+  const count = m.shell.showInvestigations(items.length);
+  const label = current ? `${count}. ${m.shell.openCase(current.title)}` : count;
   return (
     <div className="flex h-full justify-center bg-li-paper py-3 font-li-body">
       <button

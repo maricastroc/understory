@@ -1,43 +1,75 @@
 "use client";
 
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import { formatSeconds } from "@/i18n/format";
+import type { Locale } from "@/i18n/locales";
+import type { Messages } from "@/i18n/messages";
+import type { ApiFailure } from "@/lib/api-error";
 import { Alert, Github } from "./icons";
 import { authEnabled } from "./investigator/use-auth";
 import { liButton } from "./line-investigation/parts/button-class";
 
-type Category = "private" | "rate" | "network" | "generic";
-
-function categorize(msg: string): Category {
-  const m = msg.toLowerCase();
-  if (/404|not found|\b403\b|private|permission|forbidden/.test(m)) return "private";
-  if (/rate.?limit|\b429\b|too many/.test(m)) return "rate";
-  if (/network|fetch failed|timed? ?out|unreachable|econn|enotfound|failed to fetch/.test(m))
-    return "network";
-  return "generic";
+export function failureLead(
+  failure: ApiFailure,
+  m: Messages,
+  locale: Locale,
+  title: string,
+): string {
+  const e = m.errors;
+  switch (failure.code) {
+    case "not-found":
+      return e.notFound;
+    case "rate-limited":
+      return e.rateLimited(failure.host ?? "GitHub");
+    case "busy":
+      return failure.retryAfter ? e.busy(formatSeconds(locale, failure.retryAfter)) : e.busySoon;
+    case "too-large":
+      return e.tooLarge;
+    case "ai-unavailable":
+      return e.aiUnavailable;
+    case "owner-not-repo":
+      return e.ownerNotRepo;
+    case "not-a-repository":
+      return e.notARepository;
+    case "git-unavailable":
+      return e.gitUnavailable;
+    case "server":
+      return e.server;
+    case "network":
+      return e.network;
+    case "no-evidence":
+      return e.noEvidence;
+    case "failed":
+      return title;
+  }
 }
 
-const HINT: Record<Category, string> = {
-  private: "This repository looks private or doesn't exist.",
-  rate: "GitHub's rate limit was hit.",
-  network: "Couldn't reach the server — check your connection.",
-  generic: "",
-};
+const QUIET = new Set<ApiFailure["code"]>(["network", "busy", "no-evidence"]);
+
+export function failureDetail(failure: ApiFailure): string | null {
+  return QUIET.has(failure.code) ? null : failure.detail;
+}
 
 export function ErrorState({
   id,
-  message,
+  failure,
+  title,
   onRetry,
   signedIn = false,
   flush = false,
 }: {
   id?: string;
-  message: string;
+  failure: ApiFailure;
+  title: string;
   onRetry?: () => void;
   signedIn?: boolean;
   flush?: boolean;
 }) {
-  const category = categorize(message);
-  const suggestSignIn = authEnabled && !signedIn && (category === "private" || category === "rate");
-  const hint = HINT[category];
+  const m = useMessages();
+  const locale = useLocale();
+  const access = failure.code === "not-found" || failure.code === "rate-limited";
+  const suggestSignIn = authEnabled && !signedIn && access;
+  const detail = failureDetail(failure);
 
   return (
     <div
@@ -51,24 +83,40 @@ export function ErrorState({
     >
       <Alert className="mt-0.5 size-4 shrink-0" />
       <div className="min-w-0 flex-1">
-        <p className="text-[13px]">{message}</p>
-        {(hint || suggestSignIn) && (
-          <p className="mt-1 text-[12.5px] text-li-text-subtle">
-            {hint}
-            {suggestSignIn && " Signing in with GitHub is the easiest fix — no token needed."}
+        <p className="text-[13px]">{failureLead(failure, m, locale, title)}</p>
+        {detail && (
+          <p lang="en" className="mt-1 font-li-mono text-[11.5px] break-words text-li-text-subtle">
+            {detail}
           </p>
         )}
-        {(suggestSignIn || onRetry) && (
+        {failure.installUrl && (
+          <p className="mt-1 text-[12.5px] text-li-text-subtle">{m.errors.installHint}</p>
+        )}
+        {suggestSignIn && (
+          <p className="mt-1 text-[12.5px] text-li-text-subtle">{m.errors.signInHint}</p>
+        )}
+        {(suggestSignIn || failure.installUrl || onRetry) && (
           <div className="mt-2.5 flex flex-wrap items-center gap-2">
             {suggestSignIn && (
               <a href="/api/auth/login" className={liButton("secondary", "", "sm")}>
                 <Github className="size-3.5" />
-                Sign in with GitHub
+                {m.common.signInWithGithub}
+              </a>
+            )}
+            {failure.installUrl && (
+              <a
+                href={failure.installUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={liButton("secondary", "", "sm")}
+              >
+                <Github className="size-3.5" />
+                {m.errors.installApp}
               </a>
             )}
             {onRetry && (
               <button type="button" onClick={onRetry} className={liButton("secondary", "", "sm")}>
-                Try again
+                {m.common.tryAgain}
               </button>
             )}
           </div>

@@ -9,5 +9,5 @@ export const languages: Messages["languages"] = {
     pt: "português",
   },
   rewriting: (language) => `reescrevendo em ${language}…`,
-  rewriteFailed: (language) => `Não foi possível reescrever a análise em ${language}:`,
+  rewriteFailed: (language) => `Não foi possível reescrever a análise em ${language}.`,
 };

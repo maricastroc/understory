@@ -9,6 +9,7 @@ import type {
   Lineage,
   NarrativeLanguage,
 } from "@understory/core/types";
+import { type ApiFailure, failureFrom, NETWORK_FAILURE, thrownFailure } from "@/lib/api-error";
 import { readJson } from "@/lib/read-json";
 import type { AuthUser } from "./use-auth";
 import type { CaseDraft } from "./case-draft";
@@ -32,7 +33,7 @@ export type Entry = {
   pending?: boolean;
   mountKey?: string;
   rewriting?: NarrativeLanguage | null;
-  rewriteError?: { language: NarrativeLanguage; message: string } | null;
+  rewriteError?: { language: NarrativeLanguage; failure: ApiFailure } | null;
   alternates?: Partial<Record<NarrativeLanguage, DigResult["narrative"]>>;
 };
 export type View = "browse" | "case";
@@ -78,7 +79,7 @@ export function useInvestigation(user: AuthUser | null) {
 
   const [loading, setLoading] = useState(false);
 
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiFailure | null>(null);
 
   const [history, setHistory] = useState<Entry[]>([]);
 
@@ -188,22 +189,28 @@ export function useInvestigation(user: AuthUser | null) {
         return;
       }
       patch((e) => ({ ...e, rewriting: language, rewriteError: null }));
-      const failed = (message: string) =>
-        patch((e) => ({ ...e, rewriting: null, rewriteError: { language, message } }));
+      const failed = (failure: ApiFailure) =>
+        patch((e) => ({ ...e, rewriting: null, rewriteError: { language, failure } }));
       try {
         const res = await fetch("/api/narrate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ evidence: forTheWriter(entry.result.evidence), language }),
-        });
-        const data = await readJson<{ narrative: DigResult["narrative"]; error?: string }>(res);
-        if (!res.ok || !data.narrative) {
-          failed(data.error || `Request failed (${res.status})`);
+        }).catch(() => null);
+        if (!res) {
+          failed(NETWORK_FAILURE);
+          return;
+        }
+        const data = (await res.json().catch(() => null)) as {
+          narrative?: DigResult["narrative"];
+        } | null;
+        if (!res.ok || !data?.narrative) {
+          failed(failureFrom(res, data));
           return;
         }
         settle(data.narrative);
       } catch (err) {
-        failed(err instanceof Error ? err.message : String(err));
+        failed(thrownFailure(err));
       }
     },
     [saveCase],
@@ -229,12 +236,12 @@ export function useInvestigation(user: AuthUser | null) {
     const settleDraft = () => {
       if (key) setDraft((d) => (d?.key === key ? null : d));
     };
-    const fail = (message: string) => {
+    const fail = (failure: ApiFailure) => {
       if (key) {
-        setDraft((d) => (d?.key === key ? { ...d, error: message } : d));
+        setDraft((d) => (d?.key === key ? { ...d, error: failure } : d));
         return;
       }
-      setError(message);
+      setError(failure);
       setView("browse");
     };
 
@@ -248,11 +255,15 @@ export function useInvestigation(user: AuthUser | null) {
           ...(token ? { "x-github-token": token } : {}),
         },
         body: JSON.stringify(reqBody),
-      });
+      }).catch(() => null);
+
+      if (!res) {
+        fail(NETWORK_FAILURE);
+        return;
+      }
 
       if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { error?: string };
-        fail(data.error || `Request failed (${res.status})`);
+        fail(failureFrom(res, await res.json().catch(() => null)));
         return;
       }
 
@@ -261,7 +272,7 @@ export function useInvestigation(user: AuthUser | null) {
       if (!streamed) {
         const data = await readJson<DigResult & { error?: string }>(res);
         if (!data.evidence) {
-          fail(data.error || `Request failed (${res.status})`);
+          fail(data.error ? failureFrom(res, data) : { code: "no-evidence", detail: null });
           return;
         }
         const caseId = `GI-${counter.current++}`;
@@ -318,9 +329,9 @@ export function useInvestigation(user: AuthUser | null) {
         }
       });
 
-      if (!caseId) fail("The investigation did not return any evidence.");
+      if (!caseId) fail({ code: "no-evidence", detail: null });
     } catch (err) {
-      fail(err instanceof Error ? err.message : String(err));
+      fail(thrownFailure(err));
     } finally {
       setLoading(false);
     }

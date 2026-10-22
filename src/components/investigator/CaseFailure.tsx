@@ -1,23 +1,31 @@
+import { useMessages } from "@/i18n/LocaleProvider";
+import type { ApiFailure } from "@/lib/api-error";
 import { ErrorState } from "../ErrorState";
 import { liButton } from "../line-investigation/parts/button-class";
 
 export function CaseFailure({
-  message,
+  failure,
   signedIn,
   onRetry,
   onBack,
 }: {
-  message: string;
+  failure: ApiFailure;
   signedIn: boolean;
   onRetry: () => void;
   onBack: () => void;
 }) {
+  const m = useMessages();
   return (
     <>
-      <ErrorState message={message} signedIn={signedIn} onRetry={onRetry} />
+      <ErrorState
+        failure={failure}
+        title={m.errors.investigation}
+        signedIn={signedIn}
+        onRetry={onRetry}
+      />
       <div>
         <button type="button" onClick={onBack} className={liButton("ghost", "", "sm")}>
-          Back to code
+          {m.common.backToCode}
         </button>
       </div>
     </>

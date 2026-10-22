@@ -10,14 +10,10 @@ function leaves(node: unknown, path = ""): Leaf[] {
   return [{ path, value: node }];
 }
 
-const SAMPLE_ARGS = ["Portuguese", 3, "a1b2c3d"];
-
 function rendered(value: unknown): string[] {
   if (typeof value === "string") return [value];
-  if (typeof value === "function") {
-    const args = SAMPLE_ARGS.slice(0, value.length);
-    return [0, 1, 2].map((n) => String(value(...args.map((a) => (typeof a === "number" ? n : a)))));
-  }
+  if (typeof value === "function")
+    return [0, 1, 2, 21].map((n) => String(value(...Array(value.length).fill(n))));
   return [String(value)];
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMessages } from "@/i18n/LocaleProvider";
 import type { AuthUser } from "../investigator/use-auth";
 import { Menu } from "../icons";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
@@ -34,13 +35,14 @@ export function AppHeader({
   user: AuthUser | null;
   onMenuClick: () => void;
 }) {
+  const m = useMessages();
   const newLabel = (
     <>
       <BlueprintCorners />
       <span aria-hidden className="min-[640px]:hidden">
         +
       </span>
-      <span className="max-[640px]:sr-only">New investigation</span>
+      <span className="max-[640px]:sr-only">{m.shell.newInvestigation}</span>
     </>
   );
 
@@ -48,7 +50,7 @@ export function AppHeader({
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4.5 border-b border-li-divider bg-li-paper px-5 font-li-body text-li-ink max-[820px]:gap-3 max-[820px]:px-4">
       <button
         type="button"
-        aria-label="Open investigations"
+        aria-label={m.shell.openInvestigations}
         onClick={onMenuClick}
         className="-ml-1 grid size-8 shrink-0 cursor-pointer place-items-center text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus min-[820px]:hidden"
       >

@@ -1,14 +1,6 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import { StatusGlyph } from "./StatusGlyph";
 import type { RailItem } from "./types";
-
-const STATUS_LABEL = {
-  resolved: "resolved",
-  silent: "not recorded",
-  "evidence-only": "evidence only",
-  "out-of-scope": "out of scope",
-  fabrication: "fabrication caught",
-  pending: "reconstructing",
-} as const;
 
 export function CaseRailRow({
   item,
@@ -19,6 +11,7 @@ export function CaseRailRow({
   onSelect: (item: RailItem) => void;
   onRemove?: (item: RailItem) => void;
 }) {
+  const m = useMessages();
   return (
     <li className="group relative">
       <button
@@ -48,7 +41,7 @@ export function CaseRailRow({
               item.current ? "text-li-datum-ink" : "text-li-text-subtle"
             }`}
           >
-            <span className="sr-only">{STATUS_LABEL[item.status]} · </span>
+            <span className="sr-only">{m.shell.status[item.status]} · </span>
             {item.subline}
           </span>
         </span>
@@ -56,7 +49,7 @@ export function CaseRailRow({
       {onRemove && (
         <button
           type="button"
-          aria-label={`Remove “${item.title}”`}
+          aria-label={m.shell.removeCase(item.title)}
           onClick={() => onRemove(item)}
           className="absolute top-1.5 right-1 grid size-6 cursor-pointer place-items-center text-[11px] text-li-text-subtle opacity-0 transition-opacity group-hover:opacity-100 hover:bg-li-neutral-300/60 hover:text-li-ink focus-visible:opacity-100 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none [@media(hover:none)]:opacity-100"
         >

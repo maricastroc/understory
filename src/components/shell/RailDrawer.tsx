@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 
 export function RailDrawer({
   open,
@@ -11,6 +12,7 @@ export function RailDrawer({
   onClose: () => void;
   children: ReactNode;
 }) {
+  const m = useMessages();
   const panel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export function RailDrawer({
         ref={panel}
         role="dialog"
         aria-modal="true"
-        aria-label="Investigations"
+        aria-label={m.shell.investigations}
         className={`absolute inset-y-0 left-0 flex w-[min(17rem,85vw)] flex-col border-r border-li-divider bg-li-paper shadow-li-lg transition-transform duration-200 ease-out motion-reduce:transition-none ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}

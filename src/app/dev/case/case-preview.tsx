@@ -1,5 +1,6 @@
 "use client";
 
+import { useMessages } from "@/i18n/LocaleProvider";
 import { useState } from "react";
 import { AnchoredInvestigation } from "@/components/line-investigation/case/AnchoredInvestigation";
 import { syntheticCases } from "@/components/line-investigation/fixtures/synthetic-cases";
@@ -16,7 +17,8 @@ const ANCHORED = syntheticCases.find((c) => !c.result.evidence.location)!;
 
 export function CasePreview() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const items = lineRailItems(syntheticCases, { activeId: ANCHORED.caseId, now: NOW });
+  const m = useMessages();
+  const items = lineRailItems(syntheticCases, { activeId: ANCHORED.caseId, now: NOW, m });
   return (
     <AppShell
       drawerOpen={menuOpen}
@@ -37,7 +39,7 @@ export function CasePreview() {
         <CaseRail
           items={items}
           onSelect={() => {}}
-          footer={railFooterInfo(null, false)}
+          footer={railFooterInfo(null, false, m)}
           onClose={onClose}
         />
       )}
