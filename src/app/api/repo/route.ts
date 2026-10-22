@@ -7,7 +7,7 @@ import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithTokens } from "@understory/core/collect/token-context";
 import { githubTokenForRepo } from "@/lib/github-app";
-import { providerFailure } from "@/lib/api-error";
+import { providerFailure } from "@/lib/provider-failure";
 import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
             { status: 400 },
           );
         }
-        return NextResponse.json({ error: msg, ...providerFailure(msg) }, { status: 400 });
+        return NextResponse.json({ error: msg, ...providerFailure(e) }, { status: 400 });
       }
     },
   );
