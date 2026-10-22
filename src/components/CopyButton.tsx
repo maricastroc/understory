@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { Check, Copy } from "./icons";
 
-export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
+export function CopyButton({ text, label }: { text: string; label: string }) {
+  const m = useMessages();
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -24,11 +26,11 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
     <button
       type="button"
       onClick={copy}
-      aria-label={copied ? "Copied to clipboard" : label}
+      aria-label={copied ? m.report.copiedToClipboard : label}
       className="inline-flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-line-2 bg-surface px-2.5 text-[12px] font-medium text-ink-2 transition-colors hover:bg-inset hover:text-ink"
     >
       {copied ? <Check className="size-3.5 text-good" /> : <Copy className="size-3.5" />}
-      {copied ? "Copied" : label}
+      {copied ? m.caseScreen.copied : label}
     </button>
   );
 }

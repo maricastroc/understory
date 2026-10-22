@@ -1,12 +1,16 @@
 import type { Artifact, ArtifactRef } from "@understory/core/types";
+import { coreText } from "@/i18n/core-text";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { CausalChain } from "../chain/CausalChain";
 import { Evidence } from "../Evidence";
 import { Findings } from "../findings/Findings";
 import { FindingsPending } from "../findings/FindingsPending";
-import { basename, levelLabel, toArtifactRef } from "../format";
-import { Alert, Branch, ChevronLeft, KindIcon, kindLabel } from "../icons";
+import { basename, toArtifactRef } from "../format";
+import { Alert, Branch, ChevronLeft, KindIcon } from "../icons";
+import { writerError } from "../line-investigation/copy/verdict-copy";
 import { Timeline } from "../Timeline";
 import { Pill } from "../ui";
+import { shownQuestion } from "./default-question";
 import type { Entry } from "./use-investigation";
 
 export function CaseView({
@@ -20,6 +24,9 @@ export function CaseView({
   onDrill?: (ref: ArtifactRef) => void;
   onOpenParent?: (caseId: string) => void;
 }) {
+  const locale = useLocale();
+  const m = useMessages();
+  const r = m.report;
   const { result, caseId, form, parentCaseId, parentQuestion, pending } = entry;
 
   const ev = result.evidence;
@@ -37,15 +44,22 @@ export function CaseView({
 
   const outOfScope = narrative?.answerable === false;
 
+  const label = m.verdict.label;
   const status = pending
-    ? { tone: "neutral" as const, label: "Reconstructing…" }
+    ? { tone: "neutral" as const, label: label.pending }
     : !narrative
-      ? { tone: "neutral" as const, label: "Evidence only" }
+      ? { tone: "neutral" as const, label: label["evidence-only"] }
       : outOfScope
-        ? { tone: "neutral" as const, label: "Out of scope" }
+        ? { tone: "neutral" as const, label: label["out-of-scope"] }
         : narrative.recorded
-          ? { tone: "good" as const, label: "Resolved" }
-          : { tone: "warn" as const, label: "Inconclusive" };
+          ? { tone: "good" as const, label: label.resolved }
+          : { tone: "warn" as const, label: r.inconclusive };
+
+  const note =
+    ev.note && ev.coverage?.granularity === "file"
+      ? coreText(locale, "fileLevelNote", ev.note)
+      : ev.note;
+  const error = result.error ? writerError(result.error, locale) : null;
 
   return (
     <>
@@ -54,7 +68,7 @@ export function CaseView({
         className="mb-4 inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border border-accent/25 bg-accent-tint px-3 text-[13px] font-medium text-accent-press shadow-sm transition-colors hover:bg-accent hover:text-white"
       >
         <ChevronLeft className="size-3.5" />
-        Back to code
+        {r.backToCode}
       </button>
 
       <div className="flex flex-col gap-5">
@@ -65,11 +79,11 @@ export function CaseView({
             className="flex w-fit max-w-full cursor-pointer flex-col gap-0.5 rounded-lg border border-accent/20 bg-accent-tint px-3 py-2 text-left transition-colors hover:border-accent/45"
           >
             <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold tracking-wide text-accent-press uppercase">
-              ↳ continues {parentCaseId}
+              {m.caseScreen.continues} {parentCaseId}
             </span>
             {parentQuestion && (
               <span className="line-clamp-1 text-[12.5px] text-ink-2 italic">
-                drilled from “{parentQuestion}”
+                {m.caseScreen.drilledFrom(shownQuestion(parentQuestion, locale))}
               </span>
             )}
           </button>
@@ -85,37 +99,36 @@ export function CaseView({
         </div>
 
         <h1 className="max-w-[26ch] text-[27px] leading-[1.22] font-semibold tracking-tight text-balance">
-          {form.question || "Why is this line the way it is?"}
+          {form.question ? shownQuestion(form.question, locale) : m.questions.line}
         </h1>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-ink-2">
           {anchor && (
             <span className="inline-flex items-center gap-1.5">
               <KindIcon kind={anchor.kind} className="size-3.5 text-ink-3" />
-              <span className="text-ink-3">{kindLabel[anchor.kind]}</span>
+              <span className="text-ink-3">{r.kind[anchor.kind]}</span>
               <span className="font-mono text-ink">{anchor.ref ?? anchor.id}</span>
             </span>
           )}
           <span className="inline-flex items-center gap-1.5">
             <Branch className="size-3.5 text-ink-3" />
-            branch <b className="font-medium text-ink">{ev.repo.branch ?? "—"}</b>
+            {m.composer.repo.labels.branch}{" "}
+            <b className="font-medium text-ink">{ev.repo.branch ?? "—"}</b>
           </span>
-          <span>
-            {ev.artifacts.length} exhibit{ev.artifacts.length !== 1 ? "s" : ""}
-          </span>
+          <span>{r.exhibits(ev.artifacts.length)}</span>
           {narrative && !outOfScope && (
             <Pill tone={status.tone} dot={status.tone !== "neutral"}>
-              {levelLabel[narrative.confidence.level]} confidence ·{" "}
+              {r.confidence(r.level[narrative.confidence.level])} ·{" "}
               <span className="tnum">{Math.round(narrative.confidence.score * 100)}%</span>
             </Pill>
           )}
         </div>
       </div>
 
-      {ev.note && (
+      {note && (
         <div className="mt-5 flex items-start gap-2 rounded-[10px] border border-line bg-surface-2 p-3.5 text-[12.5px] text-ink-2">
           <Alert className="mt-0.5 size-4 shrink-0 text-ink-3" />
-          <span>{ev.note}</span>
+          <span lang={note === ev.note && locale !== "en" ? "en" : undefined}>{note}</span>
         </div>
       )}
 
@@ -129,8 +142,8 @@ export function CaseView({
           className="mt-6 flex items-start gap-2 rounded-[10px] border border-warn/30 bg-warn-tint p-4 text-[13px] text-warn"
         >
           <Alert className="mt-0.5 size-4 shrink-0" />
-          <span>
-            {result.error ?? "No conclusion was produced — showing collected evidence only."}
+          <span lang={error && error === result.error && locale !== "en" ? "en" : undefined}>
+            {error ?? r.noConclusion}
           </span>
         </div>
       )}

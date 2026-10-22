@@ -21,6 +21,7 @@ import {
 } from "./investigation";
 import { loading } from "./loading";
 import { map } from "./map";
+import { report } from "./report";
 import { shell } from "./shell";
 import { time } from "./time";
 
@@ -48,4 +49,5 @@ export const ptBR: Messages = {
   history,
   meta,
   landing,
+  report,
 };

@@ -1,7 +1,9 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import { Alert, Check } from "../icons";
 import { Pill } from "../ui";
 
 export function VerdictStrip({ recorded }: { recorded: boolean }) {
+  const m = useMessages();
   return (
     <div className="flex flex-wrap items-center gap-2.5 border-b border-line bg-surface-2 px-6 py-3.5">
       <span
@@ -12,10 +14,10 @@ export function VerdictStrip({ recorded }: { recorded: boolean }) {
         {recorded ? <Check className="size-3.5" /> : <Alert className="size-3.5" />}
       </span>
       <span className="text-[14px] font-semibold tracking-tight text-ink">
-        {recorded ? "Investigation conclusion" : "No conclusion on record"}
+        {recorded ? m.report.findings.concluded : m.report.findings.noRecord}
       </span>
       <Pill tone={recorded ? "good" : "warn"} dot>
-        {recorded ? "Resolved" : "Inconclusive"}
+        {recorded ? m.verdict.label.resolved : m.report.inconclusive}
       </Pill>
     </div>
   );

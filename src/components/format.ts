@@ -19,20 +19,6 @@ export function basename(p: string): string {
   return p.split("/").filter(Boolean).pop() ?? p;
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-export function fmtDate(iso: string): string {
-  const [y, m, d] = iso.slice(0, 10).split("-");
-  if (!y || !m || !d) return iso;
-  return `${d} ${MONTHS[Number(m) - 1] ?? m} ${y}`;
-}
-
-export const levelLabel: Record<Confidence["level"], string> = {
-  high: "High",
-  medium: "Medium",
-  low: "Low",
-};
-
 export const levelTone: Record<Confidence["level"], { text: string; bg: string; ring: string }> = {
   high: { text: "text-good", bg: "bg-good-tint", ring: "var(--color-good)" },
   medium: { text: "text-warn", bg: "bg-warn-tint", ring: "var(--color-warn)" },

@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import type { Artifact, ArtifactKind } from "@understory/core/types";
-import { Alert, Check, ChevronRight, KindIcon, kindLabel } from "../icons";
+import { useMessages } from "@/i18n/LocaleProvider";
+import { Alert, Check, ChevronRight, KindIcon } from "../icons";
 import { SectionLabel } from "../ui";
 import {
   buildCausalChain,
@@ -25,6 +26,7 @@ function StageChip({
   extra?: number;
   grow?: boolean;
 }) {
+  const r = useMessages().report;
   const inner = (
     <>
       <div className="flex items-center gap-1.5">
@@ -36,12 +38,12 @@ function StageChip({
           <KindIcon kind={kind} className="size-3" />
         </span>
         <span className="text-[9.5px] font-semibold tracking-[0.08em] text-ink-3 uppercase">
-          {kindLabel[kind]}
+          {r.kind[kind]}
         </span>
         {cited && (
           <span
             className="ml-auto size-1.5 shrink-0 rounded-full bg-accent"
-            title="On the cited chain"
+            title={r.chain.onChain}
           />
         )}
       </div>
@@ -74,6 +76,7 @@ function StageChip({
 }
 
 function MissingSlot({ kind, text }: { kind: ArtifactKind; text: string }) {
+  const r = useMessages().report;
   return (
     <div className="flex min-w-[92px] flex-1 flex-col justify-center gap-1 rounded-lg border border-dashed border-line-2 bg-surface-2 p-2.5">
       <div className="flex items-center gap-1.5">
@@ -81,7 +84,7 @@ function MissingSlot({ kind, text }: { kind: ArtifactKind; text: string }) {
           <KindIcon kind={kind} className="size-3" />
         </span>
         <span className="text-[9.5px] font-semibold tracking-[0.08em] text-ink-3 uppercase">
-          {kindLabel[kind]}
+          {r.kind[kind]}
         </span>
       </div>
       <div className="text-[11.5px] text-ink-3 italic">{text}</div>
@@ -111,11 +114,12 @@ function upstream(slot: ChainSlot, kind: ArtifactKind, missing: string, citedIds
 }
 
 function Lane({ lane, citedIds }: { lane: ChainLane; citedIds: Set<string> }) {
+  const c = useMessages().report.chain;
   return (
     <div className="flex items-stretch gap-2 overflow-x-auto pb-1">
       {lane.pr.artifact ? (
         <>
-          {upstream(lane.issue, "issue", "no issue linked", citedIds)}
+          {upstream(lane.issue, "issue", c.noIssue, citedIds)}
           <Connector />
           <StageChip
             a={lane.pr.artifact}
@@ -124,12 +128,12 @@ function Lane({ lane, citedIds }: { lane: ChainLane; citedIds: Set<string> }) {
             extra={lane.pr.extra}
           />
           <Connector />
-          {upstream(lane.review, "review", "no review recorded", citedIds)}
+          {upstream(lane.review, "review", c.noReview, citedIds)}
         </>
       ) : (
         <div className="flex min-w-[180px] flex-[3] items-center gap-2 rounded-lg border border-dashed border-line-2 bg-surface-2 p-2.5 text-[11.5px] text-ink-3">
           <Alert className="size-3.5 shrink-0 opacity-70" />
-          <span>Committed directly — no pull request, issue, or review in the trail</span>
+          <span>{c.direct}</span>
         </div>
       )}
       <Connector />
@@ -163,12 +167,10 @@ function Banner({
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
+  const c = useMessages().report.chain;
   return (
     <section className="mt-7">
-      <SectionLabel
-        title="Provenance chain"
-        meta="Issue → pull request → review → commit — the causal path to this line, and where it breaks"
-      />
+      <SectionLabel title={c.title} meta={c.meta} />
       <div className="rounded-xl border border-line bg-surface px-5 py-5 shadow-card">
         {children}
       </div>
@@ -183,6 +185,7 @@ export function CausalChain({
   artifacts: Artifact[];
   citedIds: Set<string>;
 }) {
+  const r = useMessages().report;
   const chain = useMemo(() => buildCausalChain(artifacts), [artifacts]);
   const [expanded, setExpanded] = useState(false);
 
@@ -192,8 +195,7 @@ export function CausalChain({
     return (
       <Shell>
         <Banner tone="neutral" icon={<Alert className="size-4" />}>
-          No pull request, issue, or review was found upstream of these commits — the recorded
-          history for this line is the commits themselves.
+          {r.chain.commitsOnly}
         </Banner>
         <div className="flex flex-wrap gap-2">
           {chain.commits.map((c) => (
@@ -208,13 +210,13 @@ export function CausalChain({
     return (
       <Shell>
         <Banner tone="neutral" icon={<Alert className="size-4" />}>
-          Structural links aren’t recorded for this saved case — showing the trail grouped by role.
+          {r.chain.grouped}
         </Banner>
         <div className="flex flex-wrap gap-x-6 gap-y-4">
           {chain.groups.map((g) => (
             <div key={g.kind} className="flex min-w-[180px] flex-col gap-2">
               <div className="text-[10.5px] font-semibold tracking-[0.07em] text-ink-3 uppercase">
-                {kindLabel[g.kind]} · {g.items.length}
+                {r.kind[g.kind]} · {g.items.length}
               </div>
               <div className="flex flex-col gap-2">
                 {g.items.map((a) => (
@@ -242,12 +244,11 @@ export function CausalChain({
     <Shell>
       {chain.gaps === 0 ? (
         <Banner tone="good" icon={<Check className="size-4" />}>
-          Complete trail — every change traces back to a pull request, an issue, and a review.
+          {r.chain.complete}
         </Banner>
       ) : (
         <Banner tone="warn" icon={<Alert className="size-4" />}>
-          <b className="font-semibold text-ink">{chain.gaps}</b> {chain.gaps === 1 ? "gap" : "gaps"}{" "}
-          in the causal trail — shown dashed below. The line’s recorded reason stops there.
+          <b className="font-semibold text-ink">{chain.gaps}</b> {r.chain.gaps(chain.gaps)}
         </Banner>
       )}
 
@@ -265,8 +266,8 @@ export function CausalChain({
           onClick={() => setExpanded((v) => !v)}
           className="mt-3 inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-inset px-2.5 py-1.5 text-[12px] font-medium text-ink-2 transition-colors hover:border-accent/40 hover:text-accent-press"
         >
-          {expanded ? "Show fewer paths" : `Show all ${chain.lanes.length} paths`}
-          {!expanded && hidden > 0 && <span className="text-ink-3">· {hidden} more</span>}
+          {expanded ? r.chain.fewer : r.chain.all(chain.lanes.length)}
+          {!expanded && hidden > 0 && <span className="text-ink-3">{r.chain.more(hidden)}</span>}
         </button>
       )}
     </Shell>
