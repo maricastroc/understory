@@ -1,13 +1,18 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { messagesFor } from "@/i18n/messages";
 import { axe } from "@/test/axe";
 import { syntheticCases } from "../line-investigation/fixtures/synthetic-cases";
 import { SYNTHETIC_NOW } from "../line-investigation/fixtures/synthetic-retry-cap";
 import { HeaderSearch } from "./HeaderSearch";
 import { lineRailItems } from "./rail-items";
 
-const cases = lineRailItems(syntheticCases, { activeId: null, now: Date.parse(SYNTHETIC_NOW) });
+const cases = lineRailItems(syntheticCases, {
+  activeId: null,
+  now: Date.parse(SYNTHETIC_NOW),
+  m: messagesFor("en"),
+});
 
 describe("HeaderSearch", () => {
   it("searches only cases when no repository is open", () => {

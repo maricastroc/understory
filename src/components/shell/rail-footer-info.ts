@@ -1,16 +1,19 @@
+import type { Messages } from "@/i18n/messages";
 import type { AuthUser } from "../investigator/use-auth";
 import { initials } from "./initials";
 import type { RailFooterInfo } from "./types";
 
-export function railFooterInfo(user: AuthUser | null, persisted: boolean): RailFooterInfo {
+export function railFooterInfo(
+  user: AuthUser | null,
+  persisted: boolean,
+  m: Messages,
+): RailFooterInfo {
   if (!user) {
-    return { name: "Guest", initials: "?", subline: "Sign in to save line cases", guest: true };
+    return { name: m.shell.guest, initials: "?", subline: m.shell.guestHint, guest: true };
   }
   return {
     name: user.name,
     initials: initials(user.name),
-    subline: persisted
-      ? "Line cases saved across devices"
-      : "Line cases aren't saved on this server",
+    subline: persisted ? m.shell.savedEverywhere : m.shell.notSaved,
   };
 }

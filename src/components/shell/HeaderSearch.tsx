@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { useFileSearch } from "../composer/use-file-search";
 import { Search } from "../icons";
 import type { SearchOption } from "./search-option";
@@ -29,6 +30,7 @@ export function HeaderSearch({
   files: { repoPath: string; token?: string } | null;
   onOpenFile?: (path: string) => void;
 }) {
+  const m = useMessages();
   const listId = useId();
   const input = useRef<HTMLInputElement>(null);
   const box = useRef<HTMLDivElement>(null);
@@ -108,7 +110,7 @@ export function HeaderSearch({
   const fileOptions = options.filter((o) => o.type === "file");
   const optionId = (i: number) => `${listId}-opt-${i}`;
   const showList = open && needle.length > 0;
-  const placeholder = searchFiles ? "Search files, symbols or cases" : "Search cases";
+  const placeholder = searchFiles ? m.shell.searchAll : m.shell.searchCases;
 
   const renderOption = (o: SearchOption, i: number) => (
     <li
@@ -165,22 +167,22 @@ export function HeaderSearch({
         <ul
           id={listId}
           role="listbox"
-          aria-label="Search results"
+          aria-label={m.shell.searchResults}
           className="absolute top-10 right-0 left-0 z-40 max-h-96 overflow-auto border border-li-divider bg-li-paper py-1.5 shadow-li-lg"
         >
           {options.length === 0 && (
             <li role="presentation" className="px-3 py-2 text-xs text-li-text-subtle">
-              {fileSearch.searching ? "Searching…" : "No matches"}
+              {fileSearch.searching ? m.shell.searching : m.shell.noMatches}
             </li>
           )}
           {caseOptions.length > 0 && (
             <li role="presentation">
-              <ul role="group" aria-label="Cases">
+              <ul role="group" aria-label={m.shell.cases}>
                 <li
                   role="presentation"
                   className="px-3 pt-1 pb-0.5 text-[11px] font-semibold text-li-text-subtle"
                 >
-                  Cases
+                  {m.shell.cases}
                 </li>
                 {caseOptions.map((o) => renderOption(o, options.indexOf(o)))}
               </ul>
@@ -188,12 +190,12 @@ export function HeaderSearch({
           )}
           {fileOptions.length > 0 && (
             <li role="presentation">
-              <ul role="group" aria-label="Files">
+              <ul role="group" aria-label={m.shell.files}>
                 <li
                   role="presentation"
                   className="px-3 pt-1.5 pb-0.5 text-[11px] font-semibold text-li-text-subtle"
                 >
-                  Files
+                  {m.shell.files}
                 </li>
                 {fileOptions.map((o) => renderOption(o, options.indexOf(o)))}
               </ul>

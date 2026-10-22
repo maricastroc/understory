@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useId, useMemo, useRef, useState } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { liButton } from "../line-investigation/parts/button-class";
 import type { RepoSummary } from "./types";
 import { useDismiss } from "./use-dismiss";
@@ -12,6 +13,7 @@ export function RepoSelector({
   repo: RepoSummary;
   onNewInRepo?: () => void;
 }) {
+  const m = useMessages();
   const [open, setOpen] = useState(false);
   const popId = useId();
   const button = useRef<HTMLButtonElement>(null);
@@ -50,7 +52,7 @@ export function RepoSelector({
           id={popId}
           ref={panel}
           role="dialog"
-          aria-label="Repository"
+          aria-label={m.shell.repository}
           className="absolute top-10 left-0 z-40 flex w-72 flex-col gap-2.5 border border-li-divider bg-li-paper p-3.5 font-li-body shadow-li-lg"
         >
           <div className="flex flex-col gap-0.5">
@@ -69,7 +71,7 @@ export function RepoSelector({
                 }}
                 className={liButton("secondary", "", "sm")}
               >
-                New investigation here
+                {m.shell.newHere}
               </button>
             )}
             {repo.url && (
@@ -79,7 +81,7 @@ export function RepoSelector({
                 rel="noopener noreferrer"
                 className={liButton("ghost", "", "sm")}
               >
-                Open repository ↗
+                {m.shell.openRepository}
               </a>
             )}
           </div>

@@ -13,6 +13,7 @@ import { narrate } from "@understory/core/investigate";
 import { getModel } from "@understory/core/llm";
 import { ensureHistoryStore } from "@/lib/history-store";
 import { AI_DAILY_LIMIT_REACHED } from "@/lib/ai-limit";
+import { providerFailure } from "@/lib/api-error";
 import { consumeAiDailyLimit, rateLimit } from "@/lib/ratelimit";
 import type { ArtifactRef, Evidence } from "@understory/core/types";
 
@@ -93,7 +94,15 @@ export async function POST(req: Request) {
       gh && link
         ? ` If ${gh.owner}/${gh.repo} is private, install the Understory GitHub App: ${link}`
         : "";
-    return NextResponse.json({ error: `${message}${hint}` }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: `${message}${hint}`,
+        detail: message,
+        ...providerFailure(message),
+        ...(hint && link ? { installUrl: link } : {}),
+      },
+      { status: 400 },
+    );
   }
 
   const walking = new AbortController();

@@ -1,3 +1,4 @@
+import type { Messages } from "@/i18n/messages";
 import { basename } from "../format";
 import { isDefaultQuestion } from "../investigator/default-question";
 import type { Entry } from "../investigator/use-investigation";
@@ -15,48 +16,37 @@ const STATUS: Record<Verdict, RailStatus> = {
   pending: "pending",
 };
 
-const SUFFIX: Partial<Record<Verdict, string>> = {
-  "not-recorded": "not recorded",
-  "evidence-only": "evidence only",
-  "out-of-scope": "out of scope",
-  fabrication: "fabrication caught",
-  pending: "reconstructing…",
-};
-
-function statusSuffix(view: InvestigationView): string | null {
-  if (view.verdict !== "resolved") return SUFFIX[view.verdict] ?? null;
+function statusSuffix(view: InvestigationView, m: Messages): string | null {
+  if (view.verdict === "pending") return `${m.shell.status.pending}…`;
+  if (view.verdict !== "resolved") return m.shell.status[STATUS[view.verdict]];
   const links = view.links;
   if (!links || !view.location || links.filled + links.gaps === 0) return null;
   return links.unverified === 0
-    ? `${links.filled} of ${links.filled + links.gaps} links`
-    : `${links.filled} links`;
+    ? m.shell.linksOf(links.filled, links.filled + links.gaps)
+    : m.shell.links(links.filled);
 }
 
-function caseTitle(entry: Entry): string {
+function caseTitle(entry: Entry, m: Messages): string {
   const question = entry.form.question || entry.result.evidence.question || "";
   const loc = entry.result.evidence.location;
-  if (loc && isDefaultQuestion(question)) {
-    const lines =
-      loc.startLine === loc.endLine
-        ? `Line ${loc.startLine}`
-        : `Lines ${loc.startLine}–${loc.endLine}`;
-    return `${lines} of ${basename(loc.file)}`;
-  }
-  return question || "(no question asked)";
+  if (loc && isDefaultQuestion(question))
+    return m.shell.caseTitle(loc.startLine, loc.endLine, basename(loc.file));
+  return question || m.shell.noQuestion;
 }
 
 function lineSubline(
   entry: Entry,
   view: InvestigationView,
   parent: InvestigationView | null,
+  m: Messages,
 ): string {
   const ev = entry.result.evidence;
   const anchor = ev.anchor;
   if (!ev.location && anchor && parent) {
     const source = parent.artifacts.find((a) => a.id === anchor.id);
-    return source
-      ? `from ${source.letter} · ${displayId(source)}`
-      : `from ${anchor.ref ?? anchor.id}`;
+    return m.shell.from(
+      source ? `${source.letter} · ${displayId(source)}` : (anchor.ref ?? anchor.id),
+    );
   }
   const where = ev.location
     ? `${basename(ev.location.file)}:${
@@ -65,13 +55,13 @@ function lineSubline(
           : `${ev.location.startLine}-${ev.location.endLine}`
       }`
     : (anchor?.ref ?? anchor?.id ?? "—");
-  const suffix = statusSuffix(view);
+  const suffix = statusSuffix(view, m);
   return suffix ? `${where} · ${suffix}` : where;
 }
 
 export function lineRailItems(
   entries: Entry[],
-  opts: { activeId: string | null; now: number },
+  opts: { activeId: string | null; now: number; m: Messages },
 ): RailItem[] {
   const views = new Map(
     entries.map((e) => [
@@ -87,8 +77,8 @@ export function lineRailItems(
     const parent = isChild(e) ? (views.get(e.parentCaseId!) ?? null) : null;
     return {
       id: e.caseId,
-      title: caseTitle(e),
-      subline: lineSubline(e, view, parent),
+      title: caseTitle(e, opts.m),
+      subline: lineSubline(e, view, parent, opts.m),
       status: STATUS[view.verdict],
       child: isChild(e),
       current: e.caseId === opts.activeId,

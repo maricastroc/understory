@@ -3,9 +3,10 @@
 import { useSearchParams } from "next/navigation";
 import { narrativeLanguage } from "@understory/core/narrative-language";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ApiFailure } from "@/lib/api-error";
 import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { answerLanguageOf } from "@/i18n/locales";
-import { ErrorState } from "../ErrorState";
+import { ErrorState, failureDetail, failureLead } from "../ErrorState";
 import { liButton } from "../line-investigation/parts/button-class";
 import { Composer } from "../composer/Composer";
 import type { ComposerPrefill } from "../composer/composer-prefill";
@@ -129,8 +130,8 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
   const activeCaseId = view === "case" ? activeId : null;
 
   const lineItems = useMemo(
-    () => lineRailItems(history, { activeId: activeCaseId, now }),
-    [history, activeCaseId, now],
+    () => lineRailItems(history, { activeId: activeCaseId, now, m }),
+    [history, activeCaseId, now, m],
   );
   const cases = useMemo(() => casePaths(history, repoPath), [history, repoPath]);
   const recent = useMemo(() => recentRepos(history), [history]);
@@ -240,6 +241,12 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
     };
   };
 
+  const rewriteReason = (failure: ApiFailure) => {
+    if (failure.code !== "failed") return failureLead(failure, m, locale, "");
+    const detail = failureDetail(failure);
+    return detail && <span lang="en">{detail}</span>;
+  };
+
   const analysisOf = (entry: Entry) =>
     entry.result.narrative && !entry.pending
       ? {
@@ -287,7 +294,7 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
           }}
           onSelect={openRailItem}
           onRemove={(item) => removeCase(item.id)}
-          footer={railFooterInfo(user, persisted)}
+          footer={railFooterInfo(user, persisted, m)}
           onClose={onClose}
         />
       )}
@@ -302,7 +309,7 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
         >
           {error && browsing && (
             <div className="mb-4">
-              <ErrorState message={error} signedIn={!!user} />
+              <ErrorState failure={error} title={m.errors.investigation} signedIn={!!user} />
             </div>
           )}
 
@@ -343,7 +350,7 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
                 className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-li-text-subtle"
               >
                 {m.languages.rewriteFailed(m.languages.name[explicit])}{" "}
-                {current.rewriteError.message}
+                {rewriteReason(current.rewriteError.failure)}
                 <button
                   type="button"
                   onClick={() => void rewrite(current.caseId, explicit)}
@@ -366,7 +373,7 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
               failure={
                 draft.error ? (
                   <CaseFailure
-                    message={draft.error}
+                    failure={draft.error}
                     signedIn={!!user}
                     onRetry={() => retryDraft(tokenValue, language)}
                     onBack={backToCode}

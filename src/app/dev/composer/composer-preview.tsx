@@ -1,5 +1,6 @@
 "use client";
 
+import { useMessages } from "@/i18n/LocaleProvider";
 import { useMemo, useState } from "react";
 import { FileStage } from "@/components/composer/FileStage";
 import {
@@ -26,7 +27,11 @@ export function ComposerPreview({ state, files }: { state: string; files: number
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [opened, setOpened] = useState<string | null>(null);
-  const lineItems = useMemo(() => lineRailItems(syntheticCases, { activeId: null, now: NOW }), []);
+  const m = useMessages();
+  const lineItems = useMemo(
+    () => lineRailItems(syntheticCases, { activeId: null, now: NOW, m }),
+    [m],
+  );
   const overview = useMemo(
     () =>
       state === "loading"
@@ -98,7 +103,7 @@ export function ComposerPreview({ state, files }: { state: string; files: number
           items={lineItems}
           onSelect={() => setMenuOpen(false)}
           onRemove={() => {}}
-          footer={railFooterInfo(null, false)}
+          footer={railFooterInfo(null, false, m)}
           onClose={onClose}
         />
       )}

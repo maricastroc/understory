@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { messagesFor } from "@/i18n/messages";
 import { syntheticCases } from "../line-investigation/fixtures/synthetic-cases";
 import { SYNTHETIC_NOW } from "../line-investigation/fixtures/synthetic-retry-cap";
 import { syntheticWithoutStageFourData } from "../line-investigation/fixtures/synthetic-states";
 import { lineRailItems } from "./rail-items";
 
 const now = Date.parse(SYNTHETIC_NOW);
-const lines = lineRailItems(syntheticCases, { activeId: "GI-2049", now });
+const m = messagesFor("en");
+const lines = lineRailItems(syntheticCases, { activeId: "GI-2049", now, m });
 
 describe("lineRailItems", () => {
   it("derives status and subline from each case's evidence", () => {
@@ -35,7 +37,7 @@ describe("lineRailItems", () => {
         { ...at("Why are these lines the way they are?", 8, 12), caseId: "GI-3001" },
         { ...at("Why exactly 3 retries?", 9, 9), caseId: "GI-3002" },
       ],
-      { activeId: null, now },
+      { activeId: null, now, m },
     );
     expect(line.title).toBe("Line 9 of charge.ts");
     expect(range.title).toBe("Lines 8–12 of charge.ts");
@@ -44,7 +46,7 @@ describe("lineRailItems", () => {
 
   it("places children right under their parent regardless of recency", () => {
     const reordered = [syntheticCases[2], syntheticCases[1], syntheticCases[0]];
-    expect(lineRailItems(reordered, { activeId: null, now }).map((i) => i.id)).toEqual([
+    expect(lineRailItems(reordered, { activeId: null, now, m }).map((i) => i.id)).toEqual([
       "GI-2050",
       "GI-2049",
       "GI-2054",
@@ -52,14 +54,14 @@ describe("lineRailItems", () => {
   });
 
   it("shows an orphaned child at the top level with its anchor", () => {
-    const orphan = lineRailItems([syntheticCases[1]], { activeId: null, now });
+    const orphan = lineRailItems([syntheticCases[1]], { activeId: null, now, m });
     expect(orphan[0]).toMatchObject({ child: false, subline: "#812" });
   });
 
   it("does not claim N of M links when a gap was not verified", () => {
     const [item] = lineRailItems(
       [{ ...syntheticCases[0], result: syntheticWithoutStageFourData() }],
-      { activeId: null, now },
+      { activeId: null, now, m },
     );
     expect(item.subline).toBe("charge.ts:9 · 5 links");
   });
@@ -68,6 +70,7 @@ describe("lineRailItems", () => {
     const [item] = lineRailItems([{ ...syntheticCases[0], pending: true }], {
       activeId: null,
       now,
+      m,
     });
     expect([item.status, item.subline]).toEqual(["pending", "charge.ts:9 · reconstructing…"]);
   });

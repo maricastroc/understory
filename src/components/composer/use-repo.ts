@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { RepoMeta } from "@understory/core/types";
-import { readJson } from "@/lib/read-json";
+import { type ApiFailure, failureFrom, NETWORK_FAILURE, thrownFailure } from "@/lib/api-error";
 
 export type Repo = ReturnType<typeof useRepo>;
 
@@ -8,7 +8,7 @@ export function useRepo() {
   const [connecting, setConnecting] = useState(false);
   const [ready, setReady] = useState(false);
   const [meta, setMeta] = useState<RepoMeta | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiFailure | null>(null);
 
   async function open(repoPath: string, token?: string) {
     const repo = repoPath.trim();
@@ -25,10 +25,14 @@ export function useRepo() {
           ...(token ? { "x-github-token": token } : {}),
         },
         body: JSON.stringify({ repo }),
-      });
-      const data = await readJson<RepoMeta & { error?: string }>(res);
-      if (!res.ok) {
-        setError(data.error || "Could not open repository");
+      }).catch(() => null);
+      if (!res) {
+        setError(NETWORK_FAILURE);
+        return;
+      }
+      const data = (await res.json().catch(() => null)) as RepoMeta | null;
+      if (!res.ok || !data) {
+        setError(failureFrom(res, data));
         return;
       }
       setMeta({
@@ -47,7 +51,7 @@ export function useRepo() {
       });
       setReady(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(thrownFailure(e));
     } finally {
       setConnecting(false);
     }

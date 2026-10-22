@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { Github } from "../icons";
 import { type AuthUser, authEnabled } from "../investigator/use-auth";
 import { liButton } from "../line-investigation/parts/button-class";
@@ -14,6 +15,7 @@ export function AccountButton({
   user: AuthUser | null;
   signIn?: "secondary" | "ghost";
 }) {
+  const m = useMessages();
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
@@ -26,14 +28,14 @@ export function AccountButton({
     if (signIn === "ghost") {
       return (
         <a href="/api/auth/login" className={liButton("ghost", "max-[640px]:px-1.5")}>
-          Sign in
+          {m.common.signIn}
         </a>
       );
     }
     return (
       <a href="/api/auth/login" className={liButton("secondary")}>
         <Github className="size-4 shrink-0" />
-        <span className="max-[640px]:sr-only">Sign in with GitHub</span>
+        <span className="max-[640px]:sr-only">{m.common.signInWithGithub}</span>
       </a>
     );
   }
@@ -43,7 +45,7 @@ export function AccountButton({
       <button
         ref={trigger}
         type="button"
-        aria-label={`Account: ${user.name}`}
+        aria-label={m.shell.account(user.name)}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
@@ -69,7 +71,7 @@ export function AccountButton({
               role="menuitem"
               className="w-full cursor-pointer px-3.5 py-2.5 text-left text-[13px] text-li-ink hover:bg-li-neutral-200 focus-visible:bg-li-neutral-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus"
             >
-              Sign out
+              {m.common.signOut}
             </button>
           </form>
         </div>

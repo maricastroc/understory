@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { messagesFor } from "@/i18n/messages";
 import { axe } from "@/test/axe";
 import { syntheticCases } from "../line-investigation/fixtures/synthetic-cases";
 import { SYNTHETIC_NOW } from "../line-investigation/fixtures/synthetic-retry-cap";
@@ -10,6 +11,7 @@ import { lineRailItems } from "./rail-items";
 const items = lineRailItems(syntheticCases, {
   activeId: "GI-2049",
   now: Date.parse(SYNTHETIC_NOW),
+  m: messagesFor("en"),
 });
 
 describe("CaseStrip", () => {

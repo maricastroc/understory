@@ -7,6 +7,7 @@ import { collectorAuthError, maybeDelegate } from "@/lib/collect/remote";
 import { resolveRepoInput } from "@/lib/collect/resolve";
 import { runWithTokens } from "@understory/core/collect/token-context";
 import { githubTokenForRepo } from "@/lib/github-app";
+import { providerFailure } from "@/lib/api-error";
 import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
           return NextResponse.json(
             {
               error: `"${repo}" points to a GitHub user or org, not a repository. Use a full repo URL like https://github.com/owner/repo (or the shorthand owner/repo).`,
+              code: "owner-not-repo",
             },
             { status: 400 },
           );
@@ -90,7 +92,10 @@ export async function POST(req: Request) {
 
         const resolved = await resolveRepoInput(repo);
         if (!(await isGitRepo(resolved.path))) {
-          return NextResponse.json({ error: `Not a git repository: ${repo}` }, { status: 400 });
+          return NextResponse.json(
+            { error: `Not a git repository: ${repo}`, code: "not-a-repository" },
+            { status: 400 },
+          );
         }
         const ref = await resolveRepo(resolved.path);
         return NextResponse.json({
@@ -101,10 +106,17 @@ export async function POST(req: Request) {
         });
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        const friendly = /\bENOENT\b/.test(msg)
-          ? "Git isn't available in this environment, so only GitHub repos work here. Use owner/repo or a full https://github.com/owner/repo URL."
-          : msg;
-        return NextResponse.json({ error: friendly }, { status: 400 });
+        if (/\bENOENT\b/.test(msg)) {
+          return NextResponse.json(
+            {
+              error:
+                "Git isn't available in this environment, so only GitHub repos work here. Use owner/repo or a full https://github.com/owner/repo URL.",
+              code: "git-unavailable",
+            },
+            { status: 400 },
+          );
+        }
+        return NextResponse.json({ error: msg, ...providerFailure(msg) }, { status: 400 });
       }
     },
   );

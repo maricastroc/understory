@@ -7,5 +7,5 @@ export const languages = {
     pt: "Portuguese",
   },
   rewriting: (language: string) => `rewriting in ${language}…`,
-  rewriteFailed: (language: string) => `Could not rewrite this analysis in ${language}:`,
+  rewriteFailed: (language: string) => `Could not rewrite this analysis in ${language}.`,
 };

@@ -62,7 +62,7 @@ export async function rateLimit(req: Request, tier: RateTier): Promise<NextRespo
 
   const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
   return NextResponse.json(
-    { error: `Rate limit exceeded — try again in ${retryAfter}s.` },
+    { error: `Rate limit exceeded — try again in ${retryAfter}s.`, code: "busy" },
     {
       status: 429,
       headers: {
