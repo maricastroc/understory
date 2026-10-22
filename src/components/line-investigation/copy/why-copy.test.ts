@@ -16,6 +16,7 @@ function copied(result: DigResult): string | null {
   return whyCopy(
     whyModel(readAnswer(result.evidence, result.narrative)!),
     sourceNamer(view.artifacts),
+    "en",
   );
 }
 
@@ -25,12 +26,14 @@ describe("where a passage sits", () => {
       passageWhere(
         { kind: "commit", name: "18a2e4f" },
         { source: "c", text: "", parts: ["title"] },
+        "en",
       ),
     ).toBe("commit title");
     expect(
       passageWhere(
         { kind: "pull_request", name: "pr:3412" },
         { source: "p", text: "", parts: ["description"] },
+        "en",
       ),
     ).toBe("pr:3412 description");
     expect(
@@ -43,22 +46,27 @@ describe("where a passage sits", () => {
           placement: "another file",
           outdated: true,
         },
+        "en",
       ),
     ).toBe("review·ajafff · comment made in another file");
   });
 
   it("says when a change is the last one or an earlier one, and what it did to the line", () => {
     const at = { id: "commit:22e1399", date: "2024-03-05T10:00:00Z" };
-    expect(changeText({ ...at, last: false, did: "rewrote" })).toBe(
+    expect(changeText({ ...at, last: false, did: "rewrote" }, "en")).toBe(
       "earlier change · 22e1399 · 5 Mar 2024 · rewrote this line",
     );
-    expect(changeText({ ...at, last: true, did: null })).toBe("last change · 22e1399 · 5 Mar 2024");
+    expect(changeText({ ...at, last: true, did: null }, "en")).toBe(
+      "last change · 22e1399 · 5 Mar 2024",
+    );
   });
 
   it("keeps the audit's three findings apart", () => {
-    expect(qualityText("insufficient")).toBe("insufficient: the cited sources do not say this");
-    expect(qualityText("refuted")).toBe("refuted: the cited sources say something else");
-    expect(qualityText("absent")).toBe("absent: no cited source was checked");
+    expect(qualityText("insufficient", "en")).toBe(
+      "insufficient: the cited sources do not say this",
+    );
+    expect(qualityText("refuted", "en")).toBe("refuted: the cited sources say something else");
+    expect(qualityText("absent", "en")).toBe("absent: no cited source was checked");
   });
 });
 

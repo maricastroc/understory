@@ -1,32 +1,36 @@
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import type { ViewArtifact, ViewClause, ViewGap } from "../model/types";
 import { dateLine, displayId, kindName } from "./artifact-copy";
 
-function clauseList(ids: string[], clauses: ViewClause[]): string {
+function clauseList(ids: string[], clauses: ViewClause[], locale: Locale): string {
+  const a = messagesFor(locale).accessible;
   const numbers = clauses.filter((c) => ids.includes(c.id)).map((c) => c.index + 1);
-  if (numbers.length === 0) return "not cited by any clause";
-  if (numbers.length === 1) return `cited by clause ${numbers[0]}`;
-  return `cited by clause ${numbers.slice(0, -1).join(", ")} and ${numbers[numbers.length - 1]}`;
+  if (numbers.length === 0) return a.notCited;
+  if (numbers.length === 1) return a.citedBy(String(numbers[0]));
+  return a.citedByMany(numbers.slice(0, -1).join(", "), String(numbers[numbers.length - 1]));
 }
 
-export function artifactName(a: ViewArtifact, clauses: ViewClause[]): string {
+export function artifactName(a: ViewArtifact, clauses: ViewClause[], locale: Locale): string {
   const parts = [
     a.letter,
-    `${kindName(a.kind)} ${displayId(a)}`,
-    dateLine(a),
-    clauseList(a.citedBy, clauses),
+    `${kindName(a.kind, locale)} ${displayId(a)}`,
+    dateLine(a, locale),
+    clauseList(a.citedBy, clauses, locale),
   ];
-  if (a.verified) parts.push("quote verified");
+  if (a.verified) parts.push(messagesFor(locale).accessible.quoteVerified);
   return parts.join(", ");
 }
 
-export function gapName(gap: ViewGap, after: ViewArtifact): string {
-  const target = `${kindName(after.kind)} ${displayId(after)}`;
+export function gapName(gap: ViewGap, after: ViewArtifact, locale: Locale): string {
+  const a = messagesFor(locale).accessible;
+  const target = `${kindName(after.kind, locale)} ${displayId(after)}`;
   const text =
     gap.missing === "pull_request"
-      ? `no pull request, review or issue before ${target}`
+      ? a.noPrBefore(target)
       : gap.missing === "review"
-        ? `no review on ${target}`
-        : `no linked issue on ${target}`;
-  const prefix = !gap.verified ? "Not verified" : gap.missing === "issue" ? null : "Not recorded";
-  return prefix ? `${prefix}: ${text}` : text.charAt(0).toUpperCase() + text.slice(1);
+        ? a.noReviewOn(target)
+        : a.noIssueOn(target);
+  if (!gap.verified) return a.notVerified(text);
+  return gap.missing === "issue" ? a.capitalized(text) : a.notRecorded(text);
 }

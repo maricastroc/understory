@@ -1,7 +1,7 @@
 import type { Passage } from "@understory/core/types";
 import { type KeyboardEvent, type ReactNode, useEffect, useRef } from "react";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import {
-  NOT_IDENTIFIED,
   type SourceName,
   changeText,
   contextText,
@@ -41,6 +41,7 @@ function Glyph({ mark }: { mark: Mark }) {
 }
 
 function Quotes({ passages, source }: { passages: Passage[]; source: (id: string) => SourceName }) {
+  const locale = useLocale();
   if (passages.length === 0) return null;
   return (
     <ul className="flex flex-col gap-0.5 pr-2 pb-1 pl-7.5">
@@ -50,7 +51,7 @@ function Quotes({ passages, source }: { passages: Passage[]; source: (id: string
           className="line-clamp-2 font-li-mono text-xs leading-[1.5] text-li-text-subtle"
         >
           <span className="text-li-neutral-800">
-            {passageWhere(source(passage.source), passage)}
+            {passageWhere(source(passage.source), passage, locale)}
           </span>{" "}
           “{passage.text}”
         </li>
@@ -82,6 +83,8 @@ export function ReadingWhy({
   evidenceId: string;
   renderEvidence?: (clause: ViewClause, id: string) => ReactNode;
 }) {
+  const locale = useLocale();
+  const m = useMessages();
   const root = useRef<HTMLDivElement>(null);
   const intent = useRef<number | undefined>(undefined);
   const later = (fn: () => void, ms: number) => {
@@ -146,6 +149,7 @@ export function ReadingWhy({
           <span className="flex min-w-0 flex-col gap-1">
             {sentence && (
               <span
+                lang={language ?? undefined}
                 className={
                   mark === "unsustained"
                     ? "text-[15px] leading-[1.45] text-li-neutral-800"
@@ -164,7 +168,7 @@ export function ReadingWhy({
                     : "text-li-neutral-800"
               }`}
             >
-              {label} · clause {claim + 1}
+              {m.why.sentenceOf(label, claim + 1)}
             </span>
           </span>
         </button>
@@ -185,26 +189,30 @@ export function ReadingWhy({
         : entry.standing === "inferred"
           ? "likely"
           : "context",
-      entry.standing ? standingText(entry.standing) : contextText(carried.has(entry.claim)),
+      entry.standing
+        ? standingText(entry.standing, locale)
+        : contextText(carried.has(entry.claim), locale),
       entry.sentence,
       <Quotes passages={entry.passages} source={source} />,
     );
 
   return (
-    <div ref={root} lang={language ?? undefined} className="mt-1 flex flex-col gap-3">
+    <div ref={root} className="mt-1 flex flex-col gap-3">
       {model.explanation === "not identified" && (
-        <p className="pl-7 text-base text-li-ink">{NOT_IDENTIFIED}</p>
+        <p className="pl-7 text-base text-li-ink">{m.why.notIdentified}</p>
       )}
       {model.changes.length > 0 && (
-        <ol aria-label="Changes, newest first" className="flex flex-col gap-3">
+        <ol aria-label={m.why.changes} className="flex flex-col gap-3">
           {model.changes.map((change) => (
             <li key={change.id} data-why-change={change.last ? "last" : "earlier"}>
               <p className="pl-7 font-li-mono text-[11px] text-li-text-subtle">
                 <span className={change.last ? "text-li-ink" : undefined}>
-                  {changeText(change)}
+                  {changeText(change, locale)}
                 </span>
                 {model.explanation === "not identified" && (
-                  <span className="block text-li-neutral-800">{titledText(change.title)}</span>
+                  <span className="block text-li-neutral-800">
+                    {titledText(change.title, locale)}
+                  </span>
                 )}
               </p>
               {change.entries.length > 0 && (
@@ -219,7 +227,7 @@ export function ReadingWhy({
       {model.unsustained.length > 0 && (
         <details className="group">
           <summary className="w-fit cursor-pointer pl-7 text-xs text-li-gap-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus">
-            {notEstablishedText(model.unsustained.length)}
+            {notEstablishedText(model.unsustained.length, locale)}
           </summary>
           <ul className="mt-1 flex flex-col gap-1">
             {model.unsustained.map((u) =>
@@ -227,7 +235,7 @@ export function ReadingWhy({
                 `unsustained-${u.claim}`,
                 u.claim,
                 "unsustained",
-                qualityText(u.quality),
+                qualityText(u.quality, locale),
                 u.text,
                 null,
               ),

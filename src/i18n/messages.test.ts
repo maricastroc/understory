@@ -10,17 +10,41 @@ function leaves(node: unknown, path = ""): Leaf[] {
   return [{ path, value: node }];
 }
 
+const SAMPLES: unknown[] = [0, 1, 2, 21, "linha 9", "linhas 2–5", "o arquivo", "pr:812"];
+
 function rendered(value: unknown): string[] {
   if (typeof value === "string") return [value];
-  if (typeof value === "function")
-    return [0, 1, 2, 21].map((n) => String(value(...Array(value.length).fill(n))));
-  return [String(value)];
+  if (typeof value !== "function") return [String(value)];
+  const out: string[] = [];
+  for (const sample of SAMPLES) {
+    try {
+      out.push(String(value(...Array(value.length).fill(sample))));
+    } catch {}
+  }
+  if (out.length === 0) throw new Error("no sample renders this message");
+  return out;
 }
 
 const SAME_IN_BOTH = new Set<string>([
   "time.unit.m",
   "time.unit.d",
   "time.dayMonth",
+  "time.plainDate",
+  "artifact.kind.commit",
+  "artifact.kind.pull_request",
+  "artifact.kind.issue",
+  "artifact.relation.other",
+  "gap.chip.pull_request",
+  "gap.chip.issue",
+  "subject.commit",
+  "clause.source",
+  "why.commitHead",
+  "caseScreen.legend.commit",
+  "caseScreen.legend.pr",
+  "caseScreen.legend.issue",
+  "caseScreen.hidden",
+  "caseScreen.hiddenSymbol",
+  "accessible.capitalized",
   "composer.noun.namespace",
   "composer.noun.interface",
   "composer.noun.enum",

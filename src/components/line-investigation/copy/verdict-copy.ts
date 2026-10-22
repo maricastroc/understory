@@ -1,65 +1,46 @@
-import type { ChecklistItem, Verdict } from "../model/types";
+import { coreText } from "@/i18n/core-text";
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
+import { AI_DAILY_LIMIT_REACHED } from "@/lib/ai-limit";
+import type { ChecklistItem } from "../model/types";
 
-export const VERDICT_LABEL: Record<Verdict, string> = {
-  pending: "Reconstructing…",
-  "evidence-only": "Evidence only",
-  "out-of-scope": "Out of scope",
-  fabrication: "Fabrication caught",
-  "not-recorded": "Not recorded",
-  resolved: "Resolved",
-};
+export function writerError(error: string, locale: Locale): string {
+  return error === AI_DAILY_LIMIT_REACHED ? messagesFor(locale).errors.aiUnavailable : error;
+}
 
-export const VERDICT_TITLE: Record<Verdict, string> = {
-  pending: "Still reconstructing",
-  "evidence-only": "Why there is no reconstruction",
-  "out-of-scope": "Why this is out of scope",
-  fabrication: "Why a fabrication was caught",
-  "not-recorded": "Why this is not recorded",
-  resolved: "Why this is resolved",
-};
-
-export const READING_ANSWERED = {
-  label: "Answered",
-  title: "What was checked",
-  confidence:
-    "Computed from the checks above, never the model's self-assessment. It rates the answer's sources, not their link to this line.",
-};
-
-const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-
-export function checklistText(item: ChecklistItem): string {
+export function checklistText(item: ChecklistItem, locale: Locale): string {
+  const v = messagesFor(locale).verdict;
   switch (item.kind) {
     case "clauses-grounded":
-      return `${item.grounded} of ${plural(item.total, "clause")} rest on recorded sources`;
+      return v.grounded(item.grounded, item.total);
     case "citations-resolved":
       return item.unknown.length
-        ? `${item.resolved} of ${plural(item.total, "citation")} resolve; ${item.unknown.join(", ")} was never collected`
-        : `${item.resolved} of ${plural(item.total, "citation")} resolve to real artifacts`;
+        ? v.resolvedUnknown(item.resolved, item.total, item.unknown.join(", "))
+        : v.resolved(item.resolved, item.total);
     case "quotes": {
-      const parts = [`${plural(item.verified, "quote")} found verbatim`];
-      parts.push(`${item.misattributed} misattributed`);
-      if (item.weak) parts.push(`${item.weak} weak`);
-      if (item.unaudited) parts.push(`${item.unaudited} not audited`);
+      const parts = [v.verbatim(item.verified), v.misattributed(item.misattributed)];
+      if (item.weak) parts.push(v.weak(item.weak));
+      if (item.unaudited) parts.push(v.unaudited(item.unaudited));
       return parts.join(", ");
     }
     case "audit-unavailable":
-      return "Citation audit unavailable; confidence is capped";
+      return v.auditUnavailable;
     case "uncited-claims":
-      return `${plural(item.count, "clause")} cite nothing that was collected`;
+      return v.uncited(item.count);
     case "contradictions":
       return item.items.map((c) => `${c.artifactId}: ${c.detail}`).join("; ");
     case "file-granularity":
-      return item.note ?? "File-level history only, not line-level";
+      return item.note ? coreText(locale, "fileLevelNote", item.note) : v.fileLevel;
     case "collection-note":
       return item.note;
     case "cosmetic-origin":
-      return `The last change, ${item.ref}, looks cosmetic`;
+      return v.cosmetic(item.ref);
     case "not-recorded":
       return item.answer;
     case "out-of-scope":
       return item.answer;
     case "evidence-only":
-      return item.error ?? "No reconstruction was produced";
+      return item.error ? writerError(item.error, locale) : v.noReconstruction;
   }
 }
 

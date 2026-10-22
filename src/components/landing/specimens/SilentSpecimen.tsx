@@ -21,9 +21,9 @@ export function SilentSpecimen({ gap, after }: { gap: ViewGap; after: ViewArtifa
           {direct ? " · direct commit" : ""}
         </span>
         <span className="text-li-gap-ink">
-          {gapLetter(gap)} {gapTitle(gap).toLowerCase()}
+          {gapLetter(gap)} {gapTitle(gap, "en").toLowerCase()}
         </span>
-        <span className="text-li-gap-ink">reason: {gapLabel(gap)}</span>
+        <span className="text-li-gap-ink">reason: {gapLabel(gap, "en")}</span>
       </p>
     </div>
   );

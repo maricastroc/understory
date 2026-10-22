@@ -131,7 +131,7 @@ describe("Investigator — the interface language and the answer language", () =
   it("asks for the answer in the interface's language when none was chosen", async () => {
     const api = stubApi();
     render(inLocale("pt-BR"));
-    await screen.findByText("Collecting the line's history…");
+    await screen.findByText("Coletando o histórico da linha…");
     expect(api.digLanguage()).toBe("pt");
     expect(window.localStorage.getItem("gi:lang")).toBeNull();
   });
@@ -140,7 +140,7 @@ describe("Investigator — the interface language and the answer language", () =
     window.localStorage.setItem("gi:lang", "en");
     const api = stubApi();
     render(inLocale("pt-BR"));
-    await screen.findByText("Collecting the line's history…");
+    await screen.findByText("Coletando o histórico da linha…");
     expect(api.digLanguage()).toBe("en");
   });
 
@@ -160,7 +160,7 @@ describe("Investigator — the interface language and the answer language", () =
     expect(within(analysis).getByRole("button", { name: "EN" }).getAttribute("aria-pressed")).toBe(
       "true",
     );
-    expect(region.querySelector("ol")!.getAttribute("lang")).toBe("en");
+    expect(region.querySelector("li[data-clause] [lang]")!.getAttribute("lang")).toBe("en");
     expect(requests(api, "/api/narrate")).toHaveLength(0);
     expect(requests(api, "/api/dig")).toHaveLength(1);
     expect(window.localStorage.getItem("gi:lang")).toBeNull();
@@ -169,12 +169,12 @@ describe("Investigator — the interface language and the answer language", () =
   it("rewrites the answer when its own language is changed, in either interface", async () => {
     const api = stubApi();
     render(inLocale("pt-BR"));
-    await screen.findByText("Collecting the line's history…");
+    await screen.findByText("Coletando o histórico da linha…");
     await act(async () => {
       api.evidence();
       api.final("en");
     });
-    const region = why();
+    const region = screen.getByRole("region", { name: "O porquê reconstruído" });
     await waitFor(() => expect(clauses(region).length).toBeGreaterThan(0));
     expect(requests(api, "/api/narrate")).toHaveLength(0);
 
@@ -184,7 +184,9 @@ describe("Investigator — the interface language and the answer language", () =
     expect(requests(api, "/api/narrate").map((c) => c.body?.language)).toEqual(["pt"]);
     expect(window.localStorage.getItem("gi:lang")).toBe("pt");
     await act(async () => api.narrate("pt"));
-    await waitFor(() => expect(region.querySelector("ol")!.getAttribute("lang")).toBe("pt"));
+    await waitFor(() =>
+      expect(region.querySelector("li[data-clause] [lang]")!.getAttribute("lang")).toBe("pt"),
+    );
   });
 
   it("brings an answer into the language chosen before, as it always did", async () => {

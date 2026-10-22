@@ -1,4 +1,6 @@
 import type { Dispatch } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { Locale } from "@/i18n/locales";
 import { dateLine, dayDate, displayId, labelTitle, tickText } from "../copy/artifact-copy";
 import { artifactName, gapName } from "../copy/accessible-name";
 import { contextLines, metaLine } from "../copy/drawer-copy";
@@ -17,8 +19,8 @@ import { BoreCell, Glyph, Margin, ROW_GRID } from "./HistoryParts";
 import { type ReadingLayer, scopeKey } from "./reading-layer";
 import type { HistoryMember, HistoryStratum } from "./types";
 
-function shortDate(a: ViewArtifact, anchor: ViewArtifact): string {
-  const full = dayDate(a.date);
+function shortDate(a: ViewArtifact, anchor: ViewArtifact, locale: Locale): string {
+  const full = dayDate(a.date, locale);
   return a.date.slice(0, 4) === anchor.date.slice(0, 4)
     ? full.split(" ").slice(0, 2).join(" ")
     : full;
@@ -53,6 +55,7 @@ export function HistoryRow({
   onBack: (clause: string, source: string) => void;
   onDrill?: (a: ViewArtifact) => void;
 }) {
+  const locale = useLocale();
   const a = member.artifact;
   const anchor = member.depth === 0;
   const on = !!lit?.has(a.id);
@@ -62,11 +65,14 @@ export function HistoryRow({
   const quotes = a.quotes.filter((q) => q.range !== null);
   const citing = view.clauses.filter((c) => a.citedBy.includes(c.id));
   const detailsId = `history-details-${a.id}`;
-  const caption = subjectCaption(subject, a, anchor && stratum.current);
-  const name = [artifactName(a, view.clauses), ...chips.map((g) => gapName(g, a))].join(". ");
+  const caption = subjectCaption(subject, a, anchor && stratum.current, locale);
+  const name = [
+    artifactName(a, view.clauses, locale),
+    ...chips.map((g) => gapName(g, a, locale)),
+  ].join(". ");
   const shown = opened ? excerpt(a, quotes[0]?.range ?? null) : null;
-  const context = opened ? contextLines(a, view.artifacts) : [];
-  const meta = opened ? metaLine(a, view.artifacts) : "";
+  const context = opened ? contextLines(a, view.artifacts, locale) : [];
+  const meta = opened ? metaLine(a, view.artifacts, locale) : "";
   const fact = layer && anchor ? layer.facts.get(a.id) : undefined;
 
   return (
@@ -79,16 +85,16 @@ export function HistoryRow({
       <Margin strong={anchor}>
         {anchor ? (
           <>
-            {dayDate(a.date)}
+            {dayDate(a.date, locale)}
             {a.daysBeforeNow !== null && (
               <>
                 <br />
-                <span className="text-li-text-subtle">{tickText(a.daysBeforeNow)}</span>
+                <span className="text-li-text-subtle">{tickText(a.daysBeforeNow, locale)}</span>
               </>
             )}
           </>
         ) : (
-          shortDate(a, stratum.anchor)
+          shortDate(a, stratum.anchor, locale)
         )}
       </Margin>
       <BoreCell from={anchor && stratum.members[0] === member ? 13 : 0} to={last ? undefined : 0}>
@@ -99,8 +105,8 @@ export function HistoryRow({
         style={{ paddingLeft: member.depth * 20 }}
       >
         <span className="font-li-mono text-[11px] text-li-text-subtle min-[821px]:hidden">
-          {dayDate(a.date)}
-          {anchor && a.daysBeforeNow !== null && ` · ${tickText(a.daysBeforeNow)}`}
+          {dayDate(a.date, locale)}
+          {anchor && a.daysBeforeNow !== null && ` · ${tickText(a.daysBeforeNow, locale)}`}
         </span>
         <button
           type="button"
@@ -125,10 +131,12 @@ export function HistoryRow({
               a.role === "cited" ? "text-li-ink" : "text-li-neutral-800"
             }`}
           >
-            {labelTitle(a)}
+            {labelTitle(a, locale)}
           </span>
           {a.kind === "pull_request" && (
-            <span className="font-li-mono text-[11px] text-li-text-subtle">{dateLine(a)}</span>
+            <span className="font-li-mono text-[11px] text-li-text-subtle">
+              {dateLine(a, locale)}
+            </span>
           )}
           {chips.map((g) => (
             <span
@@ -139,14 +147,14 @@ export function HistoryRow({
                   : "border-li-unverified text-li-text-muted"
               }`}
             >
-              {gapChip(g)}
+              {gapChip(g, locale)}
             </span>
           ))}
         </button>
         {caption && <span className="font-li-mono text-[11px] text-li-text-subtle">{caption}</span>}
         {fact && (
           <span data-fact className="font-li-mono text-[11px] text-li-datum-ink">
-            {factText(fact)}
+            {factText(fact, locale)}
             {fact.did === "rewrote" && fact.before !== null && (
               <>
                 {" · before: "}
@@ -179,7 +187,7 @@ export function HistoryRow({
                     data-scope={scope.scope}
                     className={`text-[11px] ${scope.scope === "line" ? "text-li-datum-ink" : "text-li-text-subtle"}`}
                   >
-                    {scopeText(scope)}
+                    {scopeText(scope, locale)}
                   </span>
                 </>
               )}
@@ -189,7 +197,7 @@ export function HistoryRow({
         {opened && shown && (
           <div id={detailsId} className="mt-1 flex max-w-170 flex-col gap-2.5">
             <span className="text-xs text-li-text-subtle">
-              {[dateLine(a), meta].filter(Boolean).join(" · ")}
+              {[dateLine(a, locale), meta].filter(Boolean).join(" · ")}
             </span>
             <QuoteBlock
               body={shown.body}
@@ -216,7 +224,7 @@ export function HistoryRow({
                   rel="noopener noreferrer"
                   className={liButton("ghost", "", "sm")}
                 >
-                  {sourceLinkLabel(a.source.url)} ↗
+                  {sourceLinkLabel(a.source.url, locale)} ↗
                 </a>
               )}
               {onDrill && (

@@ -2,6 +2,7 @@
 
 import type { Artifact, ArtifactRef } from "@understory/core/types";
 import { useState } from "react";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { dayDate, kindName, tickText } from "../copy/artifact-copy";
 import { withoutTitle } from "../drawer/drawer-body";
 import { sourceLinkLabel } from "../drawer/source-link";
@@ -27,28 +28,30 @@ export function AnchorSpecimen({
   collected: number;
   now: number;
 }) {
+  const locale = useLocale();
+  const c = useMessages().caseScreen;
   const [open, setOpen] = useState(false);
-  const noun = kindName(anchor.kind);
+  const noun = kindName(anchor.kind, locale);
   const ref = shownId(artifact, anchor);
   const title = artifact?.title ?? anchor.title ?? ref;
   const body = artifact ? withoutTitle(artifact.body, artifact.title, null).body.trim() : "";
   const time = artifact ? Date.parse(artifact.date) : Number.NaN;
   const meta = [
     artifact?.author?.name,
-    Number.isNaN(time) ? null : dayDate(artifact!.date),
-    Number.isNaN(time) ? null : tickText((now - time) / DAY),
+    Number.isNaN(time) ? null : dayDate(artifact!.date, locale),
+    Number.isNaN(time) ? null : tickText((now - time) / DAY, locale),
   ].filter(Boolean);
   const long = body.length > LONG;
 
   return (
     <section
-      aria-label={`Anchor, ${noun} ${ref}`}
+      aria-label={c.anchor(`${noun} ${ref}`)}
       className="flex w-full flex-col border border-li-divider bg-li-neutral-100 shadow-li-sm"
     >
       <div className="flex min-h-11 items-center gap-2 border-b border-li-divider px-4 py-2 font-li-mono text-xs">
         <span className="bg-li-datum-strong px-1.5 py-px font-medium text-li-ink">{ref}</span>
         <span className="text-li-text-subtle">
-          {anchor.kind === "commit" ? `${noun} · ` : ""}anchor of this case
+          {anchor.kind === "commit" ? `${noun} · ${c.anchorOfCase}` : c.anchorOfCase}
         </span>
         {artifact?.url && (
           <a
@@ -57,7 +60,7 @@ export function AnchorSpecimen({
             rel="noopener noreferrer"
             className="ml-auto font-li-body text-[12.5px] whitespace-nowrap text-li-ink underline decoration-li-neutral-400 underline-offset-2 hover:decoration-li-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
           >
-            {sourceLinkLabel(artifact.url)} ↗
+            {sourceLinkLabel(artifact.url, locale)} ↗
           </a>
         )}
       </div>
@@ -82,12 +85,12 @@ export function AnchorSpecimen({
             onClick={() => setOpen((v) => !v)}
             className="w-fit cursor-pointer text-[12.5px] text-li-ink underline decoration-li-neutral-400 underline-offset-2 hover:decoration-li-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
           >
-            {open ? "Show less" : "Show all"}
+            {open ? c.showLess : c.showAll}
           </button>
         )}
       </div>
       <p className="border-t border-li-divider px-4 py-2 font-li-mono text-[11px] text-li-text-subtle">
-        {collected} artifact{collected === 1 ? "" : "s"} collected around it
+        {c.collectedAround(collected)}
       </p>
     </section>
   );

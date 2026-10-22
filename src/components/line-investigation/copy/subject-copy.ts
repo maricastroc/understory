@@ -1,5 +1,7 @@
 import type { ArtifactRef } from "@understory/core/types";
-import { shortAge } from "../format/age";
+import { shortAge } from "@/i18n/format";
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import type { InvestigationView, ViewArtifact } from "../model/types";
 import { displayId, kindName } from "./artifact-copy";
 import type { CaseSubject } from "./types";
@@ -7,76 +9,80 @@ import type { CaseSubject } from "./types";
 export function caseSubject(
   view: Pick<InvestigationView, "location" | "artifacts">,
   anchor: ArtifactRef | undefined,
+  locale: Locale,
 ): CaseSubject {
+  const s = messagesFor(locale).subject;
   const loc = view.location;
-  if (loc) {
-    return {
-      kind: "line",
-      label:
-        loc.startLine === loc.endLine
-          ? `line ${loc.startLine}`
-          : `lines ${loc.startLine}–${loc.endLine}`,
-    };
-  }
+  if (loc) return { kind: "line", label: s.lines(loc.startLine, loc.endLine) };
   if (anchor) {
     const found = view.artifacts.find((a) => a.id === anchor.id);
     const ref = found ? displayId(found) : (anchor.ref ?? anchor.id);
-    const noun = kindName(anchor.kind);
+    const noun = kindName(anchor.kind, locale);
     return {
       kind: "anchor",
-      label: anchor.kind === "commit" ? `${noun} ${ref}` : ref,
+      label: anchor.kind === "commit" ? s.commit(ref) : ref,
       id: anchor.id,
       artifact: anchor.kind,
       noun,
       ref,
     };
   }
-  return { kind: "line", label: "the file" };
+  return { kind: "line", label: s.file };
 }
 
-export function historyTitle(s: CaseSubject): string {
-  return s.kind === "line" ? `History of ${s.label}` : `Around ${s.label}`;
+export function historyTitle(subject: CaseSubject, locale: Locale): string {
+  const s = messagesFor(locale).subject;
+  return subject.kind === "line" ? s.historyOf(subject.label) : s.around(subject.label);
 }
 
-export function surfaceText(s: CaseSubject): string {
-  return s.kind === "line" ? `${s.label} · as it reads now` : "today";
+export function surfaceText(subject: CaseSubject, locale: Locale): string {
+  const s = messagesFor(locale).subject;
+  return subject.kind === "line" ? s.asItReadsNow(subject.label) : s.today;
 }
 
-export function breakText(s: CaseSubject, days: number, first: boolean): string {
-  const age = shortAge(days);
-  if (s.kind === "anchor") return first ? `${age} before today` : `${age} between these`;
-  return first ? `unchanged for ${age}` : `${age} with no change to ${s.label}`;
+export function breakText(
+  subject: CaseSubject,
+  days: number,
+  first: boolean,
+  locale: Locale,
+): string {
+  const m = messagesFor(locale);
+  const s = m.subject;
+  const age = shortAge(m.time, days);
+  if (subject.kind === "anchor") return first ? s.beforeToday(age) : s.between(age);
+  return first ? s.unchangedFor(age) : s.noChange(age, subject.label);
 }
 
-export function breakMargin(s: CaseSubject, first: boolean): string {
-  if (s.kind === "anchor") return first ? "before today" : "between";
-  return first ? "unchanged" : "no change";
+export function breakMargin(subject: CaseSubject, first: boolean, locale: Locale): string {
+  const margin = messagesFor(locale).subject.margin;
+  if (subject.kind === "anchor") return first ? margin.beforeToday : margin.between;
+  return first ? margin.unchanged : margin.noChange;
 }
 
-export function originText(s: CaseSubject): string {
-  return s.kind === "line" ? `oldest recorded change to ${s.label}` : "earliest artifact collected";
+export function originText(subject: CaseSubject, locale: Locale): string {
+  const s = messagesFor(locale).subject;
+  return subject.kind === "line" ? s.oldestChange(subject.label) : s.earliestArtifact;
 }
 
-const ASKED: Record<string, string> = {
-  commit: "the change this case asks about",
-  pull_request: "the pull request this case asks about",
-  review: "the review this case asks about",
-  issue: "the issue this case asks about",
-};
-
-export function subjectCaption(s: CaseSubject, a: ViewArtifact, current: boolean): string | null {
-  if (s.kind === "anchor") return a.id === s.id ? ASKED[a.kind] : null;
-  return current && a.kind === "commit" ? `wrote ${s.label} as it reads today` : null;
+export function subjectCaption(
+  subject: CaseSubject,
+  a: ViewArtifact,
+  current: boolean,
+  locale: Locale,
+): string | null {
+  const s = messagesFor(locale).subject;
+  if (subject.kind === "anchor") return a.id === subject.id ? s.asked[a.kind] : null;
+  return current && a.kind === "commit" ? s.wrote(subject.label) : null;
 }
 
 export function commitRole(
   commit: ViewArtifact | null,
   current: ViewArtifact | null,
-  s: CaseSubject,
+  subject: CaseSubject,
+  locale: Locale,
 ): string | null {
+  const s = messagesFor(locale).subject;
   if (!commit) return null;
-  if (s.kind === "anchor") return commit.id === s.id ? ASKED.commit : null;
-  return commit.id === current?.id
-    ? `wrote ${s.label} as it reads today`
-    : `an earlier change to ${s.label}`;
+  if (subject.kind === "anchor") return commit.id === subject.id ? s.asked.commit : null;
+  return commit.id === current?.id ? s.wrote(subject.label) : s.earlierChange(subject.label);
 }

@@ -1,4 +1,4 @@
-import { READING_ANSWERED, VERDICT_LABEL } from "../copy/verdict-copy";
+import { useMessages } from "@/i18n/LocaleProvider";
 import type { Verdict } from "../model/types";
 
 const CHIP: Record<Verdict, string> = {
@@ -26,6 +26,7 @@ export function VerdictButton({
   controls: string;
   onToggle: () => void;
 }) {
+  const v = useMessages().verdict;
   const answered = reading && verdict === "resolved";
   return (
     <button
@@ -49,7 +50,7 @@ export function VerdictButton({
           <path d="M20 6 9 17l-5-5" />
         </svg>
       )}
-      {answered ? READING_ANSWERED.label : VERDICT_LABEL[verdict]}
+      {answered ? v.answered : v.label[verdict]}
       <span aria-hidden className="font-normal opacity-80">
         ▾
       </span>

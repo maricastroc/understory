@@ -1,4 +1,5 @@
 import type { KeyboardEvent, ReactNode } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { tallyText } from "../copy/clause-copy";
 import type { ViewClause } from "../model/types";
 import { ClauseLetters } from "./ClauseLetters";
@@ -17,13 +18,14 @@ const SURFACE = {
 } as const;
 
 function Meta({ clause, open, inline }: { clause: ViewClause; open: boolean; inline: boolean }) {
+  const locale = useLocale();
   const words = (
     <span
       className={`text-[11.5px] whitespace-nowrap transition-opacity duration-150 motion-reduce:transition-none ${
         clause.silent ? "text-li-gap-ink" : "text-li-neutral-800"
       } ${open ? "opacity-100" : "opacity-0"}`}
     >
-      {tallyText(clause)}
+      {tallyText(clause, locale)}
     </span>
   );
   const marks = (
@@ -63,6 +65,7 @@ export function ClauseRow({
   buttonRef,
   evidence,
   controls,
+  lang,
 }: {
   clause: ViewClause;
   description: string;
@@ -81,6 +84,7 @@ export function ClauseRow({
   buttonRef: (el: HTMLButtonElement | null) => void;
   evidence?: ReactNode;
   controls?: string;
+  lang?: string;
 }) {
   const descId = `clause-desc-${clause.id}`;
   const open = expanded || pinned;
@@ -114,7 +118,7 @@ export function ClauseRow({
       >
         <ClauseRing silent={clause.silent} filled={open} className="mt-1.5 ml-1" />
         <span className="flex min-w-0 flex-col gap-1">
-          <ClauseText text={clause.text} open={open} ink={ink} />
+          <ClauseText text={clause.text} open={open} ink={ink} lang={lang} />
           {compact && <Meta clause={clause} open={open} inline />}
         </span>
         {!compact && <Meta clause={clause} open={open} inline={false} />}

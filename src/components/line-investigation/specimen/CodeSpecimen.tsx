@@ -3,6 +3,7 @@
 import { enclosingSymbol } from "@understory/core/collect/symbol";
 import type { BlameSpan } from "@understory/core/types";
 import { useEffect, useId, useMemo } from "react";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { blameBars } from "./blame-bars";
 import { codeWindow } from "./code-window";
 import { symbolInRange } from "./collapsed-label";
@@ -46,6 +47,8 @@ export function CodeSpecimen({
   targetDatumY?: number;
   onDatumY?: (y: number) => void;
 }) {
+  const locale = useLocale();
+  const m = useMessages();
   const listId = useId();
   const [scrollRef, scrolls] = useHorizontalOverflow();
   const enclosing = useMemo(
@@ -76,14 +79,14 @@ export function CodeSpecimen({
   }, [win.datumY, onDatumY]);
 
   const hiddenLabel = (range: LineRange, from: "start" | "end" = "start") =>
-    rangeLabel(range, symbolInRange(lines, range, path, from));
+    rangeLabel(range, symbolInRange(lines, range, path, from), locale);
   const footerLabel =
     layout.mode === "strip"
       ? expanded
-        ? "Show less"
-        : "Show file"
+        ? m.caseScreen.showLess
+        : m.caseScreen.showFile
       : expanded
-        ? "Show less"
+        ? m.caseScreen.showLess
         : win.hiddenAfter
           ? hiddenLabel(win.hiddenAfter)
           : null;
@@ -95,7 +98,7 @@ export function CodeSpecimen({
 
   return (
     <section
-      aria-label={`Code, ${path}`}
+      aria-label={m.composer.viewer.code(path)}
       data-datum-y={win.datumY}
       data-mode={layout.mode}
       className={`flex flex-col border border-li-divider bg-li-neutral-100 font-li-mono text-xs text-li-neutral-800 shadow-li-sm ${WIDTH[layout.width]}`}
@@ -104,7 +107,7 @@ export function CodeSpecimen({
       <div
         ref={scrollRef}
         tabIndex={scrolls ? 0 : undefined}
-        aria-label={scrolls ? "Code lines, scroll sideways for long lines" : undefined}
+        aria-label={scrolls ? m.caseScreen.codeLines : undefined}
         role={scrolls ? "region" : undefined}
         className="overflow-x-auto pt-2.5 pb-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus"
       >
@@ -132,7 +135,7 @@ export function CodeSpecimen({
                 datum={isDatum}
                 token={isDatum ? token : null}
                 bar={bar}
-                description={describeLine(n, isDatum, bar)}
+                description={describeLine(n, isDatum, bar, locale)}
               />
             );
           })}

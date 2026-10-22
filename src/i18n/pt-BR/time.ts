@@ -10,4 +10,5 @@ export const time: Messages["time"] = {
   monthNames: ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"],
   date: (day, month, year) => `${day} ${month} ${year}`,
   dayMonth: (day, month) => `${day} ${month}`,
+  plainDate: (day, month, year) => `${day} ${month} ${year}`,
 };

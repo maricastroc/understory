@@ -80,7 +80,7 @@ export function StrataSurface({
               >
                 {n}
               </span>
-              <span className="sr-only">{describeLine(n, isDatum, undefined)}</span>
+              <span className="sr-only">{describeLine(n, isDatum, undefined, "en")}</span>
               <StrataCode
                 segments={segments[n - 1] ?? []}
                 mark={isDatum ? token : null}

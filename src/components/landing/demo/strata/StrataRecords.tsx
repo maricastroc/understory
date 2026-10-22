@@ -52,14 +52,14 @@ function Record({
             cited ? "text-strata-ink" : "text-strata-neutral-800"
           } ${quoted && !sub ? "font-medium" : ""}`}
         >
-          {labelTitle(s.artifact)}
+          {labelTitle(s.artifact, "en")}
         </span>
         {s.version?.note && (
           <span className="text-[11px] text-strata-neutral-700">{s.version.note}</span>
         )}
         {s.gap && (
           <span className="border border-dashed border-strata-neutral-700 px-1.25 text-[11px] leading-4 text-strata-neutral-700">
-            {gapChip(s.gap)}
+            {gapChip(s.gap, "en")}
           </span>
         )}
       </span>
@@ -113,7 +113,7 @@ export function StrataRecords({
       {layout.strata.map((s) => (
         <li key={s.artifact.id} className="absolute" style={{ top: s.row - m.date, left: m.codeX }}>
           <span className="sr-only">
-            {artifactName(s.artifact, view.clauses)}
+            {artifactName(s.artifact, view.clauses, "en")}
             {s.version && `. ${s.version.note ?? "Line read"}: ${s.version.text.trim()}`}
           </span>
           <Record s={s} m={m} datum={datum} active={active} clause={clause} />
@@ -124,7 +124,7 @@ export function StrataRecords({
         return after
           ? [
               <li key={gap.id} className="sr-only">
-                {gapName(gap, after)}
+                {gapName(gap, after, "en")}
               </li>,
             ]
           : [];

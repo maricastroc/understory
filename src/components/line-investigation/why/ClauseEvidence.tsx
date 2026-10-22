@@ -1,5 +1,7 @@
 import { anchorQuestion } from "@understory/core/anchor-question";
 import type { KeyboardEvent } from "react";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import { shownQuestion } from "../../investigator/default-question";
 import { dateLine, depthText, displayId, kindName, labelTitle } from "../copy/artifact-copy";
 import { gapBasis, gapBody, gapChip, gapTitle } from "../copy/gap-copy";
 import { currentCommit, excerpt, hostCommit, provenance, sourceStatus } from "../copy/source-copy";
@@ -7,7 +9,6 @@ import { commitRole } from "../copy/subject-copy";
 import type { CaseSubject, ClauseSource } from "../copy/types";
 import { MiniCore } from "../drawer/MiniCore";
 import { QuoteBlock } from "../drawer/QuoteBlock";
-import { LIKELY_NOTE } from "../copy/why-copy";
 import { sourceLinkLabel } from "../drawer/source-link";
 import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types";
 import { EvidenceLetter } from "../parts/EvidenceLetter";
@@ -29,11 +30,12 @@ function SourceChip({
   current: boolean;
   onClick: () => void;
 }) {
+  const locale = useLocale();
   const label =
     source.type === "artifact"
       ? `${source.artifact.letter} ${displayId(source.artifact)}`
       : source.type === "gap"
-        ? gapChip(source.gap)
+        ? gapChip(source.gap, locale)
         : source.citation;
   return (
     <button
@@ -68,10 +70,17 @@ function ArtifactBody({
   onLocate: (id: string) => void;
   onDrill?: (a: ViewArtifact) => void;
 }) {
+  const locale = useLocale();
+  const m = useMessages();
   const a = source.artifact;
-  const status = sourceStatus(source, clause);
-  const path = provenance(a, view.artifacts);
-  const role = commitRole(hostCommit(a, view.artifacts), currentCommit(view.artifacts), subject);
+  const status = sourceStatus(source, clause, locale);
+  const path = provenance(a, view.artifacts, locale);
+  const role = commitRole(
+    hostCommit(a, view.artifacts),
+    currentCommit(view.artifacts),
+    subject,
+    locale,
+  );
   const shown = excerpt(a, source.quote?.range ?? null);
   const fraction = maxDays > 0 && a.daysBeforeNow !== null ? a.daysBeforeNow / maxDays : 0;
 
@@ -87,17 +96,21 @@ function ArtifactBody({
               letter={a.letter}
               variant={a.role === "cited" ? "cited" : "supporting"}
             />
-            <span className="tracking-[0.05em]">{kindName(a.kind).toUpperCase()}</span>
-            <span>{dateLine(a)}</span>
+            <span className="tracking-[0.05em]">{kindName(a.kind, locale).toUpperCase()}</span>
+            <span>{dateLine(a, locale)}</span>
             <span>
-              {depthText(a.daysBeforeNow)}
-              {maxDays > 0 && ` of ${depthText(maxDays).replace("−", "")}`}
+              {maxDays > 0
+                ? m.caseScreen.depthOf(
+                    depthText(a.daysBeforeNow, locale),
+                    depthText(maxDays, locale).replace("−", ""),
+                  )
+                : depthText(a.daysBeforeNow, locale)}
             </span>
           </div>
           <div className="flex flex-wrap items-baseline gap-x-2">
             <span className="font-li-mono text-[13px] font-medium text-li-ink">{displayId(a)}</span>
             <span className="text-[15px] leading-[1.35] font-semibold text-li-ink">
-              {labelTitle(a)}
+              {labelTitle(a, locale)}
             </span>
           </div>
           <p className="font-li-mono text-[11.5px] leading-[1.5] text-li-text-subtle">
@@ -122,7 +135,7 @@ function ArtifactBody({
             data-likely-note
             className="-mt-1.5 max-w-140 text-[12.5px] leading-[1.45] text-li-text-subtle"
           >
-            {LIKELY_NOTE}
+            {m.why.likelyNote}
           </p>
         )}
         <div className="flex flex-wrap items-center gap-2">
@@ -131,7 +144,7 @@ function ArtifactBody({
             onClick={() => onLocate(a.id)}
             className={liButton("secondary", "", "sm")}
           >
-            Show in history ↓
+            {m.caseScreen.showInHistory}
           </button>
           {a.source.url && (
             <a
@@ -140,17 +153,17 @@ function ArtifactBody({
               rel="noopener noreferrer"
               className={liButton("ghost", "", "sm")}
             >
-              {sourceLinkLabel(a.source.url)} ↗
+              {sourceLinkLabel(a.source.url, locale)} ↗
             </a>
           )}
           {onDrill && (
             <button
               type="button"
               onClick={() => onDrill(a)}
-              title={`Opens a new case anchored here: “${anchorQuestion[a.kind]}”`}
+              title={m.caseScreen.opensCase(shownQuestion(anchorQuestion[a.kind], locale))}
               className={liButton("ghost", "", "sm")}
             >
-              Investigate →
+              {m.caseScreen.investigate}
             </button>
           )}
         </div>
@@ -192,6 +205,9 @@ export function ClauseEvidence({
   );
   const source = sources[index] ?? null;
   const headingId = `${id}-heading`;
+  const locale = useLocale();
+  const m = useMessages();
+  const c = m.caseScreen;
 
   const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
@@ -213,10 +229,10 @@ export function ClauseEvidence({
           id={headingId}
           className="font-li-mono text-[11px] font-normal tracking-[0.05em] text-li-text-subtle"
         >
-          EVIDENCE · CLAUSE {clause.index + 1}
-          {sources.length > 1 && ` · ${index + 1} OF ${sources.length}`}
+          {c.evidenceOf(clause.index + 1)}
+          {sources.length > 1 && ` · ${c.sourceOf(index + 1, sources.length)}`}
         </h3>
-        <div role="group" aria-label="Sources of this clause" className="flex flex-wrap gap-1">
+        <div role="group" aria-label={c.sourcesOfClause} className="flex flex-wrap gap-1">
           {sources.map((s) => (
             <SourceChip key={s.id} source={s} current={s === source} onClick={() => onShow(s.id)} />
           ))}
@@ -226,7 +242,7 @@ export function ClauseEvidence({
             <>
               <button
                 type="button"
-                aria-label="Previous source"
+                aria-label={c.previousSource}
                 aria-disabled={index === 0}
                 onClick={() => onStep(-1)}
                 className={liButton("icon", "aria-disabled:opacity-40")}
@@ -235,7 +251,7 @@ export function ClauseEvidence({
               </button>
               <button
                 type="button"
-                aria-label="Next source"
+                aria-label={c.nextSource}
                 aria-disabled={index === sources.length - 1}
                 onClick={() => onStep(1)}
                 className={liButton("icon", "aria-disabled:opacity-40")}
@@ -246,7 +262,7 @@ export function ClauseEvidence({
           )}
           <button
             type="button"
-            aria-label="Close evidence"
+            aria-label={c.closeEvidence}
             onClick={onClose}
             className={liButton("icon")}
           >
@@ -256,7 +272,7 @@ export function ClauseEvidence({
       </div>
 
       {!source ? (
-        <p className="text-[13px] text-li-text-subtle">This clause cites no collected source.</p>
+        <p className="text-[13px] text-li-text-subtle">{c.noSource}</p>
       ) : source.type === "artifact" ? (
         <ArtifactBody
           source={source}
@@ -271,26 +287,30 @@ export function ClauseEvidence({
         <div className="flex flex-col gap-2.5">
           <div className="flex flex-col gap-1">
             <span className="font-li-mono text-[11px] text-li-gap-ink">
-              {gapChip(source.gap)} · {displayId(source.after)}
+              {gapChip(source.gap, locale)} · {displayId(source.after)}
             </span>
-            <span className="text-[15px] font-semibold text-li-ink">{gapTitle(source.gap)}</span>
+            <span className="text-[15px] font-semibold text-li-ink">
+              {gapTitle(source.gap, locale)}
+            </span>
           </div>
           <QuoteBlock
-            body={gapBody(source.gap, source.after, !!view.reading)}
+            body={gapBody(source.gap, source.after, locale, !!view.reading)}
             range={null}
             tone={source.gap.verified ? "gap" : "unverified"}
           />
-          <p className={`text-[12.5px] font-semibold ${TONE[sourceStatus(source, clause).tone]}`}>
-            {sourceStatus(source, clause).text}
+          <p
+            className={`text-[12.5px] font-semibold ${TONE[sourceStatus(source, clause, locale).tone]}`}
+          >
+            {sourceStatus(source, clause, locale).text}
           </p>
-          <p className="text-[12.5px] text-li-text-subtle">{gapBasis(source.gap)}</p>
+          <p className="text-[12.5px] text-li-text-subtle">{gapBasis(source.gap, locale)}</p>
           <div>
             <button
               type="button"
               onClick={() => onLocate(source.after.id)}
               className={liButton("secondary", "", "sm")}
             >
-              Show in history ↓
+              {c.showInHistory}
             </button>
           </div>
         </div>
@@ -300,12 +320,9 @@ export function ClauseEvidence({
             {source.citation}
           </span>
           <p className="text-[12.5px] font-semibold text-li-text-subtle">
-            {sourceStatus(source, clause).text}
+            {sourceStatus(source, clause, locale).text}
           </p>
-          <p className="text-[12.5px] text-li-text-subtle">
-            The model named this source, but it is not in the evidence Understory collected, so the
-            clause cannot be checked against it.
-          </p>
+          <p className="text-[12.5px] text-li-text-subtle">{c.missingSource}</p>
         </div>
       )}
     </section>
