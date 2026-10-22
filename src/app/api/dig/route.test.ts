@@ -220,15 +220,21 @@ describe("/api/dig — a collection that fails says what kind of failure it is",
   };
 
   it("adds a stable code and the host, and keeps the message it always sent", async () => {
-    mocks.collect.mockRejectedValue(new Error("GitHub API 403 — rate limited"));
+    mocks.collect.mockRejectedValue(new Error("GitHub API 429 — rate limited"));
     const { status, body } = await failure();
     expect(status).toBe(400);
     expect(body).toEqual({
-      error: "GitHub API 403 — rate limited",
-      detail: "GitHub API 403 — rate limited",
+      error: "GitHub API 429 — rate limited",
+      detail: "GitHub API 429 — rate limited",
       code: "rate-limited",
       host: "GitHub",
     });
+  });
+
+  it("leaves a 403 unnamed rather than calling it a rate limit", async () => {
+    mocks.collect.mockRejectedValue(new Error("GitHub API 403 — rate limited"));
+    const { body } = await failure();
+    expect(body).toMatchObject({ code: "failed", host: "GitHub" });
   });
 
   it("gives the GitHub App's address apart from the message when it can help", async () => {

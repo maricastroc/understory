@@ -22,18 +22,24 @@ describe("providerFailure, read from the errors core really throws", () => {
   it("tells a missing GitHub repository from a rate limit and a server fault", async () => {
     const github = (status: number) => thrownBy(() => rest("/repos/acme/x"), status);
     expect(providerFailure(await github(404))).toEqual({ code: "not-found", host: "GitHub" });
-    expect(providerFailure(await github(403))).toEqual({ code: "rate-limited", host: "GitHub" });
+    expect(providerFailure(await github(403))).toEqual({ code: "failed", host: "GitHub" });
     expect(providerFailure(await github(429))).toEqual({ code: "rate-limited", host: "GitHub" });
     expect(providerFailure(await github(502))).toEqual({ code: "server", host: "GitHub" });
     expect(providerFailure(await github(422))).toEqual({ code: "failed", host: "GitHub" });
   });
 
-  it("reads GitLab's refusals as a project it cannot see", async () => {
+  it("reads GitLab's request for credentials as a project it cannot see", async () => {
     const gitlab = (status: number) => thrownBy(() => glRest("gitlab.com", "/projects/1"), status);
     expect(providerFailure(await gitlab(401))).toEqual({ code: "not-found", host: "GitLab" });
-    expect(providerFailure(await gitlab(403))).toEqual({ code: "not-found", host: "GitLab" });
+    expect(providerFailure(await gitlab(403))).toEqual({ code: "failed", host: "GitLab" });
     expect(providerFailure(await gitlab(404))).toEqual({ code: "not-found", host: "GitLab" });
     expect(providerFailure(await gitlab(429))).toEqual({ code: "rate-limited", host: "GitLab" });
+  });
+
+  it("does not call a 403 a rate limit, since core's message carries none of GitHub's signals", async () => {
+    const message = await thrownBy(() => rest("/repos/acme/x"), 403);
+    expect(message).toMatch(/^GitHub API 403/);
+    expect(providerFailure(message).code).toBe("failed");
   });
 
   it("knows a local path that is not a repository, and leaves the rest as failed", () => {

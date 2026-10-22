@@ -34,8 +34,9 @@ for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/dev/line?state=resolved&user=guest");
     await page.locator('ol[aria-label="History, newest first"] button').first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
     await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
-    expect(await overflow(page)).toBeLessThanOrEqual(0);
+    await expect.poll(() => overflow(page)).toBeLessThanOrEqual(0);
     if (width < 1360) {
       await page.getByRole("button", { name: "Abrir investigações" }).click();
       const drawer = page.getByRole("dialog", { name: "Investigações" });

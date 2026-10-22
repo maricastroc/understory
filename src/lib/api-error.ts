@@ -34,9 +34,8 @@ export function providerFailure(message: string): Pick<ApiFailure, "code" | "hos
   const host = match[1] as Host;
   const status = Number(match[2]);
   if (status === 429) return { code: "rate-limited", host };
-  if (host === "GitHub" && status === 403) return { code: "rate-limited", host };
   if (status === 404) return { code: "not-found", host };
-  if (host === "GitLab" && (status === 401 || status === 403)) return { code: "not-found", host };
+  if (host === "GitLab" && status === 401) return { code: "not-found", host };
   if (status >= 500) return { code: "server", host };
   return { code: "failed", host };
 }

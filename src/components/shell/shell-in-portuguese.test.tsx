@@ -6,6 +6,7 @@ import { axe } from "@/test/axe";
 import { CaseFailure } from "../investigator/CaseFailure";
 import { LoadingCard } from "../investigator/LoadingCard";
 import { syntheticCases } from "../line-investigation/fixtures/synthetic-cases";
+import { syntheticFabricated } from "../line-investigation/fixtures/synthetic-states";
 import { SYNTHETIC_NOW } from "../line-investigation/fixtures/synthetic-retry-cap";
 import { AppHeader } from "./AppHeader";
 import { CaseRail } from "./CaseRail";
@@ -73,6 +74,16 @@ describe("the shell in Portuguese", () => {
     expect(pt.shell.links(1)).toBe("1 elo");
     expect(pt.shell.links(3)).toBe("3 elos");
     expect(messagesFor("en").shell.links(1)).toBe("1 link");
+  });
+
+  it("says a case whose answer cites a source that was not collected has a citation without backing", () => {
+    const [item] = lineRailItems([{ ...syntheticCases[0], result: syntheticFabricated() }], {
+      activeId: null,
+      now,
+      m: pt,
+    });
+    expect(item.status).toBe("fabrication");
+    expect(item.subline).toBe("charge.ts:9 · citação sem respaldo");
   });
 
   it("says in the footer whether cases are kept", () => {

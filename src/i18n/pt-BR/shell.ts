@@ -16,7 +16,7 @@ export const shell: Messages["shell"] = {
     silent: "sem registro",
     "evidence-only": "só evidências",
     "out-of-scope": "fora do escopo",
-    fabrication: "citação inventada",
+    fabrication: "citação sem respaldo",
     pending: "reconstruindo",
   },
   caseTitle: (start, end, file) =>
