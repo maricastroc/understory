@@ -42,7 +42,7 @@ export function StrataSilence({
           <span
             className={`leading-[1.45] text-pretty text-strata-neutral-700 ${wide ? "text-sm" : "text-[13px]"}`}
           >
-            {gapBody(b.gap, after)}
+            {gapBody(b.gap, after, "en")}
           </span>
         </span>
       </div>,

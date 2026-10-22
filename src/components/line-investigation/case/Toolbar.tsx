@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { Legend } from "../legend/Legend";
 import { liButton } from "../parts/button-class";
 
@@ -15,6 +16,7 @@ export function Toolbar({
   onHistory: () => void;
   onToggleKey: () => void;
 }) {
+  const c = useMessages().caseScreen;
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     if (!answer) return;
@@ -40,14 +42,14 @@ export function Toolbar({
             onClick={onToggleKey}
             className={liButton("ghost", "", "sm")}
           >
-            Key
+            {c.key}
           </button>
           {keyOpen && <Legend />}
         </>
       )}
       {answer && (
         <button type="button" onClick={copy} className={liButton("ghost", "ml-auto", "sm")}>
-          <span aria-live="polite">{copied ? "Copied" : "Copy the why"}</span>
+          <span aria-live="polite">{copied ? c.copied : c.copyWhy}</span>
         </button>
       )}
     </div>

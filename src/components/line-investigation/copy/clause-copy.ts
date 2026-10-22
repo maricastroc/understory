@@ -1,38 +1,41 @@
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import type { ViewArtifact, ViewClause } from "../model/types";
 import { displayId, kindName } from "./artifact-copy";
 
-const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-
-export function tallyText(clause: ViewClause): string {
-  if (clause.silent) return "no reason on record";
-  const known = clause.cells.filter((c) => c.state !== "unknown").length;
+export function tallyText(clause: ViewClause, locale: Locale): string {
+  const c = messagesFor(locale).clause;
+  if (clause.silent) return c.noReason;
+  const known = clause.cells.filter((cell) => cell.state !== "unknown").length;
   const unknown = clause.cells.length - known;
-  const parts = [plural(known, "source")];
-  const verified = clause.cells.filter((c) => c.state === "verified").length;
-  if (clause.audit === "supported") parts.push(`${verified} verified`);
-  if (clause.audit === "weak") parts.push("weak support");
-  if (clause.audit === "unsupported") parts.push("not substantiated");
-  if (clause.audit === "unaudited") parts.push("not audited");
-  if (unknown > 0) parts.push(`${unknown} not collected`);
+  const parts = [c.sources(known)];
+  const verified = clause.cells.filter((cell) => cell.state === "verified").length;
+  if (clause.audit === "supported") parts.push(c.verified(verified));
+  if (clause.audit === "weak") parts.push(c.weak);
+  if (clause.audit === "unsupported") parts.push(c.unsupported);
+  if (clause.audit === "unaudited") parts.push(c.unaudited);
+  if (unknown > 0) parts.push(c.notCollected(unknown));
   return parts.join(" · ");
 }
 
-export function clauseDescription(clause: ViewClause, byId: Map<string, ViewArtifact>): string {
-  if (clause.silent) return "Not recorded. No source explains this.";
+export function clauseDescription(
+  clause: ViewClause,
+  byId: Map<string, ViewArtifact>,
+  locale: Locale,
+): string {
+  const c = messagesFor(locale).clause;
+  if (clause.silent) return c.silent;
   const sources = clause.citations
     .map((id) => byId.get(id))
     .filter((a): a is ViewArtifact => !!a)
-    .map((a) => `${a.letter}, ${kindName(a.kind)} ${displayId(a)}`);
-  const parts = [sources.length ? `Supported by ${sources.join("; ")}.` : "No collected source."];
-  const verified = clause.cells.filter((c) => c.state === "verified").length;
-  if (clause.audit === "supported") {
-    parts.push(verified ? `${plural(verified, "quote")} verified.` : "No verbatim quote.");
-  }
-  if (clause.audit === "weak") parts.push("Sources are on topic but no line proves it.");
-  if (clause.audit === "unsupported") parts.push("The cited sources do not substantiate it.");
-  if (clause.audit === "unaudited") parts.push("Not audited.");
-  if (clause.unknownCitations.length) {
-    parts.push(`Cites ${clause.unknownCitations.join(", ")}, which was never collected.`);
-  }
+    .map((a) => c.source(a.letter, kindName(a.kind, locale), displayId(a)));
+  const parts = [sources.length ? c.supportedBy(sources.join("; ")) : c.noSource];
+  const verified = clause.cells.filter((cell) => cell.state === "verified").length;
+  if (clause.audit === "supported") parts.push(verified ? c.quotesVerified(verified) : c.noQuote);
+  if (clause.audit === "weak") parts.push(c.weakDescription);
+  if (clause.audit === "unsupported") parts.push(c.unsupportedDescription);
+  if (clause.audit === "unaudited") parts.push(c.unauditedDescription);
+  if (clause.unknownCitations.length)
+    parts.push(c.neverCollected(clause.unknownCitations.join(", ")));
   return parts.join(" ");
 }

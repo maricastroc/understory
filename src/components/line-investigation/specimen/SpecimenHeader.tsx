@@ -1,12 +1,6 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import { basename } from "../../format";
 import type { BlameStatus } from "./types";
-
-const HINT: Record<BlameStatus, string> = {
-  ready: "hover a bar for its commit",
-  loading: "loading blame…",
-  unavailable: "blame unavailable for this revision",
-  unpinned: "current HEAD, not the investigated revision",
-};
 
 export function SpecimenHeader({
   path,
@@ -17,6 +11,7 @@ export function SpecimenHeader({
   status: BlameStatus;
   hasBars: boolean;
 }) {
+  const hint = useMessages().caseScreen.blameHint;
   const shown = status === "ready" && !hasBars ? "unavailable" : status;
   return (
     <div className="flex h-9 shrink-0 items-center gap-2.5 border-b border-li-divider px-3.5">
@@ -29,7 +24,7 @@ export function SpecimenHeader({
           shown === "unpinned" ? "text-li-text-subtle" : "text-li-text-muted"
         }`}
       >
-        {HINT[shown]}
+        {hint[shown]}
       </span>
     </div>
   );

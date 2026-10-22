@@ -24,11 +24,13 @@ describe("clause sources", () => {
     const [issue, pr] = sources;
     expect(issue.type === "artifact" && issue.quote?.text).toBe("212 customers were charged twice");
     expect(pr.type === "artifact" && pr.quote).toBeNull();
-    expect(sourceStatus(issue, clause)).toEqual({
+    expect(sourceStatus(issue, clause, "en")).toEqual({
       text: "✓ Quote found verbatim in the source",
       tone: "evidence",
     });
-    expect(sourceStatus(pr, clause).text).toBe("Cited · the verbatim quote is in another source");
+    expect(sourceStatus(pr, clause, "en").text).toBe(
+      "Cited · the verbatim quote is in another source",
+    );
   });
 
   it("shows the silence itself as the evidence of a silent clause", () => {
@@ -42,18 +44,18 @@ describe("clause sources", () => {
     const clause = fabricated.clauses.find((c) => c.unknownCitations.length > 0)!;
     const missing = clauseSources(clause, fabricated).find((s) => s.type === "missing")!;
     expect(missing.id).toBe("commit:deadbee");
-    expect(sourceStatus(missing, clause).text).toMatch(/never collected/);
+    expect(sourceStatus(missing, clause, "en").text).toMatch(/never collected/);
   });
 });
 
 describe("provenance", () => {
   it("walks from an artifact up to the commit that carries it to the line", () => {
-    expect(provenance(art("issue:1187"), view.artifacts)).toEqual([
+    expect(provenance(art("issue:1187"), view.artifacts, "en")).toEqual([
       { relation: null, id: "issue:1187" },
       { relation: "closed by", id: "pr:812" },
       { relation: "merged as", id: "92f6a3f" },
     ]);
-    expect(provenance(art("review:812-1"), view.artifacts).map((s) => s.relation)).toEqual([
+    expect(provenance(art("review:812-1"), view.artifacts, "en").map((s) => s.relation)).toEqual([
       null,
       "on",
       "merged as",
@@ -62,11 +64,13 @@ describe("provenance", () => {
 
   it("says whether that commit wrote the line as it reads today", () => {
     const current = currentCommit(view.artifacts);
-    const line = caseSubject(view, undefined);
-    expect(commitRole(hostCommit(art("issue:1187"), view.artifacts), current, line)).toBe(
+    const line = caseSubject(view, undefined, "en");
+    expect(commitRole(hostCommit(art("issue:1187"), view.artifacts), current, line, "en")).toBe(
       "wrote line 9 as it reads today",
     );
-    expect(commitRole(art("commit:7be210e"), current, line)).toBe("an earlier change to line 9");
+    expect(commitRole(art("commit:7be210e"), current, line, "en")).toBe(
+      "an earlier change to line 9",
+    );
   });
 });
 

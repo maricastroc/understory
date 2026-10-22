@@ -7,10 +7,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { useMessages } from "@/i18n/LocaleProvider";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import type { Locale } from "@/i18n/locales";
+import type { Messages } from "@/i18n/messages";
 import type { AnalysisLanguage, CasePhase } from "../case/types";
 import { clauseDescription } from "../copy/clause-copy";
-import { WHY_TITLE, sourceNamer } from "../copy/why-copy";
+import { writerError } from "../copy/verdict-copy";
+import { sourceNamer } from "../copy/why-copy";
 import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types";
 import { LanguageSwitch } from "../parts/LanguageSwitch";
 import { ClauseRow } from "./ClauseRow";
@@ -29,10 +32,11 @@ function hintFor(
   pinnedIndex: number | null,
   clauses: boolean,
   noun: "clause" | "sentence",
+  m: Messages,
 ): string {
-  if (pinnedIndex !== null) return `checking clause ${pinnedIndex + 1} · Esc returns here`;
+  if (pinnedIndex !== null) return m.why.checking(pinnedIndex + 1);
   if (!clauses) return "";
-  return `select a ${noun} to check its evidence`;
+  return noun === "sentence" ? m.why.selectSentence : m.why.selectClause;
 }
 
 export function WhyZone({
@@ -63,6 +67,7 @@ export function WhyZone({
   renderEvidence?: (clause: ViewClause, id: string) => ReactNode;
 }) {
   const m = useMessages();
+  const locale = useLocale();
   const headingId = useId();
   const evidenceId = useId();
   const buttons = useRef(new Map<string, HTMLButtonElement>());
@@ -74,7 +79,7 @@ export function WhyZone({
   };
   useEffect(() => () => window.clearTimeout(intent.current), []);
   const pinnedIndex = view.clauses.findIndex((c) => c.id === pinned);
-  const body = whyBody(view, phase, failure);
+  const body = whyBody(view, m, locale, phase, failure);
   const plain = body === null;
   const model = useMemo(
     () => (view.reading && plain ? whyModel(view.reading) : null),
@@ -101,7 +106,7 @@ export function WhyZone({
     <section aria-labelledby={headingId} className="flex flex-col">
       <div className="flex min-h-7 flex-wrap items-center gap-x-2.5 gap-y-1 pl-7">
         <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
-          {view.reading ? WHY_TITLE : "Reconstructed why"}
+          {view.reading ? m.why.title : m.why.reconstructed}
         </h2>
         <span aria-live="polite" className="text-xs text-li-text-subtle">
           {analysis?.rewriting
@@ -110,6 +115,7 @@ export function WhyZone({
                 pinnedIndex >= 0 ? pinnedIndex : null,
                 clauses,
                 model ? "sentence" : "clause",
+                m,
               )}
         </span>
         {analysis && (
@@ -138,12 +144,13 @@ export function WhyZone({
         />
       )}
       {!model && clauses && (
-        <ol lang={view.language ?? undefined} className="relative mt-1 flex flex-col gap-1">
+        <ol className="relative mt-1 flex flex-col gap-1">
           {view.clauses.map((clause, i) => (
             <ClauseRow
               key={clause.id}
               clause={clause}
-              description={clauseDescription(clause, byId)}
+              description={clauseDescription(clause, byId, locale)}
+              lang={view.language ?? undefined}
               expanded={effective === clause.id}
               pinned={pinned === clause.id}
               marked={!effective && marked.has(clause.id)}
@@ -193,32 +200,40 @@ function Skeleton({ caption }: { caption: string }) {
   );
 }
 
-function whyBody(view: InvestigationView, phase?: CasePhase, failure?: ReactNode): ReactNode {
-  if (phase === "collecting") return <Skeleton caption="Collecting the line's history…" />;
+function whyBody(
+  view: InvestigationView,
+  m: Messages,
+  locale: Locale,
+  phase?: CasePhase,
+  failure?: ReactNode,
+): ReactNode {
+  if (phase === "collecting") return <Skeleton caption={m.why.collecting} />;
   if (phase === "failed") return <div className="mt-1 flex flex-col gap-2.5 pl-7">{failure}</div>;
   if (view.empty && view.verdict !== "out-of-scope" && view.verdict !== "fabrication") {
     return (
       <div className="mt-1 flex flex-col gap-1.5 pl-7">
-        <p className="text-base text-li-ink">No history was found for this line.</p>
+        <p className="text-base text-li-ink">{m.why.noHistory}</p>
         <p className="text-xs text-li-text-subtle">
-          {view.pinnedSha
-            ? `The investigation read ${view.pinnedSha.slice(0, 7)} and found no commit that changed it, so there is nothing to trace.`
-            : "The investigation found no commit that changed it, so there is nothing to trace."}
+          {view.pinnedSha ? m.why.noCommitAt(view.pinnedSha.slice(0, 7)) : m.why.noCommit}
         </p>
       </div>
     );
   }
   if (view.verdict === "pending") {
-    const n = view.artifacts.length;
-    return <Skeleton caption={`Reconstructing from ${n} artifact${n === 1 ? "" : "s"}…`} />;
+    return <Skeleton caption={m.why.reconstructing(view.artifacts.length)} />;
   }
   if (view.verdict === "evidence-only") {
     return (
       <div className="mt-1 flex flex-col gap-1.5 pl-7">
-        <p className="text-base text-li-text-subtle">
-          No reconstruction. The evidence below is complete.
-        </p>
-        {view.error && <p className="text-xs text-li-text-subtle">{view.error}</p>}
+        <p className="text-base text-li-text-subtle">{m.why.noReconstruction}</p>
+        {view.error && (
+          <p
+            lang={writerError(view.error, locale) === view.error ? "en" : undefined}
+            className="text-xs text-li-text-subtle"
+          >
+            {writerError(view.error, locale)}
+          </p>
+        )}
       </div>
     );
   }
@@ -228,10 +243,7 @@ function whyBody(view: InvestigationView, phase?: CasePhase, failure?: ReactNode
         <p lang={view.language ?? undefined} className="text-base text-li-ink">
           {view.answer}
         </p>
-        <p className="text-xs text-li-text-subtle">
-          The question is outside what this line&apos;s history can answer. The evidence is still
-          shown below.
-        </p>
+        <p className="text-xs text-li-text-subtle">{m.why.outOfScope}</p>
       </div>
     );
   }

@@ -1,54 +1,42 @@
 import type { Reading } from "@understory/core/types";
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import type { ChangeFact, PassageScope } from "../history/reading-layer";
 
-export function factText(fact: ChangeFact): string {
-  if (fact.did === "added") return "added this line";
-  if (fact.did === "respaced") return "changed only the spacing of this line";
-  return "rewrote this line";
+export function factText(fact: ChangeFact, locale: Locale): string {
+  const r = messagesFor(locale).reading;
+  if (fact.did === "added") return r.added;
+  if (fact.did === "respaced") return r.respaced;
+  return r.rewrote;
 }
 
-const SCOPE: Record<PassageScope["scope"], string> = {
-  line: "source linked directly to this line",
-  change: "said of the change as a whole",
-  "earlier change": "said of an earlier change to this line",
-  file: "from the file's history, not this line's",
-};
-
-const PLACE: Record<NonNullable<PassageScope["placement"]>, string> = {
-  "on the line": "comment made on this line",
-  "in its hunk": "comment made near this line",
-  "same file, elsewhere": "comment made elsewhere in this file",
-  "another file": "comment made in another file",
-};
-
-export const placeText = (placement: NonNullable<PassageScope["placement"]>, outdated?: boolean) =>
-  `${PLACE[placement]}${outdated && placement !== "another file" ? ", on an earlier version" : ""}`;
-
-export function scopeText(scope: PassageScope): string {
-  const place = scope.placement ? placeText(scope.placement, scope.outdated) : null;
-  return [SCOPE[scope.scope], place].filter(Boolean).join(" · ");
+export function placeText(
+  placement: NonNullable<PassageScope["placement"]>,
+  locale: Locale,
+  outdated?: boolean,
+): string {
+  const r = messagesFor(locale).reading;
+  const place = r.place[placement];
+  return outdated && placement !== "another file" ? r.onEarlierVersion(place) : place;
 }
 
-export const EARLIER_CAPTION = "found by following the line back · not read for a reason";
+export function scopeText(scope: PassageScope, locale: Locale): string {
+  const place = scope.placement ? placeText(scope.placement, locale, scope.outdated) : null;
+  return [messagesFor(locale).reading.scope[scope.scope], place].filter(Boolean).join(" · ");
+}
 
-export function edgeText(edge: Reading["earlier"], history: Reading["history"]): string | null {
-  if (history === "the file")
-    return "These are changes to the file. The line's own history could not be read.";
+export function earlierCaption(locale: Locale): string {
+  return messagesFor(locale).reading.earlierCaption;
+}
+
+export function edgeText(
+  edge: Reading["earlier"],
+  history: Reading["history"],
+  locale: Locale,
+): string | null {
+  const r = messagesFor(locale).reading;
+  if (history === "the file") return r.fileOnly;
   if (edge === null) return null;
-  if (edge === "not read") return "The line's history before this was not read.";
-  const why: Record<
-    Exclude<NonNullable<Reading["earlier"]>, "not read" | "the line was added">,
-    string
-  > = {
-    "depth limit": "this view follows only a few changes back",
-    "request limit": "this view follows only a few changes back",
-    "time limit": "following it took too long",
-    "no patch": "the host did not return the change",
-    "line not located": "the line could not be followed through the change",
-    quota: "the host's request allowance was low",
-    cancelled: "the investigation was cancelled",
-  };
-  return edge === "the line was added"
-    ? null
-    : `The line's history before this was not read: ${why[edge]}.`;
+  if (edge === "not read") return r.notRead;
+  return edge === "the line was added" ? null : r.notReadBecause(r.why[edge]);
 }

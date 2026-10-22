@@ -11,6 +11,9 @@ import {
   useState,
 } from "react";
 import { Answer } from "../answer/Answer";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import { coreText } from "@/i18n/core-text";
+import { shownQuestion } from "../../investigator/default-question";
 import { tickText } from "../copy/artifact-copy";
 import { caseSubject } from "../copy/subject-copy";
 import { sourceNamer, whyCopy } from "../copy/why-copy";
@@ -29,8 +32,6 @@ import { Toolbar } from "./Toolbar";
 import { whyModel } from "../why/why-model";
 import { useCaseKeyboard } from "./use-case-keyboard";
 import type { AnalysisLanguage, CasePhase } from "./types";
-
-const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 
 export function LineInvestigation({
   result,
@@ -61,6 +62,9 @@ export function LineInvestigation({
   phase?: CasePhase;
   failure?: ReactNode;
 }) {
+  const locale = useLocale();
+  const m = useMessages();
+  const c = m.caseScreen;
   const view = useMemo(
     () => buildInvestigationView(result, { now, pending, reading }),
     [result, now, pending, reading],
@@ -68,19 +72,22 @@ export function LineInvestigation({
   const model = useMemo(() => historyModel(view, now), [view, now]);
   const layer = useMemo(() => readingLayer(view.reading, now), [view, now]);
   const subject = useMemo(
-    () => caseSubject(view, result.evidence.anchor),
-    [view, result.evidence.anchor],
+    () => caseSubject(view, result.evidence.anchor, locale),
+    [view, result.evidence.anchor, locale],
   );
   const copied = useMemo(
     () =>
       view.reading
-        ? whyCopy(whyModel(view.reading), sourceNamer(view.artifacts))
+        ? whyCopy(whyModel(view.reading), sourceNamer(view.artifacts), locale)
         : view.clauses.length && !view.clauses[0].silent
           ? view.answer
           : null,
-    [view],
+    [view, locale],
   );
-  const note = result.evidence.note;
+  const note =
+    result.evidence.note && view.granularity === "file"
+      ? coreText(locale, "fileLevelNote", result.evidence.note)
+      : result.evidence.note;
   const [state, dispatch] = useReducer(caseReducer, undefined, () =>
     initialCaseState(readKeyPreference()),
   );
@@ -131,21 +138,22 @@ export function LineInvestigation({
   const extent = extentOf(layer, historyCount, model.originDays);
   const hasHistory = !phase && (historyCount > 0 || model.loose.length > 0);
   const artifactCount = model.strata.reduce((n, s) => n + s.members.length, 0) + model.loose.length;
+  const changes = c.historySummary(extent.changes);
   const summary = !hasHistory
     ? null
     : subject.kind === "anchor"
-      ? `Around ${subject.label} · ${plural(artifactCount, "artifact")}`
+      ? c.aroundSummary(subject.label, c.artifacts(artifactCount))
       : historyCount > 0
-        ? `History · ${plural(extent.changes, "change")}${
-            extent.days !== null ? ` over ${tickText(extent.days).replace("−", "")}` : ""
-          }`
-        : `History · ${plural(model.loose.length, "artifact")}`;
+        ? extent.days !== null
+          ? c.over(changes, tickText(extent.days, locale).replace("−", ""))
+          : changes
+        : c.historyArtifacts(c.artifacts(model.loose.length));
 
   return (
     <div className="flex flex-col gap-5.5 font-li-body text-li-ink">
       {parent && (
         <p className="-mb-3 font-li-mono text-[11.5px] text-li-text-subtle">
-          ↳ continues{" "}
+          {c.continues}{" "}
           {parent.onOpen ? (
             <button
               type="button"
@@ -159,8 +167,10 @@ export function LineInvestigation({
           )}
           {parent.question && (
             <span>
-              {" "}
-              · {subject.kind === "anchor" ? "drilled from" : "follow-up to"} “{parent.question}”
+              {" · "}
+              {subject.kind === "anchor"
+                ? c.drilledFrom(shownQuestion(parent.question, locale))
+                : c.followUpTo(shownQuestion(parent.question, locale))}
             </span>
           )}
         </p>

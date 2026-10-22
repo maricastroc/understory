@@ -1,10 +1,12 @@
 "use client";
 
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { Locale } from "@/i18n/locales";
 import { type Dispatch, useEffect, useId, useMemo, useRef, useState } from "react";
 import { dayDate, displayId, tickText } from "../copy/artifact-copy";
 import { gapName } from "../copy/accessible-name";
 import { gapBody, gapLetter, gapTitle } from "../copy/gap-copy";
-import { EARLIER_CAPTION, edgeText, factText } from "../copy/reading-copy";
+import { earlierCaption, edgeText, factText } from "../copy/reading-copy";
 import {
   breakMargin,
   breakText,
@@ -41,9 +43,9 @@ function kinds(strata: HistoryStratum[]): string {
     .join(" · ");
 }
 
-function span(strata: HistoryStratum[]): string {
-  const first = dayDate(strata[0].anchor.date).split(" ").slice(1).join(" ");
-  const last = dayDate(strata.at(-1)!.anchor.date).split(" ").slice(1).join(" ");
+function span(strata: HistoryStratum[], locale: Locale): string {
+  const first = dayDate(strata[0].anchor.date, locale).split(" ").slice(1).join(" ");
+  const last = dayDate(strata.at(-1)!.anchor.date, locale).split(" ").slice(1).join(" ");
   return first === last ? first : `${first} – ${last}`;
 }
 
@@ -68,6 +70,7 @@ export function HistorySection({
   onDrill?: (a: ViewArtifact) => void;
   arrive: boolean;
 }) {
+  const locale = useLocale();
   const headingId = useId();
   const section = useRef<HTMLElement | null>(null);
   const bar = useRef<HTMLDivElement | null>(null);
@@ -80,7 +83,7 @@ export function HistorySection({
   const byStratum = useMemo(() => new Map(model.strata.map((s) => [s.id, s])), [model.strata]);
   const here = at ? byStratum.get(at) : undefined;
   const count = model.strata.reduce((n, s) => n + s.members.length, 0) + model.loose.length;
-  const edge = layer ? edgeText(layer.edge, layer.history) : null;
+  const edge = layer ? edgeText(layer.edge, layer.history, locale) : null;
   const extent = extentOf(layer, model.strata.length, model.originDays);
   const open = layer?.history === "the line" && edge !== null;
 
@@ -114,14 +117,14 @@ export function HistorySection({
             <Margin>
               {shortAge(item.days)}
               <br />
-              {breakMargin(subject, item.first)}
+              {breakMargin(subject, item.first, locale)}
             </Margin>
             <BoreCell line="none">
               <span className="absolute top-0 bottom-0 left-1/2 -ml-[0.75px] border-l-[1.5px] border-li-rule" />
               <BreakMark />
             </BoreCell>
             <div className="flex items-center gap-3 font-li-mono text-[11px] text-li-text-subtle">
-              <span>{breakText(subject, item.days, item.first)}</span>
+              <span>{breakText(subject, item.days, item.first, locale)}</span>
               <span
                 aria-hidden
                 className="h-0 flex-1 border-t border-dashed border-li-neutral-300"
@@ -139,7 +142,7 @@ export function HistorySection({
               <ol>{renderItems(item.items)}</ol>
             ) : (
               <div className={`${ROW_GRID} min-h-14`}>
-                <Margin>{span(item.strata)}</Margin>
+                <Margin>{span(item.strata, locale)}</Margin>
                 <BoreCell line="dashed" />
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pb-2.5">
                   <span className="text-[14px] text-li-neutral-800">
@@ -198,15 +201,15 @@ export function HistorySection({
               <BoreCell line="dashed" />
               <div
                 role="note"
-                aria-label={gapName(g, s.anchor)}
+                aria-label={gapName(g, s.anchor, locale)}
                 className="col-span-2 flex flex-col gap-1 border border-dashed border-li-gap px-3 py-2.5 max-[820px]:col-span-1"
                 style={{ background: HATCH_BAND }}
               >
                 <span className="w-fit bg-li-paper px-1 text-[14px] font-medium text-li-gap-ink">
-                  {gapLetter(g)} {gapTitle(g)}
+                  {gapLetter(g)} {gapTitle(g, locale)}
                 </span>
                 <span className="w-fit max-w-160 bg-li-paper px-1 text-[12.5px] leading-[1.45] text-li-neutral-800">
-                  {gapBody(g, s.anchor, !!layer)}
+                  {gapBody(g, s.anchor, locale, !!layer)}
                 </span>
               </div>
             </div>
@@ -229,19 +232,19 @@ export function HistorySection({
         className="sticky top-14 z-20 flex flex-wrap items-center gap-x-4 gap-y-1 border-y border-li-divider bg-li-paper py-2.5"
       >
         <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
-          {historyTitle(subject)}
+          {historyTitle(subject, locale)}
         </h2>
         <span className="font-li-mono text-[11px] text-li-text-subtle">
           today ±0 → {open ? "oldest read" : "origin"}{" "}
-          {extent.days !== null ? tickText(extent.days) : "—"} · {plural(extent.changes, "change")}{" "}
-          · {plural(count, "artifact")}
+          {extent.days !== null ? tickText(extent.days, locale) : "—"} ·{" "}
+          {plural(extent.changes, "change")} · {plural(count, "artifact")}
         </span>
         {inside && here && (
           <span className="font-li-mono text-[11px] text-li-ink" aria-hidden>
-            at {dayDate(here.anchor.date)}
+            at {dayDate(here.anchor.date, locale)}
             {here.anchor.daysBeforeNow !== null &&
-              ` · ${tickText(here.anchor.daysBeforeNow)}`} · {here.anchor.letter}{" "}
-            {displayId(here.anchor)}
+              ` · ${tickText(here.anchor.daysBeforeNow, locale)}`}{" "}
+            · {here.anchor.letter} {displayId(here.anchor)}
           </span>
         )}
         <span className="ml-auto flex flex-wrap items-center gap-2">
@@ -274,7 +277,7 @@ export function HistorySection({
         <div className="col-span-2 flex items-start gap-3 max-[820px]:col-span-1">
           <span className="mt-3 h-0.5 flex-1 bg-li-datum" />
           <span className="mt-1 font-li-mono text-[11px] text-li-datum-ink">
-            {surfaceText(subject)}
+            {surfaceText(subject, locale)}
           </span>
         </div>
       </div>
@@ -289,13 +292,13 @@ export function HistorySection({
               data-earlier={entry.id}
               className={`${ROW_GRID} border-t border-li-neutral-300 pt-2`}
             >
-              <Margin>{dayDate(entry.date)}</Margin>
+              <Margin>{dayDate(entry.date, locale)}</Margin>
               <BoreCell line="dashed">
                 <Glyph kind="commit" cited={false} dim />
               </BoreCell>
               <div className="col-span-2 flex min-w-0 flex-col gap-1 pb-2.5 max-[820px]:col-span-1">
                 <span className="font-li-mono text-[11px] text-li-text-subtle min-[821px]:hidden">
-                  {dayDate(entry.date)}
+                  {dayDate(entry.date, locale)}
                 </span>
                 <span className="flex flex-wrap items-baseline gap-x-2">
                   <span className="font-li-mono text-[12.5px] font-medium text-li-ink">
@@ -307,7 +310,7 @@ export function HistorySection({
                 </span>
                 {entry.did && (
                   <span className="font-li-mono text-[11px] text-li-datum-ink">
-                    {factText({ did: entry.did, before: entry.before ?? null })}
+                    {factText({ did: entry.did, before: entry.before ?? null }, locale)}
                     {entry.did === "rewrote" && entry.before && (
                       <>
                         {" · before: "}
@@ -317,7 +320,7 @@ export function HistorySection({
                   </span>
                 )}
                 <span className="font-li-mono text-[11px] text-li-text-subtle">
-                  {EARLIER_CAPTION}
+                  {earlierCaption(locale)}
                 </span>
                 {entry.message && entry.message.trim() !== entry.title.trim() && (
                   <details className="max-w-170 text-[12.5px] text-li-neutral-800">
@@ -355,7 +358,7 @@ export function HistorySection({
             {model.originDays !== null && (
               <>
                 <br />
-                {tickText(model.originDays)}
+                {tickText(model.originDays, locale)}
               </>
             )}
           </Margin>
@@ -364,7 +367,7 @@ export function HistorySection({
             <span className="absolute top-2 left-1/2 size-2.5 -translate-x-1/2 rotate-45 bg-li-ink" />
           </BoreCell>
           <p className="col-span-2 pt-1 font-li-mono text-[11px] text-li-text-subtle max-[820px]:col-span-1">
-            {originText(subject)} · {displayId(origin.anchor)}
+            {originText(subject, locale)} · {displayId(origin.anchor)}
             {model.originDays !== null && ` · ${shortAge(model.originDays)} deep`}
           </p>
         </div>

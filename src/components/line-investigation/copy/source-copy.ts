@@ -1,4 +1,6 @@
 import type { QuoteRange } from "@understory/core/types";
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import { withoutTitle } from "../drawer/drawer-body";
 import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types";
 import { displayId } from "./artifact-copy";
@@ -30,46 +32,33 @@ export function clauseSources(
 export function sourceStatus(
   source: ClauseSource,
   clause: ViewClause,
+  locale: Locale,
 ): { text: string; tone: StatusTone } {
+  const s = messagesFor(locale).source;
   if (source.type === "gap") {
-    return { text: gapStatus(source.gap), tone: source.gap.verified ? "gap" : "neutral" };
+    return { text: gapStatus(source.gap, locale), tone: source.gap.verified ? "gap" : "neutral" };
   }
-  if (source.type === "missing") {
-    return { text: "Cited, but never collected · it cannot be checked", tone: "neutral" };
-  }
+  if (source.type === "missing") return { text: s.missing, tone: "neutral" };
   const state = source.cell?.state ?? "cited";
-  if (state === "verified")
-    return { text: "✓ Quote found verbatim in the source", tone: "evidence" };
-  if (state === "weak") return { text: "Cited · on topic, but no line proves it", tone: "neutral" };
-  if (state === "misattributed") {
-    return { text: "Cited · this source does not support the clause", tone: "neutral" };
-  }
+  if (state === "verified") return { text: s.verified, tone: "evidence" };
+  if (state === "weak") return { text: s.weak, tone: "neutral" };
+  if (state === "misattributed") return { text: s.misattributed, tone: "neutral" };
   if (state === "unaudited" || clause.audit === "unaudited") {
-    return { text: "Cited · not audited", tone: "neutral" };
+    return { text: s.unaudited, tone: "neutral" };
   }
   const elsewhere = clause.cells.some((c) => c.state === "verified" && c.citation !== source.id);
-  return {
-    text: elsewhere
-      ? "Cited · the verbatim quote is in another source"
-      : "Cited · no verbatim quote in this source",
-    tone: "neutral",
-  };
+  return { text: elsewhere ? s.elsewhere : s.noQuote, tone: "neutral" };
 }
 
-const UP: Record<string, string> = {
-  pull_request: "merged as",
-  review: "on",
-  issue: "closed by",
-};
-
-export function provenance(a: ViewArtifact, all: ViewArtifact[]): ProvenanceStep[] {
+export function provenance(a: ViewArtifact, all: ViewArtifact[], locale: Locale): ProvenanceStep[] {
+  const up = messagesFor(locale).artifact.relation;
   const byId = new Map(all.map((x) => [x.id, x]));
   const steps: ProvenanceStep[] = [{ relation: null, id: displayId(a) }];
   let cur: ViewArtifact | undefined = a;
   for (let i = 0; cur && cur.kind !== "commit" && i < 4; i++) {
     const parent: ViewArtifact | undefined = cur.parentId ? byId.get(cur.parentId) : undefined;
     if (!parent) break;
-    steps.push({ relation: UP[cur.kind] ?? "via", id: displayId(parent) });
+    steps.push({ relation: up[cur.kind] ?? up.other, id: displayId(parent) });
     cur = parent;
   }
   return steps;

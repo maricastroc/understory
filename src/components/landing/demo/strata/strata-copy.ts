@@ -24,10 +24,10 @@ export function currentCaption(line: number): string {
 }
 
 export function marginDate(s: Stratum): { date: string; depth: string | null } {
-  const full = dayDate(s.artifact.date);
+  const full = dayDate(s.artifact.date, "en");
   if (s.layer === "sub") return { date: full.split(" ").slice(0, 2).join(" "), depth: null };
   const days = s.artifact.daysBeforeNow;
-  return { date: full, depth: days === null ? null : tickText(days) };
+  return { date: full, depth: days === null ? null : tickText(days, "en") };
 }
 
 export function unchangedText(days: number): string {
@@ -45,7 +45,7 @@ export function originText(line: number, days: number | null): string | null {
 }
 
 export function strataTally(clause: ViewClause): string {
-  if (clause.silent || clause.audit !== "supported") return tallyText(clause);
+  if (clause.silent || clause.audit !== "supported") return tallyText(clause, "en");
   const verified = clause.cells.filter((c) => c.state === "verified").length;
   const known = clause.cells.filter((c) => c.state !== "unknown").length;
   return `${plural(known, "source")} · ${plural(verified, "quote")} verified`;

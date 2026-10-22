@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import type { ViewArtifact, ViewGap } from "../model/types";
 import { displayId } from "./artifact-copy";
 
@@ -5,62 +7,47 @@ export function gapLetter(gap: ViewGap): string {
   return gap.verified ? "∅" : "?";
 }
 
-const CHIP_NOUN: Record<ViewGap["missing"], string> = {
-  pull_request: "PR",
-  review: "review",
-  issue: "issue",
-};
-
-export function gapChip(gap: ViewGap): string {
-  return `${gapLetter(gap)} ${CHIP_NOUN[gap.missing]}`;
+export function gapChip(gap: ViewGap, locale: Locale): string {
+  return `${gapLetter(gap)} ${messagesFor(locale).gap.chip[gap.missing]}`;
 }
 
-export function gapLabel(gap: ViewGap): string {
-  if (!gap.verified) return "not verified";
-  return gap.missing === "issue" ? "no linked issue" : "not recorded";
+export function gapLabel(gap: ViewGap, locale: Locale): string {
+  const g = messagesFor(locale).gap;
+  if (!gap.verified) return g.notVerified;
+  return gap.missing === "issue" ? g.noLinkedIssue : g.notRecorded;
 }
 
 export function gapKind(gap: ViewGap): string {
   return gap.verified ? "NOT RECOVERED" : "NOT VERIFIED";
 }
 
-export function gapTitle(gap: ViewGap): string {
-  if (gap.missing === "pull_request") return "No pull request, review or issue";
-  if (gap.missing === "review") return "No review on the pull request";
-  return "No issue linked to the pull request";
+export function gapTitle(gap: ViewGap, locale: Locale): string {
+  return messagesFor(locale).gap.title[gap.missing];
 }
 
 export function gapId(gap: ViewGap, after: ViewArtifact): string {
   return gap.missing === "pull_request" ? `before ${displayId(after)}` : `on ${displayId(after)}`;
 }
 
-const BASIS: Record<ViewGap["basis"], string> = {
-  searched: "The provider was asked and has nothing on record.",
-  skipped: "This commit was not looked up (outside the enrichment limit, or no supported remote).",
-  failed: "The lookup failed, so nothing is known about what exists.",
-  unknown: "This case was saved before lookups were tracked, so absence cannot be confirmed.",
-};
-
-export function gapBasis(gap: ViewGap): string {
-  return BASIS[gap.basis];
+export function gapBasis(gap: ViewGap, locale: Locale): string {
+  return messagesFor(locale).gap.basis[gap.basis];
 }
 
-export function gapBody(gap: ViewGap, after: ViewArtifact, reading = false): string {
+export function gapBody(
+  gap: ViewGap,
+  after: ViewArtifact,
+  locale: Locale,
+  reading = false,
+): string {
+  const g = messagesFor(locale).gap;
   const id = displayId(after);
-  if (!gap.verified) {
-    return `Nothing is shown before ${id}, but this was not verified. Understory does not treat it as silence.`;
-  }
-  if (gap.missing === "pull_request") {
-    if (reading)
-      return `Blame reaches ${id}, and no pull request, review or issue was found for it. The commit's own message is all the record holds.`;
-    return `Blame reaches ${id}, but no pull request, review or issue explains it. Understory does not infer a reason here.`;
-  }
-  if (gap.missing === "review") {
-    return `${id} was merged without a recorded review. Understory does not infer what a review would have said.`;
-  }
-  return `${id} closes no issue by a closing keyword. An issue may still be mentioned elsewhere.`;
+  if (!gap.verified) return g.unverifiedBody(id);
+  if (gap.missing === "pull_request") return reading ? g.noPrReading(id) : g.noPr(id);
+  if (gap.missing === "review") return g.noReview(id);
+  return g.noIssue(id);
 }
 
-export function gapStatus(gap: ViewGap): string {
-  return gap.verified ? "History silent · recorded: false" : "Not verified · absence not confirmed";
+export function gapStatus(gap: ViewGap, locale: Locale): string {
+  const g = messagesFor(locale).gap;
+  return gap.verified ? g.silent : g.unconfirmed;
 }

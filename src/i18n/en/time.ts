@@ -9,4 +9,5 @@ export const time = {
   date: (day: number, month: string, year: number) =>
     `${String(day).padStart(2, "0")} ${month} ${year}`,
   dayMonth: (day: number, month: string) => `${day} ${month}`,
+  plainDate: (day: number, month: string, year: number) => `${day} ${month} ${year}`,
 };

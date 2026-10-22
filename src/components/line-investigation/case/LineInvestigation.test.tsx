@@ -336,7 +336,7 @@ describe("LineInvestigation — the language of the analysis", () => {
 
   it("marks the clauses with the language they are written in", () => {
     setup();
-    expect(why().querySelector("ol")!.getAttribute("lang")).toBe("en");
+    expect(why().querySelector("li[data-clause] [lang]")!.getAttribute("lang")).toBe("en");
   });
 
   it("offers the switch in the answer only when the host can rewrite it", async () => {
@@ -360,7 +360,7 @@ describe("LineInvestigation — the language of the analysis", () => {
     rerender(withAnalysis({ selected: "pt", rewriting: true, onSelect: () => {} }));
     expect(within(why()).getByText("rewriting in Portuguese…")).toBeTruthy();
     expect(why().querySelectorAll("li[data-clause]")).toHaveLength(count);
-    expect(why().querySelector("ol")!.getAttribute("lang")).toBe("en");
+    expect(why().querySelector("li[data-clause] [lang]")!.getAttribute("lang")).toBe("en");
   });
 
   it("has no axe violations with the switch", async () => {

@@ -1,10 +1,7 @@
 import { type RefObject, useEffect, useRef } from "react";
-import {
-  checklistGlyph,
-  checklistText,
-  READING_ANSWERED,
-  VERDICT_TITLE,
-} from "../copy/verdict-copy";
+import { formatDecimal } from "@/i18n/format";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import { checklistGlyph, checklistText } from "../copy/verdict-copy";
 import type { ChecklistTone, InvestigationView } from "../model/types";
 
 const GLYPH: Record<ChecklistTone, string> = {
@@ -25,6 +22,8 @@ export function VerdictPopover({
   onClose: () => void;
   anchor: RefObject<HTMLElement | null>;
 }) {
+  const locale = useLocale();
+  const v = useMessages().verdict;
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,7 +47,7 @@ export function VerdictPopover({
       className="absolute top-9.5 right-0 z-20 flex w-75 flex-col gap-2 border border-li-divider bg-li-paper p-3.5 text-[12.5px] shadow-li-lg"
     >
       <h2 id={headingId} className="text-[13px] font-semibold text-li-ink">
-        {answered ? READING_ANSWERED.title : VERDICT_TITLE[view.verdict]}
+        {answered ? v.checked : v.title[view.verdict]}
       </h2>
       <ul className="grid grid-cols-[16px_minmax(0,1fr)] gap-x-1.5 gap-y-1.25 text-li-neutral-800">
         {view.checklist.map((item, i) => (
@@ -56,22 +55,20 @@ export function VerdictPopover({
             <span aria-hidden className={GLYPH[item.tone]}>
               {checklistGlyph(item)}
             </span>
-            <span>{checklistText(item)}</span>
+            <span>{checklistText(item, locale)}</span>
           </li>
         ))}
       </ul>
       {view.confidence && (
         <>
           <div className="flex items-baseline gap-2 border-t border-li-divider pt-2">
-            <span className="text-li-text-subtle">Derived confidence</span>
+            <span className="text-li-text-subtle">{v.derived}</span>
             <span className="ml-auto font-li-mono text-li-ink">
-              {view.confidence.score.toFixed(2)} · {view.confidence.level}
+              {formatDecimal(locale, view.confidence.score, 2)} · {v.level[view.confidence.level]}
             </span>
           </div>
           <p className="text-[11.5px] text-li-text-subtle">
-            {answered
-              ? READING_ANSWERED.confidence
-              : "Computed from the checks above, never the model's self-assessment."}
+            {answered ? v.answeredConfidenceNote : v.confidenceNote}
           </p>
         </>
       )}

@@ -30,7 +30,7 @@ export function LineSpecimen({
             datum={n === line}
             token={n === line ? datumToken(question, lines[n - 1]) : null}
             bar={undefined}
-            description={describeLine(n, n === line, undefined)}
+            description={describeLine(n, n === line, undefined, "en")}
           />
         ))}
       </ol>

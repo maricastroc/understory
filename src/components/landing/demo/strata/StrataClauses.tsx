@@ -157,7 +157,7 @@ export function StrataClauses({
         >
           <Clause
             clause={clause}
-            description={clauseDescription(clause, byId)}
+            description={clauseDescription(clause, byId, "en")}
             descId={`${idPrefix}-clause-${clause.id}`}
             on={active === clause.id}
             wide={wide}

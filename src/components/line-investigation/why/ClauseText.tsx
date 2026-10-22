@@ -3,7 +3,17 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 const LINES = 3;
 const REVEAL_MS = 200;
 
-export function ClauseText({ text, open, ink }: { text: string; open: boolean; ink: string }) {
+export function ClauseText({
+  text,
+  open,
+  ink,
+  lang,
+}: {
+  text: string;
+  open: boolean;
+  ink: string;
+  lang?: string;
+}) {
   const inner = useRef<HTMLSpanElement>(null);
   const [size, setSize] = useState<{ full: number; clamp: number } | null>(null);
   const [settled, setSettled] = useState(!open);
@@ -40,7 +50,7 @@ export function ClauseText({ text, open, ink }: { text: string; open: boolean; i
       className="pointer-events-none block overflow-hidden text-[17px] leading-[1.42] transition-[max-height] duration-200 ease-out motion-reduce:transition-none"
       style={{ maxHeight: size ? (open ? size.full : size.clamp) : `${LINES}lh` }}
     >
-      <span ref={inner} className={`${ink} ${clamped ? "line-clamp-3" : "block"}`}>
+      <span ref={inner} lang={lang} className={`${ink} ${clamped ? "line-clamp-3" : "block"}`}>
         {text}
       </span>
     </span>
