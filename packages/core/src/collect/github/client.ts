@@ -13,12 +13,31 @@ function headers(): Record<string, string> {
   return h;
 }
 
-function hint(status: number): string {
-  if (status === 403 || status === 429)
-    return " — rate limited; set GITHUB_TOKEN in .env.local for higher limits";
+function isRateLimited(res: Response): boolean {
+  if (res.status === 429) return true;
+  if (res.status !== 403) return false;
+  return res.headers.get("x-ratelimit-remaining") === "0" || res.headers.has("retry-after");
+}
+
+function hint(status: number, rateLimited: boolean): string {
+  if (rateLimited) return " — rate limited; set GITHUB_TOKEN in .env.local for higher limits";
+  if (status === 403) return " — refused; check that the token can read this repository";
   if (status === 404)
     return " — not found; is the repo public, or is GITHUB_TOKEN set for private access?";
   return "";
+}
+
+export class GitHubApiError extends Error {
+  readonly status: number;
+  readonly rateLimited: boolean;
+
+  constructor(api: "API" | "GraphQL", res: Response) {
+    const rateLimited = isRateLimited(res);
+    super(`GitHub ${api} ${res.status}${hint(res.status, rateLimited)}`);
+    this.name = "GitHubApiError";
+    this.status = res.status;
+    this.rateLimited = rateLimited;
+  }
 }
 
 export async function rest<T>(path: string, opts: { signal?: AbortSignal } = {}): Promise<T> {
@@ -26,7 +45,7 @@ export async function rest<T>(path: string, opts: { signal?: AbortSignal } = {})
     `${API}${path}`,
     opts.signal ? { headers: headers(), signal: opts.signal } : { headers: headers() },
   );
-  if (!res.ok) throw new Error(`GitHub API ${res.status}${hint(res.status)}`);
+  if (!res.ok) throw new GitHubApiError("API", res);
   return (await res.json()) as T;
 }
 
@@ -34,7 +53,7 @@ export async function restRaw(path: string): Promise<string> {
   const res = await fetch(`${API}${path}`, {
     headers: { ...headers(), Accept: "application/vnd.github.raw" },
   });
-  if (!res.ok) throw new Error(`GitHub API ${res.status}${hint(res.status)}`);
+  if (!res.ok) throw new GitHubApiError("API", res);
   return res.text();
 }
 
@@ -76,7 +95,7 @@ export async function graphqlResult<T>(
         lastError = new Error(`GitHub GraphQL ${res.status}`);
         continue;
       }
-      if (!res.ok) throw new Error(`GitHub GraphQL ${res.status}`);
+      if (!res.ok) throw new GitHubApiError("GraphQL", res);
       const json = (await res.json()) as GraphqlResult<T>;
       return { data: json.data ?? null, errors: json.errors ?? [] };
     } catch (e) {
