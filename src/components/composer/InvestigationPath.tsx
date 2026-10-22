@@ -1,3 +1,4 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import type { PathStep } from "./types/path-step";
 
 const MARKER: Record<PathStep["state"], string> = {
@@ -31,8 +32,9 @@ function Thread({ from, to }: { from: PathStep["state"]; to: PathStep["state"] }
 }
 
 export function InvestigationPath({ steps }: { steps: PathStep[] }) {
+  const c = useMessages().composer;
   return (
-    <nav aria-label="Investigation path">
+    <nav aria-label={c.path}>
       <ol className="grid grid-cols-4">
         {steps.map((step, i) => {
           const next = steps[i + 1];
@@ -81,7 +83,7 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
                   <button
                     type="button"
                     onClick={step.onPick ?? undefined}
-                    aria-label={`${number} ${step.label}${step.value ? `: ${step.value}` : ""}, go back to this step`}
+                    aria-label={`${number} ${step.label}${step.value ? `: ${step.value}` : ""}, ${c.goBack}`}
                     className="group flex max-w-full min-w-0 cursor-pointer items-baseline gap-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-li-focus"
                   >
                     {text}
@@ -95,8 +97,8 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
                     <span className="sr-only">
                       {number} {step.label}
                       {step.value ? `: ${step.value}` : ""}
-                      {step.state === "current" ? ", current step" : ""}
-                      {step.state === "next" ? ", not yet" : ""}
+                      {step.state === "current" ? `, ${c.currentStep}` : ""}
+                      {step.state === "next" ? `, ${c.notYet}` : ""}
                     </span>
                     <span aria-hidden className="flex max-w-full min-w-0 items-baseline gap-2.5">
                       {text}

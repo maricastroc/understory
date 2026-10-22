@@ -2,17 +2,18 @@
 
 import type { TreeOverview } from "@understory/core/types";
 import { useEffect, useState } from "react";
+import { type ApiFailure, failureFrom, NETWORK_FAILURE } from "@/lib/api-error";
 
 export function useOverview(
   repoPath: string,
   ready: boolean,
   cases: string[],
   token?: string,
-): { overview: TreeOverview | null; error: string | null } {
+): { overview: TreeOverview | null; error: ApiFailure | null } {
   const [state, setState] = useState<{
     key: string;
     overview: TreeOverview | null;
-    error: string | null;
+    error: ApiFailure | null;
   }>({ key: "", overview: null, error: null });
   const caseKey = cases.join("\n");
   const key = ready ? `${repoPath}\n${caseKey}` : "";
@@ -27,15 +28,15 @@ export function useOverview(
       ...(token ? { headers: { "x-github-token": token } } : {}),
     })
       .then(async (res) => {
-        const data = await res.json();
+        const data = await res.json().catch(() => null);
         setState(
-          res.ok
+          res.ok && data
             ? { key, overview: data as TreeOverview, error: null }
-            : { key, overview: null, error: data.error || "Could not read the file tree" },
+            : { key, overview: null, error: failureFrom(res, data) },
         );
       })
-      .catch((e) => {
-        if (!ctrl.signal.aborted) setState({ key, overview: null, error: String(e) });
+      .catch(() => {
+        if (!ctrl.signal.aborted) setState({ key, overview: null, error: NETWORK_FAILURE });
       });
     return () => ctrl.abort();
   }, [key, repoPath, caseKey, token]);

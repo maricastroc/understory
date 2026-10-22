@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { liButton } from "../line-investigation/parts/button-class";
 
 export function GoToLine({ max, onGo }: { max: number; onGo: (line: number) => void }) {
+  const v = useMessages().composer.viewer;
   const [value, setValue] = useState("");
 
   function submit() {
@@ -19,8 +21,8 @@ export function GoToLine({ max, onGo }: { max: number; onGo: (line: number) => v
         value={value}
         onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))}
         onKeyDown={(e) => e.key === "Enter" && submit()}
-        placeholder="line"
-        aria-label={`Go to line, 1 to ${max}`}
+        placeholder={v.goToPlaceholder}
+        aria-label={v.goTo(max)}
         className="h-6 w-16 border border-li-neutral-500 bg-li-paper px-2 font-li-mono text-[11px] text-li-ink outline-none placeholder:text-li-text-muted focus:border-li-ink focus:shadow-[inset_0_0_0_1px_var(--color-li-ink)]"
       />
       <button
@@ -28,7 +30,7 @@ export function GoToLine({ max, onGo }: { max: number; onGo: (line: number) => v
         onClick={submit}
         className={liButton("secondary", "font-li-mono", "xs")}
       >
-        go
+        {v.go}
       </button>
     </div>
   );

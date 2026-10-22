@@ -1,8 +1,13 @@
 import type { FileHistory } from "@understory/core/types";
 import { describe, expect, it } from "vitest";
+import { depthLabel } from "@/i18n/format";
+import { messagesFor } from "@/i18n/messages";
 import { coreHistory, depthScale, markTone, markWidth } from "./depth";
 import { MAP } from "./map-geometry";
 import { historyFacts, historyShares, prAbsence, shareLine } from "./share-copy";
+
+const label = (t: { count: number; unit: "d" | "w" | "m" | "y" }) =>
+  depthLabel(messagesFor("en").time, t.count, t.unit);
 
 const head = { sha: "h".repeat(40), date: "2026-09-25T00:00:00Z" };
 
@@ -31,21 +36,21 @@ describe("depth", () => {
     const view = coreHistory(h, head, scale);
     expect(view.oldestDays).toBe(365);
     expect(view.bottom).toBe(MAP.datumY + scale.depth);
-    expect(scale.ticks.map((t) => t.label)).toEqual(["−3m", "−6m", "−9m", "−12m"]);
+    expect(scale.ticks.map((t) => label(t))).toEqual(["−3m", "−6m", "−9m", "−12m"]);
   });
 
   it("stays linear: equal time spans get equal depth, labelled in the unit the history needs", () => {
     const young = depthScale([history([["2026-06-25T00:00:00Z", 1, "found"]])], head);
-    expect(young.ticks.map((t) => t.label)).toEqual(["−1m", "−2m", "−3m"]);
+    expect(young.ticks.map((t) => label(t))).toEqual(["−1m", "−2m", "−3m"]);
     expect(young.ticks[1].offset - young.ticks[0].offset).toBeCloseTo(young.ticks[0].offset, 6);
     const mid = depthScale([history([["2023-09-25T00:00:00Z", 1, "found"]])], head);
-    expect(mid.ticks.map((t) => t.label)).toEqual(["−1y", "−2y", "−3y"]);
+    expect(mid.ticks.map((t) => label(t))).toEqual(["−1y", "−2y", "−3y"]);
     const deep = depthScale([history([["2006-09-25T00:00:00Z", 1, "found"]])], head);
-    expect(deep.ticks.map((t) => t.label)).toEqual(["−5y", "−10y", "−15y", "−20y"]);
+    expect(deep.ticks.map((t) => label(t))).toEqual(["−5y", "−10y", "−15y", "−20y"]);
     const days = depthScale([history([["2026-09-21T00:00:00Z", 1, "found"]])], head);
-    expect(days.ticks.map((t) => t.label)).toEqual(["−1d", "−2d", "−3d", "−4d"]);
+    expect(days.ticks.map((t) => label(t))).toEqual(["−1d", "−2d", "−3d", "−4d"]);
     const weeks = depthScale([history([["2026-08-20T00:00:00Z", 1, "found"]])], head);
-    expect(weeks.ticks.map((t) => t.label)).toEqual(["−2w", "−4w"]);
+    expect(weeks.ticks.map((t) => label(t))).toEqual(["−2w", "−4w"]);
   });
 
   it("sizes the depth by the commits there are to draw, not by how old they are", () => {
@@ -106,7 +111,7 @@ describe("depth", () => {
     expect(views[1].breakY).toBeNull();
     expect(views[2].breakY).toBeNull();
     expect(views[1].bottom - MAP.datumY).toBeCloseTo(100, 0);
-    const labels = scale.ticks.map((t) => t.label);
+    const labels = scale.ticks.map((t) => label(t));
     expect(labels[labels.length - 1]).toBe("−12y");
     expect(labels.slice(0, -1).every((l) => l.endsWith("m") || l.endsWith("w"))).toBe(true);
     const mixed = depthScale(
@@ -118,7 +123,7 @@ describe("depth", () => {
       head,
     );
     expect(mixed.breakAt).not.toBeNull();
-    expect(mixed.ticks[mixed.ticks.length - 1].label).toBe("−4y");
+    expect(label(mixed.ticks[mixed.ticks.length - 1])).toBe("−4y");
   });
 
   it("sizes marks by the share of current lines and never turns unknown into none", () => {
@@ -139,42 +144,42 @@ describe("share copy", () => {
   ]);
 
   it("scopes the percentages to the lines of the mapped files, all on the same base", () => {
-    expect(shareLine([a], "github")).toBe(
+    expect(shareLine([a], "github", "en")).toBe(
       "60% of lines in 1 mapped file have a PR · 20% not checked",
     );
-    expect(shareLine([a, { ...a, path: "b.ts" }], "github")).toMatch(/in 2 mapped files/);
-    expect(shareLine([], "github")).toBeNull();
-    expect(shareLine([a], "none")).toBeNull();
+    expect(shareLine([a, { ...a, path: "b.ts" }], "github", "en")).toMatch(/in 2 mapped files/);
+    expect(shareLine([], "github", "en")).toBeNull();
+    expect(shareLine([a], "none", "en")).toBeNull();
     const skipped = history([["2020-01-01T00:00:00Z", 3, "skipped"]]);
-    expect(shareLine([skipped], "github")).toBeNull();
+    expect(shareLine([skipped], "github", "en")).toBeNull();
   });
 
   it("keeps the absence of PR data out of the legend and says it where it is asked for", () => {
-    expect(prAbsence([a], "none")).toMatch(/^PR data is unavailable for this repo/);
-    expect(prAbsence([history([["2020-01-01T00:00:00Z", 3, "skipped"]])], "github")).toBe(
+    expect(prAbsence([a], "none", "en")).toMatch(/^PR data is unavailable for this repo/);
+    expect(prAbsence([history([["2020-01-01T00:00:00Z", 3, "skipped"]])], "github", "en")).toBe(
       "PR lookups were unavailable for the 1 mapped file.",
     );
-    expect(prAbsence([a], "github")).toBeNull();
-    expect(prAbsence([], "github")).toBeNull();
+    expect(prAbsence([a], "github", "en")).toBeNull();
+    expect(prAbsence([], "github", "en")).toBeNull();
   });
 
   it("states depth as the oldest surviving line and qualifies a cut history as a lower bound", () => {
     const view = coreHistory(a, head, depthScale([a], head));
-    expect(historyFacts(view)).toBe(
+    expect(historyFacts(view, "en")).toBe(
       "Oldest surviving line: 6y 8m. 3 commits own its 10 lines at HEAD.",
     );
-    expect(historyShares(view)).toBe("60% PR · 20% no PR · 20% not checked (of lines)");
-    expect(historyShares({ ...view, shares: { found: 1, none: 1, unknown: 1 } })).toBe(
+    expect(historyShares(view, "en")).toBe("60% PR · 20% no PR · 20% not checked (of lines)");
+    expect(historyShares({ ...view, shares: { found: 1, none: 1, unknown: 1 } }, "en")).toBe(
       "34% PR · 33% no PR · 33% not checked (of lines)",
     );
-    expect(historyShares({ ...view, shares: { found: 996, none: 4, unknown: 0 } })).toBe(
+    expect(historyShares({ ...view, shares: { found: 996, none: 4, unknown: 0 } }, "en")).toBe(
       ">99% PR · <1% no PR (of lines)",
     );
-    expect(historyShares({ ...view, shares: { found: 5, none: 0, unknown: 0 } })).toBe(
+    expect(historyShares({ ...view, shares: { found: 5, none: 0, unknown: 0 } }, "en")).toBe(
       "100% PR (of lines)",
     );
     const cut = coreHistory({ ...a, cut: true }, head, depthScale([a], head));
-    expect(historyFacts(cut)).toMatch(
+    expect(historyFacts(cut, "en")).toMatch(
       /^Oldest surviving line: ≥ 6y 8m\..* History cut at clone depth\.$/,
     );
   });

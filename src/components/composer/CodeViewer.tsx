@@ -1,5 +1,6 @@
 import type { SymbolSpan } from "@understory/core/collect/symbol";
 import { useEffect, useMemo, useRef } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { CodeText } from "../line-investigation/specimen/CodeText";
 import { highlightLines } from "../line-investigation/specimen/highlight-code";
 import { GoToLine } from "./GoToLine";
@@ -54,6 +55,8 @@ export function CodeViewer({
     scrollToIndex(n - 1);
   };
 
+  const m = useMessages();
+  const v = m.composer.viewer;
   const hasSelection = selectedStart !== null && selectedEnd !== null;
   const rangeSize = hasSelection ? selectedEnd - selectedStart + 1 : 0;
   const isSymbolSelected =
@@ -62,7 +65,7 @@ export function CodeViewer({
 
   return (
     <section
-      aria-label={`Code, ${file.path}`}
+      aria-label={v.code(file.path)}
       className="flex min-w-0 flex-col border border-li-divider bg-li-neutral-100"
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-li-divider px-3.5 py-2">
@@ -71,10 +74,10 @@ export function CodeViewer({
           {file.path.slice(slash + 1)}
         </span>
         <span className="font-li-mono text-[11px] text-li-text-subtle">
-          {file.lines.length} lines
+          {m.composer.lineCount(file.lines.length)}
         </span>
         <span className="ml-auto text-[11.5px] text-li-neutral-800 max-[640px]:hidden">
-          Drag or shift-click to select a range
+          {v.dragHint}
         </span>
         <GoToLine max={file.lines.length} onGo={goToLine} />
       </div>
@@ -115,7 +118,7 @@ export function CodeViewer({
                     if (!pointerPicked.current) onSelect(n, e.shiftKey);
                   }}
                   aria-pressed={inRange}
-                  aria-label={`Line ${n}${inRange ? ", selected" : ""}. Shift-click, shift-enter or drag to extend the range.`}
+                  aria-label={inRange ? v.lineSelected(n) : v.line(n)}
                   className={`group flex h-full w-full cursor-pointer items-center border-l-[3px] text-left font-li-mono text-xs leading-[1.6] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus ${
                     inRange
                       ? "border-li-datum bg-li-datum-row font-medium text-li-ink"
@@ -141,10 +144,10 @@ export function CodeViewer({
                   {inRange && isEnd && (
                     <span className="shrink-0 self-center pr-3 font-li-mono text-[10.5px] font-medium text-li-datum-ink">
                       {isSymbolSelected
-                        ? symbolNoun(enclosing.kind)
+                        ? m.composer.noun[symbolNoun(enclosing.kind)]
                         : rangeSize > 1
-                          ? `${rangeSize} lines`
-                          : "selected"}
+                          ? m.composer.lineCount(rangeSize)
+                          : v.selected}
                     </span>
                   )}
                 </button>

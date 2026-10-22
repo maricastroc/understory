@@ -2,6 +2,7 @@
 
 import type { TreeOverview } from "@understory/core/types";
 import { useId, useMemo, useState } from "react";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { useElementWidth } from "../../use-element-width";
 import { MapCanvas, useCoreViews } from "./MapCanvas";
 import { MapHeader } from "./MapHeader";
@@ -29,6 +30,8 @@ export function HistoryMap({
   map: HistoryMapControl;
   onOpen: (path: string) => void;
 }) {
+  const locale = useLocale();
+  const m = useMessages();
   const titleId = useId();
   const [boxRef, width] = useElementWidth();
   const [focus, setFocus] = useState<string | null>(null);
@@ -48,15 +51,13 @@ export function HistoryMap({
       }),
     [overview.files, map.states],
   );
-  const share = shareLine(histories, overview.prData);
+  const share = shareLine(histories, overview.prData, locale);
   const sparse = layout.mode === "sparse";
   const broken = histories.length > 0 && scale?.breakAt != null;
   const about = [
-    scopeAbout(overview),
-    `Depth is how long before HEAD each current line was last changed${
-      broken ? "; below the zigzag break it is compressed to fit one much older file" : ""
-    }. Percentages count lines in mapped files only.`,
-    prAbsence(histories, overview.prData),
+    scopeAbout(overview, locale),
+    `${broken ? m.map.depthBroken : m.map.depth} ${m.map.percentages}`,
+    prAbsence(histories, overview.prData, locale),
   ].filter((line): line is string => !!line);
   const legend = <MapLegend present={legendKeys(layout, map.states, broken)} note={share} />;
   const focused = focus ? (layout.cores.find((c) => c.path === focus) ?? null) : null;
@@ -67,7 +68,7 @@ export function HistoryMap({
         ref={sideRef}
         tabIndex={hidden.scrolls ? 0 : undefined}
         role={hidden.scrolls ? "region" : undefined}
-        aria-label={hidden.scrolls ? "History map, scroll sideways for more files" : undefined}
+        aria-label={hidden.scrolls ? m.map.scrollable : undefined}
         className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
       >
         <MapCanvas
@@ -105,10 +106,10 @@ export function HistoryMap({
     <section aria-labelledby={titleId} className="flex flex-col gap-4">
       <MapHeader
         titleId={titleId}
-        scope={scopeWhy(overview, !sparse)}
+        scope={scopeWhy(overview, !sparse, locale)}
         about={about}
-        mapped={map.mapped < total ? mappedLine(map.mapped, total, map.mapping) : null}
-        moreLabel={map.mapMore ? `Map ${map.remaining} more` : null}
+        mapped={map.mapped < total ? mappedLine(map.mapped, total, map.mapping, locale) : null}
+        moreLabel={map.mapMore ? m.map.more(map.remaining) : null}
         onMapMore={map.mapMore}
       />
       {!sparse && legend}
@@ -127,7 +128,7 @@ export function HistoryMap({
           <div className="flex items-start gap-10">
             {canvas}
             <aside
-              aria-label="File inspector"
+              aria-label={m.map.inspector}
               className="min-w-0 flex-1 border-l border-li-divider pl-8"
               style={{ maxWidth: 520 }}
             >

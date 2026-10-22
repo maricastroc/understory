@@ -17,7 +17,21 @@ function rendered(value: unknown): string[] {
   return [String(value)];
 }
 
-const SAME_IN_BOTH = new Set<string>();
+const SAME_IN_BOTH = new Set<string>([
+  "time.unit.m",
+  "time.unit.d",
+  "time.dayMonth",
+  "composer.noun.namespace",
+  "composer.noun.interface",
+  "composer.noun.enum",
+  "composer.noun.struct",
+  "composer.noun.trait",
+  "composer.repo.source.github",
+  "composer.repo.labels.branch",
+  "composer.repo.labels.head",
+  "map.rows.commits",
+  "map.rows.prs",
+]);
 
 const en = leaves(messagesFor("en"));
 

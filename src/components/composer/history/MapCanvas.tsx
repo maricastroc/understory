@@ -2,10 +2,11 @@
 
 import type { HeadCommit } from "@understory/core/types";
 import { useMemo } from "react";
+import { depthLabel, shortAge } from "@/i18n/format";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { DatumRule } from "../../line-investigation/bore/DatumRule";
-import { shortAge } from "../../line-investigation/format/age";
 import { CoreGraphic } from "./CoreGraphic";
-import { coreLabel, MOVED_LINES, statusFacts } from "./core-copy";
+import { coreLabel, statusFacts } from "./core-copy";
 import { coreHistory, depthScale } from "./depth";
 import { headLabel } from "./head-label";
 import { MapCard } from "./MapCard";
@@ -67,7 +68,9 @@ export function MapCanvas({
   onOpen: (path: string) => void;
   card: boolean;
 }) {
-  const label = head ? headLabel(head) : null;
+  const locale = useLocale();
+  const m = useMessages();
+  const label = head ? headLabel(head, locale) : null;
   const { mapped, scale, views } = useCoreViews(layout, states, head);
   const datumY = layout.datumY;
 
@@ -130,12 +133,12 @@ export function MapCanvas({
         mapped.length > 0 &&
         scale.ticks.map((t) => (
           <p
-            key={t.label}
+            key={`${t.count}${t.unit}`}
             aria-hidden
             className="absolute w-9 text-right font-li-mono text-[10.5px] text-li-neutral-800"
             style={{ left: 0, top: datumY + t.offset - 7 }}
           >
-            {t.label}
+            {depthLabel(m.time, t.count, t.unit)}
           </p>
         ))}
 
@@ -185,7 +188,7 @@ export function MapCanvas({
             )}
             {scale.ticks.map((t) => (
               <line
-                key={t.label}
+                key={`${t.count}${t.unit}`}
                 x1={MAP.axisX}
                 x2={MAP.axisX + 8}
                 y1={datumY + t.offset}
@@ -208,7 +211,7 @@ export function MapCanvas({
         ))}
       </svg>
 
-      <ul aria-label="Files shown">
+      <ul aria-label={m.map.filesShown}>
         {layout.cores.map((c) => {
           const view = views.get(c.path) ?? null;
           return (
@@ -219,9 +222,9 @@ export function MapCanvas({
               opacity={hidden(c) ? 0.15 : 1}
               muted={muted(c)}
               focused={focus === c.path}
-              label={coreLabel(c, stateOf(c).status, view)}
+              label={coreLabel(c, stateOf(c).status, view, locale)}
               reach={reachOf(c)}
-              age={view ? `${view.cut ? "≥ " : ""}${shortAge(view.oldestDays)}` : null}
+              age={view ? `${view.cut ? "≥ " : ""}${shortAge(m.time, view.oldestDays)}` : null}
               onOpen={() => onOpen(c.path)}
               onFocus={() => onFocus(c.path)}
             />
@@ -240,16 +243,14 @@ export function MapCanvas({
           top={datumY + MAP.cardTop}
           facts={
             views.get(focused.path)
-              ? historyFacts(views.get(focused.path)!)
-              : statusFacts(stateOf(focused).status)
+              ? historyFacts(views.get(focused.path)!, locale)
+              : statusFacts(stateOf(focused).status, locale)
           }
           history={views.get(focused.path) ?? null}
-          shares={views.get(focused.path) ? historyShares(views.get(focused.path)!) : null}
-          why={whyShown(focused.reason, recentCommits)}
+          shares={views.get(focused.path) ? historyShares(views.get(focused.path)!, locale) : null}
+          why={whyShown(focused.reason, recentCommits, locale)}
           note={
-            views.get(focused.path)
-              ? `${MOVED_LINES} Click to open and pick a line.`
-              : "Click to open and pick a line."
+            views.get(focused.path) ? `${m.map.movedLines} ${m.map.clickToOpen}` : m.map.clickToOpen
           }
         />
       )}

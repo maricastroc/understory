@@ -2,6 +2,9 @@
 
 import type { TreeOverview } from "@understory/core/types";
 import { useMemo } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
+import type { ApiFailure } from "@/lib/api-error";
+import { ErrorState } from "../ErrorState";
 import { HistoryMap } from "./history/HistoryMap";
 import type { HistoryMapControl } from "./history/use-history-map";
 import { SECTION_RULE } from "./composer-classes";
@@ -20,7 +23,7 @@ export function FileStage({
   onOpen,
 }: {
   overview: TreeOverview | null;
-  overviewError: string | null;
+  overviewError: ApiFailure | null;
   caseCounts: ReadonlyMap<string, number>;
   query: string;
   onQuery: (v: string) => void;
@@ -30,6 +33,7 @@ export function FileStage({
   map: HistoryMapControl;
   onOpen: (path: string) => void;
 }) {
+  const f = useMessages().composer.files;
   const q = query.trim().toLowerCase();
   const shown = useMemo(() => overview?.files ?? [], [overview]);
   const matches = useMemo(
@@ -37,7 +41,7 @@ export function FileStage({
       q ? new Set(shown.filter((f) => f.path.toLowerCase().includes(q)).map((f) => f.path)) : null,
     [q, shown],
   );
-  const note = matches ? `${matches.size} of ${shown.length} shown` : "↵ open";
+  const note = matches ? f.shown(matches.size, shown.length) : f.open;
 
   const submit = () => {
     const first = shown.find((f) => matches?.has(f.path))?.path ?? results[0];
@@ -45,7 +49,7 @@ export function FileStage({
   };
 
   return (
-    <section aria-label="Choose a file" className="flex flex-col gap-10">
+    <section aria-label={f.choose} className="flex flex-col gap-10">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
         <MapSearch
           query={query}
@@ -69,12 +73,12 @@ export function FileStage({
           onOpen={onOpen}
         />
       ) : overviewError ? (
-        <p role="alert" className={`text-[13px] text-li-neutral-800 ${SECTION_RULE}`}>
-          The file list could not be read: {overviewError}. Search still works.
-        </p>
+        <div className={SECTION_RULE}>
+          <ErrorState failure={overviewError} title={f.treeFailed} />
+        </div>
       ) : (
         <p role="status" className={`text-[13px] text-li-text-subtle ${SECTION_RULE}`}>
-          Reading the file tree…
+          {f.readingTree}
         </p>
       )}
     </section>

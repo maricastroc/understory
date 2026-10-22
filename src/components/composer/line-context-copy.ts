@@ -1,6 +1,7 @@
 import type { BlameSpan, HeadCommit } from "@understory/core/types";
-import { fmtDate } from "../format";
-import { shortAge } from "../line-investigation/format/age";
+import { formatDay, shortAge } from "@/i18n/format";
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import { ageDays } from "./history/depth";
 
 export type LastChange = {
@@ -11,14 +12,19 @@ export type LastChange = {
   commits: number;
 };
 
-export function lastChange(spans: BlameSpan[], head: HeadCommit | null): LastChange | null {
+export function lastChange(
+  spans: BlameSpan[],
+  head: HeadCommit | null,
+  locale: Locale,
+): LastChange | null {
   if (!spans.length) return null;
+  const t = messagesFor(locale).time;
   const newest = [...spans].sort((a, b) => b.date.localeCompare(a.date))[0];
   return {
     sha: newest.shortSha,
     author: newest.author ?? null,
-    date: fmtDate(newest.date),
-    age: head ? shortAge(ageDays(head, newest.date)) : null,
+    date: formatDay(t, newest.date),
+    age: head ? shortAge(t, ageDays(head, newest.date)) : null,
     commits: new Set(spans.map((s) => s.sha)).size,
   };
 }

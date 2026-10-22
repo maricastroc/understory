@@ -44,10 +44,11 @@ export function RepoStage({
   const inputId = useId();
   const statusId = useId();
   const m = useMessages();
+  const r = m.composer.repo;
   const needsAccess = error?.code === "not-found";
 
   return (
-    <section aria-label="Open a repository" className="flex max-w-190 flex-col gap-3">
+    <section aria-label={r.section} className="flex max-w-190 flex-col gap-3">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -56,7 +57,7 @@ export function RepoStage({
         className="flex items-stretch gap-2 max-[640px]:flex-col"
       >
         <label htmlFor={inputId} className="sr-only">
-          Repository
+          {m.shell.repository}
         </label>
         <div className={`flex h-14 min-w-0 flex-1 items-center ${FIELD_FRAME}`}>
           <span aria-hidden className="pl-4">
@@ -70,7 +71,7 @@ export function RepoStage({
             value={repoPath}
             onChange={(e) => onEdit(e.target.value)}
             disabled={connecting}
-            placeholder="github.com/owner/repo or ./path/to/a/clone"
+            placeholder={r.placeholder}
             spellCheck={false}
             autoComplete="off"
             className="h-full min-w-0 flex-1 bg-transparent px-3 font-li-mono text-[16px] text-li-ink outline-none placeholder:text-li-text-muted disabled:text-li-text-subtle"
@@ -90,20 +91,16 @@ export function RepoStage({
           {connecting ? (
             <>
               <span aria-hidden className={`size-3.5 ${SPINNER}`} />
-              Opening
+              {r.opening}
             </>
           ) : (
-            "Open"
+            r.open
           )}
         </button>
       </form>
 
       <div id={statusId} aria-live="polite" className="min-h-5">
-        {connecting && (
-          <p className="text-[13px] text-li-neutral-800">
-            Reading the repository. A clone from a URL can take a moment the first time.
-          </p>
-        )}
+        {connecting && <p className="text-[13px] text-li-neutral-800">{r.reading}</p>}
       </div>
 
       {needsAccess && (

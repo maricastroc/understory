@@ -1,14 +1,9 @@
 import type { RepoMeta, TreeOverview } from "@understory/core/types";
 import type { ReactNode } from "react";
-import { fmtDate } from "../format";
+import { formatDay, formatNumber } from "@/i18n/format";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import type { HistoryMapControl } from "./history/use-history-map";
-
-const SOURCE: Record<RepoMeta["kind"], string> = {
-  github: "GitHub",
-  remote: "Cloned from URL",
-  local: "Local clone",
-};
 
 const CELL: Record<string, string> = {
   mapped: "border-li-ink bg-li-ink",
@@ -47,6 +42,9 @@ export function RepoDetails({
   overview: TreeOverview | null;
   map: HistoryMapControl;
 }) {
+  const locale = useLocale();
+  const m = useMessages();
+  const r = m.composer.repo;
   const head = overview?.head ?? null;
   const shown = overview?.files ?? [];
   const status = (path: string) => map.states.get(path)?.status ?? "stub";
@@ -55,8 +53,8 @@ export function RepoDetails({
     <div className="border-t border-li-divider">
       <dl className="grid grid-cols-[repeat(6,minmax(0,max-content))] items-stretch max-[1100px]:grid-cols-3 max-[1100px]:gap-x-6 max-[640px]:grid-cols-2">
         <Segment
-          label="source"
-          sub={meta?.private ? "private" : meta?.kind === "local" ? "on this machine" : undefined}
+          label={r.labels.source}
+          sub={meta?.private ? r.private : meta?.kind === "local" ? r.onThisMachine : undefined}
         >
           {meta?.htmlUrl ? (
             <a
@@ -65,42 +63,42 @@ export function RepoDetails({
               rel="noopener noreferrer"
               className="li-link truncate font-li-body text-[14px]"
             >
-              {SOURCE[meta.kind]}
+              {r.source[meta.kind]}
               <span aria-hidden> ↗</span>
             </a>
           ) : (
-            <span className="font-li-body text-[14px]">{SOURCE[meta?.kind ?? "local"]}</span>
+            <span className="font-li-body text-[14px]">{r.source[meta?.kind ?? "local"]}</span>
           )}
         </Segment>
         {meta?.branch && (
-          <Segment label="branch">
+          <Segment label={r.labels.branch}>
             <span className="truncate">{meta.branch}</span>
           </Segment>
         )}
         {head && (
-          <Segment label="head" sub={overview?.shallow ? "shallow clone" : fmtDate(head.date)}>
+          <Segment
+            label={r.labels.head}
+            sub={overview?.shallow ? r.shallow : formatDay(m.time, head.date)}
+          >
             <DomainIcon kind="commit" size={14} />
             {head.sha.slice(0, 7)}
           </Segment>
         )}
         {overview && (
-          <Segment
-            label="files"
-            sub={overview.truncated ? "partial file list" : "in the tree at HEAD"}
-          >
+          <Segment label={r.labels.files} sub={overview.truncated ? r.partialList : r.inTree}>
             {overview.truncated ? "≥" : ""}
-            {overview.total.toLocaleString("en-US")}
+            {formatNumber(locale, overview.total)}
           </Segment>
         )}
         {overview && shown.length > 0 && (
           <Segment
-            label="mapped"
+            label={r.labels.mapped}
             sub={
               map.mapping
-                ? `mapping ${map.mapping}`
+                ? r.mapping(map.mapping)
                 : overview.mappable
-                  ? "files shown below"
-                  : "not available here"
+                  ? r.shownBelow
+                  : r.notAvailableHere
             }
           >
             <span>
@@ -116,14 +114,12 @@ export function RepoDetails({
         )}
         {overview && (
           <Segment
-            label="pr data"
-            sub={
-              overview.prData === "github" ? "looked up per commit" : "no GitHub remote or token"
-            }
+            label={r.labels.prData}
+            sub={overview.prData === "github" ? r.perCommit : r.noRemote}
           >
             <DomainIcon kind="pull_request" size={14} muted={overview.prData !== "github"} />
             <span className={overview.prData === "github" ? "" : "text-li-text-subtle"}>
-              {overview.prData === "github" ? "GitHub" : "unavailable"}
+              {overview.prData === "github" ? r.source.github : r.unavailable}
             </span>
           </Segment>
         )}

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { readJson } from "@/lib/read-json";
+import { type ApiFailure, failureFrom, NETWORK_FAILURE, thrownFailure } from "@/lib/api-error";
 
 export function useFileSearch(repoPath: string, enabled: boolean, token?: string) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<string[]>([]);
   const [searching, setSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiFailure | null>(null);
   const seq = useRef(0);
 
   useEffect(() => {
@@ -28,11 +28,17 @@ export function useFileSearch(repoPath: string, enabled: boolean, token?: string
           const res = await fetch(
             `/api/files?repo=${encodeURIComponent(repoPath)}&q=${encodeURIComponent(q)}`,
             token ? { headers: { "x-github-token": token } } : undefined,
-          );
-          const data = await readJson<{ files?: string[]; error?: string }>(res);
+          ).catch(() => null);
           if (id !== seq.current) return;
-          if (!res.ok) {
-            setError(data.error || "Search failed");
+          if (!res) {
+            setError(NETWORK_FAILURE);
+            setResults([]);
+            return;
+          }
+          const data = (await res.json().catch(() => null)) as { files?: string[] } | null;
+          if (id !== seq.current) return;
+          if (!res.ok || !data) {
+            setError(failureFrom(res, data));
             setResults([]);
           } else {
             setError(null);
@@ -40,7 +46,7 @@ export function useFileSearch(repoPath: string, enabled: boolean, token?: string
           }
         } catch (e) {
           if (id === seq.current) {
-            setError(e instanceof Error ? e.message : String(e));
+            setError(thrownFailure(e));
             setResults([]);
           }
         } finally {
