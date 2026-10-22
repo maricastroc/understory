@@ -44,13 +44,6 @@ export function KindIcon({ kind, className }: { kind: ArtifactKind; className?: 
   return <Icon className={className} />;
 }
 
-export const kindLabel: Record<ArtifactKind, string> = {
-  commit: "Commit",
-  pull_request: "Pull request",
-  issue: "Issue",
-  review: "Review",
-};
-
 export {
   Search,
   BookMarked as Repo,

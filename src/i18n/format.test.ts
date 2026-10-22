@@ -1,9 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { fmtDate } from "@/components/format";
-import {
-  longAge as longAgeEn,
-  shortAge as shortAgeEn,
-} from "@/components/line-investigation/format/age";
 import {
   depthLabel,
   formatDay,
@@ -34,10 +29,40 @@ describe("format", () => {
   });
 
   it("writes ages in English exactly as before", () => {
-    for (const d of DAYS) {
-      expect(shortAge(en, d)).toBe(shortAgeEn(d));
-      expect(longAge(en, d)).toBe(longAgeEn(d));
-    }
+    expect(DAYS.map((d) => shortAge(en, d))).toEqual([
+      "0d",
+      "0d",
+      "1d",
+      "5d",
+      "13d",
+      "1m",
+      "1m",
+      "6m",
+      "1y",
+      "1y 1m",
+      "2y 2m",
+      "9y 11m",
+      "10y 1m",
+    ]);
+    expect(DAYS.map((d) => longAge(en, d))).toEqual([
+      "less than a day",
+      "less than a day",
+      "1 day",
+      "5 days",
+      "13 days",
+      "1 month",
+      "1 month",
+      "6 months",
+      "1 year",
+      "1 year 1 month",
+      "2 years 2 months",
+      "9 years 11 months",
+      "10 years 1 month",
+    ]);
+    expect(shortAge(en, 3.5 * 365.25)).toBe("3y 6m");
+    expect(shortAge(en, 2 * 365.25)).toBe("2y");
+    expect(shortAge(en, 70)).toBe("2m");
+    expect(longAge(en, 3.5 * 365.25)).toBe("3 years 6 months");
   });
 
   it("writes ages in Portuguese, short and long, with plurals and the conjunction", () => {
@@ -73,8 +98,11 @@ describe("format", () => {
   });
 
   it("writes a day in English exactly as before, and in Portuguese without padding", () => {
-    for (const iso of ["2023-03-09T10:00:00Z", "2024-12-31", "2023-09-01T23:59:00-03:00"])
-      expect(formatDay(en, iso)).toBe(fmtDate(iso));
+    expect(formatDay(en, "2023-03-09T10:00:00Z")).toBe("09 Mar 2023");
+    expect(formatDay(en, "2023-11-27T10:00:00Z")).toBe("27 Nov 2023");
+    expect(formatDay(en, "2024-12-31")).toBe("31 Dec 2024");
+    expect(formatDay(en, "2023-09-01T23:59:00-03:00")).toBe("01 Sep 2023");
+    expect(formatDay(en, "unknown")).toBe("unknown");
     expect(formatDay(pt, "2023-03-09T10:00:00Z")).toBe("9 mar 2023");
     expect(formatDay(pt, "2023-09-01T23:59:00-03:00")).toBe("1 set 2023");
     expect(formatDay(pt, "not a date")).toBe("not a date");
