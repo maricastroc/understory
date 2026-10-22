@@ -1,13 +1,15 @@
 import type { VerifiedNarrative } from "@understory/core/types";
+import { useMessages } from "@/i18n/LocaleProvider";
 
 export function Provenance({ narrative }: { narrative: VerifiedNarrative }) {
+  const r = useMessages().report.rail;
   const c = narrative.confidence;
   const denom = Math.max(1, c.primarySources + c.corroborating + c.contradicting);
   const pct = (n: number) => `${Math.max(n > 0 ? 6 : 2, Math.round((n / denom) * 100))}%`;
   const bars: Array<{ label: string; n: number; color: string }> = [
-    { label: "Primary sources", n: c.primarySources, color: "var(--color-good)" },
-    { label: "Corroborating", n: c.corroborating, color: "var(--color-accent)" },
-    { label: "Contradicting", n: c.contradicting, color: "var(--color-crit)" },
+    { label: r.primary, n: c.primarySources, color: "var(--color-good)" },
+    { label: r.corroborating, n: c.corroborating, color: "var(--color-accent)" },
+    { label: r.contradicting, n: c.contradicting, color: "var(--color-crit)" },
   ];
 
   return (
@@ -15,14 +17,10 @@ export function Provenance({ narrative }: { narrative: VerifiedNarrative }) {
       <div
         className={`text-[15px] font-semibold ${narrative.grounded ? "text-good" : "text-crit"}`}
       >
-        {narrative.grounded
-          ? "All citations grounded"
-          : `${narrative.unknownCitations.length} fabricated citation${narrative.unknownCitations.length > 1 ? "s" : ""}`}
+        {narrative.grounded ? r.allGrounded : r.fabricated(narrative.unknownCitations.length)}
       </div>
       <div className="mt-1 text-[12px] leading-snug text-ink-2">
-        {narrative.grounded
-          ? "Every cited source resolves to a real, collected artifact. 0 unverified citations."
-          : "A cited source was not found in the collected evidence — verification caught it."}
+        {narrative.grounded ? r.groundedNote : r.fabricatedNote}
       </div>
       <div className="mt-3 flex flex-col gap-2.5">
         {bars.map((b) => (

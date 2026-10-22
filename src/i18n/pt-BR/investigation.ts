@@ -345,9 +345,9 @@ export const questions: Messages["questions"] = {
 };
 
 export const accessible: Messages["accessible"] = {
-  notCited: "não citado por nenhuma afirmação",
-  citedBy: (n) => `citado pela afirmação ${n}`,
-  citedByMany: (list, last) => `citado pelas afirmações ${list} e ${last}`,
+  notCited: "não é fonte de nenhuma afirmação",
+  citedBy: (n) => `fonte da afirmação ${n}`,
+  citedByMany: (list, last) => `fonte das afirmações ${list} e ${last}`,
   quoteVerified: "citação literal verificada",
   noPrBefore: (target) => `nenhum pull request, revisão ou issue antes ${of(target)}`,
   noReviewOn: (target) => `nenhuma revisão ${at(target)}`,

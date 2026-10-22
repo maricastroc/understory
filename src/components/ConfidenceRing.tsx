@@ -1,5 +1,6 @@
 import type { Confidence } from "@understory/core/types";
-import { levelLabel, levelTone } from "./format";
+import { useMessages } from "@/i18n/LocaleProvider";
+import { levelTone } from "./format";
 
 export function ConfidenceRing({
   confidence,
@@ -8,6 +9,7 @@ export function ConfidenceRing({
   confidence: Confidence;
   size?: number;
 }) {
+  const level = useMessages().report.level;
   const r = 52;
   const circumference = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, confidence.score));
@@ -42,7 +44,7 @@ export function ConfidenceRing({
             className={`mt-1 font-semibold tracking-wider uppercase ${tone.text}`}
             style={{ fontSize: Math.round(size * 0.08) }}
           >
-            {levelLabel[confidence.level]}
+            {level[confidence.level]}
           </span>
         )}
       </div>

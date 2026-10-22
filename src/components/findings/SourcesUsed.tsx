@@ -1,14 +1,6 @@
-import type { Artifact, ArtifactKind, EntailmentStatus } from "@understory/core/types";
+import type { Artifact, EntailmentStatus } from "@understory/core/types";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { Alert, Check, ExternalLink, KindIcon } from "../icons";
-
-const sourceNoun = (kind: ArtifactKind): string =>
-  kind === "pull_request"
-    ? "PR"
-    : kind === "commit"
-      ? "Commit"
-      : kind === "issue"
-        ? "Issue"
-        : "Review";
 
 function SupportMark({ status }: { status?: EntailmentStatus }) {
   if (status === "unsupported") return <Alert className="size-3.5 shrink-0 text-crit" />;
@@ -20,24 +12,25 @@ export function SourcesUsed({
   resolved,
   byId,
   statusById,
-  label = "Sources used",
+  label,
 }: {
   resolved: string[];
   byId: Map<string, Artifact>;
   statusById?: Map<string, EntailmentStatus>;
   label?: string;
 }) {
+  const f = useMessages().report.findings;
   if (resolved.length === 0) return null;
   return (
     <div className="mt-6">
       <div className="mb-2.5 text-[11px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
-        {label}
+        {label ?? f.sourcesUsed}
       </div>
       <div className="flex flex-wrap gap-2">
         {resolved.map((id) => {
           const a = byId.get(id);
           if (!a) return null;
-          const label = `${sourceNoun(a.kind)} ${a.ref ?? id}`;
+          const label = `${f.sourceNoun[a.kind]} ${a.ref ?? id}`;
           const inner = (
             <>
               <SupportMark status={statusById?.get(id)} />

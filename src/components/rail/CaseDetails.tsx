@@ -1,10 +1,12 @@
 import type { DigResult, Evidence } from "@understory/core/types";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { ExternalLink, Github, Repo, Shield, Users } from "../icons";
 import { Avatar } from "../ui";
 import { MetaRow, RailCard } from "./RailCard";
 import { Provenance } from "./Provenance";
 
 export function CaseDetails({ result }: { result: DigResult }) {
+  const r = useMessages().report.rail;
   const ev: Evidence = result.evidence;
   const repoName = ev.repo.name ?? ev.repo.path.split("/").filter(Boolean).pop() ?? ev.repo.path;
   const anchor = ev.anchor?.ref ?? ev.anchor?.id ?? "—";
@@ -18,7 +20,7 @@ export function CaseDetails({ result }: { result: DigResult }) {
 
   return (
     <>
-      <RailCard icon={<Repo className="size-3.75" />} title="Repository">
+      <RailCard icon={<Repo className="size-3.75" />} title={r.repository}>
         <div className="flex items-center gap-2 text-[14px] font-semibold tracking-tight">
           {ev.repo.remoteUrl?.includes("github.com") ? (
             <Github className="size-4 shrink-0 text-ink-2" />
@@ -28,20 +30,16 @@ export function CaseDetails({ result }: { result: DigResult }) {
           <span className="truncate font-mono">{repoName}</span>
         </div>
         <div className="mt-3">
-          <MetaRow k="Branch" v={ev.repo.branch ?? "—"} mono tail />
-          <MetaRow k="Anchor" v={anchor} mono tail />
+          <MetaRow k={r.branch} v={ev.repo.branch ?? "—"} mono tail />
+          <MetaRow k={r.anchor} v={anchor} mono tail />
           <MetaRow
-            k="History"
-            v={
-              <span className="tnum">
-                {ev.artifacts.length} commit{ev.artifacts.length !== 1 ? "s" : ""}
-              </span>
-            }
+            k={r.history}
+            v={<span className="tnum">{r.commits(ev.artifacts.length)}</span>}
           />
-          <MetaRow k="Contributors" v={<span className="tnum">{people.length}</span>} />
+          <MetaRow k={r.contributors} v={<span className="tnum">{people.length}</span>} />
           {ev.repo.remoteUrl && (
             <MetaRow
-              k="Remote"
+              k={r.remote}
               v={
                 <a
                   href={ev.repo.remoteUrl}
@@ -49,7 +47,7 @@ export function CaseDetails({ result }: { result: DigResult }) {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-accent-press hover:underline"
                 >
-                  open <ExternalLink className="size-3" />
+                  {r.open} <ExternalLink className="size-3" />
                 </a>
               }
             />
@@ -58,20 +56,20 @@ export function CaseDetails({ result }: { result: DigResult }) {
       </RailCard>
 
       {result.narrative && result.narrative.answerable !== false && (
-        <RailCard icon={<Shield className="size-3.75" />} title="Provenance chain">
+        <RailCard icon={<Shield className="size-3.75" />} title={r.chain}>
           <Provenance narrative={result.narrative} />
         </RailCard>
       )}
 
       {people.length > 0 && (
-        <RailCard icon={<Users className="size-3.75" />} title="Who's involved">
+        <RailCard icon={<Users className="size-3.75" />} title={r.people}>
           <div className="flex flex-col gap-3">
             {people.map(([name, n]) => (
               <div key={name} className="flex items-center gap-2.5">
                 <Avatar name={name} size={28} />
                 <span className="text-[12.5px] font-semibold text-ink">{name}</span>
                 <span className="ml-auto font-mono text-[11px] text-ink-3 tnum">
-                  {n} commit{n !== 1 ? "s" : ""}
+                  {r.commits(n)}
                 </span>
               </div>
             ))}

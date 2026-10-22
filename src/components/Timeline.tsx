@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import type { Artifact } from "@understory/core/types";
-import { fmtDate } from "./format";
-import { KindIcon, kindLabel } from "./icons";
+import { formatDay } from "@/i18n/format";
+import { useMessages } from "@/i18n/LocaleProvider";
+import { KindIcon } from "./icons";
 import { Avatar, SectionLabel } from "./ui";
 
 export function Timeline({
@@ -13,6 +14,8 @@ export function Timeline({
   artifacts: Artifact[];
   citedIds: Set<string>;
 }) {
+  const m = useMessages();
+  const t = m.report.timeline;
   const last = artifacts.length - 1;
 
   const citedIdxs = artifacts.map((a, i) => (citedIds.has(a.id) ? i : -1)).filter((i) => i >= 0);
@@ -35,18 +38,14 @@ export function Timeline({
 
   return (
     <section className="mt-8">
-      <SectionLabel
-        title="Provenance timeline"
-        meta="PR → commit → review → merge — the chain that shaped this line, oldest first"
-      />
+      <SectionLabel title={t.title} meta={t.meta} />
 
       <div className="rounded-xl border border-line bg-surface px-5 py-5 shadow-card">
         {citedCount > 0 && (
           <div className="mb-4 flex items-center gap-2 border-b border-line pb-3 text-[12px] text-ink-2">
             <span className="inline-block h-0.75 w-6 rounded-full bg-accent" />
             <span>
-              <b className="font-semibold text-ink">{citedCount}</b> of {artifacts.length} on the
-              provenance chain
+              <b className="font-semibold text-ink">{citedCount}</b> {t.onChain(artifacts.length)}
             </span>
           </div>
         )}
@@ -57,8 +56,8 @@ export function Timeline({
             onClick={() => setExpanded(true)}
             className="mb-4 inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-inset px-2.5 py-1.5 text-[12px] font-medium text-ink-2 transition-colors hover:border-accent/40 hover:text-accent-press"
           >
-            Show all {artifacts.length} changes
-            <span className="text-ink-3">· {startIdx} earlier hidden</span>
+            {t.showAll(artifacts.length)}
+            <span className="text-ink-3">{t.hidden(startIdx)}</span>
           </button>
         )}
 
@@ -103,20 +102,20 @@ export function Timeline({
                 <div className="min-w-0 flex-1 pb-0.5">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                     <span className="text-[10.5px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
-                      {kindLabel[a.kind]}
+                      {m.report.kind[a.kind]}
                     </span>
                     {cited && (
                       <span className="inline-flex h-4.25 items-center rounded-full bg-accent-tint px-1.5 text-[10px] font-semibold tracking-wide text-accent-press uppercase">
-                        On chain
+                        {t.onChainBadge}
                       </span>
                     )}
                     {isLast && (
                       <span className="text-[10.5px] font-semibold text-accent-press">
-                        · current
+                        {t.current}
                       </span>
                     )}
                     <span className="ml-auto font-mono text-[11.5px] text-ink-3 tnum">
-                      {fmtDate(a.date)}
+                      {formatDay(m.time, a.date)}
                     </span>
                   </div>
 
@@ -146,7 +145,7 @@ export function Timeline({
             onClick={() => setExpanded(false)}
             className="mt-1 inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-inset px-2.5 py-1.5 text-[12px] font-medium text-ink-2 transition-colors hover:border-accent/40 hover:text-accent-press"
           >
-            Show less
+            {m.caseScreen.showLess}
           </button>
         )}
       </div>

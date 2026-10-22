@@ -1,9 +1,10 @@
 "use client";
 
+import { narrativeLanguage } from "@understory/core/narrative-language";
 import type { Evidence, VerifiedNarrative } from "@understory/core/types";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { CopyButton } from "../CopyButton";
 import { letter } from "../format";
-import { useLanguage } from "../use-language";
 import { SectionLabel } from "../ui";
 import { Claims } from "./Claims";
 import { ConfidencePanel } from "./ConfidencePanel";
@@ -23,10 +24,11 @@ export function Findings({
   evidence: Evidence;
   narrative: VerifiedNarrative;
 }) {
-  const { language } = useLanguage();
+  const m = useMessages();
+  const language = narrativeLanguage(narrative) ?? undefined;
 
   if (narrative.answerable === false) {
-    return <OutOfScopeCard answer={narrative.answer} />;
+    return <OutOfScopeCard answer={narrative.answer} language={language} />;
   }
 
   const claims = narrative.claims ?? [];
@@ -48,11 +50,8 @@ export function Findings({
   return (
     <section className="mt-6">
       <div className="flex items-start justify-between gap-3">
-        <SectionLabel
-          title="Findings"
-          meta="Reconstructed conclusion — each claim linked to the sources it cites"
-        />
-        {narrative.answer && <CopyButton text={narrative.answer} label="Copy the why" />}
+        <SectionLabel title={m.report.findings.title} meta={m.report.findings.meta} />
+        {narrative.answer && <CopyButton text={narrative.answer} label={m.caseScreen.copyWhy} />}
       </div>
 
       <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-card">
@@ -61,7 +60,7 @@ export function Findings({
         <div className="grid grid-cols-1 md:grid-cols-[1fr_216px]">
           <div className="border-b border-line p-7 md:border-r md:border-b-0">
             {claims.length > 0 ? (
-              <Claims claims={claims} idToLetter={idToLetter} />
+              <Claims claims={claims} idToLetter={idToLetter} language={language} />
             ) : (
               <p
                 lang={language}

@@ -1,9 +1,11 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import { SectionLabel } from "../ui";
 
 export function FindingsPending() {
+  const f = useMessages().report.findings;
   return (
     <section className="mt-6">
-      <SectionLabel title="Findings" meta="Reconstructing the conclusion from the evidence…" />
+      <SectionLabel title={f.title} meta={f.pendingMeta} />
 
       <div className="overflow-hidden rounded-[10px] border border-line bg-surface shadow-card">
         <div
@@ -14,9 +16,7 @@ export function FindingsPending() {
             aria-hidden
             className="size-4 animate-spin rounded-full border-2 border-line-2 border-t-accent"
           />
-          <span className="text-[14px] font-semibold tracking-tight text-ink">
-            Reconstructing the conclusion…
-          </span>
+          <span className="text-[14px] font-semibold tracking-tight text-ink">{f.pending}</span>
         </div>
 
         <div className="p-7">
@@ -25,10 +25,7 @@ export function FindingsPending() {
             <div className="h-3.5 w-[81%] animate-pulse rounded bg-ink/10" />
             <div className="h-3.5 w-[88%] animate-pulse rounded bg-ink/10" />
           </div>
-          <p className="mt-5 text-[12.5px] text-ink-3">
-            Synthesizing the answer and auditing every citation in-source. The evidence and
-            provenance chain below already stand.
-          </p>
+          <p className="mt-5 text-[12.5px] text-ink-3">{f.pendingBody}</p>
         </div>
       </div>
     </section>
