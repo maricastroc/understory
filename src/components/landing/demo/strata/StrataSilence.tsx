@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n/LocaleProvider";
 import { gapBody, gapLetter } from "../../../line-investigation/copy/gap-copy";
 import type { ViewArtifact } from "../../../line-investigation/model/types";
 import { silenceTitle } from "./strata-copy";
@@ -13,6 +14,7 @@ export function StrataSilence({
   m: StrataMetrics;
   byId: Map<string, ViewArtifact>;
 }) {
+  const locale = useLocale();
   const wide = m.mode === "wide";
   const oldest = layout.strata.at(-1)?.artifact.id;
   return layout.breaks.flatMap((b) => {
@@ -37,12 +39,12 @@ export function StrataSilence({
           <span
             className={`leading-[1.3] font-medium text-strata-neutral-800 ${wide ? "text-[19px]" : "text-[15px]"}`}
           >
-            {silenceTitle(after.id === oldest)}
+            {silenceTitle(after.id === oldest, locale)}
           </span>
           <span
             className={`leading-[1.45] text-pretty text-strata-neutral-700 ${wide ? "text-sm" : "text-[13px]"}`}
           >
-            {gapBody(b.gap, after, "en")}
+            {gapBody(b.gap, after, locale)}
           </span>
         </span>
       </div>,

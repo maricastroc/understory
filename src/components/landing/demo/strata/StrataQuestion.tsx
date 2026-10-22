@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n/LocaleProvider";
 import { askedText } from "./strata-copy";
 
 function split(question: string, token: string | null): [string, string, string] | null {
@@ -19,11 +20,12 @@ export function StrataQuestion({
   line: number;
   wide: boolean;
 }) {
+  const locale = useLocale();
   const parts = split(question, token);
   return (
     <div className="flex flex-col gap-0.5">
       <span className="font-li-mono text-[11px] text-strata-bore-ink">
-        {askedText(token, line)}
+        {askedText(token, line, locale)}
       </span>
       <h2
         className={`m-0 font-li-display leading-none font-semibold tracking-[-0.015em] text-strata-ink ${

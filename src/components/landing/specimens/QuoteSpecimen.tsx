@@ -1,3 +1,4 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import { QuoteBlock } from "../../line-investigation/drawer/QuoteBlock";
 import type { ViewArtifact } from "../../line-investigation/model/types";
 
@@ -18,6 +19,7 @@ export function QuoteSpecimen({
   artifact: ViewArtifact;
   rejected: string[];
 }) {
+  const t = useMessages().landing.standard;
   const quote = artifact.quotes.find((q) => q.range);
   if (!quote?.range) return null;
   const shown = paragraphAround(artifact.source.body, quote.range.start, quote.range.end);
@@ -25,12 +27,10 @@ export function QuoteSpecimen({
     <div className="flex flex-col gap-3">
       <QuoteBlock body={shown.text} range={shown.range} tone="verified" />
       <div className="flex flex-col gap-1 text-xs">
-        <span className="font-semibold text-li-evidence-ink">
-          ✓ Quote found verbatim in {artifact.id}
-        </span>
+        <span className="font-semibold text-li-evidence-ink">{t.quoteFound(artifact.id)}</span>
         {rejected.map((id) => (
           <span key={id} className="font-li-mono text-[11.5px] text-li-neutral-700">
-            <s>{id}</s> · not in evidence, rejected
+            <s>{id}</s> · {t.rejected}
           </span>
         ))}
       </div>

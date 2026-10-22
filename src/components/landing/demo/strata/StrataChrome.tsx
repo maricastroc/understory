@@ -1,3 +1,4 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import { HATCH } from "./strata-hatch";
 
 export function StrataMark() {
@@ -23,6 +24,7 @@ export function StrataTopBar({
   summary: string;
   wide: boolean;
 }) {
+  const t = useMessages().landing;
   return (
     <div
       className={`flex items-center border-b border-strata-divider font-li-mono text-xs text-strata-neutral-700 ${
@@ -32,11 +34,11 @@ export function StrataTopBar({
       <span className="flex items-center gap-3.5">
         <StrataMark />
         <span className="font-li-body text-[17px] font-semibold text-strata-ink">Understory</span>
-        {wide && <span>code archaeology</span>}
+        {wide && <span>{t.tagline}</span>}
       </span>
       <span className={`min-w-0 ${wide ? "ml-12" : "basis-full"}`}>
         {repo} / <span className="text-strata-ink">{path}</span>{" "}
-        <span className="text-strata-bore-ink">line {line}</span>
+        <span className="text-strata-bore-ink">{t.demo.line(line)}</span>
       </span>
       <span className={wide ? "ml-auto" : "basis-full"}>{summary}</span>
     </div>
@@ -44,6 +46,7 @@ export function StrataTopBar({
 }
 
 export function StrataLegend({ origin, wide }: { origin: string | null; wide: boolean }) {
+  const l = useMessages().landing.demo.legend;
   return (
     <div
       aria-hidden
@@ -51,27 +54,25 @@ export function StrataLegend({ origin, wide }: { origin: string | null; wide: bo
         wide ? "h-full gap-6 px-10" : "flex-wrap gap-x-5 gap-y-2 px-4 py-3"
       }`}
     >
-      <span className={`text-strata-ink ${wide ? "" : "basis-full"}`}>
-        depth = time · the bore follows the token down
-      </span>
+      <span className={`text-strata-ink ${wide ? "" : "basis-full"}`}>{l.depth}</span>
       <span className="flex items-center gap-1.5">
         <span className="size-2.5 bg-strata-ink" />
-        cited
+        {l.cited}
       </span>
       <span className="flex items-center gap-1.5">
         <span className="size-2.5 border border-strata-ink" />
-        context
+        {l.context}
       </span>
       <span className="flex items-center gap-1.5">
         <span className="size-2.5 bg-strata-trace" />
-        verified trace
+        {l.trace}
       </span>
       <span className="flex items-center gap-1.5">
         <span
           className="h-2.5 w-3.5 border border-dashed border-strata-neutral-600"
           style={{ background: HATCH.dense }}
         />
-        silent record
+        {l.silent}
       </span>
       {origin && <span className={wide ? "ml-auto" : "basis-full"}>{origin}</span>}
     </div>

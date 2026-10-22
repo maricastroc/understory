@@ -1,6 +1,7 @@
 "use client";
 
 import { type Dispatch, useId, useMemo } from "react";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import type { InvestigationView } from "../../../line-investigation/model/types";
 import { datumToken } from "../../../line-investigation/specimen/datum-token";
 import { highlightLines } from "../../../line-investigation/specimen/highlight-code";
@@ -39,6 +40,8 @@ export function StrataDemo({
   state: CaseState;
   dispatch: Dispatch<CaseAction>;
 }) {
+  const locale = useLocale();
+  const d = useMessages().landing.demo;
   const id = useId().replace(/:/g, "");
   const [scrollRef, scrolls] = useHorizontalOverflow();
   const wide = m.mode === "wide";
@@ -54,7 +57,7 @@ export function StrataDemo({
   const col = token ? (token.start + token.end) / 2 : Math.max(0, line.search(/\S/)) + 0.5;
   const tokenText = token ? line.slice(token.start, token.end) : null;
   const widest = Math.max(line.length, ...layout.strata.map((s) => s.version?.text.length ?? 0));
-  const origin = originText(datum, layout.strata.at(-1)?.artifact.daysBeforeNow ?? null);
+  const origin = originText(datum, layout.strata.at(-1)?.artifact.daysBeforeNow ?? null, locale);
   const headingId = `${id}-why`;
 
   const topBar = (
@@ -62,7 +65,7 @@ export function StrataDemo({
       repo={view.repo.name ?? view.repo.path}
       path={view.location?.file ?? ""}
       line={datum}
-      summary={summaryText(view)}
+      summary={summaryText(view, locale)}
       wide={wide}
     />
   );
@@ -99,7 +102,7 @@ export function StrataDemo({
   );
   const heading = (
     <h3 id={headingId} className="font-li-mono text-[11px] font-normal text-strata-neutral-700">
-      reconstructed why · read downward
+      {d.heading}
     </h3>
   );
   const clauses = (
@@ -160,7 +163,7 @@ export function StrataDemo({
         ref={scrollRef}
         tabIndex={scrolls ? 0 : undefined}
         role={scrolls ? "region" : undefined}
-        aria-label={scrolls ? "Line history, scroll sideways for long lines" : undefined}
+        aria-label={scrolls ? d.scroll : undefined}
         className="overflow-x-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-strata-bore-ink"
       >
         <div

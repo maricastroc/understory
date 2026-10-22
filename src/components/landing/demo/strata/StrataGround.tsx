@@ -1,10 +1,13 @@
-import { shortAge } from "../../../line-investigation/format/age";
+import { shortAge } from "@/i18n/format";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { marginDate } from "./strata-copy";
 import { HATCH } from "./strata-hatch";
 import { STRATA_COLUMNS } from "./strata-metrics";
 import type { StrataLayout, StrataMetrics } from "./types";
 
 export function StrataGround({ layout, m }: { layout: StrataLayout; m: StrataMetrics }) {
+  const locale = useLocale();
+  const t = useMessages();
   const wide = m.mode === "wide";
   const inset = wide ? "inset-x-10" : "inset-x-0";
 
@@ -36,7 +39,7 @@ export function StrataGround({ layout, m }: { layout: StrataLayout; m: StrataMet
         ))}
       {wide &&
         layout.strata.map((s) => {
-          const { date, depth } = marginDate(s);
+          const { date, depth } = marginDate(s, locale);
           return (
             <span
               key={s.artifact.id}
@@ -60,9 +63,9 @@ export function StrataGround({ layout, m }: { layout: StrataLayout; m: StrataMet
             className="absolute left-10 bg-strata-ground py-0.5 pr-1 text-[11px] leading-[1.35] text-strata-neutral-700"
             style={{ top: (b.top + b.bottom) / 2 - 15 }}
           >
-            {shortAge(b.days)}
+            {shortAge(t.time, b.days)}
             <br />
-            {b.kind === "silent" ? "not recorded" : "unchanged"}
+            {b.kind === "silent" ? t.landing.demo.notRecorded : t.landing.demo.unchanged}
           </span>
         ))}
     </div>

@@ -7,7 +7,10 @@ import type {
   Evidence,
   Narrative,
 } from "@understory/core/types";
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import { buildInvestigationView } from "../../line-investigation/model/build-investigation-view";
+import type { InvestigationView } from "../../line-investigation/model/types";
 import type { LineVersion } from "./strata/types";
 
 export const LANDING_NOW = Date.parse("2026-09-27T12:00:00.000Z");
@@ -87,7 +90,7 @@ const artifacts: Artifact[] = [
 ];
 
 const evidence: Evidence = {
-  question: "Why exactly 3 retries?",
+  question: messagesFor("en").landing.demo.question,
   repo: { path: "payments-service", name: "payments-service", sha: sha("4e1d0a2") },
   location: { file: LANDING_PATH, startLine: 9, endLine: 9 },
   artifacts,
@@ -95,19 +98,25 @@ const evidence: Evidence = {
   coverage: { granularity: "line" },
 };
 
-const claims = [
-  { text: "Capped at 3, with backoff", citations: ["commit:92f6a3f", "pr:812"] },
-  { text: "After 212 customers were charged twice", citations: ["issue:1187", "pr:812"] },
-  { text: "Review cut 5 → 3 to fit a 10 s timeout", citations: ["review:812-1", "review:812-0"] },
+const CITATIONS = [
+  ["commit:92f6a3f", "pr:812"],
+  ["issue:1187", "pr:812"],
+  ["review:812-1", "review:812-0"],
 ];
 
-const narrative: Narrative = {
-  answerable: true,
-  recorded: true,
-  claims,
-  answer: claims.map((c) => c.text).join(". "),
-  citations: Array.from(new Set(claims.flatMap((c) => c.citations))),
-};
+function narrativeFor(locale: Locale): Narrative {
+  const claims = messagesFor(locale).landing.demo.claims.map((text, i) => ({
+    text,
+    citations: CITATIONS[i],
+  }));
+  return {
+    answerable: true,
+    recorded: true,
+    claims,
+    answer: claims.map((c) => c.text).join(". "),
+    citations: Array.from(new Set(CITATIONS.flat())),
+  };
+}
 
 const check = (citation: string, claim: number, quote: string | null) => ({
   citation,
@@ -131,13 +140,28 @@ const entailment: Entailment = {
   ],
 };
 
-const result: DigResult = { evidence, narrative: verify(evidence, narrative, entailment) };
+const views = new Map<Locale, InvestigationView>();
 
-export const landingView = buildInvestigationView(result, { now: LANDING_NOW });
+export function landingViewFor(locale: Locale): InvestigationView {
+  const known = views.get(locale);
+  if (known) return known;
+  const asked = { ...evidence, question: messagesFor(locale).landing.demo.question };
+  const result: DigResult = {
+    evidence: asked,
+    narrative: verify(asked, narrativeFor(locale), entailment),
+  };
+  const view = buildInvestigationView(result, { now: LANDING_NOW });
+  views.set(locale, view);
+  return view;
+}
+
+export const landingView = landingViewFor("en");
+
+const english = narrativeFor("en");
 
 export const landingRejected = verify(evidence, {
-  ...narrative,
-  claims: [{ text: claims[1].text, citations: ["issue:1187", "pr:9999"] }],
+  ...english,
+  claims: [{ text: english.claims[1].text, citations: ["issue:1187", "pr:9999"] }],
   citations: ["issue:1187", "pr:9999"],
 }).unknownCitations;
 
@@ -161,14 +185,19 @@ export const landingLines = [
   "}",
 ];
 
-export const landingVersions: LineVersion[] = [
-  {
-    artifactId: "pr:812",
-    text: "  for (let attempt = 0; attempt < 5; attempt++) {",
-    note: "first revision",
-  },
-  { artifactId: "commit:7be210e", text: "  while (true) {", absent: "no bound" },
-];
+export function landingVersionsFor(locale: Locale): LineVersion[] {
+  const demo = messagesFor(locale).landing.demo;
+  return [
+    {
+      artifactId: "pr:812",
+      text: "  for (let attempt = 0; attempt < 5; attempt++) {",
+      note: demo.firstRevision,
+    },
+    { artifactId: "commit:7be210e", text: "  while (true) {", absent: demo.noBound },
+  ];
+}
+
+export const landingVersions = landingVersionsFor("en");
 
 const span = (startLine: number, endLine: number, short: string, date: string): BlameSpan => ({
   startLine,
