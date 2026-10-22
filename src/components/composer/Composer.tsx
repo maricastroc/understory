@@ -2,7 +2,8 @@
 
 import type { InvestigateInput } from "@understory/core/types";
 import { useEffect, useRef, useState } from "react";
-import { Alert } from "../icons";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import { ErrorState } from "../ErrorState";
 import type { CasePaths } from "../investigator/case-paths";
 import { defaultQuestion } from "../investigator/default-question";
 import { repoDisplayName } from "../shell/repo-display-name";
@@ -60,6 +61,8 @@ export function Composer({
 }) {
   const tokenValue = token.trim() || undefined;
   const viewer = useFileViewer(repoPath);
+  const m = useMessages();
+  const locale = useLocale();
   const [query, setQuery] = useState("");
   const q = query.trim();
   const search = useFileSearch(repoPath, repo.ready && q.length >= 2, tokenValue);
@@ -135,18 +138,16 @@ export function Composer({
     !!selection &&
     (selection.start !== enclosing.start || selection.end !== enclosing.end);
   const rangeSize = selection ? selection.end - selection.start + 1 : 0;
-  const lineValue = selection
-    ? rangeSize > 1
-      ? `lines ${selection.start}–${selection.end}`
-      : `line ${selection.start}`
-    : null;
-  const subject =
+  const lineValue = selection ? m.composer.lines(selection.start, selection.end) : null;
+  const noun =
     isSymbolSelected && enclosing ? symbolNoun(enclosing.kind) : rangeSize > 1 ? "range" : "line";
   const target =
     isSymbolSelected && enclosing
-      ? (enclosing.name ?? `this ${subject}`)
-      : (lineValue ?? `this ${subject}`);
-  const runLabel = `Investigate ${target}`;
+      ? (enclosing.name ?? m.composer.thisNoun[noun])
+      : selection
+        ? m.composer.theLines(selection.start, selection.end)
+        : m.composer.thisNoun[noun];
+  const runLabel = m.composer.investigate(target);
 
   function investigate(span: { start: number; end: number }, name: string | null) {
     if (!file) return;
@@ -171,20 +172,20 @@ export function Composer({
   const steps: PathStep[] = [
     {
       key: "repo",
-      label: "repository",
+      label: m.composer.steps.repository,
       value:
         repo.ready && stage !== "repo"
           ? repoDisplayName(repo.meta?.name ?? repoPath)
           : repo.connecting
-            ? "opening…"
+            ? m.composer.opening
             : null,
       state: stage === "repo" ? "current" : "done",
       onPick: () => setPickingRepo(true),
     },
     {
       key: "file",
-      label: "file",
-      value: stage === "code" ? (file?.path ?? "opening…") : null,
+      label: m.composer.steps.file,
+      value: stage === "code" ? (file?.path ?? m.composer.opening) : null,
       state: stage === "file" ? "current" : stage === "code" ? "done" : "next",
       onPick: repo.ready
         ? () => {
@@ -195,33 +196,34 @@ export function Composer({
     },
     {
       key: "line",
-      label: "line",
+      label: m.composer.steps.line,
       value: stage === "code" ? lineValue : null,
       state: stage !== "code" ? "next" : selection ? "done" : "current",
       onPick: stage === "code" ? () => viewer.clearSelection() : null,
     },
     {
       key: "question",
-      label: "question",
+      label: m.composer.steps.question,
       value: null,
       state: stage === "code" && selection ? "current" : "next",
       onPick: null,
     },
   ];
 
-  const copy = stageCopy({
-    stage,
-    connecting: repo.connecting,
-    fileLoading: viewer.loading,
-    lineValue,
-    subject,
-    symbolName: isSymbolSelected ? (enclosing?.name ?? null) : null,
-  });
+  const copy = stageCopy(
+    {
+      stage,
+      connecting: repo.connecting,
+      fileLoading: viewer.loading,
+      about: selection ? target : null,
+    },
+    locale,
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-280 flex-col gap-8 font-li-body text-li-ink">
       <div className="flex flex-col gap-3.5">
-        <h1 className="li-eyebrow text-li-text-subtle">New investigation</h1>
+        <h1 className="li-eyebrow text-li-text-subtle">{m.shell.newInvestigation}</h1>
         <InvestigationPath steps={steps} />
       </div>
 
@@ -272,19 +274,16 @@ export function Composer({
         />
       )}
 
-      {stage !== "repo" && (search.error || viewer.error) && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 border-l-2 border-li-ink pl-4 text-[13px]"
-        >
-          <Alert className="mt-0.5 size-4 shrink-0" />
-          <span>{search.error || viewer.error}</span>
-        </div>
+      {stage !== "repo" && search.error && (
+        <ErrorState failure={search.error} title={m.composer.files.searchFailed} />
+      )}
+      {stage !== "repo" && !search.error && viewer.error && (
+        <ErrorState failure={viewer.error} title={m.composer.files.fileFailed} />
       )}
 
       {stage === "code" && viewer.loading && (
         <p role="status" className="text-[13px] text-li-text-subtle">
-          Opening the file…
+          {m.composer.openingFile}
         </p>
       )}
 

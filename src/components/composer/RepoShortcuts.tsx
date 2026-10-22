@@ -1,3 +1,4 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { SECTION_LABEL } from "./composer-classes";
 import type { RecentRepo } from "./types/recent-repo";
@@ -18,11 +19,12 @@ export function RepoShortcuts({
   onOpen: (path: string) => void;
   onOpenDemo: () => void;
 }) {
+  const t = useMessages().composer.repo;
   const demoInRecent = !!demoRepo && recent.some((r) => r.path === demoRepo);
   if (!recent.length && !demoRepo) return null;
   return (
-    <section aria-label="Repositories" className="flex flex-col">
-      <h3 className={SECTION_LABEL}>{recent.length ? "Investigated before" : "Try it on"}</h3>
+    <section aria-label={t.shortcuts} className="flex flex-col">
+      <h3 className={SECTION_LABEL}>{recent.length ? t.investigatedBefore : t.tryItOn}</h3>
       <ul>
         {recent.map((r) => (
           <li key={r.path}>
@@ -31,11 +33,11 @@ export function RepoShortcuts({
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="truncate font-li-mono text-[14px] text-li-ink">{r.name}</span>
                 <span className="text-[12.5px] text-li-neutral-800">
-                  {r.investigations} {r.investigations === 1 ? "investigation" : "investigations"}
-                  {r.path === demoRepo ? " · demo repository" : ""}
+                  {t.investigations(r.investigations)}
+                  {r.path === demoRepo ? ` · ${t.demoRepository}` : ""}
                 </span>
               </span>
-              <span className={ACTION}>Open →</span>
+              <span className={ACTION}>{t.openAction}</span>
             </button>
           </li>
         ))}
@@ -47,11 +49,9 @@ export function RepoShortcuts({
                 <span className="truncate font-li-mono text-[14px] text-li-ink">
                   {demoRepo.split("/").filter(Boolean).pop()}
                 </span>
-                <span className="text-[12.5px] text-li-neutral-800">
-                  Demo repository: a small payments service with a seeded history
-                </span>
+                <span className="text-[12.5px] text-li-neutral-800">{t.demoLead}</span>
               </span>
-              <span className={ACTION}>Open the demo →</span>
+              <span className={ACTION}>{t.openDemo}</span>
             </button>
           </li>
         )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { liButton } from "../../line-investigation/parts/button-class";
 
 export function MapHeader({
@@ -18,6 +19,7 @@ export function MapHeader({
   moreLabel: string | null;
   onMapMore: (() => void) | null;
 }) {
+  const m = useMessages().map;
   const aboutId = useId();
   const [open, setOpen] = useState(false);
 
@@ -25,12 +27,12 @@ export function MapHeader({
     <div className="flex flex-col gap-2 border-t border-li-rule pt-3">
       <div className="flex flex-wrap items-baseline gap-x-3.5 gap-y-1 text-[13.5px] text-li-neutral-800">
         <h2 id={titleId} className="text-[15px] font-semibold text-li-ink">
-          History of current lines
+          {m.title}
         </h2>
         <p>{scope}</p>
         <button
           type="button"
-          aria-label="About this map"
+          aria-label={m.about}
           aria-expanded={open}
           aria-controls={aboutId}
           onClick={() => setOpen((v) => !v)}

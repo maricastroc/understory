@@ -1,3 +1,4 @@
+import { useMessages } from "@/i18n/LocaleProvider";
 import { liButton } from "../../line-investigation/parts/button-class";
 
 export function MapScrollCue({
@@ -11,8 +12,9 @@ export function MapScrollCue({
   top: number;
   onPage: () => void;
 }) {
+  const m = useMessages().map;
   const after = side === "after";
-  const files = `${count} more ${count === 1 ? "file" : "files"}`;
+  const files = m.moreFiles(count);
   return (
     <>
       <div
@@ -24,7 +26,7 @@ export function MapScrollCue({
       <button
         type="button"
         onClick={onPage}
-        aria-label={`Scroll ${after ? "right" : "left"}, ${files}`}
+        aria-label={after ? m.scrollRight(files) : m.scrollLeft(files)}
         className={liButton(
           "secondary",
           `absolute bg-li-paper font-li-mono ${after ? "right-0" : "left-0"}`,
@@ -32,7 +34,7 @@ export function MapScrollCue({
         )}
         style={{ top: top - 12 }}
       >
-        {after ? `${count} more →` : `← ${count} more`}
+        {after ? m.moreAfter(count) : m.moreBefore(count)}
       </button>
     </>
   );

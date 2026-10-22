@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { Highlight } from "./Highlight";
 import { FIELD_FRAME, SPINNER } from "./composer-classes";
@@ -24,6 +25,7 @@ export function MapSearch({
   onSubmit: () => void;
   empty?: boolean;
 }) {
+  const f = useMessages().composer.files;
   const listId = useId();
   const q = query.trim();
   const open = q.length >= 2 && results.length > 0;
@@ -33,7 +35,7 @@ export function MapSearch({
       <div className={`flex h-12 items-center gap-3 px-4 ${FIELD_FRAME}`}>
         <DomainIcon kind="file" />
         <input
-          aria-label="Find a file or symbol"
+          aria-label={f.find}
           aria-controls={open ? listId : undefined}
           value={query}
           onChange={(e) => onQuery(e.target.value)}
@@ -44,7 +46,7 @@ export function MapSearch({
             }
             if (e.key === "Escape") onQuery("");
           }}
-          placeholder="Find a file or symbol, e.g. chargeCustomer"
+          placeholder={f.findPlaceholder}
           className="h-full min-w-0 flex-1 bg-transparent text-[16px] text-li-ink outline-none placeholder:text-li-text-muted"
         />
         {searching ? (
@@ -58,14 +60,13 @@ export function MapSearch({
           role="status"
           className="absolute inset-x-0 top-full z-20 border border-t-0 border-li-divider bg-li-paper px-3.5 py-2.5 text-[12.5px] text-li-neutral-800 shadow-li-md"
         >
-          Nothing matches <span className="font-li-mono">&ldquo;{q}&rdquo;</span>. Try part of a
-          file name, or a word from the code.
+          {f.nothingFor} <span className="font-li-mono">&ldquo;{q}&rdquo;</span>. {f.nothingHint}
         </p>
       )}
       {open && (
         <ul
           id={listId}
-          aria-label="Matching files"
+          aria-label={f.matching}
           className="absolute inset-x-0 top-full z-20 max-h-72 overflow-y-auto border border-t-0 border-li-divider bg-li-paper py-1 shadow-li-md"
         >
           {results.map((path) => (

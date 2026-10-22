@@ -1,27 +1,34 @@
-import { longAge } from "../../line-investigation/format/age";
+import { longAge } from "@/i18n/format";
+import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import type { CoreHistory, CoreStatus, MapCore } from "./types";
 
-export function coreLabel(core: MapCore, status: CoreStatus, history: CoreHistory | null): string {
-  const cases = core.cases ? `, ${core.cases} case${core.cases === 1 ? "" : "s"}` : "";
+export function coreLabel(
+  core: MapCore,
+  status: CoreStatus,
+  history: CoreHistory | null,
+  locale: Locale,
+): string {
+  const m = messagesFor(locale);
+  const c = m.map.core;
+  const cases = core.cases ? `, ${c.cases(core.cases)}` : "";
   const state =
     status === "mapped" && history
-      ? `oldest surviving line ${history.cut ? "at least " : ""}${longAge(history.oldestDays)}`
+      ? (history.cut ? c.oldestAtLeast : c.oldest)(longAge(m.time, history.oldestDays))
       : status === "mapping"
-        ? "mapping its history"
+        ? c.mapping
         : status === "unavailable"
-          ? "history unavailable"
+          ? c.unavailable
           : status === "too-large"
-            ? "too large to map"
-            : "history not mapped yet";
+            ? c.tooLarge
+            : c.notMapped;
   return `${core.dir}${core.name}, ${state}${cases}`;
 }
 
-export function statusFacts(status: CoreStatus): string {
-  if (status === "mapping") return "Mapping its blame…";
-  if (status === "unavailable")
-    return "History unavailable. It can still be opened and investigated.";
-  if (status === "too-large") return "Too large to map. It can still be opened and investigated.";
-  return "History not mapped yet.";
+export function statusFacts(status: CoreStatus, locale: Locale): string {
+  const s = messagesFor(locale).map.status;
+  if (status === "mapping") return s.mapping;
+  if (status === "unavailable") return s.unavailable;
+  if (status === "too-large") return s.tooLarge;
+  return s.notMapped;
 }
-
-export const MOVED_LINES = "Lines moved from other files show the move commit.";

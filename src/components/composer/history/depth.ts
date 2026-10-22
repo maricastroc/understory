@@ -15,11 +15,11 @@ const MIN_TICK_GAP = 28;
 const SLACK = 0.5;
 
 const UNITS = [
-  { days: 1, suffix: "d", steps: [1, 2, 5], below: 14 },
-  { days: 7, suffix: "w", steps: [1, 2, 4], below: 61 },
-  { days: 365.25 / 12, suffix: "m", steps: [1, 2, 3, 6], below: 548 },
-  { days: 365.25, suffix: "y", steps: [1, 2, 5, 10, 20, 50], below: Infinity },
-];
+  { days: 1, unit: "d", steps: [1, 2, 5], below: 14 },
+  { days: 7, unit: "w", steps: [1, 2, 4], below: 61 },
+  { days: 365.25 / 12, unit: "m", steps: [1, 2, 3, 6], below: 548 },
+  { days: 365.25, unit: "y", steps: [1, 2, 5, 10, 20, 50], below: Infinity },
+] as const;
 
 type Tick = DepthScale["ticks"][number];
 
@@ -42,7 +42,7 @@ function ticksFor(maxDays: number, pxPerDay: number, offset: (days: number) => n
     ) ?? unit.steps[unit.steps.length - 1];
   const ticks: Tick[] = [];
   for (let n = step; n * unit.days <= maxDays + SLACK; n += step) {
-    ticks.push({ offset: offset(n * unit.days), label: `−${n}${unit.suffix}` });
+    ticks.push({ offset: offset(n * unit.days), count: n, unit: unit.unit });
   }
   return ticks;
 }
@@ -69,7 +69,7 @@ export function depthScale(histories: FileHistory[], head: HeadCommit): DepthSca
   const whole = Math.floor((maxDays + SLACK) / unit.days);
   const end =
     whole * unit.days > knee
-      ? [{ offset: offset(whole * unit.days), label: `−${whole}${unit.suffix}` }]
+      ? [{ offset: offset(whole * unit.days), count: whole, unit: unit.unit }]
       : [];
   return {
     depth: near + TAIL,

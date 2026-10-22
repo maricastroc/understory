@@ -1,9 +1,10 @@
-import { shortAge } from "../../line-investigation/format/age";
+import { formatNumber, shortAge } from "@/i18n/format";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { BlueprintCorners } from "../../line-investigation/parts/BlueprintCorners";
 import { liButton } from "../../line-investigation/parts/button-class";
 import { DomainIcon } from "../../line-investigation/parts/DomainIcon";
 import { HATCH } from "../../line-investigation/parts/hatch";
-import { MOVED_LINES, statusFacts } from "./core-copy";
+import { statusFacts } from "./core-copy";
 import type { MapSummary } from "./map-summary";
 import { whyShown } from "./scope-copy";
 import { historyShares } from "./share-copy";
@@ -59,22 +60,23 @@ export function MapReading({
   prUnavailable: boolean;
   onOpen: (path: string) => void;
 }) {
+  const locale = useLocale();
+  const m = useMessages();
+  const r = m.map;
   if (!focused) {
     return (
       <div className="flex flex-col gap-2">
         <p className="text-[20px] leading-tight font-semibold text-li-ink">
-          {summary.files} {summary.files === 1 ? "file" : "files"}
+          {r.files(summary.files)}
           {summary.lines > 0 && (
             <span className="font-li-mono text-[13px] font-normal text-li-neutral-800">
               {" "}
-              · {summary.lines.toLocaleString("en-US")} current lines
-              {summary.mapped < summary.files ? " mapped so far" : ""}
+              · {r.currentLines(formatNumber(locale, summary.lines))}
+              {summary.mapped < summary.files ? ` ${r.soFar}` : ""}
             </span>
           )}
         </p>
-        <p className="text-[13.5px] text-li-neutral-800">
-          Hover or focus a file to inspect its history.
-        </p>
+        <p className="text-[13.5px] text-li-neutral-800">{r.hoverHint}</p>
       </div>
     );
   }
@@ -90,31 +92,30 @@ export function MapReading({
       </p>
       {view ? (
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 gap-y-1.5 border-t border-li-divider pt-3 text-[13.5px]">
-          <Row label="Current lines">{view.lines.toLocaleString("en-US")}</Row>
-          <Row label="Oldest line">
-            {view.cut ? "≥ " : ""}
-            {shortAge(view.oldestDays)} before HEAD
+          <Row label={r.rows.lines}>{formatNumber(locale, view.lines)}</Row>
+          <Row label={r.rows.oldest}>
+            {r.beforeHead(`${view.cut ? "≥ " : ""}${shortAge(m.time, view.oldestDays)}`)}
           </Row>
-          <Row label="Commits">{view.commits}</Row>
-          <Row label="Pull requests">
+          <Row label={r.rows.commits}>{view.commits}</Row>
+          <Row label={r.rows.prs}>
             {prUnavailable ? (
-              <span className="font-li-body text-li-neutral-800">unavailable for this repo</span>
+              <span className="font-li-body text-li-neutral-800">{r.prUnavailable}</span>
             ) : (
               <span className="flex flex-col gap-1.5 pt-1">
                 <ShareBar view={view} />
-                <span className="text-[12px]">{historyShares(view)}</span>
+                <span className="text-[12px]">{historyShares(view, locale)}</span>
               </span>
             )}
           </Row>
         </dl>
       ) : (
         <p className="border-t border-li-divider pt-3 text-[13.5px] text-li-neutral-800">
-          {statusFacts(status)}
+          {statusFacts(status, locale)}
         </p>
       )}
       <p className="text-[12.5px] text-li-text-subtle">
-        {whyShown(focused.reason, recentCommits)}
-        {view ? ` ${MOVED_LINES}` : ""}
+        {whyShown(focused.reason, recentCommits, locale)}
+        {view ? ` ${r.movedLines}` : ""}
       </p>
       <button
         type="button"
@@ -122,7 +123,7 @@ export function MapReading({
         className={liButton("primary", "w-fit")}
       >
         <BlueprintCorners />
-        Open {focused.name} →
+        {r.open(focused.name)}
       </button>
     </div>
   );

@@ -11,8 +11,6 @@ import { LanguageSwitch } from "../line-investigation/parts/LanguageSwitch";
 import { useLanguage } from "../use-language";
 import { symbolNoun } from "./symbol-noun";
 
-const SUGGESTIONS = ["Why this value?", "What problem did this fix?", "Why this approach?"];
-
 export function QuestionForm({
   target,
   runLabel,
@@ -47,7 +45,7 @@ export function QuestionForm({
         <div className="flex flex-col gap-2">
           <label htmlFor={id} className="flex items-center gap-2 li-eyebrow text-li-ink">
             <DomainIcon kind="question" size={14} />
-            Your question about {target}
+            {m.composer.question.about(target)}
           </label>
           <textarea
             id={id}
@@ -61,11 +59,11 @@ export function QuestionForm({
                 onRun();
               }
             }}
-            placeholder="e.g. Why cap the retries at 3?"
+            placeholder={m.composer.question.placeholder}
             className="resize-none border border-li-ink bg-li-neutral-100 px-3 py-2.5 text-[15px] leading-snug text-li-ink transition-[border-color,box-shadow] duration-150 outline-none placeholder:text-li-text-muted focus:border-li-ink focus:shadow-[inset_0_0_0_1px_var(--color-li-ink)] motion-reduce:transition-none"
           />
           <div className="flex flex-wrap gap-1.5">
-            {SUGGESTIONS.map((s) => (
+            {m.composer.question.suggestions.map((s) => (
               <button
                 key={s}
                 type="button"
@@ -84,7 +82,7 @@ export function QuestionForm({
             }}
             className="w-fit li-link text-left text-[12.5px]"
           >
-            Use the general question instead
+            {m.composer.question.general}
           </button>
         </div>
       ) : (
@@ -94,8 +92,8 @@ export function QuestionForm({
           className="flex w-fit li-link items-center gap-2 text-left text-[13px]"
         >
           <DomainIcon kind="question" size={14} />
-          Ask a specific question
-          <span className="text-li-text-subtle">(optional)</span>
+          {m.composer.question.specific}
+          <span className="text-li-text-subtle">{m.composer.question.optional}</span>
         </button>
       )}
       <LanguageSwitch label={m.languages.answerIn} language={language} onChange={setLanguage} />
@@ -110,7 +108,7 @@ export function QuestionForm({
           className="flex w-full cursor-pointer flex-col items-center gap-0.5 border border-li-divider px-3 py-2 text-center text-sm leading-[1.3] font-medium text-li-ink transition-colors duration-150 hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus active:bg-li-neutral-300 motion-reduce:transition-none"
         >
           <span className="max-w-full">
-            Investigate the whole {symbolNoun(wider.kind)}
+            {m.composer.investigate(m.composer.wholeNoun[symbolNoun(wider.kind)])}
             {wider.name && (
               <>
                 {" "}
@@ -119,7 +117,7 @@ export function QuestionForm({
             )}
           </span>{" "}
           <span className="text-[12px] font-normal text-li-text-subtle">
-            {wider.end - wider.start + 1} lines
+            {m.composer.lineCount(wider.end - wider.start + 1)}
           </span>
         </button>
       )}

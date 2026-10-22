@@ -1,13 +1,13 @@
 import { useRef, useState } from "react";
 import { type SymbolSpan, enclosingSymbol } from "@understory/core/collect/symbol";
-import { readJson } from "@/lib/read-json";
+import { type ApiFailure, failureFrom, NETWORK_FAILURE, thrownFailure } from "@/lib/api-error";
 
 export type OpenFile = { path: string; lines: string[] };
 
 export function useFileViewer(repoPath: string) {
   const [file, setFile] = useState<OpenFile | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiFailure | null>(null);
   const [selectedStart, setSelectedStart] = useState<number | null>(null);
   const [selectedEnd, setSelectedEnd] = useState<number | null>(null);
   const [enclosing, setEnclosing] = useState<SymbolSpan | null>(null);
@@ -47,10 +47,14 @@ export function useFileViewer(repoPath: string) {
       const res = await fetch(
         `/api/file?repo=${encodeURIComponent(repoPath)}&path=${encodeURIComponent(path)}`,
         token ? { headers: { "x-github-token": token } } : undefined,
-      );
-      const data = await readJson<{ content: string; error?: string }>(res);
-      if (!res.ok) {
-        setError(data.error || "Could not open file");
+      ).catch(() => null);
+      if (!res) {
+        setError(NETWORK_FAILURE);
+        return;
+      }
+      const data = (await res.json().catch(() => null)) as { content: string } | null;
+      if (!res.ok || !data) {
+        setError(failureFrom(res, data));
         return;
       }
       const lines = (data.content as string).replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n");
@@ -63,7 +67,7 @@ export function useFileViewer(repoPath: string) {
         setEnclosing(enclosingSymbol(lines, select, path));
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(thrownFailure(e));
     } finally {
       setLoading(false);
     }
