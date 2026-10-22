@@ -77,7 +77,8 @@ export function HistorySection({
   const lit = useMemo(() => (clause ? new Set(clause.citations) : null), [clause]);
   const pinned = view.clauses.find((c) => c.id === state.pinnedClause) ?? null;
   const byStratum = useMemo(() => new Map(model.strata.map((s) => [s.id, s])), [model.strata]);
-  const here = at ? byStratum.get(at) : undefined;
+  const found = at ? byStratum.get(at) : undefined;
+  const here = found ?? model.strata[0];
   const count = model.strata.reduce((n, s) => n + s.members.length, 0) + model.loose.length;
   const edge = layer ? edgeText(layer.edge, layer.history, locale) : null;
   const extent = extentOf(layer, model.strata.length, model.originDays);
@@ -238,8 +239,11 @@ export function HistorySection({
             m.caseScreen.artifacts(count),
           )}
         </span>
-        {inside && here && (
-          <span className="font-li-mono text-[11px] text-li-ink" aria-hidden>
+        {here && (
+          <span
+            className={`font-li-mono text-[11px] text-li-ink ${inside && found ? "" : "invisible"}`}
+            aria-hidden
+          >
             {h.at(dayDate(here.anchor.date, locale))}
             {here.anchor.daysBeforeNow !== null &&
               ` · ${tickText(here.anchor.daysBeforeNow, locale)}`}{" "}
@@ -252,15 +256,13 @@ export function HistorySection({
               {h.tracing(pinned.index + 1, pinned.letters.join(" "))}
             </span>
           )}
-          {inside && (
-            <button
-              type="button"
-              onClick={() => onBack(state.pinnedClause)}
-              className={liButton("ghost", "", "sm")}
-            >
-              ↑ {pinned ? h.backToClause(pinned.index + 1) : h.backToAnswer}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => onBack(state.pinnedClause)}
+            className={liButton("ghost", inside ? "" : "invisible", "sm")}
+          >
+            ↑ {pinned ? h.backToClause(pinned.index + 1) : h.backToAnswer}
+          </button>
         </span>
       </div>
 
