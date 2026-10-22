@@ -34,6 +34,8 @@ const SAME_IN_BOTH = new Set<string>([
   "history.count.commit",
   "history.count.pull_request",
   "history.count.issue",
+  "landing.method.trail.commit",
+  "landing.method.trail.issue",
   "artifact.kind.commit",
   "artifact.kind.pull_request",
   "artifact.kind.issue",

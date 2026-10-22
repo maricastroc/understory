@@ -1,6 +1,7 @@
 import { common } from "./common";
 import { composer } from "./composer";
 import { errors } from "./errors";
+import { landing, meta } from "./landing";
 import { languages } from "./languages";
 import {
   accessible,
@@ -44,4 +45,6 @@ export const en = {
   accessible,
   drawer,
   history,
+  meta,
+  landing,
 };

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
-import { shortAge } from "../../../line-investigation/format/age";
+import { shortAge } from "@/i18n/format";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import type { LineRange } from "../../../line-investigation/specimen/types";
 import { pastValue } from "./past-value";
 import { StrataCode } from "./StrataCode";
@@ -77,6 +78,8 @@ export function StrataBore({
   slots: ClauseSlot[];
   clause: string | null;
 }) {
+  const locale = useLocale();
+  const t = useMessages();
   const wide = m.mode === "wide";
   const w = wide ? 3 : 2;
   const x = (dx = 0) => `calc(${m.codeX + dx}px + ${col}ch)`;
@@ -172,8 +175,8 @@ export function StrataBore({
                 className={`block -translate-y-1/2 bg-strata-ground px-1.5 leading-4.5 whitespace-nowrap text-strata-neutral-700 ${label}`}
               >
                 {b.kind === "silent"
-                  ? `${shortAge(b.days)} · record silent`
-                  : unchangedText(b.days)}
+                  ? t.landing.demo.silentAge(shortAge(t.time, b.days))
+                  : unchangedText(b.days, locale)}
               </span>
             </span>
           </span>

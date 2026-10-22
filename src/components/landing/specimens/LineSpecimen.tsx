@@ -1,3 +1,4 @@
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { DatumRule } from "../../line-investigation/bore/DatumRule";
 import { datumToken } from "../../line-investigation/specimen/datum-token";
 import { describeLine } from "../../line-investigation/specimen/describe-line";
@@ -16,12 +17,14 @@ export function LineSpecimen({
   line: number;
   question: string;
 }) {
+  const locale = useLocale();
+  const d = useMessages().landing.demo;
   const segments = highlightLines(lines, path);
   const rows = [line - 1, line, line + 1].filter((n) => n >= 1 && n <= lines.length);
   const datumY = (rows.indexOf(line) + 1) * SPECIMEN.rowHeight;
   return (
     <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,black_82%,transparent)] font-li-mono text-xs text-li-neutral-800">
-      <ol aria-label={`${path}, lines ${rows[0]}–${rows[rows.length - 1]}`}>
+      <ol aria-label={d.specimenLines(path, rows[0], rows[rows.length - 1])}>
         {rows.map((n) => (
           <SpecimenLine
             key={n}
@@ -30,7 +33,7 @@ export function LineSpecimen({
             datum={n === line}
             token={n === line ? datumToken(question, lines[n - 1]) : null}
             bar={undefined}
-            description={describeLine(n, n === line, undefined, "en")}
+            description={describeLine(n, n === line, undefined, locale)}
           />
         ))}
       </ol>

@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
-import { landingRejected, landingView } from "./demo/landing-fixture";
+import { landingRejected, landingViewFor } from "./demo/landing-fixture";
 import { CONTAINER, H2, KICKER, SECTION } from "./parts/landing-classes";
 import { ClauseSpecimen } from "./specimens/ClauseSpecimen";
 import { QuoteSpecimen } from "./specimens/QuoteSpecimen";
@@ -22,6 +23,8 @@ function Frame({ title, body, children }: { title: string; body: string; childre
 }
 
 export function EvidenceStandard() {
+  const t = useMessages().landing.standard;
+  const landingView = landingViewFor(useLocale());
   const issue = landingView.artifacts.find((a) => a.kind === "issue" && a.verified);
   const gap = landingView.gaps.find((g) => g.verified);
   const after = gap && landingView.artifacts.find((a) => a.id === gap.afterId);
@@ -30,27 +33,18 @@ export function EvidenceStandard() {
       <div className={`${CONTAINER} flex flex-col gap-9 py-18`}>
         <div className="flex flex-wrap items-end justify-between gap-x-12 gap-y-4">
           <h2 id="standard-title" className={`${H2} max-w-140`}>
-            Not a chat about your repo. A record you can audit.
+            {t.title}
           </h2>
-          <span className={KICKER}>evidence &gt; assertions</span>
+          <span className={KICKER}>{t.kicker}</span>
         </div>
         <ul className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-6">
-          <Frame
-            title="Every clause points to its sources"
-            body="Each statement carries the letters of the artifacts behind it. The conclusion is an index to the record."
-          >
+          <Frame title={t.clauses.title} body={t.clauses.body}>
             <ClauseSpecimen view={landingView} index={1} />
           </Frame>
-          <Frame
-            title="Citations are checked, not trusted"
-            body="A deterministic check finds every quote in its source. A fabricated reference is caught before you see it."
-          >
+          <Frame title={t.citations.title} body={t.citations.body}>
             {issue && <QuoteSpecimen artifact={issue} rejected={landingRejected} />}
           </Frame>
-          <Frame
-            title="It shows where the trail goes cold"
-            body="A gap counts as silence only when the provider confirms nothing is there. And when no source gives a reason, the answer is built to say so, not to guess."
-          >
+          <Frame title={t.silence.title} body={t.silence.body}>
             {gap && after && <SilentSpecimen gap={gap} after={after} />}
           </Frame>
         </ul>

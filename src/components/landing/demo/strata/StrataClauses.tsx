@@ -1,4 +1,5 @@
 import { type Dispatch, type KeyboardEvent, useRef, useState } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { clauseDescription } from "../../../line-investigation/copy/clause-copy";
 import type {
   InvestigationView,
@@ -25,6 +26,7 @@ const FOCUS =
 
 function Clause({
   clause,
+  tally,
   description,
   descId,
   on,
@@ -36,6 +38,7 @@ function Clause({
   buttonRef,
 }: {
   clause: ViewClause;
+  tally: string;
   description: string;
   descId: string;
   on: boolean;
@@ -93,7 +96,7 @@ function Clause({
                 <span key={c.citation} className={`box-border h-1.5 w-3.5 ${CELL[c.state]}`} />
               ))}
             </span>
-            {strataTally(clause)}
+            {tally}
           </span>
         </span>
       </button>
@@ -121,6 +124,7 @@ export function StrataClauses({
   labelledBy: string;
   idPrefix: string;
 }) {
+  const locale = useLocale();
   const buttons = useRef(new Map<string, HTMLButtonElement>());
   const [focusIndex, setFocusIndex] = useState(0);
   const wide = slots !== null;
@@ -157,7 +161,8 @@ export function StrataClauses({
         >
           <Clause
             clause={clause}
-            description={clauseDescription(clause, byId, "en")}
+            tally={strataTally(clause, locale)}
+            description={clauseDescription(clause, byId, locale)}
             descId={`${idPrefix}-clause-${clause.id}`}
             on={active === clause.id}
             wide={wide}

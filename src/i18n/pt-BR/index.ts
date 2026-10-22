@@ -2,6 +2,7 @@ import type { Messages } from "../messages";
 import { common } from "./common";
 import { composer } from "./composer";
 import { errors } from "./errors";
+import { landing, meta } from "./landing";
 import { languages } from "./languages";
 import {
   accessible,
@@ -45,4 +46,6 @@ export const ptBR: Messages = {
   accessible,
   drawer,
   history,
+  meta,
+  landing,
 };

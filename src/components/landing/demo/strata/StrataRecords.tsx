@@ -1,3 +1,4 @@
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { artifactName, gapName } from "../../../line-investigation/copy/accessible-name";
 import { displayId, labelTitle } from "../../../line-investigation/copy/artifact-copy";
 import { gapChip } from "../../../line-investigation/copy/gap-copy";
@@ -18,12 +19,14 @@ function Record({
   active: ReadonlySet<string> | null;
   clause: string | null;
 }) {
+  const locale = useLocale();
+  const d = useMessages().landing.demo;
   const wide = m.mode === "wide";
   const sub = s.layer === "sub";
   const cited = !!active?.has(s.artifact.id);
   const quoted = cited && s.quote?.clauseId === clause;
   const knock = wide ? "" : "bg-strata-ground";
-  const date = marginDate(s);
+  const date = marginDate(s, locale);
 
   return (
     <span aria-hidden className="flex flex-col items-start">
@@ -52,14 +55,14 @@ function Record({
             cited ? "text-strata-ink" : "text-strata-neutral-800"
           } ${quoted && !sub ? "font-medium" : ""}`}
         >
-          {labelTitle(s.artifact, "en")}
+          {labelTitle(s.artifact, locale)}
         </span>
         {s.version?.note && (
           <span className="text-[11px] text-strata-neutral-700">{s.version.note}</span>
         )}
         {s.gap && (
           <span className="border border-dashed border-strata-neutral-700 px-1.25 text-[11px] leading-4 text-strata-neutral-700">
-            {gapChip(s.gap, "en")}
+            {gapChip(s.gap, locale)}
           </span>
         )}
       </span>
@@ -68,7 +71,7 @@ function Record({
           className={`pl-7.5 font-li-mono text-[11px] leading-4 text-strata-neutral-700 ${knock}`}
           style={{ marginTop: m.caption - 16 }}
         >
-          {currentCaption(datum)}
+          {currentCaption(datum, locale)}
         </span>
       )}
       {s.quote && (
@@ -85,7 +88,7 @@ function Record({
           >
             “{s.quote.text}”
           </span>
-          {quoted && <span className="text-[11px] text-strata-trace-ink">quoted verbatim</span>}
+          {quoted && <span className="text-[11px] text-strata-trace-ink">{d.quoted}</span>}
         </span>
       )}
     </span>
@@ -107,14 +110,17 @@ export function StrataRecords({
   active: ReadonlySet<string> | null;
   clause: string | null;
 }) {
+  const locale = useLocale();
+  const t = useMessages();
   const byId = new Map(view.artifacts.map((a) => [a.id, a]));
   return (
-    <ol aria-label="History, newest first" className="pointer-events-none absolute inset-0">
+    <ol aria-label={t.history.newestFirst} className="pointer-events-none absolute inset-0">
       {layout.strata.map((s) => (
         <li key={s.artifact.id} className="absolute" style={{ top: s.row - m.date, left: m.codeX }}>
           <span className="sr-only">
-            {artifactName(s.artifact, view.clauses, "en")}
-            {s.version && `. ${s.version.note ?? "Line read"}: ${s.version.text.trim()}`}
+            {artifactName(s.artifact, view.clauses, locale)}
+            {s.version &&
+              `. ${s.version.note ?? t.landing.demo.lineRead}: ${s.version.text.trim()}`}
           </span>
           <Record s={s} m={m} datum={datum} active={active} clause={clause} />
         </li>
@@ -124,7 +130,7 @@ export function StrataRecords({
         return after
           ? [
               <li key={gap.id} className="sr-only">
-                {gapName(gap, after, "en")}
+                {gapName(gap, after, locale)}
               </li>,
             ]
           : [];

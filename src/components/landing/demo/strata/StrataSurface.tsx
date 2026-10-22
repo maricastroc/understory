@@ -1,3 +1,4 @@
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { describeLine } from "../../../line-investigation/specimen/describe-line";
 import type { CodeSegment, LineRange } from "../../../line-investigation/specimen/types";
 import { StrataCode } from "./StrataCode";
@@ -16,6 +17,9 @@ export function StrataSurface({
   token: LineRange | null;
   bandEnd: number;
 }) {
+  const locale = useLocale();
+  const t = useMessages();
+  const d = t.landing.demo;
   const wide = m.mode === "wide";
   const { font, line } = m.code;
   const datumTop = m.datumY - line - 2;
@@ -31,7 +35,7 @@ export function StrataSurface({
           className="absolute left-10 font-li-mono text-[11px] leading-[1.35] text-strata-bore-ink"
           style={{ top: m.datumY - 30 }}
         >
-          today
+          {t.subject.today}
           <br />
           ±0
         </span>
@@ -58,7 +62,7 @@ export function StrataSurface({
         style={{ top: m.datumY }}
       />
       <ol
-        aria-label={`Code, lines ${rows[0]}–${datum}`}
+        aria-label={d.code(rows[0], datum)}
         className="absolute inset-x-0 top-0 font-li-mono"
         style={{ height: m.datumY, fontSize: font, lineHeight: `${line}px` }}
       >
@@ -80,7 +84,7 @@ export function StrataSurface({
               >
                 {n}
               </span>
-              <span className="sr-only">{describeLine(n, isDatum, undefined, "en")}</span>
+              <span className="sr-only">{describeLine(n, isDatum, undefined, locale)}</span>
               <StrataCode
                 segments={segments[n - 1] ?? []}
                 mark={isDatum ? token : null}
