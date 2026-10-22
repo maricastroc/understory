@@ -34,7 +34,10 @@ export async function POST(req: Request) {
 
   const raw = await req.text();
   if (raw.length > MAX_BODY) {
-    return NextResponse.json({ error: "The evidence is too large to rewrite" }, { status: 413 });
+    return NextResponse.json(
+      { error: "The evidence is too large to rewrite", code: "too-large" },
+      { status: 413 },
+    );
   }
   let body: { evidence?: unknown; language?: unknown };
   try {
@@ -51,7 +54,11 @@ export async function POST(req: Request) {
   }
 
   if (getModel() !== null && !(await consumeAiDailyLimit())) {
-    return NextResponse.json({ narrative: null, error: AI_DAILY_LIMIT_REACHED });
+    return NextResponse.json({
+      narrative: null,
+      error: AI_DAILY_LIMIT_REACHED,
+      code: "ai-unavailable",
+    });
   }
   const { narrative, error } = await narrate(evidence, { language });
   return NextResponse.json({ narrative, ...(error ? { error } : {}) });

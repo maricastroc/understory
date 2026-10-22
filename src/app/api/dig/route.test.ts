@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   narrate: vi.fn(),
   getModel: vi.fn(),
   consumeAiDailyLimit: vi.fn(),
+  installUrl: vi.fn(),
 }));
 
 vi.mock("@understory/core/collect", async (importOriginal) => ({
@@ -24,9 +25,9 @@ vi.mock("@/lib/collect/remote", () => ({
   maybeDelegate: async () => null,
 }));
 vi.mock("@/lib/github-app", () => ({
-  githubAppConfigured: () => false,
+  githubAppConfigured: () => mocks.installUrl() !== null,
   githubTokenForRepo: async () => undefined,
-  installUrl: () => null,
+  installUrl: mocks.installUrl,
 }));
 vi.mock("@/lib/auth/current-user", () => ({ sessionToken: async () => undefined }));
 vi.mock("@/lib/history-store", () => ({ ensureHistoryStore: () => {} }));
@@ -66,6 +67,7 @@ async function dig() {
 describe("/api/dig — global daily AI limit", () => {
   beforeEach(() => {
     for (const m of Object.values(mocks)) m.mockReset();
+    mocks.installUrl.mockReturnValue(null);
     mocks.collect.mockResolvedValue(evidence);
     mocks.narrate.mockResolvedValue({ narrative: null, error: "narrated" });
   });
@@ -119,6 +121,7 @@ describe("/api/dig — the line's earlier history, behind its flag", () => {
 
   beforeEach(() => {
     for (const m of Object.values(mocks)) m.mockReset();
+    mocks.installUrl.mockReturnValue(null);
     mocks.collect.mockResolvedValue(evidence);
     mocks.narrate.mockResolvedValue({ narrative: null, error: "narrated" });
     mocks.getModel.mockReturnValue(null);
@@ -193,5 +196,53 @@ describe("/api/dig — the line's earlier history, behind its flag", () => {
     const options = mocks.lineageOf.mock.calls[0][1] as { signal: AbortSignal };
     expect(options.signal).toBeInstanceOf(AbortSignal);
     expect(options.signal.aborted).toBe(false);
+  });
+});
+
+describe("/api/dig — a collection that fails says what kind of failure it is", () => {
+  beforeEach(() => {
+    for (const m of Object.values(mocks)) m.mockReset();
+    mocks.installUrl.mockReturnValue(null);
+    mocks.getModel.mockReturnValue(null);
+  });
+
+  const failure = async () => {
+    const res = await POST(
+      new Request("http://localhost/api/dig", {
+        method: "POST",
+        body: JSON.stringify({
+          repoPath: "https://github.com/acme/payments-service",
+          location: "src/billing/charge.ts:8",
+        }),
+      }),
+    );
+    return { status: res.status, body: await res.json() };
+  };
+
+  it("adds a stable code and the host, and keeps the message it always sent", async () => {
+    mocks.collect.mockRejectedValue(new Error("GitHub API 403 — rate limited"));
+    const { status, body } = await failure();
+    expect(status).toBe(400);
+    expect(body).toEqual({
+      error: "GitHub API 403 — rate limited",
+      detail: "GitHub API 403 — rate limited",
+      code: "rate-limited",
+      host: "GitHub",
+    });
+  });
+
+  it("gives the GitHub App's address apart from the message when it can help", async () => {
+    mocks.installUrl.mockReturnValue("https://github.com/apps/understory/installations/new");
+    mocks.collect.mockRejectedValue(new Error("GitHub API 404 — not found"));
+    const { body } = await failure();
+    expect(body).toMatchObject({
+      detail: "GitHub API 404 — not found",
+      code: "not-found",
+      host: "GitHub",
+      installUrl: "https://github.com/apps/understory/installations/new",
+    });
+    expect(body.error).toBe(
+      "GitHub API 404 — not found If acme/payments-service is private, install the Understory GitHub App: https://github.com/apps/understory/installations/new",
+    );
   });
 });

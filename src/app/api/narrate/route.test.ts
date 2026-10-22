@@ -57,6 +57,18 @@ describe("POST /api/narrate", () => {
     expect(status).toBe(200);
     expect(data.narrative).toBeNull();
     expect(data.error).toMatch(/temporarily unavailable/);
+    expect(data.code).toBe("ai-unavailable");
     expect(mocks.narrate).not.toHaveBeenCalled();
+  });
+
+  it("refuses evidence too large to send again, with its code", async () => {
+    const res = await POST(
+      new Request("http://localhost/api/narrate", {
+        method: "POST",
+        body: "x".repeat(2_000_001),
+      }),
+    );
+    expect(res.status).toBe(413);
+    expect(await res.json()).toMatchObject({ code: "too-large" });
   });
 });
