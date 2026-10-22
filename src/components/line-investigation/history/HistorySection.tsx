@@ -1,7 +1,8 @@
 "use client";
 
-import { useLocale } from "@/i18n/LocaleProvider";
-import type { Locale } from "@/i18n/locales";
+import { formatMonthYear, shortAge } from "@/i18n/format";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import type { Messages } from "@/i18n/messages";
 import { type Dispatch, useEffect, useId, useMemo, useRef, useState } from "react";
 import { dayDate, displayId, tickText } from "../copy/artifact-copy";
 import { gapName } from "../copy/accessible-name";
@@ -15,7 +16,6 @@ import {
   surfaceText,
 } from "../copy/subject-copy";
 import type { CaseSubject } from "../copy/types";
-import { shortAge } from "../format/age";
 import type { InvestigationView, ViewArtifact } from "../model/types";
 import { HATCH_BAND } from "../parts/hatch";
 import { liButton } from "../parts/button-class";
@@ -27,25 +27,19 @@ import { extentOf, type ReadingLayer } from "./reading-layer";
 import type { HistoryItem, HistoryModel, HistoryStratum } from "./types";
 import { useHistoryPosition } from "./use-history-position";
 
-const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
+const KINDS = ["commit", "pull_request", "review", "issue"] as const;
 
-function kinds(strata: HistoryStratum[]): string {
-  const count = (k: string) =>
-    strata.flatMap((s) => s.members).filter((m) => m.artifact.kind === k).length;
-  return [
-    [count("commit"), "commit"],
-    [count("pull_request"), "PR"],
-    [count("review"), "review"],
-    [count("issue"), "issue"],
-  ]
-    .filter(([n]) => (n as number) > 0)
-    .map(([n, k]) => plural(n as number, k as string))
+function kinds(strata: HistoryStratum[], m: Messages): string {
+  const members = strata.flatMap((s) => s.members);
+  return KINDS.map((k) => [k, members.filter((x) => x.artifact.kind === k).length] as const)
+    .filter(([, n]) => n > 0)
+    .map(([k, n]) => m.history.count[k](n))
     .join(" · ");
 }
 
-function span(strata: HistoryStratum[], locale: Locale): string {
-  const first = dayDate(strata[0].anchor.date, locale).split(" ").slice(1).join(" ");
-  const last = dayDate(strata.at(-1)!.anchor.date, locale).split(" ").slice(1).join(" ");
+function span(strata: HistoryStratum[], m: Messages): string {
+  const first = formatMonthYear(m.time, strata[0].anchor.date);
+  const last = formatMonthYear(m.time, strata.at(-1)!.anchor.date);
   return first === last ? first : `${first} – ${last}`;
 }
 
@@ -71,6 +65,8 @@ export function HistorySection({
   arrive: boolean;
 }) {
   const locale = useLocale();
+  const m = useMessages();
+  const h = m.history;
   const headingId = useId();
   const section = useRef<HTMLElement | null>(null);
   const bar = useRef<HTMLDivElement | null>(null);
@@ -115,7 +111,7 @@ export function HistorySection({
         return (
           <li key={item.id} className={`${ROW_GRID} h-10`}>
             <Margin>
-              {shortAge(item.days)}
+              {shortAge(m.time, item.days)}
               <br />
               {breakMargin(subject, item.first, locale)}
             </Margin>
@@ -142,22 +138,22 @@ export function HistorySection({
               <ol>{renderItems(item.items)}</ol>
             ) : (
               <div className={`${ROW_GRID} min-h-14`}>
-                <Margin>{span(item.strata, locale)}</Margin>
+                <Margin>{span(item.strata, m)}</Margin>
                 <BoreCell line="dashed" />
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pb-2.5">
                   <span className="text-[14px] text-li-neutral-800">
-                    {plural(item.strata.length, "earlier change")} not cited by the answer
+                    {h.quiet(item.strata.length)}
                   </span>
                   <span className="font-li-mono text-[11px] text-li-text-subtle">
-                    {kinds(item.strata)}
-                    {absences > 0 && ` · ${plural(absences, "absence")}`}
+                    {kinds(item.strata, m)}
+                    {absences > 0 && ` · ${h.absences(absences)}`}
                   </span>
                   <button
                     type="button"
                     onClick={() => setOpenRuns((s) => new Set(s).add(item.id))}
                     className={liButton("ghost", "", "sm")}
                   >
-                    Show {item.strata.length}
+                    {h.show(item.strata.length)}
                   </button>
                 </div>
               </div>
@@ -196,7 +192,7 @@ export function HistorySection({
           {silent.map((g) => (
             <div key={g.id} className={`${ROW_GRID} pb-3`}>
               <Margin>
-                <span className="text-li-gap-ink">not recorded</span>
+                <span className="text-li-gap-ink">{m.gap.notRecorded}</span>
               </Margin>
               <BoreCell line="dashed" />
               <div
@@ -235,13 +231,16 @@ export function HistorySection({
           {historyTitle(subject, locale)}
         </h2>
         <span className="font-li-mono text-[11px] text-li-text-subtle">
-          today ±0 → {open ? "oldest read" : "origin"}{" "}
-          {extent.days !== null ? tickText(extent.days, locale) : "—"} ·{" "}
-          {plural(extent.changes, "change")} · {plural(count, "artifact")}
+          {h.extent(
+            open ? h.oldestRead : h.origin,
+            extent.days !== null ? tickText(extent.days, locale) : "—",
+            h.changes(extent.changes),
+            m.caseScreen.artifacts(count),
+          )}
         </span>
         {inside && here && (
           <span className="font-li-mono text-[11px] text-li-ink" aria-hidden>
-            at {dayDate(here.anchor.date, locale)}
+            {h.at(dayDate(here.anchor.date, locale))}
             {here.anchor.daysBeforeNow !== null &&
               ` · ${tickText(here.anchor.daysBeforeNow, locale)}`}{" "}
             · {here.anchor.letter} {displayId(here.anchor)}
@@ -250,7 +249,7 @@ export function HistorySection({
         <span className="ml-auto flex flex-wrap items-center gap-2">
           {pinned && (
             <span className="font-li-mono text-[11px] text-li-evidence-ink">
-              tracing clause {pinned.index + 1} · {pinned.letters.join(" ")}
+              {h.tracing(pinned.index + 1, pinned.letters.join(" "))}
             </span>
           )}
           {inside && (
@@ -259,7 +258,7 @@ export function HistorySection({
               onClick={() => onBack(state.pinnedClause)}
               className={liButton("ghost", "", "sm")}
             >
-              ↑ {pinned ? `Back to clause ${pinned.index + 1}` : "Back to the answer"}
+              ↑ {pinned ? h.backToClause(pinned.index + 1) : h.backToAnswer}
             </button>
           )}
         </span>
@@ -268,7 +267,7 @@ export function HistorySection({
       <div className={`${ROW_GRID} mt-4 h-9`}>
         <Margin>
           <span className="text-li-datum-ink">
-            today
+            {m.subject.today}
             <br />
             ±0
           </span>
@@ -282,10 +281,10 @@ export function HistorySection({
         </div>
       </div>
 
-      <ol aria-label="History, newest first">{renderItems(model.items)}</ol>
+      <ol aria-label={h.newestFirst}>{renderItems(model.items)}</ol>
 
       {layer && layer.earlier.length > 0 && (
-        <ol aria-label="Earlier changes to this line, found by following it back">
+        <ol aria-label={h.earlierList}>
           {layer.earlier.map((entry) => (
             <li
               key={entry.id}
@@ -313,7 +312,7 @@ export function HistorySection({
                     {factText({ did: entry.did, before: entry.before ?? null }, locale)}
                     {entry.did === "rewrote" && entry.before && (
                       <>
-                        {" · before: "}
+                        {` · ${h.before} `}
                         <code className="text-li-neutral-800">{entry.before}</code>
                       </>
                     )}
@@ -325,7 +324,7 @@ export function HistorySection({
                 {entry.message && entry.message.trim() !== entry.title.trim() && (
                   <details className="max-w-170 text-[12.5px] text-li-neutral-800">
                     <summary className="w-fit cursor-pointer font-li-mono text-[11px] text-li-text-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus">
-                      the commit message
+                      {h.commitMessage}
                     </summary>
                     <pre className="mt-1 font-li-mono text-[11.5px] leading-[1.5] whitespace-pre-wrap">
                       {entry.message}
@@ -354,7 +353,7 @@ export function HistorySection({
       {origin && !(layer && (layer.earlier.length > 0 || edge !== null)) && (
         <div className={`${ROW_GRID} border-t border-li-neutral-300 pt-2`}>
           <Margin>
-            origin
+            {h.origin}
             {model.originDays !== null && (
               <>
                 <br />
@@ -368,16 +367,14 @@ export function HistorySection({
           </BoreCell>
           <p className="col-span-2 pt-1 font-li-mono text-[11px] text-li-text-subtle max-[820px]:col-span-1">
             {originText(subject, locale)} · {displayId(origin.anchor)}
-            {model.originDays !== null && ` · ${shortAge(model.originDays)} deep`}
+            {model.originDays !== null && ` · ${h.deep(shortAge(m.time, model.originDays))}`}
           </p>
         </div>
       )}
 
       {model.loose.length > 0 && (
         <div className="mt-8 flex flex-col gap-2">
-          <h3 className="text-[13px] font-semibold text-li-ink">
-            Also collected, not on the line’s history
-          </h3>
+          <h3 className="text-[13px] font-semibold text-li-ink">{h.alsoCollected}</h3>
           <ul className="flex flex-col gap-1.5">
             {model.loose.map((a) => (
               <li

@@ -8,6 +8,7 @@ import {
   depthLabel,
   formatDay,
   formatDayMonth,
+  formatMonthYear,
   formatNumber,
   formatSeconds,
   longAge,
@@ -79,5 +80,11 @@ describe("format", () => {
     expect(formatDay(pt, "not a date")).toBe("not a date");
     expect(formatDayMonth(pt, "2023-12-08T00:00:00Z")).toEqual({ dayMonth: "8 dez", year: "2023" });
     expect(formatDayMonth(en, "2023-12-08T00:00:00Z")).toEqual({ dayMonth: "8 Dec", year: "2023" });
+  });
+
+  it("writes a month and its year, for a stretch of history", () => {
+    expect(formatMonthYear(en, "2024-03-09T10:00:00Z")).toBe("Mar 2024");
+    expect(formatMonthYear(pt, "2024-03-09T10:00:00Z")).toBe("mar 2024");
+    expect(formatMonthYear(pt, "not a date")).toBe("not a date");
   });
 });

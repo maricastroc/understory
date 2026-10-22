@@ -343,3 +343,36 @@ export const drawer = {
   reviewState: (state: string) => `Review state: ${state}`,
   issueState: { open: "open", closed: "closed" },
 };
+
+export const history = {
+  count: {
+    commit: (n: number) => (n === 1 ? "1 commit" : `${n} commits`),
+    pull_request: (n: number) => (n === 1 ? "1 PR" : `${n} PRs`),
+    review: (n: number) => (n === 1 ? "1 review" : `${n} reviews`),
+    issue: (n: number) => (n === 1 ? "1 issue" : `${n} issues`),
+  },
+  quiet: (n: number) =>
+    n === 1
+      ? "1 earlier change not cited by the answer"
+      : `${n} earlier changes not cited by the answer`,
+  absences: (n: number) => (n === 1 ? "1 absence" : `${n} absences`),
+  show: (n: number) => `Show ${n}`,
+  changes: (n: number) => (n === 1 ? "1 change" : `${n} changes`),
+  extent: (to: string, depth: string, changes: string, artifacts: string) =>
+    `today ±0 → ${to} ${depth} · ${changes} · ${artifacts}`,
+  origin: "origin",
+  oldestRead: "oldest read",
+  at: (date: string) => `at ${date}`,
+  tracing: (n: number, letters: string) => `tracing clause ${n} · ${letters}`,
+  backToClause: (n: number) => `Back to clause ${n}`,
+  backToAnswer: "Back to the answer",
+  newestFirst: "History, newest first",
+  earlierList: "Earlier changes to this line, found by following it back",
+  before: "before:",
+  commitMessage: "the commit message",
+  deep: (age: string) => `${age} deep`,
+  alsoCollected: "Also collected, not on the line’s history",
+  quotedFor: (n: number) => `quoted for clause ${n}`,
+  backWithSource: (n: number, id: string) => `Back to clause ${n} with ${id} as its source`,
+  clauseChip: (n: number) => `clause ${n}`,
+};

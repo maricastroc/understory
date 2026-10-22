@@ -10,6 +10,7 @@ import {
   clause,
   drawer,
   gap,
+  history,
   questions,
   reading,
   source,
@@ -43,4 +44,5 @@ export const ptBR: Messages = {
   questions,
   accessible,
   drawer,
+  history,
 };

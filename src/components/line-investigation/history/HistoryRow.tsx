@@ -1,6 +1,8 @@
 import type { Dispatch } from "react";
-import { useLocale } from "@/i18n/LocaleProvider";
+import { formatDayMonth } from "@/i18n/format";
+import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import type { Locale } from "@/i18n/locales";
+import { messagesFor } from "@/i18n/messages";
 import { dateLine, dayDate, displayId, labelTitle, tickText } from "../copy/artifact-copy";
 import { artifactName, gapName } from "../copy/accessible-name";
 import { contextLines, metaLine } from "../copy/drawer-copy";
@@ -20,10 +22,9 @@ import { type ReadingLayer, scopeKey } from "./reading-layer";
 import type { HistoryMember, HistoryStratum } from "./types";
 
 function shortDate(a: ViewArtifact, anchor: ViewArtifact, locale: Locale): string {
-  const full = dayDate(a.date, locale);
   return a.date.slice(0, 4) === anchor.date.slice(0, 4)
-    ? full.split(" ").slice(0, 2).join(" ")
-    : full;
+    ? formatDayMonth(messagesFor(locale).time, a.date).dayMonth
+    : dayDate(a.date, locale);
 }
 
 export function HistoryRow({
@@ -56,6 +57,8 @@ export function HistoryRow({
   onDrill?: (a: ViewArtifact) => void;
 }) {
   const locale = useLocale();
+  const m = useMessages();
+  const h = m.history;
   const a = member.artifact;
   const anchor = member.depth === 0;
   const on = !!lit?.has(a.id);
@@ -157,7 +160,7 @@ export function HistoryRow({
             {factText(fact, locale)}
             {fact.did === "rewrote" && fact.before !== null && (
               <>
-                {" · before: "}
+                {` · ${h.before} `}
                 <code className="text-li-neutral-800">{fact.before}</code>
               </>
             )}
@@ -177,7 +180,7 @@ export function HistoryRow({
               <span className={active ? "border-b-[1.5px] border-li-evidence" : ""}>
                 “{q.text}”
               </span>
-              {c && <span className="text-[11px]">quoted for clause {c.index + 1}</span>}
+              {c && <span className="text-[11px]">{h.quotedFor(c.index + 1)}</span>}
               {scope && (
                 <>
                   <span aria-hidden className="text-[11px]">
@@ -233,7 +236,7 @@ export function HistoryRow({
                   onClick={() => onDrill(a)}
                   className={liButton("ghost", "", "sm")}
                 >
-                  Investigate →
+                  {m.caseScreen.investigate}
                 </button>
               )}
             </div>
@@ -245,7 +248,7 @@ export function HistoryRow({
           <button
             key={c.id}
             type="button"
-            aria-label={`Back to clause ${c.index + 1} with ${displayId(a)} as its source`}
+            aria-label={h.backWithSource(c.index + 1, displayId(a))}
             onClick={() => onBack(c.id, a.id)}
             className={`cursor-pointer border px-1.5 font-li-mono text-[10.5px] leading-4.5 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-li-focus ${
               c.id === clause
@@ -253,7 +256,7 @@ export function HistoryRow({
                 : "border-li-divider text-li-text-subtle hover:border-li-ink hover:text-li-ink"
             }`}
           >
-            ↑ clause {c.index + 1}
+            ↑ {h.clauseChip(c.index + 1)}
           </button>
         ))}
       </div>
