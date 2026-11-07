@@ -15,7 +15,7 @@ import { ensureHistoryStore } from "@/lib/history-store";
 import { AI_DAILY_LIMIT_REACHED } from "@/lib/ai-limit";
 import { providerFailure } from "@/lib/provider-failure";
 import { consumeAiDailyLimit, rateLimit } from "@/lib/ratelimit";
-import type { ArtifactRef, Evidence } from "@understory/core/types";
+import type { ArtifactRef, DigStreamMessage, Evidence } from "@understory/core/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -119,7 +119,8 @@ export async function POST(req: Request) {
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enc = new TextEncoder();
-      const send = (obj: unknown) => controller.enqueue(enc.encode(`${JSON.stringify(obj)}\n`));
+      const send = (obj: DigStreamMessage) =>
+        controller.enqueue(enc.encode(`${JSON.stringify(obj)}\n`));
       try {
         send({ phase: "evidence", evidence });
         const aiBlocked = getModel() !== null && !(await consumeAiDailyLimit());
