@@ -38,6 +38,7 @@ export type {
   Unsustained,
 } from "./reading";
 export type { DigResult } from "./dig-result";
+export type { DigStreamMessage } from "./dig-stream-message";
 export type { InvestigateInput } from "./investigate-input";
 export type { PrLookup } from "./pr-lookup";
 export type { BlameSpan } from "./blame-span";

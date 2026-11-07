@@ -5,8 +5,8 @@ import { narrativeLanguage } from "@understory/core/narrative-language";
 import type {
   ArtifactRef,
   DigResult,
+  DigStreamMessage,
   InvestigateInput,
-  Lineage,
   NarrativeLanguage,
 } from "@understory/core/types";
 import { type ApiFailure, failureFrom, NETWORK_FAILURE, thrownFailure } from "@/lib/api-error";
@@ -38,11 +38,6 @@ export type Entry = {
 };
 export type View = "browse" | "case";
 
-type StreamMessage =
-  | { phase: "evidence"; evidence: DigResult["evidence"] }
-  | { phase: "final"; narrative: DigResult["narrative"]; error?: string }
-  | { phase: "lineage"; lineage: Lineage };
-
 function forTheWriter(evidence: DigResult["evidence"]): DigResult["evidence"] {
   const sent = { ...evidence };
   delete sent.lineage;
@@ -51,7 +46,7 @@ function forTheWriter(evidence: DigResult["evidence"]): DigResult["evidence"] {
 
 async function readNdjson(
   body: ReadableStream<Uint8Array>,
-  onMessage: (m: StreamMessage) => void,
+  onMessage: (m: DigStreamMessage) => void,
 ): Promise<void> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
@@ -64,12 +59,12 @@ async function readNdjson(
     while (nl >= 0) {
       const line = buf.slice(0, nl).trim();
       buf = buf.slice(nl + 1);
-      if (line) onMessage(JSON.parse(line) as StreamMessage);
+      if (line) onMessage(JSON.parse(line) as DigStreamMessage);
       nl = buf.indexOf("\n");
     }
   }
   const tail = buf.trim();
-  if (tail) onMessage(JSON.parse(tail) as StreamMessage);
+  if (tail) onMessage(JSON.parse(tail) as DigStreamMessage);
 }
 
 const caseNumber = (caseId: string) => Number.parseInt(caseId.replace(/^GI-/, ""), 10) || 0;
