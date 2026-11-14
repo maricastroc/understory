@@ -71,7 +71,6 @@ export function HistorySection({
   const section = useRef<HTMLElement | null>(null);
   const bar = useRef<HTMLDivElement | null>(null);
   const { inside, at } = useHistoryPosition(section, bar);
-  const [collapsed, setCollapsed] = useState(false);
   const [openRuns, setOpenRuns] = useState<Set<string>>(new Set());
   const effective = state.hoverClause ?? state.pinnedClause;
   const clause = view.clauses.find((c) => c.id === effective) ?? null;
@@ -98,7 +97,6 @@ export function HistorySection({
 
   useEffect(() => {
     if (!state.located) return;
-    setCollapsed(false);
     const el = section.current?.querySelector<HTMLElement>(
       `[data-artifact="${cssEscape(state.located)}"]`,
     );
@@ -260,14 +258,6 @@ export function HistorySection({
           )}
           <button
             type="button"
-            aria-expanded={!collapsed}
-            onClick={() => setCollapsed((c) => !c)}
-            className={liButton("ghost", "", "sm")}
-          >
-            {collapsed ? `↓ ${h.expand}` : `↑ ${h.collapse}`}
-          </button>
-          <button
-            type="button"
             onClick={() => onBack(state.pinnedClause)}
             className={liButton("ghost", inside ? "" : "invisible", "sm")}
           >
@@ -276,136 +266,132 @@ export function HistorySection({
         </span>
       </div>
 
-      {!collapsed && (
-        <>
-          <div className={`${ROW_GRID} mt-4 h-9`}>
-            <Margin>
-              <span className="text-li-datum-ink">
-                {m.subject.today}
-                <br />
-                ±0
-              </span>
-            </Margin>
-            <BoreCell from={14} />
-            <div className="col-span-2 flex items-start gap-3 max-[820px]:col-span-1">
-              <span className="mt-3 h-0.5 flex-1 bg-li-datum" />
-              <span className="mt-1 font-li-mono text-[11px] text-li-datum-ink">
-                {surfaceText(subject, locale)}
-              </span>
-            </div>
-          </div>
+      <div className={`${ROW_GRID} mt-4 h-9`}>
+        <Margin>
+          <span className="text-li-datum-ink">
+            {m.subject.today}
+            <br />
+            ±0
+          </span>
+        </Margin>
+        <BoreCell from={14} />
+        <div className="col-span-2 flex items-start gap-3 max-[820px]:col-span-1">
+          <span className="mt-3 h-0.5 flex-1 bg-li-datum" />
+          <span className="mt-1 font-li-mono text-[11px] text-li-datum-ink">
+            {surfaceText(subject, locale)}
+          </span>
+        </div>
+      </div>
 
-          <ol aria-label={h.newestFirst}>{renderItems(model.items)}</ol>
+      <ol aria-label={h.newestFirst}>{renderItems(model.items)}</ol>
 
-          {layer && layer.earlier.length > 0 && (
-            <ol aria-label={h.earlierList}>
-              {layer.earlier.map((entry) => (
-                <li
-                  key={entry.id}
-                  data-earlier={entry.id}
-                  className={`${ROW_GRID} border-t border-li-neutral-300 pt-2`}
-                >
-                  <Margin>{dayDate(entry.date, locale)}</Margin>
-                  <BoreCell line="dashed">
-                    <Glyph kind="commit" cited={false} dim />
-                  </BoreCell>
-                  <div className="col-span-2 flex min-w-0 flex-col gap-1 pb-2.5 max-[820px]:col-span-1">
-                    <span className="font-li-mono text-[11px] text-li-text-subtle min-[821px]:hidden">
-                      {dayDate(entry.date, locale)}
-                    </span>
-                    <span className="flex flex-wrap items-baseline gap-x-2">
-                      <span className="font-li-mono text-[12.5px] font-medium text-li-ink">
-                        {entry.id.replace("commit:", "")}
-                      </span>
-                      <span className="text-[14.5px] leading-[1.35] text-li-neutral-800">
-                        {entry.title}
-                      </span>
-                    </span>
-                    {entry.did && (
-                      <span className="font-li-mono text-[11px] text-li-datum-ink">
-                        {factText({ did: entry.did, before: entry.before ?? null }, locale)}
-                        {entry.did === "rewrote" && entry.before && (
-                          <>
-                            {` · ${h.before} `}
-                            <code className="text-li-neutral-800">{entry.before}</code>
-                          </>
-                        )}
-                      </span>
-                    )}
-                    <span className="font-li-mono text-[11px] text-li-text-subtle">
-                      {earlierCaption(locale)}
-                    </span>
-                    {entry.message && entry.message.trim() !== entry.title.trim() && (
-                      <details className="max-w-170 text-[12.5px] text-li-neutral-800">
-                        <summary className="w-fit cursor-pointer font-li-mono text-[11px] text-li-text-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus">
-                          {h.commitMessage}
-                        </summary>
-                        <pre className="mt-1 font-li-mono text-[11.5px] leading-[1.5] whitespace-pre-wrap">
-                          {entry.message}
-                        </pre>
-                      </details>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ol>
-          )}
-
-          {edge && (
-            <p
-              role="note"
-              data-edge
-              className={`${ROW_GRID} border-t border-dashed border-li-neutral-300 pt-2 pb-2`}
+      {layer && layer.earlier.length > 0 && (
+        <ol aria-label={h.earlierList}>
+          {layer.earlier.map((entry) => (
+            <li
+              key={entry.id}
+              data-earlier={entry.id}
+              className={`${ROW_GRID} border-t border-li-neutral-300 pt-2`}
             >
-              <span className="col-span-2 max-[820px]:hidden" />
-              <span className="col-span-2 font-li-mono text-[11px] text-li-text-subtle max-[820px]:col-span-2">
-                {edge}
-              </span>
-            </p>
-          )}
-
-          {origin && !(layer && (layer.earlier.length > 0 || edge !== null)) && (
-            <div className={`${ROW_GRID} border-t border-li-neutral-300 pt-2`}>
-              <Margin>
-                {h.origin}
-                {model.originDays !== null && (
-                  <>
-                    <br />
-                    {tickText(model.originDays, locale)}
-                  </>
-                )}
-              </Margin>
-              <BoreCell line="none">
-                <span className="absolute top-0 left-1/2 -ml-[0.75px] h-2 border-l-[1.5px] border-li-rule" />
-                <span className="absolute top-2 left-1/2 size-2.5 -translate-x-1/2 rotate-45 bg-li-ink" />
+              <Margin>{dayDate(entry.date, locale)}</Margin>
+              <BoreCell line="dashed">
+                <Glyph kind="commit" cited={false} dim />
               </BoreCell>
-              <p className="col-span-2 pt-1 font-li-mono text-[11px] text-li-text-subtle max-[820px]:col-span-1">
-                {originText(subject, locale)} · {displayId(origin.anchor)}
-                {model.originDays !== null && ` · ${h.deep(shortAge(m.time, model.originDays))}`}
-              </p>
-            </div>
-          )}
+              <div className="col-span-2 flex min-w-0 flex-col gap-1 pb-2.5 max-[820px]:col-span-1">
+                <span className="font-li-mono text-[11px] text-li-text-subtle min-[821px]:hidden">
+                  {dayDate(entry.date, locale)}
+                </span>
+                <span className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="font-li-mono text-[12.5px] font-medium text-li-ink">
+                    {entry.id.replace("commit:", "")}
+                  </span>
+                  <span className="text-[14.5px] leading-[1.35] text-li-neutral-800">
+                    {entry.title}
+                  </span>
+                </span>
+                {entry.did && (
+                  <span className="font-li-mono text-[11px] text-li-datum-ink">
+                    {factText({ did: entry.did, before: entry.before ?? null }, locale)}
+                    {entry.did === "rewrote" && entry.before && (
+                      <>
+                        {` · ${h.before} `}
+                        <code className="text-li-neutral-800">{entry.before}</code>
+                      </>
+                    )}
+                  </span>
+                )}
+                <span className="font-li-mono text-[11px] text-li-text-subtle">
+                  {earlierCaption(locale)}
+                </span>
+                {entry.message && entry.message.trim() !== entry.title.trim() && (
+                  <details className="max-w-170 text-[12.5px] text-li-neutral-800">
+                    <summary className="w-fit cursor-pointer font-li-mono text-[11px] text-li-text-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus">
+                      {h.commitMessage}
+                    </summary>
+                    <pre className="mt-1 font-li-mono text-[11.5px] leading-[1.5] whitespace-pre-wrap">
+                      {entry.message}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
 
-          {model.loose.length > 0 && (
-            <div className="mt-8 flex flex-col gap-2">
-              <h3 className="text-[13px] font-semibold text-li-ink">{h.alsoCollected}</h3>
-              <ul className="flex flex-col gap-1.5">
-                {model.loose.map((a) => (
-                  <li
-                    key={a.id}
-                    data-artifact={a.id}
-                    className="flex flex-wrap items-center gap-2 text-[13.5px]"
-                  >
-                    <span className="font-li-mono text-[12px] text-li-ink">
-                      {a.letter} {displayId(a)}
-                    </span>
-                    <span className="text-li-neutral-800">{a.title}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </>
+      {edge && (
+        <p
+          role="note"
+          data-edge
+          className={`${ROW_GRID} border-t border-dashed border-li-neutral-300 pt-2 pb-2`}
+        >
+          <span className="col-span-2 max-[820px]:hidden" />
+          <span className="col-span-2 font-li-mono text-[11px] text-li-text-subtle max-[820px]:col-span-2">
+            {edge}
+          </span>
+        </p>
+      )}
+
+      {origin && !(layer && (layer.earlier.length > 0 || edge !== null)) && (
+        <div className={`${ROW_GRID} border-t border-li-neutral-300 pt-2`}>
+          <Margin>
+            {h.origin}
+            {model.originDays !== null && (
+              <>
+                <br />
+                {tickText(model.originDays, locale)}
+              </>
+            )}
+          </Margin>
+          <BoreCell line="none">
+            <span className="absolute top-0 left-1/2 -ml-[0.75px] h-2 border-l-[1.5px] border-li-rule" />
+            <span className="absolute top-2 left-1/2 size-2.5 -translate-x-1/2 rotate-45 bg-li-ink" />
+          </BoreCell>
+          <p className="col-span-2 pt-1 font-li-mono text-[11px] text-li-text-subtle max-[820px]:col-span-1">
+            {originText(subject, locale)} · {displayId(origin.anchor)}
+            {model.originDays !== null && ` · ${h.deep(shortAge(m.time, model.originDays))}`}
+          </p>
+        </div>
+      )}
+
+      {model.loose.length > 0 && (
+        <div className="mt-8 flex flex-col gap-2">
+          <h3 className="text-[13px] font-semibold text-li-ink">{h.alsoCollected}</h3>
+          <ul className="flex flex-col gap-1.5">
+            {model.loose.map((a) => (
+              <li
+                key={a.id}
+                data-artifact={a.id}
+                className="flex flex-wrap items-center gap-2 text-[13.5px]"
+              >
+                <span className="font-li-mono text-[12px] text-li-ink">
+                  {a.letter} {displayId(a)}
+                </span>
+                <span className="text-li-neutral-800">{a.title}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </section>
   );

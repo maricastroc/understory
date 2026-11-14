@@ -285,7 +285,7 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
         />
       }
       strip={<CaseStrip items={lineItems} expanded={menuOpen} onOpen={() => setMenuOpen(true)} />}
-      rail={(onClose) => (
+      rail={(onClose, onCollapse) => (
         <CaseRail
           items={lineItems}
           onNew={() => {
@@ -296,6 +296,7 @@ export function Investigator({ reading = false }: { reading?: boolean } = {}) {
           onRemove={(item) => removeCase(item.id)}
           footer={railFooterInfo(user, persisted, m)}
           onClose={onClose}
+          onCollapse={onCollapse}
         />
       )}
     >
