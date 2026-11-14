@@ -22,7 +22,7 @@ export function AppShell({
   const m = useMessages();
   const [collapsed, setCollapsed] = useState(false);
   return (
-    <div className="min-h-screen bg-li-paper">
+    <div data-rail={collapsed ? "collapsed" : "open"} className="min-h-screen bg-li-paper">
       {header}
       <div
         className={`grid max-[1360px]:grid-cols-[56px_minmax(0,1fr)] max-[820px]:grid-cols-1 ${
