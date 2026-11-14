@@ -221,7 +221,7 @@ export function Composer({
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-280 flex-col gap-8 font-li-body text-li-ink">
+    <div className="mx-auto flex w-full max-w-280 flex-col gap-8 font-li-body text-li-ink in-data-[rail=collapsed]:max-w-400">
       <div className="flex flex-col gap-3.5">
         <h1 className="li-eyebrow text-li-text-subtle">{m.shell.newInvestigation}</h1>
         <InvestigationPath steps={steps} />
