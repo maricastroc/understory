@@ -397,8 +397,6 @@ export const history: Messages["history"] = {
   backToClause: (n) => `Voltar à afirmação ${n}`,
   backToAnswer: "Voltar à resposta",
   newestFirst: "Histórico, do mais recente para o mais antigo",
-  collapse: "Recolher histórico",
-  expand: "Expandir histórico",
   earlierList: "Mudanças anteriores nesta linha, encontradas ao segui-la para trás",
   before: "antes:",
   commitMessage: "a mensagem do commit",

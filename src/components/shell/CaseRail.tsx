@@ -11,6 +11,7 @@ export function CaseRail({
   footer,
   onClose,
   onNew,
+  onCollapse,
 }: {
   items: RailItem[];
   onSelect: (item: RailItem) => void;
@@ -18,6 +19,7 @@ export function CaseRail({
   footer: RailFooterInfo;
   onClose?: () => void;
   onNew?: () => void;
+  onCollapse?: () => void;
 }) {
   const m = useMessages();
   const headingId = useId();
@@ -38,6 +40,16 @@ export function CaseRail({
             className="-mr-1.5 ml-auto grid size-7 cursor-pointer place-items-center text-[18px] leading-none font-light text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus active:bg-li-neutral-300 motion-reduce:transition-none"
           >
             +
+          </button>
+        )}
+        {onCollapse && (
+          <button
+            type="button"
+            onClick={onCollapse}
+            aria-label={m.shell.collapseInvestigations}
+            className={`-mr-1.5 grid size-7 cursor-pointer place-items-center text-[15px] leading-none text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus motion-reduce:transition-none ${onNew ? "ml-1" : "ml-auto"}`}
+          >
+            «
           </button>
         )}
         {onClose && (

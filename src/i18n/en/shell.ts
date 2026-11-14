@@ -3,6 +3,8 @@ export const shell = {
   openInvestigations: "Open investigations",
   investigations: "Investigations",
   closeInvestigations: "Close investigations",
+  collapseInvestigations: "Collapse investigations",
+  expandInvestigations: "Expand investigations",
   caseList: "Case list",
   emptyTitle: "No investigations yet.",
   emptyBody: "Each line you investigate stays here, with the trail it followed.",

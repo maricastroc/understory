@@ -5,6 +5,8 @@ export const shell: Messages["shell"] = {
   openInvestigations: "Abrir investigações",
   investigations: "Investigações",
   closeInvestigations: "Fechar investigações",
+  collapseInvestigations: "Recolher investigações",
+  expandInvestigations: "Expandir investigações",
   caseList: "Lista de casos",
   emptyTitle: "Nenhuma investigação ainda.",
   emptyBody: "Cada linha que você investigar fica aqui, com a trilha que ela seguiu.",
