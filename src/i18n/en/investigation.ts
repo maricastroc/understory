@@ -367,8 +367,6 @@ export const history = {
   backToClause: (n: number) => `Back to clause ${n}`,
   backToAnswer: "Back to the answer",
   newestFirst: "History, newest first",
-  collapse: "Collapse history",
-  expand: "Expand history",
   earlierList: "Earlier changes to this line, found by following it back",
   before: "before:",
   commitMessage: "the commit message",
