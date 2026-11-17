@@ -49,7 +49,7 @@ test("on a phone the path keeps its boxes without scrolling the page", async ({ 
 test("on a phone the code moves to the token the question names, line numbers held in place", async ({
   page,
 }) => {
-  await open(page, 375);
+  await open(page, 320);
   await page.getByRole("button", { name: /Ask a specific question/ }).click();
   await field(page).fill("Why exactly 3 retries?");
   const scroller = page.locator("section[aria-label^='Code'] .overflow-auto");
