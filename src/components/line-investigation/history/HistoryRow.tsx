@@ -41,8 +41,10 @@ export function HistoryRow({
   onBack,
   onDrill,
   layer,
+  pop,
 }: {
   layer?: ReadingLayer | null;
+  pop?: number;
   member: HistoryMember;
   stratum: HistoryStratum;
   view: InvestigationView;
@@ -101,7 +103,7 @@ export function HistoryRow({
         )}
       </Margin>
       <BoreCell from={anchor && stratum.members[0] === member ? 13 : 0} to={last ? undefined : 0}>
-        <Glyph kind={a.kind} cited={a.role === "cited"} dim={lit !== null && !on} />
+        <Glyph kind={a.kind} cited={a.role === "cited"} dim={lit !== null && !on} pop={pop} />
       </BoreCell>
       <div
         className="flex min-w-0 flex-col gap-1 pb-2.5"

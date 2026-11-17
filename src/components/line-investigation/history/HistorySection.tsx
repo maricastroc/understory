@@ -3,10 +3,10 @@
 import { formatMonthYear, shortAge } from "@/i18n/format";
 import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import type { Messages } from "@/i18n/messages";
-import { type Dispatch, useEffect, useId, useMemo, useRef, useState } from "react";
+import { type Dispatch, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { dayDate, displayId, tickText } from "../copy/artifact-copy";
 import { gapName } from "../copy/accessible-name";
-import { gapBody, gapLetter, gapTitle } from "../copy/gap-copy";
+import { gapBasis, gapBody, gapLetter, gapTitle } from "../copy/gap-copy";
 import { earlierCaption, edgeText, factText } from "../copy/reading-copy";
 import {
   breakMargin,
@@ -72,11 +72,20 @@ export function HistorySection({
   const bar = useRef<HTMLDivElement | null>(null);
   const { inside, at } = useHistoryPosition(section, bar);
   const [openRuns, setOpenRuns] = useState<Set<string>>(new Set());
+  const strata = useRef<HTMLDivElement | null>(null);
+  const [trace, setTrace] = useState<{ x: number; top: number; height: number } | null>(null);
   const effective = state.hoverClause ?? state.pinnedClause;
   const clause = view.clauses.find((c) => c.id === effective) ?? null;
   const lit = useMemo(() => (clause ? new Set(clause.citations) : null), [clause]);
   const pinned = view.clauses.find((c) => c.id === state.pinnedClause) ?? null;
   const byStratum = useMemo(() => new Map(model.strata.map((s) => [s.id, s])), [model.strata]);
+  const depthOrder = useMemo(
+    () =>
+      new Map(
+        model.strata.flatMap((s) => s.members.map((x) => x.artifact.id)).map((id, i) => [id, i]),
+      ),
+    [model.strata],
+  );
   const found = at ? byStratum.get(at) : undefined;
   const here = found ?? model.strata[0];
   const count = model.strata.reduce((n, s) => n + s.members.length, 0) + model.loose.length;
@@ -94,6 +103,34 @@ export function HistorySection({
     }
     return out;
   }, [model.items, lit, state.located]);
+
+  const tracedIds = pinned ? pinned.citations.join("|") : "";
+  useLayoutEffect(() => {
+    const box = strata.current;
+    if (!box || !tracedIds) {
+      setTrace(null);
+      return;
+    }
+    const measure = () => {
+      const base = box.getBoundingClientRect();
+      const points = tracedIds
+        .split("|")
+        .map((id) => box.querySelector(`[data-artifact="${cssEscape(id)}"] svg`))
+        .filter((el): el is SVGSVGElement => el !== null)
+        .map((el) => {
+          const r = el.getBoundingClientRect();
+          return { x: r.left + r.width / 2 - base.left, y: r.top + 13 - base.top };
+        });
+      if (points.length < 2) return setTrace(null);
+      const ys = points.map((p) => p.y);
+      setTrace({ x: points[0].x, top: Math.min(...ys), height: Math.max(...ys) - Math.min(...ys) });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [tracedIds]);
+  const verifiedTrace = !!pinned?.cells.some((c) => c.state === "verified");
 
   useEffect(() => {
     if (!state.located) return;
@@ -163,15 +200,9 @@ export function HistorySection({
         );
       }
       const s = item.stratum;
-      const delay = arrive ? { animationDelay: `${Math.min(item.index, 12) * 45}ms` } : undefined;
       const silent = s.gaps.filter((g) => g.missing === "pull_request" && g.verified);
       return (
-        <li
-          key={s.id}
-          data-stratum={s.id}
-          className={`border-t border-li-neutral-300 pt-2 ${arrive ? "animate-li-arrive" : ""}`}
-          style={delay}
-        >
+        <li key={s.id} data-stratum={s.id} className="border-t border-li-neutral-300 pt-2">
           {s.members.map((m, i) => (
             <HistoryRow
               key={m.artifact.id}
@@ -188,6 +219,7 @@ export function HistorySection({
               onBack={onBack}
               onDrill={onDrill}
               layer={layer}
+              pop={arrive ? Math.min(depthOrder.get(m.artifact.id) ?? 0, 12) * 45 : undefined}
             />
           ))}
           {silent.map((g) => (
@@ -207,6 +239,9 @@ export function HistorySection({
                 </span>
                 <span className="w-fit max-w-160 bg-li-paper px-1 text-[12.5px] leading-[1.45] text-li-neutral-800">
                   {gapBody(g, s.anchor, locale, !!layer)}
+                </span>
+                <span className="w-fit bg-li-paper px-1 font-li-mono text-[11px] leading-[1.45] text-li-text-subtle">
+                  {gapBasis(g, locale)}
                 </span>
               </div>
             </div>
@@ -283,7 +318,19 @@ export function HistorySection({
         </div>
       </div>
 
-      <ol aria-label={h.newestFirst}>{renderItems(model.items)}</ol>
+      <div ref={strata} className="relative">
+        {trace && (
+          <span
+            key={tracedIds}
+            aria-hidden
+            className={`pointer-events-none absolute z-[1] -ml-px w-0.5 origin-top animate-li-trace ${
+              verifiedTrace ? "bg-li-evidence" : "bg-li-ink/45"
+            }`}
+            style={{ left: trace.x, top: trace.top, height: trace.height }}
+          />
+        )}
+        <ol aria-label={h.newestFirst}>{renderItems(model.items)}</ol>
+      </div>
 
       {layer && layer.earlier.length > 0 && (
         <ol aria-label={h.earlierList}>

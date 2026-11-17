@@ -46,7 +46,8 @@ export function CodeText({
         p.marked ? (
           <mark
             key={i}
-            className={`bg-li-datum-strong px-px text-inherit outline-[1.5px] outline-offset-1 outline-li-ink outline-solid ${segmentClass(p.kind, datum)}`}
+            data-asked
+            className={`bg-li-datum-weak px-px text-inherit outline-[1.5px] outline-offset-1 outline-strata-bore-ink outline-solid ${segmentClass(p.kind, datum)}`}
           >
             {p.text}
           </mark>

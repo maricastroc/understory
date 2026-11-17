@@ -45,10 +45,21 @@ export function BoreCell({
   );
 }
 
-export function Glyph({ kind, cited, dim }: { kind: ArtifactKind; cited: boolean; dim: boolean }) {
+export function Glyph({
+  kind,
+  cited,
+  dim,
+  pop,
+}: {
+  kind: ArtifactKind;
+  cited: boolean;
+  dim: boolean;
+  pop?: number;
+}) {
   return (
     <svg
-      className={`absolute top-0 left-1/2 -translate-x-1/2 overflow-visible ${dim ? "opacity-45" : ""}`}
+      className={`absolute top-0 left-1/2 z-[2] -translate-x-1/2 overflow-visible ${dim ? "opacity-45" : ""} ${pop === undefined ? "" : "animate-li-pop"}`}
+      style={pop === undefined ? undefined : { animationDelay: `${pop}ms` }}
       width={36}
       height={26}
     >

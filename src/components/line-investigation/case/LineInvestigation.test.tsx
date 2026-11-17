@@ -574,7 +574,7 @@ describe("LineInvestigation — before the evidence arrives", () => {
     expect(screen.queryByRole("status")).toBeNull();
   });
 
-  it("fades the history in, top to bottom, when the evidence arrives in the same view", () => {
+  it("pops the history's markers in, deepest last, when the evidence arrives in the same view", () => {
     const { rerender } = renderPhase("collecting");
     rerender(
       <LineInvestigation
@@ -585,18 +585,21 @@ describe("LineInvestigation — before the evidence arrives", () => {
         renderSpecimen={slot}
       />,
     );
-    const arriving = within(history())
-      .getAllByRole("listitem")
-      .filter((li) => li.classList.contains("animate-li-arrive"));
-    const delays = arriving.map((li) => Number.parseInt(li.style.animationDelay, 10));
-    expect(delays.length).toBeGreaterThan(1);
-    expect(delays).toEqual(delays.map((_, i) => i * 45));
-    expect(arriving[0].dataset.stratum).toBe("commit:92f6a3f");
+    const markers = [
+      ...history().querySelectorAll<SVGElement>("[data-artifact] svg.animate-li-pop"),
+    ];
+    const delays = markers.map((svg) => Number.parseInt(svg.style.animationDelay, 10));
+    expect(markers.length).toBeGreaterThan(1);
+    expect(delays).toEqual(delays.map((_, i) => Math.min(i, 12) * 45));
+    expect(markers[0].closest("[data-artifact]")!.getAttribute("data-artifact")).toBe(
+      "commit:92f6a3f",
+    );
+    expect(history().querySelector(".animate-li-arrive")).toBeNull();
   });
 
   it("does not animate a saved case that opens with its evidence", () => {
     setup();
-    expect(document.querySelector(".animate-li-arrive")).toBeNull();
+    expect(document.querySelector(".animate-li-pop")).toBeNull();
   });
 });
 
@@ -637,5 +640,77 @@ describe("LineInvestigation — a long history", () => {
   it("has no axe violations while folded", async () => {
     const { container } = setup(states.syntheticManyOwners(8));
     expect((await axe(container)).violations).toEqual([]);
+  });
+});
+
+describe("LineInvestigation — the language the landing uses", () => {
+  it("marks the token the question asks about, in the title and in the code", () => {
+    setup();
+    const title = screen.getByRole("heading", { level: 1, name: "Why exactly 3 retries?" });
+    expect(title.querySelector("[data-asked-mark]")!.textContent).toBe("3");
+    expect(screen.getByText("asked of the token 3 · line 9")).toBeTruthy();
+    expect(document.querySelector("[data-asked]")!.textContent).toBe("3");
+  });
+
+  it("marks nothing when the question names no token on the line", () => {
+    render(
+      <LineInvestigation
+        result={{
+          ...syntheticRetryCap,
+          evidence: { ...syntheticRetryCap.evidence, question: "Why is this loop here?" },
+        }}
+        pending={false}
+        now={NOW}
+        layout={SPECIMEN_LAYOUTS.wide}
+        renderSpecimen={(props) => (
+          <CodeSpecimen
+            path={SYNTHETIC_FILE_PATH}
+            lines={syntheticChargeLines}
+            datum={{ start: 9, end: 9 }}
+            question="Why is this loop here?"
+            blame={syntheticChargeBlame}
+            blameStatus="ready"
+            now={NOW}
+            {...props}
+          />
+        )}
+      />,
+    );
+    expect(document.querySelector("[data-asked-mark]")).toBeNull();
+    expect(document.querySelector("[data-asked]")).toBeNull();
+    expect(screen.getByText("asked of line 9")).toBeTruthy();
+  });
+
+  it("draws the trace down the history while a clause is pinned, green when a quote is verified", async () => {
+    const user = userEvent.setup();
+    setup();
+    expect(document.querySelector(".animate-li-trace")).toBeNull();
+    await user.click(clause(1));
+    const trace = document.querySelector<HTMLElement>(".animate-li-trace")!;
+    expect(trace.className).toContain("bg-li-evidence");
+    await user.click(clause(1));
+    expect(document.querySelector(".animate-li-trace")).toBeNull();
+  });
+
+  it("sweeps a verified quote the first time it is shown, not when the evidence is reopened", async () => {
+    const user = userEvent.setup();
+    setup();
+    await user.click(clause(1));
+    expect(within(evidence()).getByText("212 customers were charged twice").className).toContain(
+      "animate-li-sweep",
+    );
+    await user.click(within(evidence()).getByRole("button", { name: "Close evidence" }));
+    await user.click(clause(1));
+    expect(
+      within(evidence()).getByText("212 customers were charged twice").className,
+    ).not.toContain("animate-li-sweep");
+  });
+
+  it("says how the silence was established, under the hatched note in the history", () => {
+    setup();
+    const note = screen.getByRole("note", {
+      name: "Not recorded: no pull request, review or issue before commit 7be210e",
+    });
+    expect(note.textContent).toContain("The provider was asked and has nothing on record.");
   });
 });

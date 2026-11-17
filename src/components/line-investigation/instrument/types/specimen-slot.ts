@@ -6,4 +6,5 @@ export type SpecimenSlot = (props: {
   onToggleExpanded: () => void;
   targetDatumY: number;
   onDatumY: (y: number) => void;
+  onAsked: (token: string | null) => void;
 }) => React.ReactNode;

@@ -84,8 +84,6 @@ export const landing = {
     noBound: "no bound",
     lineRead: "Line read",
     line: (n: number) => `line ${n}`,
-    askedToken: (token: string, line: number) => `asked of the token ${token} · line ${line}`,
-    askedLine: (line: number) => `asked of line ${line}`,
     origin: (line: number, years: string) => `origin · line ${line} first written ${years}y deep`,
     notRecorded: "not recorded",
   },

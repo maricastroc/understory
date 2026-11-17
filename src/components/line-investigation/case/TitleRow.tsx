@@ -7,6 +7,22 @@ import type { CasePhase } from "./types";
 import { liButton } from "../parts/button-class";
 import { VerdictButton } from "../verdict/VerdictButton";
 import { VerdictPopover } from "../verdict/VerdictPopover";
+import { askedText } from "../copy/asked-copy";
+import { askedAt } from "../specimen/datum-token";
+
+function AskedQuestion({ question, asked }: { question: string; asked: string | null }) {
+  const at = asked ? askedAt(question, asked) : -1;
+  if (!asked || at < 0) return <>{question}</>;
+  return (
+    <>
+      {question.slice(0, at)}
+      <span data-asked-mark className="text-li-brand">
+        {asked}
+      </span>
+      {question.slice(at + asked.length)}
+    </>
+  );
+}
 
 function Anchor({ view, subject }: { view: InvestigationView; subject: CaseSubject }) {
   const c = useMessages().caseScreen;
@@ -51,6 +67,7 @@ function Location({ view, reserve }: { view: InvestigationView; reserve: boolean
 export function TitleRow({
   view,
   subject,
+  asked = null,
   verdictOpen,
   onToggleVerdict,
   onCloseVerdict,
@@ -60,6 +77,7 @@ export function TitleRow({
 }: {
   view: InvestigationView;
   subject?: CaseSubject;
+  asked?: string | null;
   verdictOpen: boolean;
   onToggleVerdict: () => void;
   onCloseVerdict: () => void;
@@ -73,15 +91,23 @@ export function TitleRow({
   const popoverId = useId();
   const anchor = useRef<HTMLDivElement>(null);
   const question = shownQuestion(view.question, locale);
+  const line = view.location?.startLine ?? null;
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 max-[820px]:flex-col max-[820px]:items-start">
       <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-4 gap-y-1.5">
-        <h1
-          title={question}
-          className="max-w-full min-w-0 truncate font-li-body text-[32px] leading-[1.1] font-semibold tracking-[-0.02em] text-li-ink max-[820px]:line-clamp-2 max-[820px]:text-2xl max-[820px]:whitespace-normal"
-        >
-          {question}
-        </h1>
+        <div className="flex min-w-0 flex-col gap-1.5">
+          {line !== null && (
+            <p className="font-li-mono text-xs text-strata-bore-ink">
+              {askedText(asked, line, locale)}
+            </p>
+          )}
+          <h1
+            title={question}
+            className="line-clamp-2 max-w-full min-w-0 font-li-display text-[42px] leading-[1.02] font-semibold tracking-[-0.01em] text-balance text-li-ink max-[820px]:text-[32px]"
+          >
+            <AskedQuestion question={question} asked={asked} />
+          </h1>
+        </div>
         <Location view={view} reserve={!!phase} />
         {subject && <Anchor view={view} subject={subject} />}
       </div>

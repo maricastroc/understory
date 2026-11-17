@@ -151,8 +151,41 @@
   animation: li-arrive 0.24s ease-out backwards;
 }
 
+@keyframes li-sweep {
+  from {
+    background-size: 0% 100%;
+  }
+}
+
+@utility animate-li-sweep {
+  animation: li-sweep 0.7s ease-out 0.15s backwards;
+}
+
+@keyframes li-pop {
+  from {
+    scale: 0;
+  }
+}
+
+@utility animate-li-pop {
+  animation: li-pop 0.2s ease-out backwards;
+}
+
+@keyframes li-trace {
+  from {
+    scale: 1 0;
+  }
+}
+
+@utility animate-li-trace {
+  animation: li-trace 0.45s linear backwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rise,
+  .animate-li-sweep,
+  .animate-li-pop,
+  .animate-li-trace,
   .animate-li-arrive,
   .animate-spin,
   .animate-pulse {

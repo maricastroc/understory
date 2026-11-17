@@ -27,6 +27,7 @@ import type { ViewArtifact } from "../model/types";
 import type { SpecimenLayout } from "../specimen/types";
 import { caseReducer, initialCaseState } from "../state/case-reducer";
 import { readKeyPreference, writeKeyPreference } from "./key-preference";
+import { FirstSightProvider } from "./first-sight";
 import { TitleRow } from "./TitleRow";
 import { Toolbar } from "./Toolbar";
 import { whyModel } from "../why/why-model";
@@ -95,6 +96,8 @@ export function LineInvestigation({
   const answerRef = useRef<HTMLDivElement | null>(null);
   const lastPinned = useRef<string | null>(null);
   const [collectedHere] = useState(() => phase === "collecting");
+  const [asked, setAsked] = useState<string | null>(null);
+  const [seen] = useState(() => new Set<string>());
 
   useCaseKeyboard(dispatch);
 
@@ -150,83 +153,87 @@ export function LineInvestigation({
         : c.historyArtifacts(c.artifacts(model.loose.length));
 
   return (
-    <div className="flex flex-col gap-5.5 font-li-body text-li-ink">
-      {parent && (
-        <p className="-mb-3 font-li-mono text-[11.5px] text-li-text-subtle">
-          {c.continues}{" "}
-          {parent.onOpen ? (
-            <button
-              type="button"
-              onClick={parent.onOpen}
-              className="cursor-pointer text-li-ink underline decoration-li-neutral-400 underline-offset-2 hover:decoration-li-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
-            >
-              {parent.id}
-            </button>
-          ) : (
-            <span className="text-li-ink">{parent.id}</span>
-          )}
-          {parent.question && (
-            <span>
-              {" · "}
-              {subject.kind === "anchor"
-                ? c.drilledFrom(shownQuestion(parent.question, locale))
-                : c.followUpTo(shownQuestion(parent.question, locale))}
-            </span>
-          )}
-        </p>
-      )}
-      <TitleRow
-        view={view}
-        subject={subject}
-        verdictOpen={state.verdictOpen}
-        onToggleVerdict={() => dispatch({ type: "toggle-verdict" })}
-        onCloseVerdict={() => dispatch({ type: "close-verdict" })}
-        onFollowUp={onFollowUp}
-        onBackToQuestion={onBackToQuestion}
-        phase={phase}
-      />
-      {note && !phase && (
-        <p className="-mt-2 max-w-190 border-l-2 border-li-neutral-300 pl-3 text-[13px] leading-normal text-li-text-subtle">
-          {note}
-        </p>
-      )}
-      <div ref={answerRef} className="scroll-mt-20">
-        <Answer
+    <FirstSightProvider value={seen}>
+      <div className="flex flex-col gap-5.5 font-li-body text-li-ink">
+        {parent && (
+          <p className="-mb-3 font-li-mono text-[11.5px] text-li-text-subtle">
+            {c.continues}{" "}
+            {parent.onOpen ? (
+              <button
+                type="button"
+                onClick={parent.onOpen}
+                className="cursor-pointer text-li-ink underline decoration-li-neutral-400 underline-offset-2 hover:decoration-li-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
+              >
+                {parent.id}
+              </button>
+            ) : (
+              <span className="text-li-ink">{parent.id}</span>
+            )}
+            {parent.question && (
+              <span>
+                {" · "}
+                {subject.kind === "anchor"
+                  ? c.drilledFrom(shownQuestion(parent.question, locale))
+                  : c.followUpTo(shownQuestion(parent.question, locale))}
+              </span>
+            )}
+          </p>
+        )}
+        <TitleRow
           view={view}
-          state={state}
-          dispatch={dispatch}
-          layout={layout}
-          renderSpecimen={renderSpecimen}
           subject={subject}
-          maxDays={model.originDays ?? 0}
-          onDrill={onDrill}
+          asked={asked}
+          verdictOpen={state.verdictOpen}
+          onToggleVerdict={() => dispatch({ type: "toggle-verdict" })}
+          onCloseVerdict={() => dispatch({ type: "close-verdict" })}
+          onFollowUp={onFollowUp}
+          onBackToQuestion={onBackToQuestion}
           phase={phase}
-          failure={failure}
-          analysis={analysis}
         />
+        {note && !phase && (
+          <p className="-mt-2 max-w-190 border-l-2 border-li-neutral-300 pl-3 text-[13px] leading-normal text-li-text-subtle">
+            {note}
+          </p>
+        )}
+        <div ref={answerRef} className="scroll-mt-20">
+          <Answer
+            view={view}
+            state={state}
+            dispatch={dispatch}
+            layout={layout}
+            renderSpecimen={renderSpecimen}
+            subject={subject}
+            maxDays={model.originDays ?? 0}
+            onDrill={onDrill}
+            phase={phase}
+            failure={failure}
+            analysis={analysis}
+            onAsked={setAsked}
+          />
+        </div>
+        {!phase && (
+          <Toolbar
+            history={summary}
+            keyOpen={state.keyOpen}
+            answer={copied}
+            onHistory={() => reveal(document.getElementById("history"), "start")}
+            onToggleKey={() => dispatch({ type: "toggle-key" })}
+          />
+        )}
+        {hasHistory && (
+          <HistorySection
+            model={model}
+            view={view}
+            subject={subject}
+            state={state}
+            dispatch={dispatch}
+            onBack={back}
+            onDrill={onDrill}
+            arrive={collectedHere}
+            layer={layer}
+          />
+        )}
       </div>
-      {!phase && (
-        <Toolbar
-          history={summary}
-          keyOpen={state.keyOpen}
-          answer={copied}
-          onHistory={() => reveal(document.getElementById("history"), "start")}
-          onToggleKey={() => dispatch({ type: "toggle-key" })}
-        />
-      )}
-      {hasHistory && (
-        <HistorySection
-          model={model}
-          view={view}
-          subject={subject}
-          state={state}
-          dispatch={dispatch}
-          onBack={back}
-          onDrill={onDrill}
-          arrive={collectedHere}
-          layer={layer}
-        />
-      )}
-    </div>
+    </FirstSightProvider>
   );
 }

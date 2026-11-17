@@ -5,7 +5,7 @@ import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { shortAge } from "@/i18n/format";
 import { BlueprintCorners } from "../../line-investigation/parts/BlueprintCorners";
 import { liButton } from "../../line-investigation/parts/button-class";
-import { askedText } from "./dig-copy";
+import { askedText } from "../../line-investigation/copy/asked-copy";
 import { META, ON_BORE, RAIL, WIDE_GRID } from "./dig-classes";
 import { DigSection } from "./DigSection";
 import { Found } from "./DigSurface";
