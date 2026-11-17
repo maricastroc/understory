@@ -3,17 +3,17 @@
 import type { Artifact, ArtifactRef } from "@understory/core/types";
 import { useState } from "react";
 import { useLocale, useMessages } from "@/i18n/LocaleProvider";
-import { dayDate, kindName, tickText } from "../copy/artifact-copy";
+import { dayDate, kindName, namedRef, refLabel, tickText } from "../copy/artifact-copy";
 import { withoutTitle } from "../drawer/drawer-body";
 import { sourceLinkLabel } from "../drawer/source-link";
 
 const DAY = 86_400_000;
 
 function shownId(a: Artifact | null, anchor: ArtifactRef): string {
-  if (!a) return anchor.ref ?? anchor.id;
+  if (!a) return anchor.ref ?? refLabel(anchor.id);
   if (a.kind === "commit") return a.ref ?? a.id.replace(/^commit:/, "");
   if (a.kind === "review" && a.author?.name) return `review·${a.author.name}`;
-  return a.id;
+  return refLabel(a.id);
 }
 const LONG = 520;
 
@@ -45,7 +45,7 @@ export function AnchorSpecimen({
 
   return (
     <section
-      aria-label={c.anchor(`${noun} ${ref}`)}
+      aria-label={c.anchor(namedRef(anchor.kind, ref, locale))}
       className="flex w-full flex-col border border-li-divider bg-li-neutral-100 shadow-li-sm"
     >
       <div className="flex min-h-11 items-center gap-2 border-b border-li-divider px-4 py-2 font-li-mono text-xs">

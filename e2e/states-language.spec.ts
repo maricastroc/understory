@@ -30,7 +30,7 @@ test("on a phone the slots fit without scrolling the page", async ({ page }) => 
 
 test("a failure reads as a plate with corners, the technical detail in mono", async ({ page }) => {
   await open(page, "failed");
-  const alert = page.getByRole("region", { name: "Reconstructed why" }).getByRole("alert");
+  const alert = page.getByRole("region", { name: "Reasons found" }).getByRole("alert");
   await expect(alert).toContainText("The server ran into a problem");
   await expect(alert.locator(":scope > span.pointer-events-none")).toHaveCount(4);
   await expect(alert.locator(":scope > svg")).toHaveCount(0);

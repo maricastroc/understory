@@ -51,8 +51,8 @@ describe("clause sources", () => {
 describe("provenance", () => {
   it("walks from an artifact up to the commit that carries it to the line", () => {
     expect(provenance(art("issue:1187"), view.artifacts, "en")).toEqual([
-      { relation: null, id: "issue:1187" },
-      { relation: "closed by", id: "pr:812" },
+      { relation: null, id: "issue #1187" },
+      { relation: "closed by", id: "PR #812" },
       { relation: "merged as", id: "92f6a3f" },
     ]);
     expect(provenance(art("review:812-1"), view.artifacts, "en").map((s) => s.relation)).toEqual([

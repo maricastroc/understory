@@ -12,9 +12,14 @@ const lines = lineRailItems(syntheticCases, { activeId: "GI-2049", now, m });
 describe("lineRailItems", () => {
   it("derives status and subline from each case's evidence", () => {
     expect(lines.map((i) => [i.title, i.subline, i.status, i.child])).toEqual([
-      ["Why exactly 3 retries?", "charge.ts:9 · 5 of 6 links", "resolved", false],
-      ["Which alternatives did review reject?", "from B · review·dmitri-k", "resolved", true],
-      ["Why is the idempotency key req.id?", "charge.ts:11 · 2 of 4 links", "resolved", false],
+      ["Why exactly 3 retries?", "charge.ts:9 · 5/6 records", "resolved", false],
+      [
+        "Which alternatives did review reject?",
+        "Derived from evidence B · review·dmitri-k",
+        "resolved",
+        true,
+      ],
+      ["Why is the idempotency key req.id?", "charge.ts:11 · 2/4 records", "resolved", false],
       ["Why are 4xx errors never retried?", "charge.ts:13 · not recorded", "silent", false],
       ["Why does refund skip the ledger?", "refund.ts:42 · evidence only", "evidence-only", false],
     ]);
@@ -63,7 +68,7 @@ describe("lineRailItems", () => {
       [{ ...syntheticCases[0], result: syntheticWithoutStageFourData() }],
       { activeId: null, now, m },
     );
-    expect(item.subline).toBe("charge.ts:9 · 5 links");
+    expect(item.subline).toBe("charge.ts:9 · 5 records");
   });
 
   it("marks pending cases", () => {
@@ -72,6 +77,6 @@ describe("lineRailItems", () => {
       now,
       m,
     });
-    expect([item.status, item.subline]).toEqual(["pending", "charge.ts:9 · reconstructing…"]);
+    expect([item.status, item.subline]).toEqual(["pending", "charge.ts:9 · investigating…"]);
   });
 });

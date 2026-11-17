@@ -10,7 +10,7 @@ async function open(page: Page, width = 1440, state = "resolved", reading = fals
 }
 
 const clause = (page: Page, n: number) => page.locator(`li[data-clause="c${n}"] > button:visible`);
-const evidence = (page: Page) => page.getByRole("region", { name: /^EVIDENCE · CLAUSE/ });
+const evidence = (page: Page) => page.getByRole("region", { name: /^EVIDENCE · CONCLUSION/ });
 const box = async (page: Page, selector: string) =>
   (await page.locator(selector).first().boundingBox())!;
 
@@ -29,11 +29,11 @@ function overlapping(boxes: Array<{ top: number; bottom: number; left: number; r
 test("the answer comes first: code beside the why, the history below both", async ({ page }) => {
   await open(page);
   const code = await box(page, "section[data-datum-y]");
-  const why = (await page.getByRole("region", { name: "Reconstructed why" }).boundingBox())!;
+  const why = (await page.getByRole("region", { name: "Reasons found" }).boundingBox())!;
   const history = await box(page, "section#history");
   expect(code.x + code.width).toBeLessThan(why.x);
   expect(history.y).toBeGreaterThan(Math.max(code.y + code.height, why.y + why.height));
-  await expect(page.getByText("select a clause to check its evidence")).toBeVisible();
+  await expect(page.getByText("Select a conclusion to see its evidence.")).toBeVisible();
 });
 
 test("a clause opens its evidence under itself and the code does not move", async ({ page }) => {
@@ -72,9 +72,9 @@ test("show in history lands on the source, and the bar leads back to the clause"
   await expect(located).toHaveAttribute("data-located", "true");
   await expect(located).toBeInViewport();
   const bar = page.locator("section#history > div.sticky");
-  await expect(bar).toContainText("tracing clause 2");
+  await expect(bar).toContainText("tracing conclusion 2");
   await expect(bar).toContainText("at 15 Mar 2023");
-  await bar.getByRole("button", { name: "↑ Back to clause 2" }).click();
+  await bar.getByRole("button", { name: "↑ Back to conclusion 2" }).click();
   await expect(clause(page, 1)).toBeInViewport();
   await expect(clause(page, 1)).toBeFocused();
 });
@@ -161,7 +161,7 @@ const marks = (page: Page) =>
 test("the reading stays out of the history until it is switched on", async ({ page }) => {
   await open(page, 1440, "kept-ng-http-114");
   await expect(marks(page)).toHaveCount(0);
-  await expect(page.locator("#history")).toContainText("oldest recorded change to line 114");
+  await expect(page.locator("#history")).toContainText("Oldest recorded change to line 114");
   await open(page, 1440, "kept-ng-http-114", true);
   await expect(page.locator("#history [data-fact]")).toHaveText(/^rewrote this line · before: /);
   await expect(page.locator("#history [data-scope]")).toHaveText("said of the change as a whole");

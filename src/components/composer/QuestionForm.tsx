@@ -102,8 +102,7 @@ export function QuestionForm({
           className="flex w-fit li-link items-center gap-2 text-left text-[13px]"
         >
           <DomainIcon kind="question" size={14} />
-          {m.composer.question.specific}
-          <span className="text-li-text-subtle">{m.composer.question.optional}</span>
+          {m.composer.question.specific(target)}
         </button>
       )}
       <LanguageSwitch label={m.languages.answerIn} language={language} onChange={setLanguage} />

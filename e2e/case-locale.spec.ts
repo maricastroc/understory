@@ -32,7 +32,7 @@ for (const width of [1440, 390]) {
       .getByRole("button", { name: /Explicação provável/ })
       .first()
       .click();
-    const evidence = page.getByRole("region", { name: /^EVIDÊNCIA · AFIRMAÇÃO/ });
+    const evidence = page.getByRole("region", { name: /^EVIDÊNCIA · CONCLUSÃO/ });
     await expect(evidence).toBeVisible();
     await expect(evidence.locator("[data-likely-note]")).toContainText(
       "A ligação dele com esta linha é uma interpretação do Understory.",
@@ -55,7 +55,7 @@ test("the verdict, its checks and the key in Portuguese", async ({ page, baseURL
   await expect(page.getByRole("list", { name: "Legenda" })).toContainText(
     "profundidade = tempo antes de hoje",
   );
-  await expect(page.getByRole("button", { name: "Copiar o porquê" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copiar a explicação" })).toBeVisible();
   await page.mouse.move(0, 0);
   expect(await axeViolations(page, { within: "main", settleMs: 400 })).toEqual([]);
 });
@@ -76,13 +76,13 @@ for (const width of [1440, 390]) {
     await open(page, baseURL!, width, "resolved");
     const history = page.locator("#history");
     await expect(history.locator("h2 + span")).toHaveText(
-      /^hoje ±0 → origem −\d+(,\d)?a · \d+ mudanças · \d+ artefatos$/,
+      /^Da data atual à origem · \d+ mudanças · \d+ registros$/,
     );
     const row = history.locator('[data-artifact="pr:812"]');
     await expect(
-      row.getByRole("button", { name: "Voltar à afirmação 1 com pr:812 como fonte" }),
-    ).toHaveText("↑ afirmação 1");
-    await expect(history).toContainText(/citada pela afirmação \d/);
+      row.getByRole("button", { name: "Voltar à conclusão 1 com PR #812 como fonte" }),
+    ).toHaveText("↑ conclusão 1");
+    await expect(history).toContainText(/fonte da conclusão \d/);
     await row.locator("button[aria-expanded]").click();
     await expect(row.getByRole("button", { name: "Investigar →" })).toBeVisible();
     await expect.poll(() => overflow(page)).toBeLessThanOrEqual(0);

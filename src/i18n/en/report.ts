@@ -1,8 +1,8 @@
 export const report = {
   backToCode: "Back to code",
   inconclusive: "Inconclusive",
-  exhibits: (n: number) => (n === 1 ? "1 exhibit" : `${n} exhibits`),
-  exhibit: (letter: string) => `Exhibit ${letter}`,
+  exhibits: (n: number) => (n === 1 ? "1 record" : `${n} records`),
+  exhibit: (letter: string) => `Record ${letter}`,
   confidence: (level: string) => `${level} confidence`,
   level: { high: "High", medium: "Medium", low: "Low" },
   kind: { commit: "Commit", pull_request: "Pull request", issue: "Issue", review: "Review" },
@@ -10,9 +10,9 @@ export const report = {
   copiedToClipboard: "Copied to clipboard",
   findings: {
     title: "Findings",
-    meta: "Reconstructed conclusion, each claim linked to the sources it cites",
-    pendingMeta: "Reconstructing the conclusion from the evidence…",
-    pending: "Reconstructing the conclusion…",
+    meta: "Reconstructed answer, each conclusion linked to the sources it cites",
+    pendingMeta: "Reconstructing the answer from the evidence…",
+    pending: "Investigating…",
     pendingBody:
       "Synthesizing the answer and auditing every citation in-source. The evidence and provenance chain below already stand.",
     concluded: "Investigation conclusion",
@@ -37,10 +37,10 @@ export const report = {
     notCollected: "Not in the collected evidence.",
     misattributed: (n: number) =>
       n === 1
-        ? "A cited source doesn't substantiate the claim"
-        : `${n} cited sources don't substantiate the claim`,
+        ? "A cited source doesn't substantiate the conclusion"
+        : `${n} cited sources don't substantiate the conclusion`,
     misattributedNote:
-      "The citation id is real, but the source text does not back the claim. Checked by entailment, it does not count as support.",
+      "The citation id is real, but the source text does not back the conclusion. Checked by entailment, it does not count as support.",
     uncitedSentences: (n: number) =>
       n === 1
         ? "1 sentence in this answer cites no collected source. Shown for transparency, not counted toward confidence."
@@ -73,11 +73,11 @@ export const report = {
   evidence: {
     title: "Evidence",
     meta: (total: number, cited: number, supporting: number) =>
-      `${total === 1 ? "1 exhibit" : `${total} exhibits`} · ${cited} cited · ${supporting} supporting`,
+      `${total === 1 ? "1 record" : `${total} records`} · ${cited} cited · ${supporting} supporting`,
     cited: "Cited",
     supporting: "Supporting",
     drillTitle: (question: string, kind: string) =>
-      `Open a new grounded case anchored on this ${kind} that asks: “${question}”`,
+      `Open a derived investigation from this ${kind} that asks: “${question}”`,
     investigate: "Investigate:",
   },
   timeline: {
@@ -93,7 +93,7 @@ export const report = {
     label: "Investigation details",
     repository: "Repository",
     branch: "Branch",
-    anchor: "Anchor",
+    anchor: "Main source",
     history: "History",
     commits: (n: number) => (n === 1 ? "1 commit" : `${n} commits`),
     contributors: "Contributors",
@@ -104,7 +104,7 @@ export const report = {
     allGrounded: "All citations grounded",
     fabricated: (n: number) => (n === 1 ? "1 fabricated citation" : `${n} fabricated citations`),
     groundedNote:
-      "Every cited source resolves to a real, collected artifact. 0 unverified citations.",
+      "Every cited source resolves to a real, collected record. 0 unverified citations.",
     fabricatedNote:
       "A cited source was not found in the collected evidence. Verification caught it.",
     primary: "Primary sources",

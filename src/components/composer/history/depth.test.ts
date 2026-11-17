@@ -166,7 +166,7 @@ describe("share copy", () => {
   it("states depth as the oldest surviving line and qualifies a cut history as a lower bound", () => {
     const view = coreHistory(a, head, depthScale([a], head));
     expect(historyFacts(view, "en")).toBe(
-      "Oldest surviving line: 6y 8m. 3 commits own its 10 lines at HEAD.",
+      "The oldest line is 6 years 8 months old. The 10 current lines were last changed in 3 commits.",
     );
     expect(historyShares(view, "en")).toBe("60% PR · 20% no PR · 20% not checked (of lines)");
     expect(historyShares({ ...view, shares: { found: 1, none: 1, unknown: 1 } }, "en")).toBe(
@@ -180,7 +180,7 @@ describe("share copy", () => {
     );
     const cut = coreHistory({ ...a, cut: true }, head, depthScale([a], head));
     expect(historyFacts(cut, "en")).toMatch(
-      /^Oldest surviving line: ≥ 6y 8m\..* History cut at clone depth\.$/,
+      /^The oldest line is at least 6 years 8 months old\..* History cut at clone depth\.$/,
     );
   });
 });

@@ -3,8 +3,8 @@ import type { Messages } from "../messages";
 export const report: Messages["report"] = {
   backToCode: "Voltar ao código",
   inconclusive: "Inconclusivo",
-  exhibits: (n) => (n === 1 ? "1 artefato" : `${n} artefatos`),
-  exhibit: (letter) => `Artefato ${letter}`,
+  exhibits: (n) => (n === 1 ? "1 registro" : `${n} registros`),
+  exhibit: (letter) => `Registro ${letter}`,
   confidence: (level) => `Confiança ${level.toLowerCase()}`,
   level: { high: "Alta", medium: "Média", low: "Baixa" },
   kind: { commit: "Commit", pull_request: "Pull request", issue: "Issue", review: "Revisão" },
@@ -12,9 +12,9 @@ export const report: Messages["report"] = {
   copiedToClipboard: "Copiado para a área de transferência",
   findings: {
     title: "Resultado",
-    meta: "Conclusão reconstruída, com cada afirmação ligada às fontes que cita",
-    pendingMeta: "Reconstruindo a conclusão a partir das evidências…",
-    pending: "Reconstruindo a conclusão…",
+    meta: "Resposta reconstruída, com cada conclusão ligada às fontes que cita",
+    pendingMeta: "Reconstruindo a resposta a partir das evidências…",
+    pending: "Investigando…",
     pendingBody:
       "Escrevendo a resposta e conferindo cada citação na própria fonte. As evidências e a cadeia de proveniência abaixo já estão prontas.",
     concluded: "Conclusão da investigação",
@@ -39,10 +39,10 @@ export const report: Messages["report"] = {
     notCollected: "Fora das evidências coletadas.",
     misattributed: (n) =>
       n === 1
-        ? "Uma fonte citada não sustenta a afirmação"
-        : `${n} fontes citadas não sustentam a afirmação`,
+        ? "Uma fonte citada não sustenta a conclusão"
+        : `${n} fontes citadas não sustentam a conclusão`,
     misattributedNote:
-      "A citação aponta para um artefato real, mas o texto da fonte não sustenta a afirmação, então ela não conta como apoio.",
+      "A citação aponta para um registro real, mas o texto da fonte não sustenta a conclusão, então ela não conta como apoio.",
     uncitedSentences: (n) =>
       n === 1
         ? "1 frase desta resposta não cita nenhuma fonte coletada. Ela aparece por transparência, mas não conta para a confiança."
@@ -77,11 +77,11 @@ export const report: Messages["report"] = {
   evidence: {
     title: "Evidências",
     meta: (total, cited, supporting) =>
-      `${total === 1 ? "1 artefato" : `${total} artefatos`} · ${cited === 1 ? "1 citado" : `${cited} citados`} · ${supporting} de apoio`,
+      `${total === 1 ? "1 registro" : `${total} registros`} · ${cited === 1 ? "1 citado" : `${cited} citados`} · ${supporting} de apoio`,
     cited: "Citado",
     supporting: "De apoio",
     drillTitle: (question, kind) =>
-      `Abre um novo caso ancorado ${/^(revisão|issue)$/.test(kind) ? "nesta" : "neste"} ${kind}, com a pergunta “${question}”`,
+      `Abre uma investigação derivada ${/^(revisão|issue)$/.test(kind) ? "desta" : "deste"} ${kind}, com a pergunta “${question}”`,
     investigate: "Investigar:",
   },
   timeline: {
@@ -97,7 +97,7 @@ export const report: Messages["report"] = {
     label: "Detalhes da investigação",
     repository: "Repositório",
     branch: "Branch",
-    anchor: "Âncora",
+    anchor: "Fonte principal",
     history: "Histórico",
     commits: (n) => (n === 1 ? "1 commit" : `${n} commits`),
     contributors: "Contribuidores",
@@ -108,7 +108,7 @@ export const report: Messages["report"] = {
     allGrounded: "Todas as citações têm respaldo",
     fabricated: (n) => (n === 1 ? "1 citação sem respaldo" : `${n} citações sem respaldo`),
     groundedNote:
-      "Cada fonte citada aponta para um artefato real que foi coletado. Nenhuma citação sem verificação.",
+      "Cada fonte citada aponta para um registro real que foi coletado. Nenhuma citação sem verificação.",
     fabricatedNote:
       "Uma fonte citada não está nas evidências coletadas. A verificação barrou a citação.",
     primary: "Fontes primárias",

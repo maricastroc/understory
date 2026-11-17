@@ -37,7 +37,7 @@ describe("CaseRail", () => {
     expect(current.textContent).toContain("resolved");
     const titles = rows().map((r) => within(r).getAllByRole("button")[0].textContent ?? "");
     const parent = titles.findIndex((t) => t.includes("Why exactly 3 retries?"));
-    expect(titles[parent + 1]).toContain("from B · review·dmitri-k");
+    expect(titles[parent + 1]).toContain("Derived from evidence B · review·dmitri-k");
     expect(screen.getByText(String(lines.length))).toBeTruthy();
   });
 

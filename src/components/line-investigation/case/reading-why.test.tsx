@@ -64,7 +64,7 @@ afterEach(() => vi.restoreAllMocks());
 describe("the why zone without the reading", () => {
   it("is the reconstructed why as it was, with its verdict and the history's wording", () => {
     setup("ng-http-114");
-    expect(screen.getByRole("region", { name: "Reconstructed why" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Reasons found" })).toBeTruthy();
     expect(screen.queryByRole("region", { name: "What the history supports" })).toBeNull();
     expect(chip().textContent).toContain("Resolved");
     expect(chip().querySelector("svg")).not.toBeNull();
@@ -81,7 +81,7 @@ describe("the why zone with the reading", () => {
       { at: "last", head: "last change · 18a2e4f · 23 Jul 2015 · rewrote this line" },
     ]);
     const row = within(zone()).getByRole("button", { name: /index/ });
-    expect(row.textContent).toContain("Likely explanation · clause 1");
+    expect(row.textContent).toContain("Likely explanation · conclusion 1");
     expect(zone().textContent).toContain(
       "commit title “fix(httpParamSerializerJQLike): Follow jQuery for index of arrays of objects”",
     );
@@ -104,9 +104,9 @@ describe("the why zone with the reading", () => {
       b.textContent!.replace(/^.*?(Documented for this line|Likely explanation)/, "$1"),
     );
     expect(labels).toEqual([
-      "Documented for this line · clause 3",
-      "Likely explanation · clause 2",
-      "Likely explanation · clause 1",
+      "Documented for this line · conclusion 3",
+      "Likely explanation · conclusion 2",
+      "Likely explanation · conclusion 1",
     ]);
   });
 
@@ -115,10 +115,10 @@ describe("the why zone with the reading", () => {
     expect(changes()).toEqual([
       { at: "last", head: "last change · 8b853b2 · 9 Jan 2018 · rewrote this line" },
     ]);
-    expect(zone().textContent).toContain("Likely explanation · clause 1");
+    expect(zone().textContent).toContain("Likely explanation · conclusion 1");
     expect(zone().textContent).not.toContain("Documented for this line");
     expect(zone().textContent).toContain(
-      "pr:3412 description “* formatterLoader * allow uncompiled custom formatters (we already allow uncompiled rules)”",
+      "PR #3412 description “* formatterLoader * allow uncompiled custom formatters (we already allow uncompiled rules)”",
     );
   });
 
@@ -131,7 +131,7 @@ describe("the why zone with the reading", () => {
         head: "last change · 63fc794 · 9 May 2017 · added this linetitled “Rewrite enable/disable logic (#2369)”",
       },
     ]);
-    expect(zone().textContent).toContain("From this change's record · clause 3");
+    expect(zone().textContent).toContain("From this change's record · conclusion 3");
     expect(zone().textContent).toContain("review·ajafff · comment made in another file");
     const details = zone().querySelector("details")!;
     expect(details.open).toBe(false);
@@ -141,7 +141,7 @@ describe("the why zone with the reading", () => {
         (b) => b.textContent!.match(/insufficient.*$/)?.[0],
       ),
     ).toEqual(
-      [0, 1, 3].map((c) => `insufficient: the cited sources do not say this · clause ${c + 1}`),
+      [0, 1, 3].map((c) => `insufficient: the cited sources do not say this · conclusion ${c + 1}`),
     );
   });
 
@@ -150,7 +150,7 @@ describe("the why zone with the reading", () => {
     const row = within(zone()).getByRole("button", { name: /uncompiled custom formatters/ });
     fireEvent.click(row);
     expect(row.getAttribute("aria-expanded")).toBe("true");
-    expect(screen.getByRole("region", { name: /^EVIDENCE · CLAUSE 1/ })).toBeTruthy();
+    expect(screen.getByRole("region", { name: /^EVIDENCE · CONCLUSION 1/ })).toBeTruthy();
   });
 
   it("calls the verdict an answer, without the check, and says what its confidence rates", () => {
@@ -169,7 +169,7 @@ describe("the why zone with the reading", () => {
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     const { unmount } = setup("ws-revert-story", true);
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Copy the why" }));
+      fireEvent.click(screen.getByRole("button", { name: "Copy the explanation" }));
     });
     expect(writeText).toHaveBeenCalledTimes(1);
     const text = writeText.mock.calls[0][0] as string;
@@ -178,7 +178,7 @@ describe("the why zone with the reading", () => {
     expect(text).toContain("05a16a3, an earlier change, 11 Mar 2024");
     unmount();
     setup("tslint-257", true);
-    expect(screen.queryByRole("button", { name: "Copy the why" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Copy the explanation" })).toBeNull();
   });
 
   for (const id of [
@@ -218,7 +218,7 @@ describe("validating the reading before it reaches the case screen", () => {
       expect(note()?.textContent).toBe(
         "The passage documents the change it belongs to. Its link to this line is Understory's interpretation.",
       );
-      const panel = screen.getByRole("region", { name: /^EVIDENCE · CLAUSE 1/ });
+      const panel = screen.getByRole("region", { name: /^EVIDENCE · CONCLUSION 1/ });
       expect(panel.textContent).toContain("Quote found verbatim in the source");
       expect(within(panel).getByRole("button", { name: /Show in history/ })).toBeTruthy();
     });
@@ -236,7 +236,7 @@ describe("validating the reading before it reaches the case screen", () => {
     const rows = within(zone()).getAllByRole("button", { name: /Documented for this line/ });
     expect(rows).toHaveLength(2);
     fireEvent.click(rows[0]);
-    expect(screen.getByRole("region", { name: /^EVIDENCE · CLAUSE 1/ })).toBeTruthy();
+    expect(screen.getByRole("region", { name: /^EVIDENCE · CONCLUSION 1/ })).toBeTruthy();
     expect(note()).toBeNull();
   });
 
@@ -252,14 +252,14 @@ describe("validating the reading before it reaches the case screen", () => {
   it("tslint-257: the change's record kept without a sentence carries no note", () => {
     setup("tslint-257", true);
     openSentence(/From this change's record/);
-    expect(screen.getByRole("region", { name: /^EVIDENCE · CLAUSE 3/ })).toBeTruthy();
+    expect(screen.getByRole("region", { name: /^EVIDENCE · CONCLUSION 3/ })).toBeTruthy();
     expect(note()).toBeNull();
   });
 
   it("without the reading, the evidence of the same sentence carries no note", () => {
     setup("control-tslint-189");
     fireEvent.click(document.querySelector<HTMLButtonElement>('li[data-clause="c0"] > button')!);
-    expect(screen.getByRole("region", { name: /^EVIDENCE · CLAUSE 1/ })).toBeTruthy();
+    expect(screen.getByRole("region", { name: /^EVIDENCE · CONCLUSION 1/ })).toBeTruthy();
     expect(note()).toBeNull();
   });
 });

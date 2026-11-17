@@ -68,13 +68,13 @@ describe("the map's copy in Portuguese", () => {
   it("states a file's history with ages, plurals and a cut history", () => {
     const view = coreHistory(a, head, depthScale([a], head));
     expect(historyFacts(view, "pt-BR")).toBe(
-      "Linha mais antiga ainda presente: 6a 8m. As 10 linhas do HEAD vêm de 3 commits.",
+      "A linha mais antiga tem 6 anos e 8 meses. As 10 linhas atuais foram alteradas por último em 3 commits.",
     );
     expect(historyFacts({ ...view, commits: 1, lines: 1 }, "pt-BR")).toBe(
-      "Linha mais antiga ainda presente: 6a 8m. A linha do HEAD vem de 1 commit.",
+      "A linha mais antiga tem 6 anos e 8 meses. A linha atual foi alterada por último em 1 commit.",
     );
     expect(historyFacts({ ...view, cut: true }, "pt-BR")).toBe(
-      "Linha mais antiga ainda presente: ≥ 6a 8m. As 10 linhas do HEAD vêm de 3 commits. Histórico cortado na profundidade do clone.",
+      "A linha mais antiga tem pelo menos 6 anos e 8 meses. As 10 linhas atuais foram alteradas por último em 3 commits. Histórico cortado na profundidade do clone.",
     );
     expect(historyShares(view, "pt-BR")).toBe(
       "60% com PR · 20% sem PR · 20% não verificadas (das linhas)",
@@ -89,7 +89,7 @@ describe("the map's copy in Portuguese", () => {
       "src/billing/charge.ts, linha mais antiga ainda presente com 6 anos e 8 meses, 3 casos",
     );
     expect(coreLabel(mapCore, "stub", null, "pt-BR")).toBe(
-      "src/billing/charge.ts, histórico ainda não mapeado, 3 casos",
+      "src/billing/charge.ts, histórico ainda não analisado, 3 casos",
     );
     expect(statusFacts("too-large", "pt-BR")).toBe(
       "Grande demais para mapear. Ainda dá para abrir e investigar.",
@@ -119,8 +119,8 @@ describe("the map's copy in Portuguese", () => {
       "Escolha uma linha ou um trecho",
     );
     expect(stageCopy({ ...base, stage: "code", about: "esta função" }, "pt-BR")).toEqual({
-      title: "Pergunte sobre esta função",
-      lead: "A resposta percorre o histórico por commits, pull requests e issues, e cita cada fonte. Quando o histórico não traz o motivo, ela foi feita para dizer isso.",
+      title: "Investigue esta função",
+      lead: "O Understory percorre commits, pull requests e issues para investigar as decisões por trás deste código. Cada conclusão vem acompanhada de suas fontes. Se não houver evidências suficientes, a resposta foi feita para deixar isso claro.",
     });
   });
 });

@@ -80,16 +80,16 @@ describe("the history in Portuguese", () => {
   it("names its extent, its margins and the way back to each clause", () => {
     setup(syntheticRetryCap);
     expect(history()).toBeTruthy();
-    expect(summary()).toMatch(/^hoje ±0 → origem −\d+(,\d)?a · \d+ mudanças · \d+ artefatos$/);
+    expect(summary()).toMatch(/^Da data atual à origem · \d+ mudanças · \d+ registros$/);
     expect(section().textContent).toContain("hoje±0");
     const chip = within(row("pr:812")).getByRole("button", {
-      name: "Voltar à afirmação 1 com pr:812 como fonte",
+      name: "Voltar à conclusão 1 com PR #812 como fonte",
     });
-    expect(chip.textContent).toBe("↑ afirmação 1");
-    expect(section().textContent).toMatch(/citada pela afirmação \d/);
+    expect(chip.textContent).toBe("↑ conclusão 1");
+    expect(section().textContent).toMatch(/fonte da conclusão \d/);
     expect(section().textContent).toMatch(/origem−\d+(,\d)?a/);
-    expect(section().textContent).toMatch(/ · \d+a( \d+m)? de profundidade/);
-    expect(section().textContent).not.toMatch(/\b(today|origin|deep|clause|quoted)\b/);
+    expect(section().textContent).toMatch(/ · há \d+ anos?( e \d+ m(ês|eses))?/);
+    expect(section().textContent).not.toMatch(/\b(today|origin|ago|conclusion|source of)\b/);
   });
 
   it("opens a row with its links in Portuguese", async () => {
@@ -104,8 +104,8 @@ describe("the history in Portuguese", () => {
     const user = userEvent.setup();
     setup(syntheticRetryCap);
     await user.click(document.querySelector<HTMLButtonElement>('li[data-clause="c1"] > button')!);
-    expect(section().textContent).toMatch(/seguindo a afirmação 2 · [A-Z](?: [A-Z])*/);
-    expect(within(section()).getByRole("button", { name: "↑ Voltar à afirmação 2" })).toBeTruthy();
+    expect(section().textContent).toMatch(/seguindo a conclusão 2 · [A-Z](?: [A-Z])*/);
+    expect(within(section()).getByRole("button", { name: "↑ Voltar à conclusão 2" })).toBeTruthy();
   });
 
   it("folds a long run of uncited changes and opens it on request", async () => {
@@ -130,7 +130,7 @@ describe("the history in Portuguese", () => {
     const first = within(earlier).getAllByRole("listitem")[0];
     expect(first.textContent).toContain("adicionou esta linha");
     expect(within(first).getByText("a mensagem do commit").closest("details")!.open).toBe(false);
-    expect(summary()).toMatch(/→ origem −\S+ · 2 mudanças · 1 artefato$/);
+    expect(summary()).toMatch(/^Da data atual à origem · 2 mudanças · 1 registro$/);
     expect(section().querySelector("[data-fact]")!.textContent).toMatch(
       /^reescreveu esta linha · antes: /,
     );
@@ -142,7 +142,7 @@ describe("the history in Portuguese", () => {
       { ...base, evidence: { ...base.evidence, lineage: undefined } },
       { reading: true, kept: true },
     );
-    expect(summary()).toMatch(/^hoje ±0 → limite da leitura −\S+ · 1 mudança · 1 artefato$/);
+    expect(summary()).toMatch(/^Da data atual ao limite da leitura · 1 mudança · 1 registro$/);
   });
 
   it("keeps a silent change apart and names what was collected off the line's history", () => {

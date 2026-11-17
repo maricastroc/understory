@@ -41,9 +41,9 @@ const header = (user: Parameters<typeof AppHeader>[0]["user"]) => (
 describe("the shell in Portuguese", () => {
   it("titles and describes each case, keeping what came from git as it was", () => {
     expect(items.map((i) => [i.title, i.subline])).toEqual([
-      ["Why exactly 3 retries?", "charge.ts:9 · 5 de 6 elos"],
-      ["Which alternatives did review reject?", "a partir de B · review·dmitri-k"],
-      ["Why is the idempotency key req.id?", "charge.ts:11 · 2 de 4 elos"],
+      ["Why exactly 3 retries?", "charge.ts:9 · 5/6 registros"],
+      ["Which alternatives did review reject?", "Derivada da evidência B · review·dmitri-k"],
+      ["Why is the idempotency key req.id?", "charge.ts:11 · 2/4 registros"],
       ["Why are 4xx errors never retried?", "charge.ts:13 · sem registro"],
       ["Why does refund skip the ledger?", "refund.ts:42 · só evidências"],
     ]);
@@ -70,10 +70,10 @@ describe("the shell in Portuguese", () => {
     });
     expect(single.title).toBe("Linha 9 de charge.ts");
     expect(range.title).toBe("Linhas 8–12 de charge.ts");
-    expect(pt.shell.linksOf(1, 1)).toBe("1 de 1 elo");
-    expect(pt.shell.links(1)).toBe("1 elo");
-    expect(pt.shell.links(3)).toBe("3 elos");
-    expect(messagesFor("en").shell.links(1)).toBe("1 link");
+    expect(pt.shell.linksOf(1, 1)).toBe("1/1 registro");
+    expect(pt.shell.links(1)).toBe("1 registro");
+    expect(pt.shell.links(3)).toBe("3 registros");
+    expect(messagesFor("en").shell.links(1)).toBe("1 record");
   });
 
   it("says a case whose answer cites a source that was not collected has a citation without backing", () => {
@@ -112,7 +112,7 @@ describe("the shell in Portuguese", () => {
     expect(screen.getByRole("button", { name: "Fechar investigações" })).toBeTruthy();
     const list = screen.getByRole("navigation", { name: "Lista de casos" });
     expect(within(list).getByRole("button", { current: "page" }).textContent).toContain(
-      "resolvido · charge.ts:9 · 5 de 6 elos",
+      "resolvido · charge.ts:9 · 5/6 registros",
     );
     expect(
       within(list).getByRole("button", { name: "Remover “Why exactly 3 retries?”" }),
@@ -126,7 +126,7 @@ describe("the shell in Portuguese", () => {
     );
     expect(screen.getByText("Nenhuma investigação ainda.")).toBeTruthy();
     expect(
-      screen.getByText("Cada linha que você investigar fica aqui, com a trilha que ela seguiu."),
+      screen.getByText("Suas investigações e as evidências encontradas ficam aqui."),
     ).toBeTruthy();
   });
 
@@ -185,7 +185,7 @@ describe("the shell in Portuguese", () => {
       </>,
     );
     expect(screen.getByRole("status").textContent).toBe(
-      "Investigando…Coletando do git→Montando a linha do tempo→Reconstruindo o porquê→Verificando as citações",
+      "Investigando…Coletando do git→Montando a linha do tempo→Reconstruindo os motivos→Verificando as citações",
     );
     expect(screen.getByText("Não foi possível concluir a investigação.")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Voltar ao código" })).toBeTruthy();

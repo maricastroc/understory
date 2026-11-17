@@ -3,7 +3,7 @@ export const loading = {
   stages: [
     "Collecting from git",
     "Building timeline",
-    "Reconstructing the why",
+    "Reconstructing the reasons",
     "Verifying citations",
   ],
 };

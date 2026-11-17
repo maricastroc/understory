@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n/locales";
 import { messagesFor } from "@/i18n/messages";
 import type { ViewArtifact, ViewClause, ViewGap } from "../model/types";
-import { dateLine, displayId, kindName } from "./artifact-copy";
+import { dateLine, displayId, namedRef } from "./artifact-copy";
 
 function clauseList(ids: string[], clauses: ViewClause[], locale: Locale): string {
   const a = messagesFor(locale).accessible;
@@ -14,7 +14,7 @@ function clauseList(ids: string[], clauses: ViewClause[], locale: Locale): strin
 export function artifactName(a: ViewArtifact, clauses: ViewClause[], locale: Locale): string {
   const parts = [
     a.letter,
-    `${kindName(a.kind, locale)} ${displayId(a)}`,
+    namedRef(a.kind, displayId(a), locale),
     dateLine(a, locale),
     clauseList(a.citedBy, clauses, locale),
   ];
@@ -24,7 +24,7 @@ export function artifactName(a: ViewArtifact, clauses: ViewClause[], locale: Loc
 
 export function gapName(gap: ViewGap, after: ViewArtifact, locale: Locale): string {
   const a = messagesFor(locale).accessible;
-  const target = `${kindName(after.kind, locale)} ${displayId(after)}`;
+  const target = namedRef(after.kind, displayId(after), locale);
   const text =
     gap.missing === "pull_request"
       ? a.noPrBefore(target)

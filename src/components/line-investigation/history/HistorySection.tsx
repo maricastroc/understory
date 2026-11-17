@@ -1,6 +1,6 @@
 "use client";
 
-import { formatMonthYear, shortAge } from "@/i18n/format";
+import { formatMonthYear, longAge, shortAge } from "@/i18n/format";
 import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import type { Messages } from "@/i18n/messages";
 import { type Dispatch, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -267,12 +267,7 @@ export function HistorySection({
           {historyTitle(subject, locale)}
         </h2>
         <span className="font-li-mono text-[11px] text-li-text-subtle">
-          {h.extent(
-            open ? h.oldestRead : h.origin,
-            extent.days !== null ? tickText(extent.days, locale) : "—",
-            h.changes(extent.changes),
-            m.caseScreen.artifacts(count),
-          )}
+          {h.extent(open, h.changes(extent.changes), m.caseScreen.artifacts(count))}
         </span>
         {here && (
           <span
@@ -416,7 +411,7 @@ export function HistorySection({
           </BoreCell>
           <p className="col-span-2 pt-1 font-li-mono text-[11px] text-li-text-subtle max-[820px]:col-span-1">
             {originText(subject, locale)} · {displayId(origin.anchor)}
-            {model.originDays !== null && ` · ${h.deep(shortAge(m.time, model.originDays))}`}
+            {model.originDays !== null && ` · ${h.deep(longAge(m.time, model.originDays))}`}
           </p>
         </div>
       )}

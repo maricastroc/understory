@@ -49,7 +49,7 @@ function setup(result: DigResult = syntheticRetryCap, extra: { onDrill?: () => v
 const clause = (n: number) =>
   document.querySelector<HTMLButtonElement>(`li[data-clause="c${n}"] > button`)!;
 const history = () => screen.getByRole("list", { name: "History, newest first" });
-const evidence = () => screen.getByRole("region", { name: /^EVIDENCE · CLAUSE/ });
+const evidence = () => screen.getByRole("region", { name: /^EVIDENCE · CONCLUSION/ });
 const row = (id: string) => document.querySelector<HTMLElement>(`[data-artifact="${id}"]`)!;
 const rowButton = (id: string) =>
   row(id).querySelector<HTMLButtonElement>("button[aria-expanded]")!;
@@ -64,9 +64,9 @@ describe("LineInvestigation — answer first", () => {
     expect(clause(1).textContent).toContain(
       "The cap followed an unbounded retry loop that charged 212 customers twice",
     );
-    expect(screen.getByText("select a clause to check its evidence")).toBeTruthy();
+    expect(screen.getByText("Select a conclusion to see its evidence.")).toBeTruthy();
     expect(rowButton("commit:92f6a3f").getAttribute("aria-label")).toBe(
-      "A, commit 92f6a3f, 15 Mar 2023, cited by clause 1, quote verified",
+      "A, commit 92f6a3f, 15 Mar 2023, source of conclusion 1, quote verified",
     );
     expect(
       screen.getByRole("note", {
@@ -126,7 +126,7 @@ describe("LineInvestigation — answer first", () => {
     setup();
     const described = document.getElementById(clause(1).getAttribute("aria-describedby")!);
     expect(described?.textContent).toBe(
-      "Supported by E, issue issue:1187; D, pull request pr:812. 1 quote verified.",
+      "Supported by E, issue #1187; D, PR #812. 1 quote verified.",
     );
   });
 
@@ -162,13 +162,13 @@ describe("LineInvestigation — evidence in place", () => {
     const panel = evidence();
     expect(clause(1).getAttribute("aria-controls")).toBe(panel.id);
     expect(clause(1).closest("li")!.contains(panel)).toBe(true);
-    expect(within(panel).getByRole("heading").textContent).toBe("EVIDENCE · CLAUSE 2 · 1 OF 2");
+    expect(within(panel).getByRole("heading").textContent).toBe("EVIDENCE · CONCLUSION 2 · 1 OF 2");
     expect(within(panel).getByText("212 customers were charged twice").tagName).toBe("MARK");
     expect(within(panel).getByText("✓ Quote found verbatim in the source")).toBeTruthy();
     expect(panel.textContent).toContain(
-      "issue:1187 → closed by pr:812 → merged as 92f6a3f · wrote line 9 as it reads today",
+      "issue #1187 → closed by PR #812 → merged as 92f6a3f · wrote line 9 as it reads today",
     );
-    expect(screen.getByText("checking clause 2 · Esc returns here")).toBeTruthy();
+    expect(screen.getByText("checking conclusion 2 · Esc returns here")).toBeTruthy();
   });
 
   it("steps through only that clause's sources, by button, chip and arrow key", async () => {
@@ -185,9 +185,9 @@ describe("LineInvestigation — evidence in place", () => {
     );
     await user.keyboard("{ArrowLeft}");
     expect(evidence().textContent).toContain("Customers double-billed during Stripe outage");
-    await user.click(within(evidence()).getByRole("button", { name: "D pr:812" }));
+    await user.click(within(evidence()).getByRole("button", { name: "D PR #812" }));
     expect(
-      within(evidence()).getByRole("button", { name: "D pr:812" }).getAttribute("aria-current"),
+      within(evidence()).getByRole("button", { name: "D PR #812" }).getAttribute("aria-current"),
     ).toBe("true");
   });
 
@@ -221,7 +221,7 @@ describe("LineInvestigation — evidence in place", () => {
     setup();
     await user.click(
       within(row("pr:812")).getByRole("button", {
-        name: "Back to clause 2 with pr:812 as its source",
+        name: "Back to conclusion 2 with PR #812 as its source",
       }),
     );
     expect(clause(1).getAttribute("aria-expanded")).toBe("true");
@@ -317,7 +317,7 @@ describe("LineInvestigation — going back", () => {
 });
 
 describe("LineInvestigation — the language of the analysis", () => {
-  const why = () => screen.getByRole("region", { name: "Reconstructed why" });
+  const why = () => screen.getByRole("region", { name: "Reasons found" });
   const withAnalysis = (analysis: {
     selected: "en" | "pt";
     rewriting: boolean;
@@ -386,7 +386,7 @@ describe("LineInvestigation — a follow-up", () => {
     );
     const link = screen.getByText(/^↳ continues/);
     expect(link.textContent).toContain("follow-up to “Why is insertRules the way it is?”");
-    expect(link.textContent).not.toContain("drilled from");
+    expect(link.textContent).not.toContain("derived from");
     expect(screen.getByRole("button", { name: "Follow up in this file" })).toBeTruthy();
   });
 });
@@ -417,19 +417,19 @@ describe("LineInvestigation — a drilled case", () => {
 
   it("shows the artifact it is anchored on where a line case shows code", () => {
     renderDrilled();
-    const panel = screen.getByRole("region", { name: "Anchor, review review·dmitri-k" });
+    const panel = screen.getByRole("region", { name: "Main source, review review·dmitri-k" });
     expect(within(panel).getByText("Review by dmitri-k on #812")).toBeTruthy();
-    expect(within(panel).getByText("3 artifacts collected around it")).toBeTruthy();
-    expect(screen.getByText("anchored on")).toBeTruthy();
+    expect(within(panel).getByText("3 records found")).toBeTruthy();
+    expect(screen.getByText("Source:")).toBeTruthy();
   });
 
   it("names its history after the anchor and never claims anything about a line", () => {
     renderDrilled();
     const section = screen
-      .getByRole("heading", { level: 2, name: "Around review·dmitri-k" })
+      .getByRole("heading", { level: 2, name: "History of review·dmitri-k" })
       .closest("section")!;
     expect(section.textContent).not.toMatch(/\bline\b/);
-    expect(within(row("review:812-1")).getByText("the review this case asks about")).toBeTruthy();
+    expect(within(row("review:812-1")).getByText("The review this case investigates")).toBeTruthy();
   });
 
   it("links back to the case it was drilled from", async () => {
@@ -437,7 +437,7 @@ describe("LineInvestigation — a drilled case", () => {
     const { onOpen } = renderDrilled();
     await user.click(screen.getByRole("button", { name: "GI-2049" }));
     expect(onOpen).toHaveBeenCalledOnce();
-    expect(screen.getByText(/drilled from “Why exactly 3 retries\?”/)).toBeTruthy();
+    expect(screen.getByText(/derived from “Why exactly 3 retries\?”/)).toBeTruthy();
   });
 
   it("has no axe violations", async () => {
@@ -513,7 +513,7 @@ describe("LineInvestigation — pending", () => {
         renderSpecimen={slot}
       />,
     );
-    expect(screen.getByRole("status").textContent).toContain("Reconstructing from 6 artifacts…");
+    expect(screen.getByRole("status").textContent).toContain("Analyzing 6 records…");
     act(() => {});
   });
 });
@@ -558,7 +558,7 @@ describe("LineInvestigation — before the evidence arrives", () => {
     expect(screen.getByRole("region", { name: `Code, ${SYNTHETIC_FILE_PATH}` })).toBeTruthy();
     expect(screen.getByRole("status").textContent).toContain("Collecting the line's history…");
     expect(screen.getByText("Collecting")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: /Resolved|Reconstructing/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Resolved|Investigating/ })).toBeNull();
     expect(screen.queryByRole("button", { name: /^History/ })).toBeNull();
     expect(screen.queryByRole("button", { name: "Follow up in this file" })).toBeNull();
     expect(screen.queryByRole("list", { name: "History, newest first" })).toBeNull();

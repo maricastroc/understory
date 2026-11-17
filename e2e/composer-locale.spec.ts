@@ -33,9 +33,7 @@ test("the demo in Portuguese: the map, a file, a line and the question about it"
     "true",
   );
   await expect(trail.getByRole("button", { name: /^03 linha: linha 8/ })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { level: 2, name: "Pergunte sobre a linha 8" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Investigue a linha 8" })).toBeVisible();
   const context = page.getByRole("complementary", { name: "Contexto" });
   await expect(context).toContainText("Última alteração:");
   await expect(context).toContainText("antes do HEAD");

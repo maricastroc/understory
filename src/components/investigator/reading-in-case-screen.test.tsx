@@ -67,7 +67,7 @@ describe("the case screen with the reading", () => {
     const answer = stubApi(BORROWED);
     render(<Investigator />);
     await answer();
-    await screen.findByRole("region", { name: "Reconstructed why" });
+    await screen.findByRole("region", { name: "Reasons found" });
     expect(screen.queryByRole("region", { name: "What the history supports" })).toBeNull();
     expect(await screen.findByRole("button", { name: /^Resolved/ })).toBeTruthy();
   });

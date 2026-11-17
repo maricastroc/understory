@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n/locales";
 import { messagesFor } from "@/i18n/messages";
 import type { ViewArtifact, ViewClause } from "../model/types";
-import { displayId, kindName } from "./artifact-copy";
+import { displayId, namedRef } from "./artifact-copy";
 
 export function tallyText(clause: ViewClause, locale: Locale): string {
   const c = messagesFor(locale).clause;
@@ -28,7 +28,7 @@ export function clauseDescription(
   const sources = clause.citations
     .map((id) => byId.get(id))
     .filter((a): a is ViewArtifact => !!a)
-    .map((a) => c.source(a.letter, kindName(a.kind, locale), displayId(a)));
+    .map((a) => c.source(a.letter, namedRef(a.kind, displayId(a), locale)));
   const parts = [sources.length ? c.supportedBy(sources.join("; ")) : c.noSource];
   const verified = clause.cells.filter((cell) => cell.state === "verified").length;
   if (clause.audit === "supported") parts.push(verified ? c.quotesVerified(verified) : c.noQuote);
