@@ -1,6 +1,3 @@
-export const SPINNER =
-  "shrink-0 animate-spin rounded-full border-2 border-li-neutral-300 border-t-li-ink";
-
 export const FIELD_FRAME =
   "border border-li-ink bg-li-neutral-100 transition-[border-color,box-shadow] duration-150 focus-within:border-li-ink focus-within:shadow-[inset_0_0_0_1px_var(--color-li-ink)] motion-reduce:transition-none";
 

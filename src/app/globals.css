@@ -171,7 +171,22 @@
   animation: li-trace 0.45s linear backwards;
 }
 
+@keyframes li-wipe {
+  from {
+    opacity: 0;
+    clip-path: inset(-8px 100% -8px -8px);
+  }
+  to {
+    clip-path: inset(-8px);
+  }
+}
+
+@utility animate-li-wipe {
+  animation: li-wipe 0.5s ease-out backwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .animate-li-wipe,
   .rise,
   .animate-li-sweep,
   .animate-li-pop,

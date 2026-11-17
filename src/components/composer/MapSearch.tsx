@@ -4,7 +4,8 @@ import { useId } from "react";
 import { useMessages } from "@/i18n/LocaleProvider";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { Highlight } from "./Highlight";
-import { FIELD_FRAME, SPINNER } from "./composer-classes";
+import { FIELD_FRAME } from "./composer-classes";
+import { PendingMark } from "../line-investigation/parts/PendingMark";
 
 export function MapSearch({
   query,
@@ -50,7 +51,7 @@ export function MapSearch({
           className="h-full min-w-0 flex-1 bg-transparent text-[16px] text-li-ink outline-none placeholder:text-li-text-muted"
         />
         {searching ? (
-          <span aria-hidden className={`size-3.5 ${SPINNER}`} />
+          <PendingMark className="text-li-neutral-600" />
         ) : (
           <span className="shrink-0 font-li-mono text-[11px] text-li-text-subtle tnum">{note}</span>
         )}

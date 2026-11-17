@@ -6,7 +6,9 @@ import type { ApiFailure } from "@/lib/api-error";
 import { ErrorState } from "../ErrorState";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
 import { liButton } from "../line-investigation/parts/button-class";
-import { FIELD_FRAME, SPINNER } from "./composer-classes";
+import { FIELD_FRAME } from "./composer-classes";
+import { Elapsed } from "../line-investigation/parts/Elapsed";
+import { PendingMark } from "../line-investigation/parts/PendingMark";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { RepoShortcuts } from "./RepoShortcuts";
 import type { RecentRepo } from "./types/recent-repo";
@@ -90,7 +92,7 @@ export function RepoStage({
           {!needsAccess && <BlueprintCorners />}
           {connecting ? (
             <>
-              <span aria-hidden className={`size-3.5 ${SPINNER}`} />
+              <PendingMark />
               {r.opening}
             </>
           ) : (
@@ -100,7 +102,12 @@ export function RepoStage({
       </form>
 
       <div id={statusId} aria-live="polite" className="min-h-5">
-        {connecting && <p className="text-[13px] text-li-neutral-800">{r.reading}</p>}
+        {connecting && (
+          <p className="flex items-baseline gap-1.5 text-[13px] text-li-neutral-800">
+            {r.reading}
+            <Elapsed />
+          </p>
+        )}
       </div>
 
       {needsAccess && (
