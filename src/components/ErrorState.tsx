@@ -5,9 +5,10 @@ import { formatSeconds } from "@/i18n/format";
 import type { Locale } from "@/i18n/locales";
 import type { Messages } from "@/i18n/messages";
 import type { ApiFailure } from "@/lib/api-error";
-import { Alert, Github } from "./icons";
+import { Github } from "./icons";
 import { authEnabled } from "./investigator/use-auth";
 import { liButton } from "./line-investigation/parts/button-class";
+import { BlueprintCorners } from "./line-investigation/parts/BlueprintCorners";
 
 export function failureLead(
   failure: ApiFailure,
@@ -78,12 +79,12 @@ export function ErrorState({
       className={`flex items-start gap-2.5 bg-li-neutral-100 font-li-body text-li-ink ${
         flush
           ? "border-b border-li-divider px-3.5 py-2.5"
-          : "border border-li-divider p-3.5 shadow-li-sm"
+          : "relative border border-li-divider px-4 py-3.5"
       }`}
     >
-      <Alert className="mt-0.5 size-4 shrink-0" />
+      {!flush && <BlueprintCorners />}
       <div className="min-w-0 flex-1">
-        <p className="text-[13px]">{failureLead(failure, m, locale, title)}</p>
+        <p className="text-[14px] leading-snug">{failureLead(failure, m, locale, title)}</p>
         {detail && (
           <p lang="en" className="mt-1 font-li-mono text-[11.5px] break-words text-li-text-subtle">
             {detail}

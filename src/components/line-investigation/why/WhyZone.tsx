@@ -17,6 +17,7 @@ import { sourceNamer } from "../copy/why-copy";
 import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types";
 import { LanguageSwitch } from "../parts/LanguageSwitch";
 import { ClauseRow } from "./ClauseRow";
+import { PendingSlots } from "./PendingSlots";
 import { ReadingWhy } from "./ReadingWhy";
 import { whyModel } from "./why-model";
 
@@ -52,6 +53,7 @@ export function WhyZone({
   failure,
   analysis,
   renderEvidence,
+  arrive = false,
 }: {
   view: InvestigationView;
   byId: Map<string, ViewArtifact>;
@@ -65,6 +67,7 @@ export function WhyZone({
   failure?: ReactNode;
   analysis?: AnalysisLanguage;
   renderEvidence?: (clause: ViewClause, id: string) => ReactNode;
+  arrive?: boolean;
 }) {
   const m = useMessages();
   const locale = useLocale();
@@ -149,6 +152,7 @@ export function WhyZone({
             <ClauseRow
               key={clause.id}
               clause={clause}
+              arriveDelay={arrive ? i * 120 : undefined}
               description={clauseDescription(clause, byId, locale)}
               lang={view.language ?? undefined}
               expanded={effective === clause.id}
@@ -187,19 +191,6 @@ export function WhyZone({
   );
 }
 
-function Skeleton({ caption }: { caption: string }) {
-  return (
-    <div role="status" className="mt-1 flex flex-col gap-1.5 pl-7">
-      <span className="text-xs text-li-text-subtle">{caption}</span>
-      {[0.9, 0.7, 0.8, 0.55].map((w) => (
-        <span key={w} className="flex h-12.5 items-start pt-2">
-          <span className="h-3 bg-li-neutral-200" style={{ width: `${w * 100}%` }} />
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function whyBody(
   view: InvestigationView,
   m: Messages,
@@ -207,7 +198,7 @@ function whyBody(
   phase?: CasePhase,
   failure?: ReactNode,
 ): ReactNode {
-  if (phase === "collecting") return <Skeleton caption={m.why.collecting} />;
+  if (phase === "collecting") return <PendingSlots caption={m.why.collecting} />;
   if (phase === "failed") return <div className="mt-1 flex flex-col gap-2.5 pl-7">{failure}</div>;
   if (view.empty && view.verdict !== "out-of-scope" && view.verdict !== "fabrication") {
     return (
@@ -220,7 +211,7 @@ function whyBody(
     );
   }
   if (view.verdict === "pending") {
-    return <Skeleton caption={m.why.reconstructing(view.artifacts.length)} />;
+    return <PendingSlots caption={m.why.reconstructing(view.artifacts.length)} />;
   }
   if (view.verdict === "evidence-only") {
     return (

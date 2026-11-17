@@ -96,6 +96,7 @@ export function LineInvestigation({
   const answerRef = useRef<HTMLDivElement | null>(null);
   const lastPinned = useRef<string | null>(null);
   const [collectedHere] = useState(() => phase === "collecting");
+  const [waitedHere] = useState(() => pending || phase === "collecting");
   const [asked, setAsked] = useState<string | null>(null);
   const [seen] = useState(() => new Set<string>());
 
@@ -209,6 +210,7 @@ export function LineInvestigation({
             failure={failure}
             analysis={analysis}
             onAsked={setAsked}
+            arrive={waitedHere && !pending && !phase}
           />
         </div>
         {!phase && (

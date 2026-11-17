@@ -64,6 +64,7 @@ export function ClauseRow({
   onKeyDown,
   buttonRef,
   evidence,
+  arriveDelay,
   controls,
   lang,
 }: {
@@ -83,6 +84,7 @@ export function ClauseRow({
   onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
   buttonRef: (el: HTMLButtonElement | null) => void;
   evidence?: ReactNode;
+  arriveDelay?: number;
   controls?: string;
   lang?: string;
 }) {
@@ -98,7 +100,11 @@ export function ClauseRow({
   const ink = clause.silent ? "text-li-gap-ink" : quiet ? "text-li-neutral-800" : "text-li-ink";
 
   return (
-    <li data-clause={clause.id}>
+    <li
+      data-clause={clause.id}
+      className={arriveDelay === undefined ? undefined : "animate-li-wipe"}
+      style={arriveDelay === undefined ? undefined : { animationDelay: `${arriveDelay}ms` }}
+    >
       <button
         type="button"
         ref={buttonRef}

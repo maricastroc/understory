@@ -30,6 +30,7 @@ export function Answer({
   failure,
   analysis,
   onAsked,
+  arrive = false,
 }: {
   view: InvestigationView;
   state: CaseState;
@@ -43,6 +44,7 @@ export function Answer({
   failure?: ReactNode;
   analysis?: AnalysisLanguage;
   onAsked: (token: string | null) => void;
+  arrive?: boolean;
 }) {
   const panel = layout.mode === "panel";
   const byId = useMemo(() => new Map(view.artifacts.map((a) => [a.id, a])), [view.artifacts]);
@@ -64,6 +66,7 @@ export function Answer({
       phase={phase}
       failure={failure}
       analysis={analysis}
+      arrive={arrive}
       renderEvidence={(clause, id) => {
         const sources = clauseSources(clause, view);
         return (

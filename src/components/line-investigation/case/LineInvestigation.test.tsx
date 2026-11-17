@@ -503,7 +503,7 @@ describe("LineInvestigation — honesty states", () => {
 });
 
 describe("LineInvestigation — pending", () => {
-  it("shows skeleton rows over the collected evidence", () => {
+  it("shows dashed slots over the collected evidence", () => {
     render(
       <LineInvestigation
         result={{ evidence: syntheticRetryCap.evidence, narrative: null }}
@@ -599,6 +599,37 @@ describe("LineInvestigation — before the evidence arrives", () => {
   it("does not animate a saved case that opens with its evidence", () => {
     setup();
     expect(document.querySelector(".animate-li-pop")).toBeNull();
+  });
+
+  it("fits the clauses in one after another when the reconstruction arrives in the same view", () => {
+    const { rerender } = render(
+      <LineInvestigation
+        result={{ evidence: syntheticRetryCap.evidence, narrative: null }}
+        pending
+        now={NOW}
+        layout={SPECIMEN_LAYOUTS.wide}
+        renderSpecimen={slot}
+      />,
+    );
+    expect(document.querySelector("li[data-clause]")).toBeNull();
+    rerender(
+      <LineInvestigation
+        result={syntheticRetryCap}
+        pending={false}
+        now={NOW}
+        layout={SPECIMEN_LAYOUTS.wide}
+        renderSpecimen={slot}
+      />,
+    );
+    const rows = [...document.querySelectorAll<HTMLElement>("li[data-clause]")];
+    expect(rows.length).toBeGreaterThan(1);
+    expect(rows.every((r) => r.className.includes("animate-li-wipe"))).toBe(true);
+    expect(rows.map((r) => r.style.animationDelay)).toEqual(rows.map((_, i) => `${i * 120}ms`));
+  });
+
+  it("opens a saved case with its clauses already in place", () => {
+    setup();
+    expect(document.querySelector(".animate-li-wipe")).toBeNull();
   });
 });
 
