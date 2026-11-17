@@ -68,6 +68,50 @@ export const landing = {
     title: "Interrogate your own code.",
     body: "Point it at a repository and a line. See what the history really says.",
   },
+  dig: {
+    whyMissing: "not in blame",
+    what: "what",
+    today: "today",
+    cue: "scroll to dig · depth = time",
+    digGo: "Dig through an example",
+    unchanged: (age: string, line: number) => `scale break · ${age}, line ${line} unchanged`,
+    answer: (done: number, total: number) => `reconstructed why · ${done} of ${total}`,
+    answerOpen: "left open in the answer, not guessed",
+    chapters: "Chapters",
+    chapter: (n: string) => `Chapter ${n}`,
+    names: ["The line", "The blame", "The trail", "The source", "The silence", "The reading"],
+    progress: (done: number, total: number) => `${done} of ${total}`,
+    open: (n: number) => `${n} open`,
+    first: {
+      title: "Blame stops here.",
+      note: "It names the last commit to touch the line. Not the reason for it.",
+    },
+    trail: {
+      title: "Thirteen days in March 2023.",
+      note: "The commit leads to a pull request, two reviews and an issue.",
+    },
+    proof: {
+      title: "Checked against the source.",
+      note: "Each clause names its records. Each quote is found verbatim before you see it.",
+    },
+    silence: {
+      title: "The record is silent here.",
+      looked: "looked for, and the provider has none",
+    },
+    reading: {
+      title: "Three reasons on record. One question left open.",
+      reconstructed: "reconstructed",
+      verified: "verified",
+      quotes: (n: number) => (n === 1 ? "1 quote found verbatim" : `${n} quotes found verbatim`),
+      open: "Why it retries at all",
+      openBody: (age: string) =>
+        `For ${age} before the fix, no pull request, review or issue explains the first version. The answer leaves it open.`,
+    },
+    closing: {
+      line: "a line in your repository",
+      depth: "depth unknown",
+    },
+  },
   demo: {
     region: (path: string, line: number) => `Example investigation of ${path} line ${line}`,
     question: "Why exactly 3 retries?",

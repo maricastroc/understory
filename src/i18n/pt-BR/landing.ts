@@ -71,6 +71,51 @@ export const landing: Messages["landing"] = {
     title: "Interrogue o seu próprio código.",
     body: "Escolha um repositório e uma linha. Veja o que o histórico realmente diz.",
   },
+  dig: {
+    whyMissing: "não está no blame",
+    what: "o quê",
+    today: "hoje",
+    cue: "role para escavar · profundidade = tempo",
+    digGo: "Escavar um exemplo",
+    unchanged: (age, line) => `quebra de escala · ${age}, linha ${line} sem mudança`,
+    answer: (done, total) => `porquê reconstruído · ${done} de ${total}`,
+    answerOpen: "fica em aberto na resposta, sem palpite",
+    chapters: "Capítulos",
+    chapter: (n) => `Capítulo ${n}`,
+    names: ["A linha", "O blame", "A trilha", "A fonte", "O silêncio", "A leitura"],
+    progress: (done, total) => `${done} de ${total}`,
+    open: (n) => `${n} em aberto`,
+    first: {
+      title: "O blame para aqui.",
+      note: "Ele aponta o último commit que mexeu na linha. O motivo, não.",
+    },
+    trail: {
+      title: "Treze dias em março de 2023.",
+      note: "O commit leva a um pull request, duas revisões e uma issue.",
+    },
+    proof: {
+      title: "Conferido na fonte.",
+      note: "Cada afirmação aponta os seus registros. Cada citação literal é encontrada na fonte antes de chegar a você.",
+    },
+    silence: {
+      title: "Aqui o registro se cala.",
+      looked: "procurado, e o provedor não tem",
+    },
+    reading: {
+      title: "Três motivos no registro. Uma pergunta em aberto.",
+      reconstructed: "reconstruído",
+      verified: "verificado",
+      quotes: (n) =>
+        n === 1 ? "1 citação literal encontrada" : `${n} citações literais encontradas`,
+      open: "Por que tentar de novo",
+      openBody: (age) =>
+        `Por ${age} antes da correção, nenhum pull request, revisão ou issue explica a primeira versão. A resposta deixa isso em aberto.`,
+    },
+    closing: {
+      line: "uma linha do seu repositório",
+      depth: "profundidade desconhecida",
+    },
+  },
   demo: {
     region: (path, line) => `Exemplo de investigação de ${path}, linha ${line}`,
     question: "Por que 3 tentativas?",
