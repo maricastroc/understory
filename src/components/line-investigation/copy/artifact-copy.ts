@@ -12,10 +12,22 @@ export function kindName(kind: ArtifactKind, locale: Locale): string {
   return messagesFor(locale).artifact.kind[kind];
 }
 
+export function refLabel(id: string): string {
+  const pr = /^pr:(.+)$/.exec(id);
+  if (pr) return `PR #${pr[1]}`;
+  const issue = /^issue:(.+)$/.exec(id);
+  if (issue) return `issue #${issue[1]}`;
+  return id;
+}
+
+export function namedRef(kind: ArtifactKind, ref: string, locale: Locale): string {
+  return /^(PR|issue) #/.test(ref) ? ref : `${kindName(kind, locale)} ${ref}`;
+}
+
 export function displayId(a: ViewArtifact): string {
   if (a.kind === "commit") return a.source.ref ?? a.id.replace(/^commit:/, "");
   if (a.kind === "review" && a.source.author?.name) return `review·${a.source.author.name}`;
-  return a.id;
+  return refLabel(a.id);
 }
 
 export function reviewStateLabel(state: string | null, locale: Locale): string | null {

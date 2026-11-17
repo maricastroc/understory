@@ -1,9 +1,9 @@
 import type { ArtifactRef } from "@understory/core/types";
-import { shortAge } from "@/i18n/format";
+import { longAge, shortAge } from "@/i18n/format";
 import type { Locale } from "@/i18n/locales";
 import { messagesFor } from "@/i18n/messages";
 import type { InvestigationView, ViewArtifact } from "../model/types";
-import { displayId, kindName } from "./artifact-copy";
+import { displayId, kindName, refLabel } from "./artifact-copy";
 import type { CaseSubject } from "./types";
 
 export function caseSubject(
@@ -16,7 +16,7 @@ export function caseSubject(
   if (loc) return { kind: "line", label: s.lines(loc.startLine, loc.endLine) };
   if (anchor) {
     const found = view.artifacts.find((a) => a.id === anchor.id);
-    const ref = found ? displayId(found) : (anchor.ref ?? anchor.id);
+    const ref = found ? displayId(found) : (anchor.ref ?? refLabel(anchor.id));
     const noun = kindName(anchor.kind, locale);
     return {
       kind: "anchor",
@@ -49,7 +49,8 @@ export function breakText(
   const m = messagesFor(locale);
   const s = m.subject;
   const age = shortAge(m.time, days);
-  if (subject.kind === "anchor") return first ? s.beforeToday(age) : s.between(age);
+  if (subject.kind === "anchor")
+    return first ? s.beforeToday(longAge(m.time, days)) : s.between(age);
   return first ? s.unchangedFor(age) : s.noChange(age, subject.label);
 }
 

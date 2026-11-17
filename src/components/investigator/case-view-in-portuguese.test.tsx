@@ -46,13 +46,13 @@ describe("the case view without a line, in Portuguese", () => {
       expect(screen.getByRole("heading", { level: 2, name: heading })).toBeTruthy();
     expect(text()).toMatch(/Resolvido/);
     expect(text()).toMatch(/Confiança (alta|média|baixa) · \d+%/);
-    expect(text()).toMatch(/\d+ artefatos · \d+ citados? · \d+ de apoio/);
-    expect(text()).toContain("Artefato A");
+    expect(text()).toMatch(/\d+ registros · \d+ citados? · \d+ de apoio/);
+    expect(text()).toContain("Registro A");
     expect(text()).toContain("Repositório");
     expect(text()).toContain("Todas as citações têm respaldo");
     expect(text()).toMatch(/\d{1,2} (jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez) \d{4}/);
     expect(text()).not.toMatch(
-      /Findings|Provenance|Exhibit|Supporting|Sources used|Back to code|Who's involved|confidence/,
+      /Findings|Provenance|Record|Supporting|Sources used|Back to code|Who's involved|confidence/,
     );
     expect((await axe(container)).violations).toEqual([]);
   });
@@ -74,7 +74,7 @@ describe("the case view without a line, in Portuguese", () => {
 
   it("keeps what the auditor and core wrote as written, marked as English", () => {
     setup(states.syntheticMisattributed());
-    expect(text()).toContain("2 fontes citadas não sustentam a afirmação");
+    expect(text()).toContain("2 fontes citadas não sustentam a conclusão");
     for (const reason of screen.getAllByText("the reviews do not mention five"))
       expect(reason.getAttribute("lang")).toBe("en");
     setup(states.syntheticContradicted());
@@ -104,11 +104,13 @@ describe("the case view without a line, in English", () => {
   it("keeps its words and drops only the dashes", () => {
     setup(syntheticRetryCap, "en");
     expect(screen.getByRole("button", { name: "Back to code" })).toBeTruthy();
-    expect(text()).toContain("Reconstructed conclusion, each claim linked to the sources it cites");
+    expect(text()).toContain(
+      "Reconstructed answer, each conclusion linked to the sources it cites",
+    );
     expect(text()).toContain(
       "Issue → pull request → review → commit: the causal path to this line, and where it breaks",
     );
-    expect(text()).toContain("Exhibit A");
+    expect(text()).toContain("Record A");
     expect(text()).toMatch(/(High|Medium|Low) confidence · \d+%/);
     expect(text()).not.toMatch(/ — /);
     setup(states.syntheticFabricated(), "en");

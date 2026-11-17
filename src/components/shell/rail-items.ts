@@ -1,8 +1,8 @@
 import type { Messages } from "@/i18n/messages";
 import { basename } from "../format";
-import { isDefaultQuestion } from "../investigator/default-question";
+import { isDefaultQuestion, shownQuestionIn } from "../investigator/default-question";
 import type { Entry } from "../investigator/use-investigation";
-import { displayId } from "../line-investigation/copy/artifact-copy";
+import { displayId, refLabel } from "../line-investigation/copy/artifact-copy";
 import { buildInvestigationView } from "../line-investigation/model/build-investigation-view";
 import type { InvestigationView, Verdict } from "../line-investigation/model/types";
 import type { RailItem, RailStatus } from "./types";
@@ -31,7 +31,7 @@ function caseTitle(entry: Entry, m: Messages): string {
   const loc = entry.result.evidence.location;
   if (loc && isDefaultQuestion(question))
     return m.shell.caseTitle(loc.startLine, loc.endLine, basename(loc.file));
-  return question || m.shell.noQuestion;
+  return question ? shownQuestionIn(question, m.questions) : m.shell.noQuestion;
 }
 
 function lineSubline(
@@ -45,7 +45,7 @@ function lineSubline(
   if (!ev.location && anchor && parent) {
     const source = parent.artifacts.find((a) => a.id === anchor.id);
     return m.shell.from(
-      source ? `${source.letter} · ${displayId(source)}` : (anchor.ref ?? anchor.id),
+      source ? `${source.letter} · ${displayId(source)}` : (anchor.ref ?? refLabel(anchor.id)),
     );
   }
   const where = ev.location
@@ -54,7 +54,7 @@ function lineSubline(
           ? ev.location.startLine
           : `${ev.location.startLine}-${ev.location.endLine}`
       }`
-    : (anchor?.ref ?? anchor?.id ?? "—");
+    : (anchor?.ref ?? (anchor ? refLabel(anchor.id) : "—"));
   const suffix = statusSuffix(view, m);
   return suffix ? `${where} · ${suffix}` : where;
 }

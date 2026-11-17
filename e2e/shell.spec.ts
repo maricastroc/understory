@@ -22,7 +22,9 @@ test("the rail marks the open case and nests the follow-up under its parent", as
   const rail = page.getByRole("navigation", { name: "Case list" });
   const current = rail.locator('button[aria-current="page"]');
   await expect(current).toContainText("Why exactly 3 retries?");
-  await expect(rail.locator("li").nth(1)).toContainText("from B · review·dmitri-k");
+  await expect(rail.locator("li").nth(1)).toContainText(
+    "Derived from evidence B · review·dmitri-k",
+  );
 });
 
 test("⌘K searches cases and Escape closes the list without unpinning the case", async ({

@@ -59,7 +59,7 @@ function stubApi() {
   };
 }
 
-const why = () => screen.getByRole("region", { name: "Reconstructed why" });
+const why = () => screen.getByRole("region", { name: "Reasons found" });
 const code = (container: HTMLElement) => container.querySelector("section[data-datum-y]");
 const clauses = (region: HTMLElement) => region.querySelectorAll("li[data-clause]");
 
@@ -76,7 +76,7 @@ describe("Investigator — a deep-linked line case", () => {
     const panel = code(container);
 
     await act(async () => api.evidence());
-    await within(region).findByText(/^Reconstructing from 6 artifacts/);
+    await within(region).findByText(/^Analyzing 6 records/);
     expect(why()).toBe(region);
     expect(code(container)).toBe(panel);
     expect(screen.queryByText("Loading file…")).toBeNull();
@@ -110,7 +110,7 @@ describe("Investigator — a deep-linked line case", () => {
     expect(within(region).queryByRole("status")).toBeNull();
 
     await act(async () => api.narrate(other));
-    await within(region).findByText("select a clause to check its evidence");
+    await within(region).findByText("Select a conclusion to see its evidence.");
     expect(clauses(region)).toHaveLength(count);
     expect(why()).toBe(region);
   });
@@ -174,7 +174,7 @@ describe("Investigator — the interface language and the answer language", () =
       api.evidence();
       api.final("en");
     });
-    const region = screen.getByRole("region", { name: "O porquê reconstruído" });
+    const region = screen.getByRole("region", { name: "Motivos encontrados" });
     await waitFor(() => expect(clauses(region).length).toBeGreaterThan(0));
     expect(requests(api, "/api/narrate")).toHaveLength(0);
 

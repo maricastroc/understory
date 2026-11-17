@@ -51,6 +51,7 @@ const SAME_IN_BOTH = new Set<string>([
   "subject.commit",
   "clause.source",
   "why.commitHead",
+  "caseScreen.onBranch",
   "caseScreen.legend.commit",
   "caseScreen.legend.pr",
   "caseScreen.legend.issue",

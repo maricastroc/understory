@@ -97,7 +97,7 @@ describe("Copy the why, with the reading", () => {
         "Likely explanation:",
         `- ${CONTROLS["tslint-189"].narrative!.claims[0].text}`,
         "  8b853b2, the last change, 9 Jan 2018",
-        "  pr:3412 description, said of the change as a whole",
+        "  PR #3412 description, said of the change as a whole",
       ].join("\n"),
     );
   });

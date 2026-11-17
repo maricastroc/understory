@@ -40,7 +40,7 @@ describe("history wording", () => {
     expect(breakText(line, 635, false, "en")).toBe("1y 8m with no change to line 9");
     expect(breakText(line, 1292, true, "en")).toBe("unchanged for 3y 6m");
     expect(breakMargin(line, true, "en")).toBe("unchanged");
-    expect(originText(line, "en")).toBe("oldest recorded change to line 9");
+    expect(originText(line, "en")).toBe("Oldest recorded change to line 9");
   });
 
   it("does not claim anything about a line in a drilled case", () => {
@@ -54,14 +54,14 @@ describe("history wording", () => {
     ]) {
       expect(text).not.toMatch(/\bline\b/);
     }
-    expect(historyTitle(anchor, "en")).toBe("Around review·dmitri-k");
-    expect(breakText(anchor, 1292, true, "en")).toBe("3y 6m before today");
+    expect(historyTitle(anchor, "en")).toBe("History of review·dmitri-k");
+    expect(breakText(anchor, 1292, true, "en")).toBe("3 years 6 months ago");
   });
 
   it("marks the anchor itself, and only it, as what the case asks about", () => {
     const byId = new Map(anchoredView.artifacts.map((a) => [a.id, a]));
     expect(subjectCaption(anchor, byId.get("review:812-1")!, false, "en")).toBe(
-      "the review this case asks about",
+      "The review this case investigates",
     );
     expect(subjectCaption(anchor, byId.get("pr:812")!, true, "en")).toBeNull();
     const commit = lineView.artifacts.find((a) => a.id === "commit:92f6a3f")!;

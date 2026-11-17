@@ -44,7 +44,7 @@ describe("FileStage — history of current lines, cold", () => {
   it("names every file with its state and cases, and opens it on click", () => {
     const { onOpen } = setup();
     const charge = files().getByRole("button", {
-      name: "src/billing/charge.ts, history not mapped yet, 3 cases",
+      name: "src/billing/charge.ts, history not analyzed yet, 3 cases",
     });
     fireEvent.click(charge);
     expect(onOpen).toHaveBeenCalledWith("src/billing/charge.ts");
@@ -69,7 +69,7 @@ describe("FileStage — history of current lines, cold", () => {
     setup();
     fireEvent.focus(files().getByRole("button", { name: /^src\/billing\/charge\.ts/ }));
     expect(screen.getByText("Shown because you have cases here.")).toBeTruthy();
-    expect(screen.getByText("History not mapped yet.")).toBeTruthy();
+    expect(screen.getByText("History not analyzed yet.")).toBeTruthy();
     fireEvent.focus(files().getByRole("button", { name: /^config\/flags\.ts/ }));
     expect(screen.getByText("Shown because it changed in the last 12 commits.")).toBeTruthy();
   });
@@ -101,7 +101,9 @@ describe("FileStage — history of current lines, cold", () => {
     ).toBeTruthy();
     fireEvent.focus(files().getByRole("button", { name: /^config\/env\.ts/ }));
     expect(
-      screen.getByText("Oldest surviving line: 5y 3m. 3 commits own its 20 lines at HEAD."),
+      screen.getByText(
+        "The oldest line is 5 years 3 months old. The 20 current lines were last changed in 3 commits.",
+      ),
     ).toBeTruthy();
     expect(screen.getByText("60% no PR · 40% not checked (of lines)")).toBeTruthy();
   });
@@ -130,7 +132,9 @@ describe("FileStage — history of current lines, cold", () => {
       }),
     );
     expect(
-      screen.getByText(/^Oldest surviving line: ≥ 5y 4m\..*History cut at clone depth\.$/),
+      screen.getByText(
+        /^The oldest line is at least 5 years 4 months old\..*History cut at clone depth\.$/,
+      ),
     ).toBeTruthy();
   });
 

@@ -107,7 +107,7 @@ describe("the composer in Portuguese", () => {
     expect(screen.getByRole("list", { name: "Arquivos mostrados" })).toBeTruthy();
     expect(
       screen.getByRole("button", {
-        name: /^src\/billing\/charge\.ts, (histórico ainda não mapeado|linha mais antiga ainda presente com .+), 3 casos$/,
+        name: /^src\/billing\/charge\.ts, (histórico ainda não analisado|linha mais antiga ainda presente com .+), 3 casos$/,
       }),
     ).toBeTruthy();
     expect((await axe(container)).violations).toEqual([]);
@@ -117,19 +117,23 @@ describe("the composer in Portuguese", () => {
     const { onInvestigate } = await openCharge();
     expect(screen.getByRole("heading", { name: "Escolha uma linha ou um trecho" })).toBeTruthy();
     fireEvent.click(line(4));
-    expect(screen.getByRole("heading", { name: "Pergunte sobre a linha 4" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Investigue a linha 4" })).toBeTruthy();
     expect(
       trail().getByRole("button", { name: /^03 linha: linha 4, voltar a esta etapa$/ }),
     ).toBeTruthy();
     expect(screen.getByRole("group", { name: "Responder em" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /Fazer uma pergunta específica/ }));
-    expect(screen.getByRole("textbox", { name: "Sua pergunta sobre a linha 4" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Por que este valor?" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "O que você quer descobrir sobre a linha 4?" }),
+    );
+    expect(
+      screen.getByRole("textbox", { name: "O que você quer saber sobre a linha 4?" }),
+    ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Por que esse valor?" }));
     fireEvent.click(screen.getByRole("button", { name: "Investigar a linha 4 →" }));
     expect(onInvestigate).toHaveBeenLastCalledWith(
-      expect.objectContaining({ question: "Por que este valor?" }),
+      expect.objectContaining({ question: "Por que esse valor?" }),
     );
-    fireEvent.click(screen.getByRole("button", { name: "Usar a pergunta geral" }));
+    fireEvent.click(screen.getByRole("button", { name: "Investigar sem pergunta específica" }));
     fireEvent.click(screen.getByRole("button", { name: "Investigar a linha 4 →" }));
     expect(onInvestigate).toHaveBeenLastCalledWith(
       expect.objectContaining({ question: "Why is this line the way it is?" }),
@@ -140,7 +144,7 @@ describe("the composer in Portuguese", () => {
     await openCharge();
     fireEvent.click(line(2));
     fireEvent.click(line(5), { shiftKey: true });
-    expect(screen.getByRole("heading", { name: "Pergunte sobre as linhas 2–5" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Investigue as linhas 2–5" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Investigar as linhas 2–5 →" })).toBeTruthy();
     fireEvent.click(line(4));
     fireEvent.click(
@@ -159,9 +163,7 @@ describe("the composer in Portuguese", () => {
     fireEvent.click(line(4));
     expect(within(context).getByRole("region", { name: "linha 4" })).toBeTruthy();
     expect(
-      within(context).getByText(
-        "Ainda falta investigar o pull request, as revisões e as issues por trás dela.",
-      ),
+      within(context).getByText("Pull requests, revisões e issues ainda não analisados."),
     ).toBeTruthy();
   });
 

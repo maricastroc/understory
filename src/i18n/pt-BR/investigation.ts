@@ -5,7 +5,7 @@ const of = (label: string) => {
   if (label === "commit") return "do commit";
   if (label.startsWith("linhas ")) return `das ${label}`;
   if (label.startsWith("linha ")) return `da ${label}`;
-  if (/^(commit|pull request) /.test(label)) return `do ${label}`;
+  if (/^(commit|pull request|PR) /.test(label)) return `do ${label}`;
   if (/^(revisão|issue) /.test(label)) return `da ${label}`;
   return `de ${label}`;
 };
@@ -14,7 +14,7 @@ const at = (label: string) => {
   if (label === "o arquivo") return "no arquivo";
   if (label.startsWith("linhas ")) return `nas ${label}`;
   if (label.startsWith("linha ")) return `na ${label}`;
-  if (/^(commit|pull request) /.test(label)) return `no ${label}`;
+  if (/^(commit|pull request|PR) /.test(label)) return `no ${label}`;
   if (/^(revisão|issue) /.test(label)) return `na ${label}`;
   return `em ${label}`;
 };
@@ -111,10 +111,10 @@ export const subject: Messages["subject"] = {
   file: "o arquivo",
   commit: (ref) => `commit ${ref}`,
   historyOf: (label) => `Histórico ${of(label)}`,
-  around: (label) => `Em torno ${of(label)}`,
+  around: (label) => `Histórico ${of(label)}`,
   asItReadsNow: (label) => `${label} · como está agora`,
   today: "hoje",
-  beforeToday: (age) => `${age} antes de hoje`,
+  beforeToday: (age) => `Há ${age}`,
   between: (age) => `${age} entre estas`,
   unchangedFor: (age) => `sem mudança há ${age}`,
   noChange: (age, label) => `${age} sem mudança ${at(label)}`,
@@ -124,13 +124,13 @@ export const subject: Messages["subject"] = {
     unchanged: "sem mudança",
     noChange: "sem mudança",
   },
-  oldestChange: (label) => `mudança mais antiga registrada ${at(label)}`,
-  earliestArtifact: "artefato mais antigo coletado",
+  oldestChange: (label) => `Mudança mais antiga registrada ${at(label)}`,
+  earliestArtifact: "Registro mais antigo encontrado",
   asked: {
-    commit: "a mudança sobre a qual este caso pergunta",
-    pull_request: "o pull request sobre o qual este caso pergunta",
-    review: "a revisão sobre a qual este caso pergunta",
-    issue: "a issue sobre a qual este caso pergunta",
+    commit: "Mudança investigada neste caso",
+    pull_request: "Pull request investigado neste caso",
+    review: "Revisão investigada neste caso",
+    issue: "Issue investigada neste caso",
   },
   wrote: (label) => `escreveu ${the(label)} como está hoje`,
   earlierChange: (label) => `uma mudança anterior ${at(label)}`,
@@ -145,7 +145,7 @@ export const clause: Messages["clause"] = {
   unaudited: "não auditada",
   notCollected: (n) => (n === 1 ? "1 não coletada" : `${n} não coletadas`),
   silent: "Sem registro. Nenhuma fonte explica isto.",
-  source: (letter, kind, id) => `${letter}, ${kind} ${id}`,
+  source: (letter, ref) => `${letter}, ${ref}`,
   supportedBy: (sources) => `Apoiada por ${sources}.`,
   noSource: "Nenhuma fonte coletada.",
   quotesVerified: (n) =>
@@ -161,7 +161,7 @@ export const source: Messages["source"] = {
   missing: "Citada, mas nunca coletada · não dá para conferir",
   verified: "✓ Citação literal encontrada na fonte",
   weak: "Citada · trata do assunto, mas nenhuma linha comprova",
-  misattributed: "Citada · esta fonte não sustenta a afirmação",
+  misattributed: "Citada · esta fonte não sustenta a conclusão",
   unaudited: "Citada · não auditada",
   elsewhere: "Citada · a citação literal está em outra fonte",
   noQuote: "Citada · sem citação literal nesta fonte",
@@ -169,7 +169,7 @@ export const source: Messages["source"] = {
 
 export const why: Messages["why"] = {
   title: "O que o histórico sustenta",
-  reconstructed: "O porquê reconstruído",
+  reconstructed: "Motivos encontrados",
   likelyNote:
     "O texto citado documenta a mudança a que pertence. A ligação dele com esta linha é uma interpretação do Understory.",
   notIdentified: "Nenhuma justificativa para esta linha foi identificada no histórico.",
@@ -200,14 +200,13 @@ export const why: Messages["why"] = {
     absent: "ausente: nenhuma fonte citada foi verificada",
   },
   notEstablished: (n) => `Não estabelecido · ${n}`,
-  sentenceOf: (label, n) => `${label} · afirmação ${n}`,
+  sentenceOf: (label, n) => `${label} · conclusão ${n}`,
   changes: "Mudanças, da mais recente para a mais antiga",
-  checking: (n) => `vendo a afirmação ${n} · Esc volta aqui`,
-  selectClause: "selecione uma afirmação para ver a evidência",
-  selectSentence: "selecione uma frase para ver a evidência",
+  checking: (n) => `vendo a conclusão ${n} · Esc volta aqui`,
+  selectClause: "Selecione uma conclusão para consultar suas evidências.",
+  selectSentence: "Selecione uma frase para consultar suas evidências.",
   collecting: "Coletando o histórico da linha…",
-  reconstructing: (n) =>
-    n === 1 ? "Reconstruindo a partir de 1 artefato…" : `Reconstruindo a partir de ${n} artefatos…`,
+  reconstructing: (n) => (n === 1 ? "Analisando 1 registro…" : `Analisando ${n} registros…`),
   noHistory: "Nenhum histórico foi encontrado para esta linha.",
   noCommitAt: (sha) =>
     `A investigação leu ${sha} e não encontrou nenhum commit que a tenha alterado, então não há nada para rastrear.`,
@@ -220,7 +219,7 @@ export const why: Messages["why"] = {
 
 export const verdict: Messages["verdict"] = {
   label: {
-    pending: "Reconstruindo…",
+    pending: "Investigando…",
     "evidence-only": "Só evidências",
     "out-of-scope": "Fora do escopo",
     fabrication: "Citação sem respaldo",
@@ -228,7 +227,7 @@ export const verdict: Messages["verdict"] = {
     resolved: "Resolvido",
   },
   title: {
-    pending: "Ainda reconstruindo",
+    pending: "Ainda investigando",
     "evidence-only": "Por que não há reconstrução",
     "out-of-scope": "Por que está fora do escopo",
     fabrication: "Por que a citação está sem respaldo",
@@ -243,11 +242,11 @@ export const verdict: Messages["verdict"] = {
   derived: "Confiança calculada",
   level: { high: "alta", medium: "média", low: "baixa" },
   grounded: (grounded, total) =>
-    `${grounded} de ${total === 1 ? "1 afirmação" : `${total} afirmações`} ${grounded === 1 ? "se apoia" : "se apoiam"} em fontes registradas`,
+    `${grounded} de ${total === 1 ? "1 conclusão" : `${total} conclusões`} ${grounded === 1 ? "se apoia" : "se apoiam"} em fontes registradas`,
   resolvedUnknown: (resolved, total, unknown) =>
-    `${resolved} de ${total === 1 ? "1 citação aponta" : `${total} citações apontam`} para artefatos reais; ${unknown} nunca foi coletado`,
+    `${resolved} de ${total === 1 ? "1 citação aponta" : `${total} citações apontam`} para registros reais; ${unknown} nunca foi coletado`,
   resolved: (resolved, total) =>
-    `${resolved} de ${total === 1 ? "1 citação aponta" : `${total} citações apontam`} para artefatos reais`,
+    `${resolved} de ${total === 1 ? "1 citação aponta" : `${total} citações apontam`} para registros reais`,
   verbatim: (n) =>
     n === 1 ? "1 citação literal encontrada" : `${n} citações literais encontradas`,
   misattributed: (n) => (n === 1 ? "1 mal atribuída" : `${n} mal atribuídas`),
@@ -256,8 +255,8 @@ export const verdict: Messages["verdict"] = {
   auditUnavailable: "Auditoria de citações indisponível; a confiança fica limitada",
   uncited: (n) =>
     n === 1
-      ? "1 afirmação não cita nada que foi coletado"
-      : `${n} afirmações não citam nada que foi coletado`,
+      ? "1 conclusão não cita nada que foi coletado"
+      : `${n} conclusões não citam nada que foi coletado`,
   fileLevel: "Só o histórico do arquivo, não o da linha",
   cosmetic: (ref) => `A última mudança, ${ref}, parece cosmética`,
   noReconstruction: "Nenhuma reconstrução foi produzida",
@@ -266,16 +265,16 @@ export const verdict: Messages["verdict"] = {
 export const caseScreen: Messages["caseScreen"] = {
   askedToken: (token, line) => `pergunta sobre o token ${token} · linha ${line}`,
   askedLine: (line) => `pergunta sobre a linha ${line}`,
-  anchoredOn: "ancorado em",
-  anchoredOnCommit: "ancorado no commit",
-  onBranch: (branch) => `em ${branch}`,
+  anchoredOn: "Fonte:",
+  anchoredOnCommit: "Fonte: commit",
+  onBranch: (branch) => `· branch ${branch}`,
   collecting: "Coletando",
   failed: "Falhou",
   backToQuestion: "← Voltar à pergunta",
   followUp: "Continuar neste arquivo",
   key: "Legenda",
   copied: "Copiado",
-  copyWhy: "Copiar o porquê",
+  copyWhy: "Copiar a explicação",
   legend: {
     commit: "commit",
     pr: "PR",
@@ -288,35 +287,34 @@ export const caseScreen: Messages["caseScreen"] = {
     depth: "profundidade = tempo antes de hoje",
   },
   continues: "↳ continua",
-  drilledFrom: (question) => `aprofundado a partir de “${question}”`,
+  drilledFrom: (question) => `derivada de “${question}”`,
   followUpTo: (question) => `depois de “${question}”`,
-  artifacts: (n) => (n === 1 ? "1 artefato" : `${n} artefatos`),
-  aroundSummary: (label, artifacts) => `Em torno ${of(label)} · ${artifacts}`,
+  artifacts: (n) => (n === 1 ? "1 registro" : `${n} registros`),
+  aroundSummary: (label, artifacts) => `Histórico ${of(label)} · ${artifacts}`,
   historySummary: (n) => (n === 1 ? "Histórico · 1 mudança" : `Histórico · ${n} mudanças`),
   over: (summary, span) => `${summary} em ${span}`,
   historyArtifacts: (artifacts) => `Histórico · ${artifacts}`,
-  evidenceOf: (n) => `EVIDÊNCIA · AFIRMAÇÃO ${n}`,
+  evidenceOf: (n) => `EVIDÊNCIA · CONCLUSÃO ${n}`,
   sourceOf: (i, total) => `${i} DE ${total}`,
-  sourcesOfClause: "Fontes desta afirmação",
+  sourcesOfClause: "Fontes desta conclusão",
   previousSource: "Fonte anterior",
   nextSource: "Próxima fonte",
   closeEvidence: "Fechar evidência",
-  noSource: "Esta afirmação não cita nenhuma fonte coletada.",
+  noSource: "Esta conclusão não cita nenhuma fonte coletada.",
   missingSource:
-    "O modelo citou esta fonte, mas ela não está nas evidências que o Understory coletou, então a afirmação não pode ser conferida com ela.",
+    "O modelo citou esta fonte, mas ela não está nas evidências que o Understory coletou, então a conclusão não pode ser conferida com ela.",
   depthOf: (depth, max) => `${depth} de ${max}`,
   showInHistory: "Ver no histórico ↓",
   investigate: "Investigar →",
-  opensCase: (question) => `Abre um novo caso ancorado aqui: “${question}”`,
-  anchor: (label) => `Âncora, ${label}`,
-  anchorOfCase: "âncora deste caso",
+  opensCase: (question) => `Abre uma investigação derivada a partir daqui: “${question}”`,
+  anchor: (label) => `Fonte principal, ${label}`,
+  anchorOfCase: "fonte principal",
   showLess: "Mostrar menos",
   showAll: "Mostrar tudo",
   showFile: "Mostrar arquivo",
-  collectedAround: (n) =>
-    n === 1 ? "1 artefato coletado em torno dela" : `${n} artefatos coletados em torno dela`,
+  collectedAround: (n) => (n === 1 ? "1 registro encontrado" : `${n} registros encontrados`),
   blameHint: {
-    ready: "passe o mouse numa barra para ver o commit",
+    ready: "Passe o cursor numa barra para ver o commit.",
     loading: "carregando o blame…",
     unavailable: "blame indisponível nesta versão",
     unpinned: "HEAD atual, não a versão investigada",
@@ -345,9 +343,9 @@ export const questions: Messages["questions"] = {
 };
 
 export const accessible: Messages["accessible"] = {
-  notCited: "não é fonte de nenhuma afirmação",
-  citedBy: (n) => `fonte da afirmação ${n}`,
-  citedByMany: (list, last) => `fonte das afirmações ${list} e ${last}`,
+  notCited: "não é fonte de nenhuma conclusão",
+  citedBy: (n) => `fonte da conclusão ${n}`,
+  citedByMany: (list, last) => `fonte das conclusões ${list} e ${last}`,
   quoteVerified: "citação literal verificada",
   noPrBefore: (target) => `nenhum pull request, revisão ou issue antes ${of(target)}`,
   noReviewOn: (target) => `nenhuma revisão ${at(target)}`,
@@ -389,20 +387,21 @@ export const history: Messages["history"] = {
   absences: (n) => (n === 1 ? "1 ausência" : `${n} ausências`),
   show: (n) => (n === 1 ? "Mostrar" : `Mostrar as ${n}`),
   changes: (n) => (n === 1 ? "1 mudança" : `${n} mudanças`),
-  extent: (to, depth, changes, artifacts) => `hoje ±0 → ${to} ${depth} · ${changes} · ${artifacts}`,
+  extent: (open, changes, records) =>
+    `${open ? "Da data atual ao limite da leitura" : "Da data atual à origem"} · ${changes} · ${records}`,
   origin: "origem",
   oldestRead: "limite da leitura",
   at: (date) => `em ${date}`,
-  tracing: (n, letters) => `seguindo a afirmação ${n} · ${letters}`,
-  backToClause: (n) => `Voltar à afirmação ${n}`,
-  backToAnswer: "Voltar à resposta",
+  tracing: (n, letters) => `seguindo a conclusão ${n} · ${letters}`,
+  backToClause: (n) => `Voltar à conclusão ${n}`,
+  backToAnswer: "Voltar às conclusões",
   newestFirst: "Histórico, do mais recente para o mais antigo",
   earlierList: "Mudanças anteriores nesta linha, encontradas ao segui-la para trás",
   before: "antes:",
   commitMessage: "a mensagem do commit",
-  deep: (age) => `${age} de profundidade`,
+  deep: (age) => `há ${age}`,
   alsoCollected: "Também coletados, fora do histórico da linha",
-  quotedFor: (n) => `citada pela afirmação ${n}`,
-  backWithSource: (n, id) => `Voltar à afirmação ${n} com ${id} como fonte`,
-  clauseChip: (n) => `afirmação ${n}`,
+  quotedFor: (n) => `fonte da conclusão ${n}`,
+  backWithSource: (n, id) => `Voltar à conclusão ${n} com ${id} como fonte`,
+  clauseChip: (n) => `conclusão ${n}`,
 };

@@ -65,7 +65,7 @@ beforeEach(() => window.localStorage.clear());
 describe("the case screen in Portuguese", () => {
   it("names the why, the verdict and its checks, and writes the confidence the Brazilian way", () => {
     setup(CASES["ng-http-114"]);
-    expect(screen.getByRole("region", { name: "O porquê reconstruído" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Motivos encontrados" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "← Voltar à pergunta" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Continuar neste arquivo" })).toBeTruthy();
     const chip = screen.getByRole("button", { name: /^Resolvido/ });
@@ -92,9 +92,9 @@ describe("the case screen in Portuguese", () => {
       b.textContent!.replace(/^.*?(Documentado para esta linha|Explicação provável)/, "$1"),
     );
     expect(labels).toEqual([
-      "Documentado para esta linha · afirmação 3",
-      "Explicação provável · afirmação 2",
-      "Explicação provável · afirmação 1",
+      "Documentado para esta linha · conclusão 3",
+      "Explicação provável · conclusão 2",
+      "Explicação provável · conclusão 1",
     ]);
     expect(zone().querySelector("[data-why-change]")!.textContent).toMatch(
       /^última mudança · 9da72fa · 18 mar 2024 · reescreveu esta linha/,
@@ -121,7 +121,7 @@ describe("the case screen in Portuguese", () => {
     expect(zone().textContent).toContain(
       "Nenhuma justificativa para esta linha foi identificada no histórico.",
     );
-    expect(zone().textContent).toContain("Do registro desta mudança · afirmação 3");
+    expect(zone().textContent).toContain("Do registro desta mudança · conclusão 3");
     expect(zone().textContent).toContain("review·ajafff · comentário feito em outro arquivo");
     expect(zone().querySelector("details summary")!.textContent).toBe("Não estabelecido · 3");
   });
@@ -129,7 +129,7 @@ describe("the case screen in Portuguese", () => {
   it("opens a likely explanation's source with the note that its link is an interpretation", () => {
     setup(CASES["control-tslint-189"], true);
     fireEvent.click(within(zone()).getAllByRole("button", { name: /Explicação provável/ })[0]);
-    const evidence = screen.getByRole("region", { name: /^EVIDÊNCIA · AFIRMAÇÃO 1/ });
+    const evidence = screen.getByRole("region", { name: /^EVIDÊNCIA · CONCLUSÃO 1/ });
     expect(evidence.querySelector("[data-likely-note]")!.textContent).toBe(
       "O texto citado documenta a mudança a que pertence. A ligação dele com esta linha é uma interpretação do Understory.",
     );

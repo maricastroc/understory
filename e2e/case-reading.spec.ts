@@ -79,14 +79,14 @@ test("the case screen with ?reading=1: a reason documented for the line stays do
     .getByRole("button", { name: /Documented for this line/ })
     .first()
     .click();
-  await expect(page.getByRole("region", { name: /^EVIDENCE · CLAUSE 1/ })).toBeVisible();
+  await expect(page.getByRole("region", { name: /^EVIDENCE · CONCLUSION 1/ })).toBeVisible();
   await expect(page.locator("[data-likely-note]")).toHaveCount(0);
 });
 
 test("the case screen without the reading is the screen as it was", async ({ page }) => {
   await serve(page, controls.cases["tslint-189"]);
   await open(page, 1440, "repo=palantir/tslint&file=src/linter.ts&line=189");
-  await expect(page.getByRole("region", { name: "Reconstructed why" })).toBeVisible({
+  await expect(page.getByRole("region", { name: "Reasons found" })).toBeVisible({
     timeout: 60_000,
   });
   await expect(page.getByRole("button", { name: /^Resolved/ })).toBeVisible();

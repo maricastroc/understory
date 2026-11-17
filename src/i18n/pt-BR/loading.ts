@@ -5,7 +5,7 @@ export const loading: Messages["loading"] = {
   stages: [
     "Coletando do git",
     "Montando a linha do tempo",
-    "Reconstruindo o porquê",
+    "Reconstruindo os motivos",
     "Verificando as citações",
   ],
 };

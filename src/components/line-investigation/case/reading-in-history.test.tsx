@@ -91,8 +91,8 @@ describe("the history without the reading", () => {
     expect(marks("scope")).toEqual([]);
     expect(marks("earlier")).toEqual([]);
     expect(marks("edge")).toEqual([]);
-    expect(summary()).toMatch(/→ origin −\S+ · 1 change · 1 artifact$/);
-    expect(section().textContent).toContain("oldest recorded change to line 114 · 18a2e4f");
+    expect(summary()).toMatch(/^From today to the origin · 1 change · 1 record$/);
+    expect(section().textContent).toContain("Oldest recorded change to line 114 · 18a2e4f");
     expect(screen.getByRole("button", { name: /^History · 1 change over / })).toBeTruthy();
     const untouched = markup();
     off.unmount();
@@ -122,7 +122,7 @@ describe("the history with the reading", () => {
     ]);
     expect(marks("earlier")).toEqual([]);
     expect(marks("edge")).toEqual([]);
-    expect(section().textContent).toContain("oldest recorded change to line 4 · 90021c7");
+    expect(section().textContent).toContain("Oldest recorded change to line 4 · 90021c7");
   });
 
   it("keeps a review comment made in another file, with its scope and its place", () => {
@@ -152,9 +152,9 @@ describe("the history with the reading", () => {
     expect(rows[0].querySelector("[data-scope]")).toBeNull();
     expect(document.querySelectorAll('[data-artifact="commit:2420a0a"]')).toHaveLength(0);
     expect(document.querySelectorAll('[data-artifact="commit:18a2e4f"]')).toHaveLength(1);
-    expect(summary()).toMatch(/→ origin −\S+ · 2 changes · 1 artifact$/);
+    expect(summary()).toMatch(/^From today to the origin · 2 changes · 1 record$/);
     expect(screen.getByRole("button", { name: /^History · 2 changes over / })).toBeTruthy();
-    expect(section().textContent).not.toContain("oldest recorded change");
+    expect(section().textContent).not.toContain("Oldest recorded change");
     expect(marks("edge")).toEqual([]);
     expect((await axe(container)).violations).toEqual([]);
   });
@@ -165,8 +165,8 @@ describe("the history with the reading", () => {
       true,
     );
     expect(marks("edge")).toEqual(["The line's history before this was not read."]);
-    expect(summary()).toMatch(/→ oldest read −\S+ · 1 change · 1 artifact$/);
-    expect(section().textContent).not.toContain("oldest recorded change");
+    expect(summary()).toMatch(/^From today to the reading limit · 1 change · 1 record$/);
+    expect(section().textContent).not.toContain("Oldest recorded change");
     expect(marks("fact")).toEqual([expect.stringMatching(/^rewrote this line · before: /)]);
   });
 
@@ -192,7 +192,7 @@ describe("the history with the reading", () => {
     );
     expect(marks("fact")).toEqual(["added this line"]);
     expect(marks("edge")).toEqual([]);
-    expect(section().textContent).toContain("oldest recorded change to line 411 · 1e90d03");
+    expect(section().textContent).toContain("Oldest recorded change to line 411 · 1e90d03");
   });
 });
 
@@ -202,23 +202,23 @@ describe("the history where the walk stopped before the line's first change", ()
     expect(earlierIds()).toEqual(["commit:05a16a3", "commit:22e1399"]);
     expect(document.querySelectorAll(`[data-artifact="${LAST}"]`)).toHaveLength(1);
     expect(document.querySelector(`[data-earlier="${LAST}"]`)).toBeNull();
-    expect(summary()).toMatch(/→ oldest read −\S+ · 3 changes · 1 artifact$/);
+    expect(summary()).toMatch(/^From today to the reading limit · 3 changes · 1 record$/);
     expect(screen.getByRole("button", { name: /^History · 3 changes over / })).toBeTruthy();
     expect(marks("edge")).toEqual([
       "The line's history before this was not read: this view follows only a few changes back.",
     ]);
-    expect(section().textContent).not.toMatch(/\borigin\b|oldest recorded change/);
+    expect(section().textContent).not.toMatch(/\borigin\b|Oldest recorded change/);
   });
 
   it("shows only the collected change where the time ran out before anything was read", () => {
     setup(hosted({ entries: [], stopped: "time limit" }), true);
     expect(earlierIds()).toEqual([]);
     expect(marks("fact")).toEqual([expect.stringMatching(/^rewrote this line · before: /)]);
-    expect(summary()).toMatch(/→ oldest read −\S+ · 1 change · 1 artifact$/);
+    expect(summary()).toMatch(/^From today to the reading limit · 1 change · 1 record$/);
     expect(marks("edge")).toEqual([
       "The line's history before this was not read: following it took too long.",
     ]);
-    expect(section().textContent).not.toMatch(/\borigin\b|oldest recorded change/);
+    expect(section().textContent).not.toMatch(/\borigin\b|Oldest recorded change/);
   });
 
   it("lists a change whose patch the host did not return, without saying what it did", () => {
@@ -230,11 +230,11 @@ describe("the history where the walk stopped before the line's first change", ()
     expect(unread.textContent).toContain(
       "found by following the line back · not read for a reason",
     );
-    expect(summary()).toMatch(/→ oldest read −\S+ · 2 changes · 1 artifact$/);
+    expect(summary()).toMatch(/^From today to the reading limit · 2 changes · 1 record$/);
     expect(marks("edge")).toEqual([
       "The line's history before this was not read: the host did not return the change.",
     ]);
-    expect(section().textContent).not.toMatch(/\borigin\b|oldest recorded change/);
+    expect(section().textContent).not.toMatch(/\borigin\b|Oldest recorded change/);
   });
 
   it("does not say the history goes further back when older changes were already collected", () => {
@@ -248,11 +248,11 @@ describe("the history where the walk stopped before the line's first change", ()
     expect(earlierIds()).toEqual([]);
     expect(marks("fact")).toHaveLength(2);
     expect(marks("fact", row("commit:90021c7"))).toEqual([]);
-    expect(summary()).toMatch(/→ oldest read −\S+ · 4 changes · 4 artifacts$/);
+    expect(summary()).toMatch(/^From today to the reading limit · 4 changes · 4 records$/);
     expect(marks("edge")).toEqual([
       "The line's history before this was not read: this view follows only a few changes back.",
     ]);
-    expect(section().textContent).not.toMatch(/goes further back|oldest recorded change/);
+    expect(section().textContent).not.toMatch(/goes further back|Oldest recorded change/);
   });
 });
 

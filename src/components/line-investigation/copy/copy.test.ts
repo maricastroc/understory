@@ -17,9 +17,9 @@ const byId = new Map(view.artifacts.map((a) => [a.id, a]));
 describe("artifact copy", () => {
   it("shows short ids the way the handoff labels them", () => {
     expect(displayId(art("commit:92f6a3f"))).toBe("92f6a3f");
-    expect(displayId(art("pr:812"))).toBe("pr:812");
+    expect(displayId(art("pr:812"))).toBe("PR #812");
     expect(displayId(art("review:812-1"))).toBe("review·dmitri-k");
-    expect(displayId(art("issue:1187"))).toBe("issue:1187");
+    expect(displayId(art("issue:1187"))).toBe("issue #1187");
   });
 
   it("gives PRs an open → merge interval and reviews their state", () => {
@@ -66,7 +66,7 @@ describe("clause copy", () => {
 
   it("describes the evidence relation as text for screen readers", () => {
     expect(clauseDescription(view.clauses[1], byId, "en")).toBe(
-      "Supported by E, issue issue:1187; D, pull request pr:812. 1 quote verified.",
+      "Supported by E, issue #1187; D, PR #812. 1 quote verified.",
     );
   });
 });
@@ -74,10 +74,10 @@ describe("clause copy", () => {
 describe("accessible names", () => {
   it("reads a label the way the handoff specifies", () => {
     expect(artifactName(art("pr:812"), view.clauses, "en")).toBe(
-      "D, pull request pr:812, open 9 → 15 Mar 2023, cited by clause 1 and 2",
+      "D, PR #812, open 9 → 15 Mar 2023, source of conclusions 1 and 2",
     );
     expect(artifactName(art("issue:1187"), view.clauses, "en")).toBe(
-      "E, issue issue:1187, 2 Mar 2023, cited by clause 2, quote verified",
+      "E, issue #1187, 2 Mar 2023, source of conclusion 2, quote verified",
     );
     expect(gapName(view.gaps[0], art("commit:7be210e"), "en")).toBe(
       "Not recorded: no pull request, review or issue before commit 7be210e",
@@ -88,7 +88,7 @@ describe("accessible names", () => {
       missing: "issue" as const,
       afterId: "pr:812",
     };
-    expect(gapName(issueGap, art("pr:812"), "en")).toBe("No linked issue on pull request pr:812");
+    expect(gapName(issueGap, art("pr:812"), "en")).toBe("No linked issue on PR #812");
   });
 });
 
@@ -106,14 +106,14 @@ describe("drawer copy", () => {
 
   it("derives context only from recorded edges and lookups", () => {
     expect(contextLines(art("pr:812"), view.artifacts, "en")).toEqual([
-      "Closes issue:1187",
+      "Closes issue #1187",
       "Merged 15 Mar 2023",
     ]);
     expect(contextLines(art("commit:7be210e"), view.artifacts, "en")).toEqual([
       "No pull request references this commit",
     ]);
     expect(metaLine(art("commit:92f6a3f"), view.artifacts, "en")).toBe(
-      "Priya Raman · merged via pr:812",
+      "Priya Raman · merged via PR #812",
     );
   });
 });
@@ -121,8 +121,8 @@ describe("drawer copy", () => {
 describe("verdict checklist copy", () => {
   it("renders the checks", () => {
     expect(view.checklist.map((x) => checklistText(x, "en"))).toEqual([
-      "3 of 3 clauses rest on recorded sources",
-      "5 of 5 citations resolve to real artifacts",
+      "3 of 3 conclusions rest on recorded sources",
+      "5 of 5 citations resolve to real records",
       "3 quotes found verbatim, 0 misattributed",
     ]);
   });

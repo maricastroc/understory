@@ -47,14 +47,14 @@ export const map: Messages["map"] = {
     mapping: "mapeando o histórico",
     unavailable: "histórico indisponível",
     tooLarge: "grande demais para mapear",
-    notMapped: "histórico ainda não mapeado",
+    notMapped: "histórico ainda não analisado",
     cases: (n) => (n === 1 ? "1 caso" : `${n} casos`),
   },
   status: {
     mapping: "Mapeando o blame…",
     unavailable: "Histórico indisponível. Ainda dá para abrir e investigar.",
     tooLarge: "Grande demais para mapear. Ainda dá para abrir e investigar.",
-    notMapped: "Histórico ainda não mapeado.",
+    notMapped: "Histórico ainda não analisado.",
   },
   scope: {
     lastCommits: (n) => (n === 1 ? "no último commit" : `nos últimos ${n} commits`),
@@ -79,9 +79,10 @@ export const map: Messages["map"] = {
     noPrData:
       "Os dados de PR não estão disponíveis neste repositório (sem remoto ou token do GitHub), então todas as marcas aparecem como “não verificado”.",
     lookupsUnavailable: (files) => `A consulta de PRs não estava disponível para ${files}.`,
-    oldest: (age) => `Linha mais antiga ainda presente: ${age}.`,
-    own: (commits, lines) =>
-      `${lines === 1 ? "A linha do HEAD vem" : `As ${lines} linhas do HEAD vêm`} de ${commits === 1 ? "1 commit" : `${commits} commits`}.`,
+    oldest: (age) => `A linha mais antiga tem ${age}.`,
+    oldestAtLeast: (age) => `A linha mais antiga tem pelo menos ${age}.`,
+    own: (commits, lines, shown) =>
+      `${lines === 1 ? "A linha atual foi alterada por último" : `As ${shown} linhas atuais foram alteradas por último`} ${commits === 1 ? "em 1 commit" : `em ${commits} commits`}.`,
     cut: "Histórico cortado na profundidade do clone.",
     pr: (pct) => `${pct} com PR`,
     noPr: (pct) => `${pct} sem PR`,

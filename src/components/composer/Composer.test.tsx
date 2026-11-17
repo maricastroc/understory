@@ -234,8 +234,10 @@ describe("Composer — choosing lines and asking", () => {
   it("investigates with the general question when no question is typed", async () => {
     const onInvestigate = await openCharge();
     fireEvent.click(line(4));
-    expect(screen.queryByRole("textbox", { name: /Your question/ })).toBeNull();
-    expect(screen.getByRole("button", { name: /Ask a specific question/ })).toBeTruthy();
+    expect(screen.queryByRole("textbox", { name: /What do you want to know about/ })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "What do you want to find out about line 4?" }),
+    ).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Investigate line 4 →" }));
     expect(onInvestigate).toHaveBeenCalledWith({
       repoPath: "acme/payments-service",
@@ -259,16 +261,20 @@ describe("Composer — choosing lines and asking", () => {
   it("sends a specific question when one is asked, and can drop it again", async () => {
     const onInvestigate = await openCharge();
     fireEvent.click(line(4));
-    fireEvent.click(screen.getByRole("button", { name: /Ask a specific question/ }));
-    const box = screen.getByRole("textbox", { name: "Your question about line 4" });
+    fireEvent.click(
+      screen.getByRole("button", { name: "What do you want to find out about line 4?" }),
+    );
+    const box = screen.getByRole("textbox", { name: "What do you want to know about line 4?" });
     fireEvent.click(screen.getByRole("button", { name: "Why this value?" }));
     expect((box as HTMLTextAreaElement).value).toBe("Why this value?");
     fireEvent.click(screen.getByRole("button", { name: "Investigate line 4 →" }));
     expect(onInvestigate).toHaveBeenLastCalledWith(
       expect.objectContaining({ question: "Why this value?" }),
     );
-    fireEvent.click(screen.getByRole("button", { name: "Use the general question instead" }));
-    expect(screen.queryByRole("textbox", { name: /Your question/ })).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Investigate without a specific question" }),
+    );
+    expect(screen.queryByRole("textbox", { name: /What do you want to know about/ })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Investigate line 4 →" }));
     expect(onInvestigate).toHaveBeenLastCalledWith(
       expect.objectContaining({ question: "Why is this line the way it is?" }),
@@ -344,7 +350,7 @@ describe("Composer — the demo line", () => {
     renderWith({ prefill: { path: "src/billing/charge.ts", line: 4, nonce: 1 } });
     const line = await screen.findByRole("button", { name: /^Line 4, selected/ });
     expect(line.getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByRole("heading", { level: 2, name: "Ask about line 4" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Investigate line 4" })).toBeTruthy();
     expect(
       trail().getByRole("button", { name: /^02 file: src\/billing\/charge\.ts/ }),
     ).toBeTruthy();

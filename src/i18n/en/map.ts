@@ -45,14 +45,14 @@ export const map = {
     mapping: "mapping its history",
     unavailable: "history unavailable",
     tooLarge: "too large to map",
-    notMapped: "history not mapped yet",
+    notMapped: "history not analyzed yet",
     cases: (n: number) => (n === 1 ? "1 case" : `${n} cases`),
   },
   status: {
     mapping: "Mapping its blame…",
     unavailable: "History unavailable. It can still be opened and investigated.",
     tooLarge: "Too large to map. It can still be opened and investigated.",
-    notMapped: "History not mapped yet.",
+    notMapped: "History not analyzed yet.",
   },
   scope: {
     lastCommits: (n: number) => (n === 1 ? "the last commit" : `the last ${n} commits`),
@@ -77,9 +77,10 @@ export const map = {
     noPrData:
       "PR data is unavailable for this repo (no GitHub remote or token), so every mark reads “not checked”.",
     lookupsUnavailable: (files: string) => `PR lookups were unavailable for ${files}.`,
-    oldest: (age: string) => `Oldest surviving line: ${age}.`,
-    own: (commits: number, lines: number) =>
-      `${commits === 1 ? "1 commit owns" : `${commits} commits own`} its ${lines === 1 ? "1 line" : `${lines} lines`} at HEAD.`,
+    oldest: (age: string) => `The oldest line is ${age} old.`,
+    oldestAtLeast: (age: string) => `The oldest line is at least ${age} old.`,
+    own: (commits: number, lines: number, shown: string) =>
+      `${lines === 1 ? "The current line was" : `The ${shown} current lines were`} last changed in ${commits === 1 ? "1 commit" : `${commits} commits`}.`,
     cut: "History cut at clone depth.",
     pr: (pct: string) => `${pct} PR`,
     noPr: (pct: string) => `${pct} no PR`,

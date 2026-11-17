@@ -44,7 +44,7 @@ test("the demo opens on the file stage: map of current lines, then a file, a lin
     "true",
   );
   await expect(trail.getByRole("button", { name: /^03 line: line 8/ })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "Ask about line 8" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Investigate line 8" })).toBeVisible();
   await expect(page.getByRole("complementary", { name: "Context" })).toContainText(
     "Last changed by",
   );
@@ -132,22 +132,30 @@ test("a follow-up starts a new question in the same file and links back as a fol
   const go = page.getByLabel(/^Go to line/);
   await go.fill("8");
   await go.press("Enter");
-  await page.getByRole("button", { name: /Ask a specific question/ }).click();
-  await page.getByRole("textbox", { name: /Your question/ }).fill("Why exactly 3 retries?");
+  await page.getByRole("button", { name: /^What do you want to find out about / }).click();
+  await page
+    .getByRole("textbox", { name: /^What do you want to know about / })
+    .fill("Why exactly 3 retries?");
   await page.getByRole("button", { name: /^Investigate line 8/ }).click();
 
   await page.getByRole("button", { name: "Follow up in this file" }).click();
-  await expect(page.getByRole("button", { name: /Ask a specific question/ })).toBeVisible();
-  await expect(page.getByRole("textbox", { name: /Your question/ })).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: /^What do you want to find out about / }),
+  ).toBeVisible();
+  await expect(page.getByRole("textbox", { name: /^What do you want to know about / })).toHaveCount(
+    0,
+  );
   await go.fill("12");
   await go.press("Enter");
-  await page.getByRole("button", { name: /Ask a specific question/ }).click();
-  await page.getByRole("textbox", { name: /Your question/ }).fill("Why only transient errors?");
+  await page.getByRole("button", { name: /^What do you want to find out about / }).click();
+  await page
+    .getByRole("textbox", { name: /^What do you want to know about / })
+    .fill("Why only transient errors?");
   await page.getByRole("button", { name: /^Investigate line 12/ }).click();
 
   const link = page.getByText(/^↳ continues/);
   await expect(link).toContainText("follow-up to “Why exactly 3 retries?”");
-  await expect(link).not.toContainText("drilled from");
+  await expect(link).not.toContainText("derived from");
 });
 
 test("the first node of the path leads back to the repository stage", async ({ page }) => {

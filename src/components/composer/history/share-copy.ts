@@ -1,5 +1,5 @@
 import type { FileHistory, TreeOverview } from "@understory/core/types";
-import { shortAge } from "@/i18n/format";
+import { formatNumber, longAge } from "@/i18n/format";
 import type { Locale } from "@/i18n/locales";
 import { messagesFor } from "@/i18n/messages";
 import { markTone } from "./depth";
@@ -62,8 +62,9 @@ export function prAbsence(
 
 export function historyFacts(view: CoreHistory, locale: Locale): string {
   const m = messagesFor(locale);
-  const age = `${view.cut ? "≥ " : ""}${shortAge(m.time, view.oldestDays)}`;
-  const facts = `${m.map.share.oldest(age)} ${m.map.share.own(view.commits, view.lines)}`;
+  const age = longAge(m.time, view.oldestDays);
+  const oldest = view.cut ? m.map.share.oldestAtLeast(age) : m.map.share.oldest(age);
+  const facts = `${oldest} ${m.map.share.own(view.commits, view.lines, formatNumber(locale, view.lines))}`;
   return view.cut ? `${facts} ${m.map.share.cut}` : facts;
 }
 
