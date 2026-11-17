@@ -11,7 +11,7 @@ const FOCUS =
   "cursor-pointer rounded-[3px] text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none";
 
 const SURFACE = {
-  pinned: "bg-li-neutral-200 shadow-[inset_3px_0_0_var(--color-li-evidence)]",
+  pinned: "bg-li-neutral-200 shadow-[inset_3px_0_0_var(--color-li-brand)]",
   silent: "bg-li-neutral-200 shadow-[inset_3px_0_0_var(--color-li-gap)]",
   inspected: "bg-li-neutral-200",
   rest: "",

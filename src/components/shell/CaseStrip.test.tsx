@@ -34,3 +34,12 @@ describe("CaseStrip", () => {
     expect(screen.getByRole("button").getAttribute("aria-label")).toBe("Show investigations, 0");
   });
 });
+
+describe("CaseStrip — selection", () => {
+  it("marks the open case with an orange edge", () => {
+    const { container } = render(<CaseStrip items={items} expanded={false} onOpen={() => {}} />);
+    const marked = container.querySelectorAll('[class*="--color-li-brand"]');
+    expect(marked).toHaveLength(1);
+    expect(container.querySelector(".bg-li-datum-tint")).toBeNull();
+  });
+});

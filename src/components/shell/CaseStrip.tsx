@@ -38,7 +38,7 @@ export function CaseStrip({
             <span
               key={item.id}
               className={`flex size-7 justify-center ${
-                item.current ? "bg-li-datum-tint" : ""
+                item.current ? "bg-li-neutral-200 shadow-[inset_2px_0_0_var(--color-li-brand)]" : ""
               } ${item.child ? "pl-1.5" : ""}`}
             >
               <span className="flex pt-1">

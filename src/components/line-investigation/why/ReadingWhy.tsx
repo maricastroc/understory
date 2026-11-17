@@ -123,7 +123,7 @@ export function ReadingWhy({
     const surface = isPinned
       ? mark === "unsustained"
         ? "bg-li-neutral-200 shadow-[inset_3px_0_0_var(--color-li-gap)]"
-        : "bg-li-neutral-200 shadow-[inset_3px_0_0_var(--color-li-evidence)]"
+        : "bg-li-neutral-200 shadow-[inset_3px_0_0_var(--color-li-brand)]"
       : effective === id
         ? "bg-li-neutral-200"
         : "";

@@ -71,6 +71,14 @@ describe("Line Investigation text tokens", () => {
     });
   }
 
+  it("the orange ink of the question and the selection reads on paper and on a selected row", () => {
+    const ink = css.match(/--color-strata-bore-ink:\s*([^;]+);/)![1].trim();
+    for (const bg of ["paper", "neutral-200"]) {
+      const [a, b] = [luminance(ink), luminance(token(bg))];
+      expect((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
   it("gap ink stays legible on the not-recorded chip", () => {
     expect(contrast("gap-ink", "gap-tint")).toBeGreaterThanOrEqual(4.5);
   });
