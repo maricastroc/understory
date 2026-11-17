@@ -2,7 +2,7 @@
 
 import { useMessages } from "@/i18n/LocaleProvider";
 import type { DigResult } from "@understory/core/types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CaseFailure } from "@/components/investigator/CaseFailure";
 import type { AuthUser } from "@/components/investigator/use-auth";
 import { LineInvestigation } from "@/components/line-investigation/case/LineInvestigation";
@@ -101,10 +101,17 @@ export function LinePreview({
   const m = useMessages();
   const layout = useSpecimenLayout();
   const [menuOpen, setMenuOpen] = useState(false);
-  const phase = PHASES[state];
+  const arriving = state === "arriving";
+  const [landed, setLanded] = useState(!arriving);
+  useEffect(() => {
+    if (!arriving) return;
+    const t = window.setTimeout(() => setLanded(true), 1500);
+    return () => window.clearTimeout(t);
+  }, [arriving]);
+  const phase = arriving && !landed ? "collecting" : PHASES[state];
   const pending = state === "pending" || !!phase;
   const keptCase = realCase(state);
-  const result = keptCase ?? (STATES[state] ?? STATES.resolved)();
+  const result = arriving && !landed ? DRAFT : (keptCase ?? (STATES[state] ?? STATES.resolved)());
   const loc = result.evidence.location!;
   const signedIn = user === "synthetic" ? SYNTHETIC_USER : null;
 

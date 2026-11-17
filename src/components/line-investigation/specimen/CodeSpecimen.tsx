@@ -2,7 +2,7 @@
 
 import { enclosingSymbol } from "@understory/core/collect/symbol";
 import type { BlameSpan } from "@understory/core/types";
-import { useEffect, useId, useMemo } from "react";
+import { useEffect, useId, useMemo, useRef } from "react";
 import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { blameBars } from "./blame-bars";
 import { codeWindow } from "./code-window";
@@ -33,6 +33,7 @@ export function CodeSpecimen({
   onToggleExpanded,
   targetDatumY,
   onDatumY,
+  onAsked,
 }: {
   path: string;
   lines: string[];
@@ -46,11 +47,14 @@ export function CodeSpecimen({
   onToggleExpanded: () => void;
   targetDatumY?: number;
   onDatumY?: (y: number) => void;
+  onAsked?: (token: string | null) => void;
 }) {
   const locale = useLocale();
   const m = useMessages();
   const listId = useId();
   const [scrollRef, scrolls] = useHorizontalOverflow();
+  const scroller = useRef<HTMLDivElement | null>(null);
+  const brought = useRef(false);
   const enclosing = useMemo(
     () => enclosingSymbol(lines, datum.end, path),
     [lines, datum.end, path],
@@ -77,6 +81,23 @@ export function CodeSpecimen({
   useEffect(() => {
     onDatumY?.(win.datumY);
   }, [win.datumY, onDatumY]);
+
+  const asked = token ? (lines[datum.start - 1] ?? "").slice(token.start, token.end) : null;
+  useEffect(() => {
+    onAsked?.(asked);
+  }, [asked, onAsked]);
+
+  useEffect(() => {
+    const box = scroller.current;
+    const mark = box?.querySelector<HTMLElement>("[data-asked]");
+    if (!scrolls || brought.current || !box || !mark) return;
+    brought.current = true;
+    const gutter = 82;
+    const left = mark.getBoundingClientRect().left - box.getBoundingClientRect().left;
+    const room = box.clientWidth - gutter;
+    if (left + mark.offsetWidth + 24 <= box.clientWidth) return;
+    box.scrollLeft = Math.max(0, left - gutter - room / 2);
+  }, [scrolls, asked]);
 
   const hiddenLabel = (range: LineRange, from: "start" | "end" = "start") =>
     rangeLabel(range, symbolInRange(lines, range, path, from), locale);
@@ -105,7 +126,10 @@ export function CodeSpecimen({
     >
       <SpecimenHeader path={path} status={blameStatus} hasBars={bars.size > 0} />
       <div
-        ref={scrollRef}
+        ref={(el) => {
+          scroller.current = el;
+          return scrollRef(el);
+        }}
         tabIndex={scrolls ? 0 : undefined}
         aria-label={scrolls ? m.caseScreen.codeLines : undefined}
         role={scrolls ? "region" : undefined}

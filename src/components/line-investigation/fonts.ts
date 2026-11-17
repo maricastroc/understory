@@ -6,18 +6,16 @@ const barlow = Barlow({
   variable: "--font-barlow",
 });
 
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-plex-mono",
-});
-
-export const lineInvestigationFonts = `${barlow.variable} ${plexMono.variable}`;
-
 const barlowCondensed = Barlow_Condensed({
   subsets: ["latin"],
   weight: ["600"],
   variable: "--font-barlow-condensed",
 });
 
-export const displayFont = barlowCondensed.variable;
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
+});
+
+export const lineInvestigationFonts = `${barlow.variable} ${barlowCondensed.variable} ${plexMono.variable}`;

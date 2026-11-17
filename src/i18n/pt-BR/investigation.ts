@@ -264,6 +264,8 @@ export const verdict: Messages["verdict"] = {
 };
 
 export const caseScreen: Messages["caseScreen"] = {
+  askedToken: (token, line) => `pergunta sobre o token ${token} · linha ${line}`,
+  askedLine: (line) => `pergunta sobre a linha ${line}`,
   anchoredOn: "ancorado em",
   anchoredOnCommit: "ancorado no commit",
   onBranch: (branch) => `em ${branch}`,

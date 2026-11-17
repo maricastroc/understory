@@ -87,8 +87,6 @@ export const landing: Messages["landing"] = {
     noBound: "sem limite",
     lineRead: "A linha era",
     line: (n) => `linha ${n}`,
-    askedToken: (token, line) => `pergunta sobre o token ${token} · linha ${line}`,
-    askedLine: (line) => `pergunta sobre a linha ${line}`,
     origin: (line, years) => `origem · linha ${line} escrita pela primeira vez há ${years} anos`,
     notRecorded: "sem registro",
   },

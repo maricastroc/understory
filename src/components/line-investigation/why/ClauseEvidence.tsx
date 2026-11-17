@@ -128,6 +128,7 @@ function ArtifactBody({
           body={shown.body}
           range={shown.range}
           tone={source.quote ? "verified" : "unverified"}
+          sight={source.quote ? `quote:${clause.id}:${a.id}` : null}
         />
         <p className={`text-[12.5px] font-semibold ${TONE[status.tone]}`}>{status.text}</p>
         {source.quote && standingOf(view.reading, clause.index) === "inferred" && (

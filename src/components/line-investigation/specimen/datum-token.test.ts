@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { datumToken } from "./datum-token";
+import { askedAt, datumToken } from "./datum-token";
 
 const LINE = "  for (let attempt = 0; attempt < 3; attempt++) {";
 const slice = (line: string, r: { start: number; end: number } | null) =>
@@ -33,5 +33,14 @@ describe("datumToken", () => {
   it("takes the first literal of the question that is actually on the line", () => {
     const line = "  sleep(2 ** attempt * 1000);";
     expect(slice(line, datumToken("Why 7 and not 1000?", line))).toBe("1000");
+  });
+});
+
+describe("askedAt", () => {
+  it("finds the asked token as a whole word in the question", () => {
+    expect(askedAt("Why exactly 3 retries?", "3")).toBe(12);
+    expect(askedAt("Why 30 and not 3?", "3")).toBe(15);
+    expect(askedAt("Why is MAX_RETRIES 3?", "MAX_RETRIES")).toBe(7);
+    expect(askedAt("Why 30?", "3")).toBe(-1);
   });
 });

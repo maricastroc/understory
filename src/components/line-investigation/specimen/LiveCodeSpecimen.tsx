@@ -22,6 +22,7 @@ export function LiveCodeSpecimen({
   layout,
   targetDatumY,
   onDatumY,
+  onAsked,
   token,
   awaitingSha = false,
 }: {
@@ -36,6 +37,7 @@ export function LiveCodeSpecimen({
   layout: SpecimenLayout;
   targetDatumY?: number;
   onDatumY?: (y: number) => void;
+  onAsked?: (token: string | null) => void;
   token?: string;
   awaitingSha?: boolean;
 }) {
@@ -102,6 +104,7 @@ export function LiveCodeSpecimen({
       onToggleExpanded={onToggleExpanded}
       targetDatumY={targetDatumY}
       onDatumY={onDatumY}
+      onAsked={onAsked}
     />
   );
 }

@@ -233,6 +233,8 @@ export const verdict = {
 };
 
 export const caseScreen = {
+  askedToken: (token: string, line: number) => `asked of the token ${token} · line ${line}`,
+  askedLine: (line: number) => `asked of line ${line}`,
   anchoredOn: "anchored on",
   anchoredOnCommit: "anchored on commit",
   onBranch: (branch: string) => `on ${branch}`,

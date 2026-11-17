@@ -22,6 +22,10 @@ function candidates(question: string): string[] {
     .map((c) => c.text);
 }
 
+export function askedAt(question: string, asked: string): number {
+  return new RegExp(`(?<![\\w$.])${escape(asked)}(?![\\w$])`).exec(question)?.index ?? -1;
+}
+
 export function datumToken(question: string, line: string): LineRange | null {
   for (const text of candidates(question)) {
     const pattern = new RegExp(`(?<![\\w$.])${escape(text)}(?![\\w$]|\\.\\d)`);

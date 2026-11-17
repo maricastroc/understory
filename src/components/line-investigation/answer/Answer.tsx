@@ -29,6 +29,7 @@ export function Answer({
   phase,
   failure,
   analysis,
+  onAsked,
 }: {
   view: InvestigationView;
   state: CaseState;
@@ -41,6 +42,7 @@ export function Answer({
   phase?: CasePhase;
   failure?: ReactNode;
   analysis?: AnalysisLanguage;
+  onAsked: (token: string | null) => void;
 }) {
   const panel = layout.mode === "panel";
   const byId = useMemo(() => new Map(view.artifacts.map((a) => [a.id, a])), [view.artifacts]);
@@ -91,6 +93,7 @@ export function Answer({
     onToggleExpanded: () => dispatch({ type: "toggle-code" }),
     targetDatumY: SPECIMEN.defaultDatumY,
     onDatumY: noop,
+    onAsked,
   });
 
   if (!panel) {
