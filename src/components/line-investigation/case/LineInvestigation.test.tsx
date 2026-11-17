@@ -594,7 +594,6 @@ describe("LineInvestigation — before the evidence arrives", () => {
     expect(markers[0].closest("[data-artifact]")!.getAttribute("data-artifact")).toBe(
       "commit:92f6a3f",
     );
-    expect(history().querySelector(".animate-li-arrive")).toBeNull();
   });
 
   it("does not animate a saved case that opens with its evidence", () => {

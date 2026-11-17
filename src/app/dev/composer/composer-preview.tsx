@@ -2,6 +2,16 @@
 
 import { useMessages } from "@/i18n/LocaleProvider";
 import { useMemo, useState } from "react";
+import { CodeContext } from "@/components/composer/CodeContext";
+import { CodeViewer } from "@/components/composer/CodeViewer";
+import { QuestionForm } from "@/components/composer/QuestionForm";
+import { stageCopy } from "@/components/composer/stage-copy";
+import {
+  SYNTHETIC_FILE_PATH,
+  syntheticChargeLines,
+} from "@/components/line-investigation/fixtures/synthetic-charge-file";
+import { datumToken } from "@/components/line-investigation/specimen/datum-token";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { FileStage } from "@/components/composer/FileStage";
 import {
   syntheticCaseCounts,
@@ -23,7 +33,18 @@ import { lineRailItems } from "@/components/shell/rail-items";
 
 const NOW = Date.parse("2026-09-27T12:00:00Z");
 
-export function ComposerPreview({ state, files }: { state: string; files: number | null }) {
+export function ComposerPreview({
+  state,
+  files,
+  stage = "file",
+}: {
+  state: string;
+  files: number | null;
+  stage?: "file" | "code";
+}) {
+  const locale = useLocale();
+  const [selected, setSelected] = useState<number | null>(9);
+  const [question, setQuestion] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [opened, setOpened] = useState<string | null>(null);
@@ -57,6 +78,21 @@ export function ComposerPreview({ state, files }: { state: string; files: number
     };
   }, [state, files, overview]);
 
+  const coding = stage === "code";
+  const lineValue = selected ? m.composer.lines(selected, selected) : null;
+  const askedRange =
+    coding && selected && question.trim()
+      ? datumToken(question, syntheticChargeLines[selected - 1] ?? "")
+      : null;
+  const copy = stageCopy(
+    {
+      stage: coding ? "code" : "file",
+      connecting: false,
+      fileLoading: false,
+      about: coding && selected ? m.composer.theLines(selected, selected) : null,
+    },
+    locale,
+  );
   const steps: PathStep[] = [
     {
       key: "repo",
@@ -68,16 +104,22 @@ export function ComposerPreview({ state, files }: { state: string; files: number
     {
       key: "file",
       label: "file",
-      value: null,
-      state: "current",
+      value: coding ? SYNTHETIC_FILE_PATH : null,
+      state: coding ? "done" : "current",
       onPick: () => {},
     },
-    { key: "line", label: "line", value: null, state: "next", onPick: null },
+    {
+      key: "line",
+      label: "line",
+      value: coding ? lineValue : null,
+      state: !coding ? "next" : selected ? "done" : "current",
+      onPick: coding ? () => setSelected(null) : null,
+    },
     {
       key: "question",
       label: "question",
       value: null,
-      state: "next",
+      state: coding && selected ? "current" : "next",
       onPick: null,
     },
   ];
@@ -122,21 +164,63 @@ export function ComposerPreview({ state, files }: { state: string; files: number
             overview={overview}
             map={map}
           />
-          <StageHeading
-            title="Find the file"
-            lead="Search for it, or pick one from the map below."
-          />
-          <FileStage
-            overview={overview}
-            overviewError={null}
-            caseCounts={syntheticCaseCounts}
-            query={query}
-            onQuery={setQuery}
-            results={[]}
-            searching={false}
-            map={map}
-            onOpen={setOpened}
-          />
+          <StageHeading title={copy.title} lead={copy.lead} />
+          {coding ? (
+            <div className="grid grid-cols-[minmax(0,1fr)_340px] items-start gap-8 max-[1280px]:grid-cols-1">
+              <CodeViewer
+                file={{ path: SYNTHETIC_FILE_PATH, lines: syntheticChargeLines }}
+                selectedStart={selected}
+                selectedEnd={selected}
+                enclosing={null}
+                onSelect={(n) => setSelected(n)}
+                asked={askedRange}
+              />
+              <CodeContext
+                repoPath=".demo/payments-service"
+                path={SYNTHETIC_FILE_PATH}
+                lineCount={syntheticChargeLines.length}
+                head={null}
+                fileState={undefined}
+                prData="github"
+                selection={selected ? { start: selected, end: selected } : null}
+              >
+                {selected && (
+                  <QuestionForm
+                    target={m.composer.theLines(selected, selected)}
+                    runLabel={m.composer.investigate(m.composer.theLines(selected, selected))}
+                    question={question}
+                    setQuestion={setQuestion}
+                    onRun={() => {}}
+                    wider={null}
+                    onRunWider={() => {}}
+                    asked={
+                      askedRange
+                        ? {
+                            token: syntheticChargeLines[selected - 1].slice(
+                              askedRange.start,
+                              askedRange.end,
+                            ),
+                            line: selected,
+                          }
+                        : null
+                    }
+                  />
+                )}
+              </CodeContext>
+            </div>
+          ) : (
+            <FileStage
+              overview={overview}
+              overviewError={null}
+              caseCounts={syntheticCaseCounts}
+              query={query}
+              onQuery={setQuery}
+              results={[]}
+              searching={false}
+              map={map}
+              onOpen={setOpened}
+            />
+          )}
           {opened && (
             <p role="status" className="font-li-mono text-xs">
               opened {opened}

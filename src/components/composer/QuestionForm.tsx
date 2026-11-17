@@ -9,6 +9,8 @@ import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { liButton } from "../line-investigation/parts/button-class";
 import { LanguageSwitch } from "../line-investigation/parts/LanguageSwitch";
 import { useLanguage } from "../use-language";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { askedText } from "../line-investigation/copy/asked-copy";
 import { symbolNoun } from "./symbol-noun";
 
 export function QuestionForm({
@@ -19,6 +21,7 @@ export function QuestionForm({
   onRun,
   wider,
   onRunWider,
+  asked = null,
 }: {
   target: string;
   runLabel: string;
@@ -27,7 +30,9 @@ export function QuestionForm({
   onRun: () => void;
   wider: SymbolSpan | null;
   onRunWider: () => void;
+  asked?: { token: string; line: number } | null;
 }) {
+  const locale = useLocale();
   const id = useId();
   const m = useMessages();
   const { language, setLanguage } = useLanguage();
@@ -62,6 +67,11 @@ export function QuestionForm({
             placeholder={m.composer.question.placeholder}
             className="resize-none border border-li-ink bg-li-neutral-100 px-3 py-2.5 text-[15px] leading-snug text-li-ink transition-[border-color,box-shadow] duration-150 outline-none placeholder:text-li-text-muted focus:border-li-ink focus:shadow-[inset_0_0_0_1px_var(--color-li-ink)] motion-reduce:transition-none"
           />
+          {asked && (
+            <p className="font-li-mono text-xs text-strata-bore-ink" aria-live="polite">
+              {askedText(asked.token, asked.line, locale)}
+            </p>
+          )}
           <div className="flex flex-wrap gap-1.5">
             {m.composer.question.suggestions.map((s) => (
               <button

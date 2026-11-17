@@ -10,6 +10,7 @@ export default async function ComposerPreviewPage({
   return (
     <ComposerPreview
       state={params.state ?? "cold"}
+      stage={params.stage === "code" ? "code" : "file"}
       files={Number.isInteger(files) && files > 0 ? files : null}
     />
   );
