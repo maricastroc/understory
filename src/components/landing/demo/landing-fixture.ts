@@ -179,11 +179,7 @@ export const landingLines = [
 export function landingVersionsFor(locale: Locale): LineVersion[] {
   const demo = messagesFor(locale).landing.demo;
   return [
-    {
-      artifactId: "pr:812",
-      text: "  for (let attempt = 0; attempt < 5; attempt++) {",
-      note: demo.firstRevision,
-    },
+    { artifactId: "pr:812", text: "  for (let attempt = 0; attempt < 5; attempt++) {" },
     { artifactId: "commit:7be210e", text: "  while (true) {", absent: demo.noBound },
   ];
 }

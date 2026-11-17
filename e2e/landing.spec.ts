@@ -31,14 +31,14 @@ for (const width of [1440, 375]) {
     const title = await top(
       page.getByRole("heading", { level: 1, name: "Why is this line here?" }),
     );
-    const lead = await top(page.getByText(/^Understory reconstructs the reasoning/));
+    const lead = await top(page.getByText(/^Understory investigates why a line/));
     const call = await top(page.getByRole("link", { name: "Explain a line →" }).first());
     const question = await top(page.getByText("Why exactly 3 retries?").first());
     expect(blame).toBeLessThan(title);
     expect(lead).toBeLessThan(call);
     expect(call).toBeLessThan(question);
     if (width < 1280) expect(title).toBeLessThan(lead);
-    await expect(page.getByText("reconstructed why · 0 of 3")).toBeVisible();
+    await expect(page.getByText("reasons found · 0 of 3")).toBeVisible();
     expect(problems).toEqual([]);
   });
 }
@@ -59,7 +59,7 @@ test("the cover: at 16:10 the first screen holds the line, the title, the call a
       page.getByRole("heading", { level: 1 }),
       page.getByRole("link", { name: "Explain a line →" }).first(),
       page.getByText("Why exactly 3 retries?").first(),
-      page.getByText("reconstructed why · 0 of 3"),
+      page.getByText("reasons found · 0 of 3"),
     ]) {
       const box = (await target.boundingBox())!;
       expect(box.y + box.height, `${width}×${height}`).toBeLessThanOrEqual(height);

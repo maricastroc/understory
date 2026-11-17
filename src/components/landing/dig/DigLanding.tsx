@@ -15,7 +15,7 @@ import {
   landingVersionsFor,
   landingViewFor,
 } from "../demo/landing-fixture";
-import { originText } from "./dig-copy";
+import { originText, refText } from "./dig-copy";
 import { blameLine } from "./blame-line";
 import { FADE, META, ON_BORE, POP, TRACE } from "./dig-classes";
 import { DigReachedProvider, useReached } from "./dig-context";
@@ -287,10 +287,10 @@ export function DigLanding() {
                         <p
                           className={`text-[15px] font-semibold text-li-evidence-ink delay-500 ${FADE}`}
                         >
-                          {t.landing.standard.quoteFound(displayId(proof))}
+                          {t.landing.standard.quoteFound(refText(proof.id))}
                         </p>
                         <p className={`${META} delay-700 ${FADE}`}>
-                          <span className="line-through">{landingRejected[0]}</span> ·{" "}
+                          <span className="line-through">{refText(landingRejected[0])}</span> ·{" "}
                           {t.landing.standard.rejected}
                         </p>
                       </div>
