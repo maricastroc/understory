@@ -705,6 +705,16 @@ describe("LineInvestigation — the language the landing uses", () => {
     ).not.toContain("animate-li-sweep");
   });
 
+  it("marks the pinned clause and the located record in orange, the colour of selection", async () => {
+    const user = userEvent.setup();
+    setup();
+    await user.click(clause(1));
+    expect(clause(1).className).toContain("--color-li-brand");
+    expect(clause(1).className).not.toContain("--color-li-evidence");
+    await user.click(within(evidence()).getByRole("button", { name: /Show in history/ }));
+    expect(row("issue:1187").className).toContain("outline-li-brand");
+  });
+
   it("says how the silence was established, under the hatched note in the history", () => {
     setup();
     const note = screen.getByRole("note", {

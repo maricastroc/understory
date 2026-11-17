@@ -24,7 +24,7 @@ export function CaseRailRow({
             : "grid-cols-[14px_minmax(0,1fr)] gap-2"
         } ${
           item.current
-            ? "border-li-datum bg-li-datum-tint"
+            ? "border-li-brand bg-li-neutral-200/70"
             : "border-transparent group-hover:bg-li-neutral-200/60 active:bg-li-neutral-200"
         }`}
       >
@@ -38,7 +38,7 @@ export function CaseRailRow({
           </span>
           <span
             className={`mt-1 block truncate font-li-mono text-[11px] tnum ${
-              item.current ? "text-li-datum-ink" : "text-li-text-subtle"
+              item.current ? "text-strata-bore-ink" : "text-li-text-subtle"
             }`}
           >
             <span className="sr-only">{m.shell.status[item.status]} · </span>

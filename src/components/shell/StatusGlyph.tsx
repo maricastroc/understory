@@ -18,7 +18,7 @@ export function StatusGlyph({ status }: { status: RailStatus }) {
     return (
       <span
         aria-hidden
-        className="mt-1.25 size-2 rounded-full border-[1.5px] border-dashed border-li-steel motion-safe:animate-pulse"
+        className="mt-1.25 size-2 rounded-full border-[1.5px] border-dashed border-li-steel"
       />
     );
   }

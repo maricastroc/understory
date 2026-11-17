@@ -85,7 +85,7 @@ export function HistoryRow({
       data-artifact={a.id}
       data-lit={on || undefined}
       data-located={located || undefined}
-      className={`${ROW_GRID} scroll-mt-40 ${located ? "outline-2 outline-offset-2 outline-li-evidence" : ""}`}
+      className={`${ROW_GRID} scroll-mt-40 ${located ? "outline-2 outline-offset-2 outline-li-brand" : ""}`}
     >
       <Margin strong={anchor}>
         {anchor ? (

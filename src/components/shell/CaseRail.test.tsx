@@ -63,3 +63,13 @@ describe("CaseRail", () => {
     expect(screen.getByText("Sign in to save line cases")).toBeTruthy();
   });
 });
+
+describe("CaseRail — selection", () => {
+  it("marks the open case in orange, the colour of selection, not the gold of today", () => {
+    render(<Harness />);
+    const current = screen.getByRole("button", { current: "page" });
+    expect(current.className).toContain("border-li-brand");
+    expect(current.className).not.toMatch(/datum/);
+    expect(current.querySelector(".text-strata-bore-ink")!.textContent).toContain("charge.ts:9");
+  });
+});
