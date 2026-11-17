@@ -71,7 +71,7 @@ export function DigHero({ model, blame }: { model: DigModel; blame: BlameLine })
         </p>
         <h1
           id="dig-title"
-          className="font-li-display text-[clamp(60px,20vw,128px)] leading-[0.88] font-semibold tracking-[-0.015em] text-li-ink xl:col-span-2 xl:col-start-1 xl:row-start-1 xl:text-[clamp(120px,21.5vh,184px)] xl:[html[lang=pt-BR]_&]:max-w-[4.1em] xl:[html[lang=pt-BR]_&]:text-[clamp(100px,17.5vh,150px)]"
+          className="font-li-display text-[clamp(60px,20vw,128px)] leading-[0.88] font-semibold tracking-[-0.015em] text-li-ink xl:col-span-2 xl:col-start-1 xl:row-start-1 xl:text-[clamp(120px,21.5vh,184px)] xl:[html[lang=pt-BR]_&]:max-w-[5.6em] xl:[html[lang=pt-BR]_&]:text-[clamp(100px,17.5vh,130px)]"
         >
           {l.hero.title}{" "}
           <span className="underline decoration-li-datum decoration-[0.06em] underline-offset-[0.1em]">
