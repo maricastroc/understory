@@ -13,12 +13,13 @@ import type { BlameLine, DigModel } from "./types";
 
 function Question({ model }: { model: DigModel }) {
   const locale = useLocale();
+  const asked = useMessages().landing.dig.asked;
   const mark = model.token ? model.code.slice(model.token.start, model.token.end) : null;
   const at = mark ? model.question.indexOf(mark) : -1;
   return (
     <div className="flex flex-col gap-1">
       <p className="font-li-mono text-xs text-strata-bore-ink">
-        {askedText(mark, model.line, locale)}
+        {mark ? asked(mark, model.line) : askedText(null, model.line, locale)}
       </p>
       <p className="font-li-display text-[34px] leading-none font-semibold tracking-[-0.01em]">
         {mark && at >= 0 ? (

@@ -1,8 +1,8 @@
 "use client";
 
-import { useLocale, useMessages } from "@/i18n/LocaleProvider";
+import { useMessages } from "@/i18n/LocaleProvider";
 import { formatMonthYear, shortAge } from "@/i18n/format";
-import { gapBody } from "../../line-investigation/copy/gap-copy";
+import { displayId } from "../../line-investigation/copy/artifact-copy";
 import { DIG_HATCH } from "./dig-hatch";
 import { DRAW, EYEBROW, META, RAIL, WIDE_GRID, WIPE } from "./dig-classes";
 import { DigSection } from "./DigSection";
@@ -11,7 +11,6 @@ import type { DigModel } from "./types";
 const PLATE = "w-fit bg-li-paper px-1.5 -mx-1.5";
 
 export function DigSilence({ model, question }: { model: DigModel; question: string }) {
-  const locale = useLocale();
   const t = useMessages();
   const s = t.landing.dig.silence;
   const months = model.silentMonths;
@@ -64,7 +63,7 @@ export function DigSilence({ model, question }: { model: DigModel; question: str
             {s.title}
           </h2>
           <p className="mt-4 text-[17px] leading-normal text-pretty text-li-neutral-800">
-            {gapBody(model.gap, model.origin.artifact, locale)}
+            {s.note(displayId(model.origin.artifact))}
           </p>
           <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-2 font-li-mono text-[12.5px] leading-5">
             {missing.map((kind) => (

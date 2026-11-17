@@ -36,16 +36,16 @@ describe("the dig in Portuguese", () => {
     expect(pt.gaps).toEqual(en.gaps);
     expect(pt.question).toBe("Por que 3 tentativas?");
     expect(pt.clauses.map((c) => c.text)).toEqual([
-      "Limitado a 3, com backoff",
-      "Depois de 212 clientes cobrados em dobro",
-      "Na revisão, 5 virou 3 por um timeout de 10 s",
+      "Limite de 3 tentativas, com espera progressiva",
+      "A mudança veio após 212 clientes serem cobrados em dobro",
+      "Na revisão, o limite caiu de 5 para 3 por causa de um timeout de 10 segundos",
     ]);
     expect(landingRejected).toEqual(["pr:9999"]);
   });
 
   it("asks in Portuguese and marks the token the probe goes down from", () => {
     const { container } = inPortuguese();
-    expect(container.textContent).toContain("pergunta sobre o token 3 · linha 9");
+    expect(container.textContent).toContain("pergunta sobre o número 3 · linha 9");
     const asked = [...container.querySelectorAll(".text-li-brand")].map((el) => el.textContent);
     expect(asked).toEqual(["3"]);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
@@ -81,16 +81,20 @@ describe("the dig in Portuguese", () => {
       "O blame para aqui.",
       "Treze dias em março de 2023.",
       "Aqui o registro se cala.",
-      "procurado, e o provedor não tem",
-      "primeira versão",
+      "O histórico chega ao commit 7be210e",
+      "Nenhum registro encontrado nas fontes consultadas",
+      "Versão anterior da linha",
       "sem limite",
       "origem · linha 9 escrita pela primeira vez há 5,3 anos",
       "Três motivos no registro. Uma pergunta em aberto.",
-      "fica em aberto na resposta, sem palpite",
+      "Sem evidências, a resposta permanece em aberto.",
+      "✓ Trecho confirmado na issue #1187",
+      "PR #9999 · descartado por não estar entre as evidências",
+      "3 trechos confirmados",
     ])
       expect(text, said).toContain(said);
     expect(text).not.toMatch(
-      /scroll to dig|reconstructed why|first revision|no bound|not in blame|looked for|Line read|left open|depth unknown|Blame stops/,
+      /scroll to dig|reasons found|no bound|not in blame|No record found|Earlier version|leaves it open|depth unknown|Blame stops/,
     );
   });
 

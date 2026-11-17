@@ -38,7 +38,7 @@ export function DigReading({
             {r.title}
           </h2>
           <p className="max-w-[34rem] text-[17px] leading-normal text-pretty text-li-neutral-800">
-            {t.landing.standard.title}
+            {r.note}
           </p>
         </div>
 

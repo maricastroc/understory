@@ -25,7 +25,7 @@ for (const width of [1440, 1279, 390]) {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Por que esta linha está aqui?",
     );
-    await expect(page.getByText(/^O Understory reconstrói o raciocínio/)).toBeVisible();
+    await expect(page.getByText(/^O Understory investiga por que uma linha/)).toBeVisible();
     await expect(page.getByRole("link", { name: /^Explicar uma linha/ })).toHaveCount(3);
     await expect(page.getByRole("navigation", { name: "Principal" })).toBeVisible();
     await expect(page.getByText("Por que 3 tentativas?").first()).toBeVisible();
@@ -101,5 +101,5 @@ test("the English description has no dash and reads the same otherwise", async (
     "content",
     "Reconstruct the historical reason behind code decisions. Grounded in git, built to say so when the record is silent.",
   );
-  await expect(page.getByText(/by tracing commits, pull requests, and issues/)).toBeVisible();
+  await expect(page.getByText(/goes through commits, pull requests and issues/)).toBeVisible();
 });
