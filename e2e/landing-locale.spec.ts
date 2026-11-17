@@ -1,10 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
 import { axeViolations } from "./axe";
 
-async function open(page: Page, baseURL: string, width: number) {
+async function open(page: Page, baseURL: string, width: number, height = 900) {
   await page.context().addCookies([{ name: "understory-locale", value: "pt-BR", url: baseURL }]);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.setViewportSize({ width, height: 900 });
+  await page.setViewportSize({ width, height });
   const problems: string[] = [];
   page.on("console", (msg) => {
     if (/hydrat|did not match|server rendered/i.test(msg.text())) problems.push(msg.text());
@@ -46,6 +46,36 @@ for (const width of [1440, 1279, 390]) {
     expect(problems).toEqual([]);
   });
 }
+
+test("the Portuguese title breaks like the English one: two lines, clear of the probe", async ({
+  page,
+  baseURL,
+}) => {
+  for (const [width, height] of [
+    [1280, 800],
+    [1440, 900],
+    [1920, 1200],
+  ]) {
+    await open(page, baseURL!, width, height);
+    const title = await page.evaluate(() => {
+      const h1 = document.querySelector("h1")!;
+      const walker = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
+      const rects: DOMRect[] = [];
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        rects.push(...[...range.getClientRects()].filter((r) => r.width > 0));
+      }
+      const tops = [...new Set(rects.map((r) => Math.round(r.top)))].sort((a, b) => a - b);
+      const size = parseFloat(getComputedStyle(h1).fontSize);
+      const lines = tops.filter((t, i) => i === 0 || t - tops[i - 1] > size / 2).length;
+      const probe = document.querySelector("#dig-01 [data-dig-bore]")!.getBoundingClientRect();
+      return { lines, right: Math.max(...rects.map((r) => r.right)), probe: probe.left };
+    });
+    expect(title.lines, `${width}×${height}`).toBe(2);
+    expect(title.right, `${width}×${height}`).toBeLessThan(title.probe);
+  }
+});
 
 test("the evidence stays as it was recorded, marked as English", async ({ page, baseURL }) => {
   await open(page, baseURL!, 1440);
