@@ -10,6 +10,9 @@ import type { OpenFile } from "./use-file-viewer";
 import { useVirtualRows } from "./use-virtual-rows";
 
 const ROW_H = 20;
+const GUTTER = 59;
+const ROW_HOVER =
+  "group-hover:bg-[color-mix(in_srgb,var(--color-li-neutral-200)_50%,var(--color-li-neutral-100))]";
 
 export function CodeViewer({
   file,
@@ -36,6 +39,18 @@ export function CodeViewer({
     if (focusLine) scrollToIndex(focusLine - 1);
   }, [focusLine, scrollToIndex]);
   const segments = useMemo(() => highlightLines(file.lines, file.path), [file.lines, file.path]);
+  const askedAt = asked && selectedStart ? `${selectedStart}:${asked.start}:${asked.end}` : null;
+  useEffect(() => {
+    const box = scrollRef.current;
+    const mark = box?.querySelector<HTMLElement>("mark[data-asked]");
+    if (!askedAt || !box || !mark) return;
+    const frame = box.getBoundingClientRect();
+    const token = mark.getBoundingClientRect();
+    const left = token.left - frame.left;
+    if (left >= GUTTER && left + token.width + 24 <= box.clientWidth) return;
+    const room = box.clientWidth - GUTTER;
+    box.scrollLeft = Math.max(0, box.scrollLeft + left - GUTTER - (room - token.width) / 2);
+  }, [askedAt, scrollRef]);
   const dragging = useRef(false);
   const pointerPicked = useRef(false);
   useEffect(() => {
@@ -122,17 +137,18 @@ export function CodeViewer({
                   }}
                   aria-pressed={inRange}
                   aria-label={inRange ? v.lineSelected(n) : v.line(n)}
-                  className={`group flex h-full w-full cursor-pointer items-center border-l-[3px] text-left font-li-mono text-xs leading-[1.6] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus ${
+                  className={`group flex h-full w-full cursor-pointer items-center text-left font-li-mono text-xs leading-[1.6] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus ${
                     inRange
-                      ? "border-li-datum bg-li-datum-row font-medium text-li-ink"
-                      : "border-transparent text-li-neutral-800 hover:border-li-datum-weak hover:bg-li-neutral-200/50"
+                      ? "bg-li-datum-row font-medium text-li-ink"
+                      : "text-li-neutral-800 hover:bg-li-neutral-200/50"
                   }`}
                 >
                   <span
-                    className={`w-14 shrink-0 pr-3 text-right ${
+                    data-gutter
+                    className={`sticky left-0 z-[1] flex w-[calc(3.5rem+3px)] shrink-0 items-center justify-end self-stretch border-l-[3px] pr-3 text-right ${
                       inRange
-                        ? "font-medium text-li-ink"
-                        : "text-li-text-muted group-hover:text-li-ink"
+                        ? "border-li-datum bg-li-datum-row font-medium text-li-ink"
+                        : `border-transparent bg-li-neutral-100 text-li-text-muted group-hover:border-li-datum-weak group-hover:text-li-ink ${ROW_HOVER}`
                     }`}
                   >
                     {n}

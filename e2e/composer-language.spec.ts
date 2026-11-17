@@ -45,3 +45,38 @@ test("on a phone the path keeps its boxes without scrolling the page", async ({ 
   expect(overflow).toBeLessThanOrEqual(0);
   await expect(page.locator('[aria-current="step"]')).toContainText("04 question");
 });
+
+test("on a phone the code moves to the token the question names, line numbers held in place", async ({
+  page,
+}) => {
+  await open(page, 375);
+  await page.getByRole("button", { name: /Ask a specific question/ }).click();
+  await field(page).fill("Why exactly 3 retries?");
+  const scroller = page.locator("section[aria-label^='Code'] .overflow-auto");
+  await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  const shown = await scroller.evaluate((box) => {
+    const b = box.getBoundingClientRect();
+    const token = box.querySelector("mark[data-asked]")!.getBoundingClientRect();
+    const gutter = box
+      .querySelector("button[aria-pressed='true'] [data-gutter]")!
+      .getBoundingClientRect();
+    return {
+      token: token.left >= gutter.right && token.right <= b.left + box.clientWidth,
+      number: Math.abs(gutter.left - b.left) <= 1,
+      page: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  expect(shown).toEqual({ token: true, number: true, page: 0 });
+});
+
+test("on a wide screen the code stays where it is", async ({ page }) => {
+  await open(page);
+  await page.getByRole("button", { name: /Ask a specific question/ }).click();
+  await field(page).fill("Why exactly 3 retries?");
+  await expect(line9(page).locator("mark[data-asked]")).toHaveText("3");
+  expect(
+    await page
+      .locator("section[aria-label^='Code'] .overflow-auto")
+      .evaluate((el) => el.scrollLeft),
+  ).toBe(0);
+});
