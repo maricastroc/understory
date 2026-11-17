@@ -6,7 +6,7 @@ import { artifactName, gapName } from "./accessible-name";
 import { dateLine, depthText, displayId, labelTitle, tickText } from "./artifact-copy";
 import { clauseDescription, tallyText } from "./clause-copy";
 import { artifactStatus, citesText, contextLines, metaLine } from "./drawer-copy";
-import { gapBody, gapLabel, gapLetter } from "./gap-copy";
+import { gapBody, gapLetter } from "./gap-copy";
 import { checklistText } from "./verdict-copy";
 
 const now = new Date(SYNTHETIC_NOW);
@@ -40,11 +40,11 @@ describe("artifact copy", () => {
 describe("gaps", () => {
   it("uses ∅ only for gaps the record supports", () => {
     const [verified] = view.gaps;
-    expect([gapLetter(verified), gapLabel(verified, "en")]).toEqual(["∅", "not recorded"]);
+    expect(gapLetter(verified)).toBe("∅");
     const [unverified] = buildInvestigationView(states.syntheticWithoutStageFourData(), {
       now,
     }).gaps;
-    expect([gapLetter(unverified), gapLabel(unverified, "en")]).toEqual(["?", "not verified"]);
+    expect(gapLetter(unverified)).toBe("?");
     expect(gapBody(unverified, art("commit:7be210e"), "en")).toMatch(/not verified/);
   });
 });

@@ -1,5 +1,5 @@
 import type { ViewArtifact, ViewClause, ViewQuote } from "../../../line-investigation/model/types";
-import type { LineVersion } from "../../demo/strata/types";
+import type { LineVersion } from "./line-version";
 
 export type DigRecord = {
   artifact: ViewArtifact;

@@ -15,7 +15,7 @@ import {
   landingVersionsFor,
   landingViewFor,
 } from "../demo/landing-fixture";
-import { originText } from "../demo/strata/strata-copy";
+import { originText } from "./dig-copy";
 import { blameLine } from "./blame-line";
 import { FADE, META, ON_BORE, POP, TRACE } from "./dig-classes";
 import { DigReachedProvider, useReached } from "./dig-context";

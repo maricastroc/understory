@@ -1,6 +1,6 @@
 import type { InvestigationView, ViewArtifact } from "../../line-investigation/model/types";
 import { datumToken } from "../../line-investigation/specimen/datum-token";
-import type { LineVersion } from "../demo/strata/types";
+import type { LineVersion } from "./types";
 import type { DigModel, DigRecord } from "./types";
 
 const DAY = 86_400_000;

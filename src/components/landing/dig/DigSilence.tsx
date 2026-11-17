@@ -3,7 +3,7 @@
 import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { formatMonthYear, shortAge } from "@/i18n/format";
 import { gapBody } from "../../line-investigation/copy/gap-copy";
-import { HATCH } from "../demo/strata/strata-hatch";
+import { DIG_HATCH } from "./dig-hatch";
 import { DRAW, EYEBROW, META, RAIL, WIDE_GRID, WIPE } from "./dig-classes";
 import { DigSection } from "./DigSection";
 import type { DigModel } from "./types";
@@ -26,7 +26,7 @@ export function DigSilence({ model, question }: { model: DigModel; question: str
         <span
           aria-hidden
           className="absolute inset-0 border-y border-dashed border-li-ink/35"
-          style={{ backgroundImage: HATCH.band }}
+          style={{ backgroundImage: DIG_HATCH }}
         />
       }
     >

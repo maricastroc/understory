@@ -1,14 +1,4 @@
-import type { DigModel } from "./types";
-
-export type BlameLine = {
-  ref: string;
-  author: string;
-  day: string;
-  open: string;
-  close: string;
-  command: string;
-  width: number;
-};
+import type { BlameLine, DigModel } from "./types";
 
 export function blameLine(model: DigModel): BlameLine {
   const source = model.first.artifact.source;

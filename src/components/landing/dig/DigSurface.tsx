@@ -3,9 +3,8 @@
 import type { ReactNode } from "react";
 import { useMessages } from "@/i18n/LocaleProvider";
 import { CONTAINER } from "../parts/landing-classes";
-import type { BlameLine } from "./blame-line";
 import { META, TOKEN } from "./dig-classes";
-import type { DigModel } from "./types";
+import type { BlameLine, DigModel } from "./types";
 
 export function Found({
   label,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMessages } from "@/i18n/LocaleProvider";
-import { HATCH } from "../demo/strata/strata-hatch";
+import { DIG_HATCH } from "./dig-hatch";
 import { CONTAINER } from "../parts/landing-classes";
 import { TOKEN } from "./dig-classes";
 import { CodeLine } from "./DigSurface";
@@ -95,7 +95,7 @@ export function DigBar({
                 <span
                   aria-hidden
                   className="h-2.5 w-5 border border-dashed border-li-gap"
-                  style={{ backgroundImage: HATCH.band }}
+                  style={{ backgroundImage: DIG_HATCH }}
                 />
               )}
               <span>

@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { datumToken } from "../../line-investigation/specimen/datum-token";
 import {
-  landingBlame,
   landingLines,
   landingRejected,
-  landingVersions,
-  landingView,
+  landingVersionsFor,
+  landingViewFor,
 } from "./landing-fixture";
+
+const landingView = landingViewFor("en");
+const landingVersions = landingVersionsFor("en");
 
 describe("landing fixtures", () => {
   it("derive the retry-cap case through the real view model", () => {
@@ -43,12 +45,5 @@ describe("landing fixtures", () => {
     expect(revision.text.slice(0, token.start)).toBe(landingLines[8].slice(0, token.start));
     expect(revision.text[token.start]).toBe("5");
     expect(origin.text.length).toBeLessThan(token.start);
-  });
-
-  it("keep blame spans inside the file and contiguous", () => {
-    const covered = landingBlame.flatMap((s) =>
-      Array.from({ length: s.endLine - s.startLine + 1 }, (_, i) => s.startLine + i),
-    );
-    expect(covered).toEqual(landingLines.map((_, i) => i + 1));
   });
 });

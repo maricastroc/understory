@@ -3,7 +3,7 @@
 import { useMessages } from "@/i18n/LocaleProvider";
 import { longAge } from "@/i18n/format";
 import { EvidenceLetter } from "../../line-investigation/parts/EvidenceLetter";
-import { HATCH } from "../demo/strata/strata-hatch";
+import { DIG_HATCH } from "./dig-hatch";
 import { CONTAINER } from "../parts/landing-classes";
 import { AT_TOKEN, EYEBROW, META, WIDE_GRID } from "./dig-classes";
 import type { DigModel } from "./types";
@@ -106,7 +106,7 @@ export function DigReading({
             <span
               aria-hidden
               className="h-3 border border-dashed border-li-ink/35"
-              style={{ backgroundImage: HATCH.band }}
+              style={{ backgroundImage: DIG_HATCH }}
             />
           </div>
         </div>

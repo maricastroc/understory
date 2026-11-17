@@ -11,12 +11,6 @@ export function gapChip(gap: ViewGap, locale: Locale): string {
   return `${gapLetter(gap)} ${messagesFor(locale).gap.chip[gap.missing]}`;
 }
 
-export function gapLabel(gap: ViewGap, locale: Locale): string {
-  const g = messagesFor(locale).gap;
-  if (!gap.verified) return g.notVerified;
-  return gap.missing === "issue" ? g.noLinkedIssue : g.notRecorded;
-}
-
 export function gapKind(gap: ViewGap): string {
   return gap.verified ? "NOT RECOVERED" : "NOT VERIFIED";
 }

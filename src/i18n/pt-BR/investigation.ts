@@ -46,8 +46,6 @@ export const artifact: Messages["artifact"] = {
 
 export const gap: Messages["gap"] = {
   chip: { pull_request: "PR", review: "revisão", issue: "issue" },
-  notVerified: "não verificado",
-  noLinkedIssue: "sem issue vinculada",
   notRecorded: "sem registro",
   title: {
     pull_request: "Nenhum pull request, revisão ou issue",

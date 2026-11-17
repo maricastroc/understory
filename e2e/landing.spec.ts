@@ -1,97 +1,73 @@
 import { expect, type Page, test } from "@playwright/test";
 import { axeViolations } from "./axe";
 
-async function open(page: Page, width = 1440) {
-  await page.setViewportSize({ width, height: 900 });
+async function open(page: Page, width = 1440, height = 900) {
+  await page.setViewportSize({ width, height });
+  const problems: string[] = [];
+  page.on("console", (msg) => {
+    if (/hydrat|did not match|server rendered/i.test(msg.text())) problems.push(msg.text());
+  });
+  page.on("pageerror", (err) => problems.push(err.message));
   await page.goto("/");
   await page.evaluate(() => document.fonts.ready);
+  await page.waitForFunction(() => document.querySelector("[data-dig-item][data-reached]"));
+  return problems;
 }
 
-const demo = (page: Page) =>
-  page.getByRole("region", { name: "Example investigation of src/billing/charge.ts line 9" });
-const visibleClause = (page: Page, text: RegExp) =>
-  demo(page).locator("li[data-clause] button:visible", { hasText: text });
-const visibleCode = (page: Page) => demo(page).locator('ol[aria-label^="Code, lines"]:visible');
-const visibleHistory = (page: Page) =>
-  demo(page).locator('ol[aria-label="History, newest first"]:visible');
-const hydrated = (page: Page) =>
-  page.waitForFunction(
-    () =>
-      document.querySelector<HTMLElement>(
-        'section[aria-label^="Example investigation"] .origin-top-left',
-      )?.style.transform !== "scale(1)",
-  );
+const reached = (page: Page, id: string) =>
+  page.locator(`[data-dig-item][data-dig-id="${id}"]`).getAttribute("data-reached");
 
-test("at 1440 the demo is the 1600-wide strata drawing scaled to fit, nothing clipped", async ({
-  page,
-}) => {
-  await open(page);
-  await hydrated(page);
-  const frame = await page.evaluate(() => {
-    const inner = document.querySelector<HTMLElement>(
-      'section[aria-label^="Example investigation"] .origin-top-left',
-    )!;
-    const outer = inner.parentElement!.getBoundingClientRect();
-    const drawn = [...inner.querySelectorAll("[data-strata] *")].map(
-      (e) => e.getBoundingClientRect().bottom - outer.top,
+const chapters = (page: Page) => page.getByRole("navigation", { name: "Chapters" });
+
+for (const width of [1440, 375]) {
+  test(`the hero at ${width} reads the blame line, the title, the product, the call, then the question`, async ({
+    page,
+  }) => {
+    const problems = await open(page, width);
+    const top = async (locator: ReturnType<Page["locator"]>) => (await locator.boundingBox())!.y;
+    const blame = await top(
+      page.locator("p:visible", { hasText: "$ git blame -L 9,9 src/billing/charge.ts" }),
     );
-    return {
-      width: inner.style.width,
-      scale: Number(/scale\(([\d.]+)\)/.exec(inner.style.transform)?.[1]),
-      shown: inner.getBoundingClientRect().width,
-      outer: outer.width,
-      height: outer.height,
-      lowest: Math.max(...drawn),
-    };
+    const title = await top(
+      page.getByRole("heading", { level: 1, name: "Why is this line here?" }),
+    );
+    const lead = await top(page.getByText(/^Understory reconstructs the reasoning/));
+    const call = await top(page.getByRole("link", { name: "Explain a line →" }).first());
+    const question = await top(page.getByText("Why exactly 3 retries?").first());
+    expect(blame).toBeLessThan(title);
+    expect(lead).toBeLessThan(call);
+    expect(call).toBeLessThan(question);
+    if (width < 1280) expect(title).toBeLessThan(lead);
+    await expect(page.getByText("reconstructed why · 0 of 3")).toBeVisible();
+    expect(problems).toEqual([]);
   });
-  expect(frame.width).toBe("1600px");
-  expect(frame.scale).toBeLessThan(1);
-  expect(Math.abs(frame.shown - frame.outer)).toBeLessThanOrEqual(1);
-  expect(frame.lowest).toBeLessThanOrEqual(frame.height + 1);
-  await expect(visibleCode(page)).toBeVisible();
-});
+}
 
-test("the hero reads eyebrow, headline, subheadline, actions, then the preview", async ({
+test("the cover: at 16:10 the first screen holds the line, the title, the call and the question", async ({
   page,
 }) => {
-  await open(page, 1440);
-  const top = async (locator: ReturnType<Page["locator"]>) => (await locator.boundingBox())!.y;
-  const order = [
-    await top(page.getByText("tells you why", { exact: false }).first()),
-    await top(page.getByRole("heading", { level: 1, name: "Why is this line here?" })),
-    await top(page.getByText(/reconstructs the reasoning behind a line of code/)),
-    await top(page.getByRole("link", { name: "How it works" })),
-    await top(demo(page)),
-  ];
-  expect([...order].sort((a, b) => a - b)).toEqual(order);
+  test.slow();
+  for (const [width, height] of [
+    [1280, 800],
+    [1440, 900],
+    [1920, 1200],
+  ]) {
+    await open(page, width, height);
+    for (const target of [
+      page.getByRole("banner"),
+      page.locator("p:visible", { hasText: "$ git blame -L 9,9 src/billing/charge.ts" }),
+      page.getByRole("heading", { level: 1 }),
+      page.getByRole("link", { name: "Explain a line →" }).first(),
+      page.getByText("Why exactly 3 retries?").first(),
+      page.getByText("reconstructed why · 0 of 3"),
+    ]) {
+      const box = (await target.boundingBox())!;
+      expect(box.y + box.height, `${width}×${height}`).toBeLessThanOrEqual(height);
+    }
+  }
 });
 
-test("clause 2 is active on load with a green trace to E and D; hover moves it", async ({
-  page,
-}) => {
-  await open(page);
-  await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "true");
-  const records = visibleHistory(page).locator("li");
-  const quoted = records.filter({ hasText: "quoted verbatim" });
-  await expect(quoted).toHaveCount(1);
-  await expect(quoted).toContainText("212 customers were charged twice");
-  await expect(quoted).toContainText("Customers double-billed during Stripe outage");
-  await expect(records.filter({ hasText: "Cap charge retries at 3" })).toHaveCount(1);
-  await expect(records.filter({ hasText: "first revision" })).toContainText(
-    "for (let attempt = 0; attempt < 5; attempt++) {",
-  );
-
-  await hydrated(page);
-  await visibleClause(page, /Review cut/).hover();
-  await page.mouse.move(5, 5);
-  await expect(visibleClause(page, /Review cut/)).toHaveAttribute("aria-pressed", "true");
-  await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "false");
-  await expect(records.filter({ hasText: "quoted verbatim" })).toContainText(
-    "3 gives a 7 s worst case",
-  );
-});
-
-test("brand orange only on the primary calls to action; no ring, no percentage", async ({
+test("orange marks the calls to action and the token the question asks about, nothing else", async ({
   page,
 }) => {
   await open(page);
@@ -99,79 +75,93 @@ test("brand orange only on the primary calls to action; no ring, no percentage",
     const orange = ["rgb(180, 83, 9)", "rgb(143, 64, 8)", "rgb(250, 234, 208)"];
     const hits: string[] = [];
     for (const el of document.querySelectorAll<HTMLElement | SVGElement>("body *")) {
-      if (el.closest('a[href="/app"].bg-li-brand')) continue;
+      if (el.closest('a[href="/app"]')) continue;
       const s = getComputedStyle(el);
-      for (const v of [s.color, s.backgroundColor, s.borderTopColor, s.fill, s.stroke]) {
-        if (orange.includes(v)) hits.push(`${el.tagName} ${v}`);
-      }
+      const own = s.borderTopWidth === "0px" ? [] : [s.borderTopColor];
+      const v = [s.color, s.backgroundColor, ...own, s.fill, s.stroke].find((c) =>
+        orange.includes(c),
+      );
+      if (v) hits.push(`${el.tagName} ${el.textContent} ${v}`);
     }
-    return { hits, percent: /\d+\s?%/.test(document.body.innerText) };
+    return hits;
   });
-  expect(found.hits).toEqual([]);
-  expect(found.percent).toBe(false);
+  expect(found).toEqual(["SPAN 3 rgb(180, 83, 9)"]);
   const primaries = page.getByRole("link", { name: /^Explain a line/ });
   await expect(primaries).toHaveCount(3);
   for (const link of await primaries.all()) {
+    await expect(link).toHaveAttribute("href", "/app");
     await expect(link).toHaveCSS("background-color", "rgb(180, 83, 9)");
-    await expect(link).toHaveCSS("color", "rgb(255, 255, 255)");
     expect(await link.locator("span[aria-hidden]").count()).toBe(4);
   }
 });
 
-test("the demo reads its palette from the strata tokens in globals.css", async ({ page }) => {
+test("scrolling digs: records below the front wait, then are reached in depth order", async ({
+  page,
+}) => {
   await open(page);
-  const trace = demo(page).locator("[data-strata]:visible .bg-strata-trace").first();
-  await trace.waitFor({ state: "attached" });
-  await page.evaluate(() =>
-    document.documentElement.style.setProperty("--color-strata-trace", "rgb(1, 2, 3)"),
+  expect(await reached(page, "issue:1187")).toBe("false");
+  expect(await reached(page, "commit:7be210e")).toBe("false");
+  await page.getByRole("heading", { name: "Checked against the source." }).scrollIntoViewIfNeeded();
+  await expect.poll(() => reached(page, "issue:1187")).toBe("true");
+  expect(await reached(page, "commit:7be210e")).toBe("false");
+  await page.getByRole("heading", { name: "The record is silent here." }).scrollIntoViewIfNeeded();
+  await page.mouse.wheel(0, 600);
+  await expect.poll(() => reached(page, "commit:7be210e")).toBe("true");
+});
+
+test("the chapter bar appears under the hero and its tabs take you to each chapter", async ({
+  page,
+}) => {
+  await open(page);
+  await expect(chapters(page)).not.toBeInViewport();
+  await page.getByRole("link", { name: "Dig through an example ↓" }).click();
+  await expect(page).toHaveURL(/#dig-02$/);
+  await expect(chapters(page)).toBeInViewport();
+  await expect(chapters(page).locator('[aria-current="step"]')).toHaveAccessibleName(
+    "Chapter 02, The blame",
   );
-  await expect(trace).toHaveCSS("background-color", "rgb(1, 2, 3)");
-  await expect(demo(page)).toHaveCSS("background-color", "rgb(244, 241, 234)");
+  await chapters(page).getByRole("link", { name: "Chapter 05, The silence" }).click();
+  await expect(page.getByRole("heading", { name: "The record is silent here." })).toBeInViewport();
+  await expect(chapters(page).locator('[aria-current="step"]')).toHaveAccessibleName(
+    "Chapter 05, The silence",
+  );
 });
 
-test("links resolve: /app and #method", async ({ page }) => {
+test("with reduced motion the whole dig is open on arrival, nothing covers it", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await open(page);
-  for (const link of await page.getByRole("link", { name: /^Explain a line/ }).all())
-    await expect(link).toHaveAttribute("href", "/app");
-  await page.getByRole("link", { name: "How it works" }).click();
-  await expect(page).toHaveURL(/#method$/);
-  await expect(
-    page.getByRole("heading", { name: /From a line you don.t understand/ }),
-  ).toBeInViewport();
+  const state = await page.evaluate(() => ({
+    waiting: document.querySelectorAll('[data-dig-item][data-reached="false"]').length,
+    items: document.querySelectorAll("[data-dig-item]").length,
+    soil: getComputedStyle(document.querySelector("[data-dig-soil]")!).visibility,
+  }));
+  expect(state.items).toBeGreaterThan(5);
+  expect(state.waiting).toBe(0);
+  expect(state.soil).toBe("hidden");
+  await expect(page.getByText("212 customers were charged twice").first()).toBeAttached();
 });
 
-for (const width of [1440, 1200, 1199, 700, 375]) {
-  test(`responsive ${width}: no horizontal overflow, wide or stacked strata, axe clean`, async ({
-    page,
-  }) => {
-    await open(page, width);
+test("without JavaScript every record is already in place", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "The record is silent here." })).toBeVisible();
+  expect(await page.locator('[data-dig-item][data-reached="false"]').count()).toBe(0);
+  await context.close();
+});
+
+for (const width of [1440, 1280, 1279, 768, 375]) {
+  test(`responsive ${width}: no horizontal overflow, axe clean`, async ({ page }) => {
+    const problems = await open(page, width);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow).toBeLessThanOrEqual(0);
-    const code = visibleCode(page);
-    await expect(code).toHaveCount(1);
-    await expect(demo(page).locator("[data-strata]:visible")).toHaveAttribute(
-      "data-strata",
-      width < 1200 ? "stacked" : "wide",
-    );
-    await expect(visibleClause(page, /212 customers/)).toHaveAttribute("aria-pressed", "true");
-    await expect(visibleHistory(page)).toHaveCount(1);
-    if (width < 1200) {
-      const scroller = code.locator("xpath=ancestor::div[contains(@class, 'overflow-x-auto')][1]");
-      await expect
-        .poll(() =>
-          scroller.evaluate(
-            (el: HTMLElement) => el.scrollWidth <= el.clientWidth + 1 || el.tabIndex === 0,
-          ),
-        )
-        .toBe(true);
-      const scrollerBox = await scroller.boundingBox();
-      const codeBox = await code.boundingBox();
-      const clauses = await visibleClause(page, /212 customers/).boundingBox();
-      expect(codeBox!.y).toBeGreaterThan(clauses!.y);
-      expect(scrollerBox!.width).toBeLessThanOrEqual(width);
-    }
-    expect(await axeViolations(page)).toEqual([]);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.mouse.move(0, 0);
+    expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
+    expect(problems).toEqual([]);
   });
 }

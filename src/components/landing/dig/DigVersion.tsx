@@ -2,7 +2,7 @@
 
 import { useMessages } from "@/i18n/LocaleProvider";
 import type { LineRange } from "../../line-investigation/specimen/types";
-import type { LineVersion } from "../demo/strata/types";
+import type { LineVersion } from "./types";
 import type { ReactNode } from "react";
 import { CODE_START, META, RAIL } from "./dig-classes";
 

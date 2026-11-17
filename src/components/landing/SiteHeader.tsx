@@ -8,13 +8,11 @@ import { LocaleMenu } from "../shell/LocaleMenu";
 import { CONTAINER } from "./parts/landing-classes";
 import { PrimaryLink } from "./parts/PrimaryLink";
 
-export function SiteHeader({ pinned = true }: { pinned?: boolean }) {
+export function SiteHeader() {
   const user = useAuth();
   const t = useMessages().landing;
   return (
-    <header
-      className={`border-b border-li-divider bg-li-paper ${pinned ? "sticky top-0 z-30" : ""}`}
-    >
+    <header className="border-b border-li-divider bg-li-paper">
       <div className={`${CONTAINER} flex h-15 items-center gap-4`}>
         <BrandMark />
         <span className="font-li-mono text-xs text-li-text-muted max-[640px]:hidden">

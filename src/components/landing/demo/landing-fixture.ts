@@ -1,20 +1,13 @@
 import { verify } from "@understory/core/verify";
-import type {
-  Artifact,
-  BlameSpan,
-  DigResult,
-  Entailment,
-  Evidence,
-  Narrative,
-} from "@understory/core/types";
+import type { Artifact, DigResult, Entailment, Evidence, Narrative } from "@understory/core/types";
 import type { Locale } from "@/i18n/locales";
 import { messagesFor } from "@/i18n/messages";
 import { buildInvestigationView } from "../../line-investigation/model/build-investigation-view";
 import type { InvestigationView } from "../../line-investigation/model/types";
-import type { LineVersion } from "./strata/types";
+import type { LineVersion } from "../dig/types";
 
 export const LANDING_NOW = Date.parse("2026-09-27T12:00:00.000Z");
-export const LANDING_PATH = "src/billing/charge.ts";
+const LANDING_PATH = "src/billing/charge.ts";
 
 const sha = (short: string) => short.padEnd(40, "0");
 
@@ -155,8 +148,6 @@ export function landingViewFor(locale: Locale): InvestigationView {
   return view;
 }
 
-export const landingView = landingViewFor("en");
-
 const english = narrativeFor("en");
 
 export const landingRejected = verify(evidence, {
@@ -196,30 +187,3 @@ export function landingVersionsFor(locale: Locale): LineVersion[] {
     { artifactId: "commit:7be210e", text: "  while (true) {", absent: demo.noBound },
   ];
 }
-
-export const landingVersions = landingVersionsFor("en");
-
-const span = (startLine: number, endLine: number, short: string, date: string): BlameSpan => ({
-  startLine,
-  endLine,
-  sha: sha(short),
-  shortSha: short,
-  date,
-});
-
-const ORIGIN = "2021-06-18T14:02:00Z";
-const CAP = "2023-03-15T16:20:00Z";
-
-export const landingBlame: BlameSpan[] = [
-  span(1, 4, "7be210e", ORIGIN),
-  span(5, 5, "a19d3f2", "2024-02-20T10:00:00Z"),
-  span(6, 6, "7be210e", ORIGIN),
-  span(7, 7, "92f6a3f", CAP),
-  span(8, 8, "7be210e", ORIGIN),
-  span(9, 9, "92f6a3f", CAP),
-  span(10, 10, "7be210e", ORIGIN),
-  span(11, 11, "c0a41e9", "2023-08-20T10:00:00Z"),
-  span(12, 12, "7be210e", ORIGIN),
-  span(13, 13, "92f6a3f", CAP),
-  span(14, 17, "7be210e", ORIGIN),
-];
