@@ -12,7 +12,7 @@ export function SiteHeader() {
   const user = useAuth();
   const t = useMessages().landing;
   return (
-    <header className="sticky top-0 z-30 border-b border-li-divider bg-li-paper">
+    <header className="border-b border-li-divider bg-li-paper">
       <div className={`${CONTAINER} flex h-15 items-center gap-4`}>
         <BrandMark />
         <span className="font-li-mono text-xs text-li-text-muted max-[640px]:hidden">

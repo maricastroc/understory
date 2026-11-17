@@ -18,8 +18,6 @@ export const artifact = {
 
 export const gap = {
   chip: { pull_request: "PR", review: "review", issue: "issue" },
-  notVerified: "not verified",
-  noLinkedIssue: "no linked issue",
   notRecorded: "not recorded",
   title: {
     pull_request: "No pull request, review or issue",
