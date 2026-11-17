@@ -1,21 +1,21 @@
 import { useMessages } from "@/i18n/LocaleProvider";
 import type { PathStep } from "./types/path-step";
 
-const MARKER: Record<PathStep["state"], string> = {
-  done: "border-li-ink bg-li-ink",
-  current: "border-li-ink bg-li-datum-strong",
-  next: "border-dashed border-li-neutral-500 bg-li-paper",
-};
-
 const LABEL: Record<PathStep["state"], string> = {
   done: "text-li-ink",
   current: "font-semibold text-li-ink",
   next: "text-li-text-muted",
 };
 
+const TAB: Record<PathStep["state"], string> = {
+  done: "border-li-ink text-li-ink",
+  current: "border-li-ink bg-li-ink text-li-paper",
+  next: "border-dashed border-li-neutral-500 text-li-text-muted",
+};
+
 const VALUE: Record<PathStep["state"], string> = {
   done: "text-li-neutral-800",
-  current: "text-li-datum-ink",
+  current: "text-li-ink",
   next: "text-li-text-subtle",
 };
 
@@ -44,13 +44,6 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
             <>
               <span className="flex shrink-0 items-baseline gap-1.5">
                 <span
-                  className={`font-li-mono text-[12px] ${
-                    step.state === "next" ? "text-li-text-muted" : "text-li-datum-ink"
-                  }`}
-                >
-                  {number}
-                </span>
-                <span
                   className={`text-[15px] underline-offset-3 ${LABEL[step.state]} ${
                     clickable
                       ? "decoration-1 group-hover:underline group-focus-visible:underline group-active:text-li-neutral-800"
@@ -62,8 +55,7 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
               </span>
               {step.value && (
                 <span
-                  key={step.value}
-                  className={`min-w-0 animate-li-arrive truncate font-li-mono text-[12.5px] ${VALUE[step.state]}`}
+                  className={`min-w-0 truncate font-li-mono text-[12.5px] ${VALUE[step.state]}`}
                 >
                   {step.value}
                 </span>
@@ -74,8 +66,10 @@ export function InvestigationPath({ steps }: { steps: PathStep[] }) {
             <li key={step.key} className="min-w-0">
               <span aria-hidden className="flex items-center gap-2">
                 <span
-                  className={`size-3.5 shrink-0 rounded-full border-2 transition-colors duration-300 motion-reduce:transition-none ${MARKER[step.state]}`}
-                />
+                  className={`flex h-5 min-w-6 shrink-0 items-center justify-center border px-1 font-li-mono text-[11px] leading-none transition-colors duration-300 motion-reduce:transition-none ${TAB[step.state]}`}
+                >
+                  {number}
+                </span>
                 {next ? <Thread from={step.state} to={next.state} /> : <span className="flex-1" />}
               </span>
               <div className="mt-2 min-h-6 pr-4">

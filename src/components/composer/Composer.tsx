@@ -8,6 +8,7 @@ import type { CasePaths } from "../investigator/case-paths";
 import { defaultQuestion } from "../investigator/default-question";
 import { repoDisplayName } from "../shell/repo-display-name";
 import { CodeContext } from "./CodeContext";
+import { datumToken } from "../line-investigation/specimen/datum-token";
 import { CodeViewer } from "./CodeViewer";
 import type { ComposerPrefill } from "./composer-prefill";
 import { FileStage } from "./FileStage";
@@ -148,6 +149,17 @@ export function Composer({
         ? m.composer.theLines(selection.start, selection.end)
         : m.composer.thisNoun[noun];
   const runLabel = m.composer.investigate(target);
+  const askedRange =
+    file && selection && selection.start === selection.end && question.trim()
+      ? datumToken(question, file.lines[selection.start - 1] ?? "")
+      : null;
+  const asked =
+    askedRange && file && selection
+      ? {
+          token: file.lines[selection.start - 1].slice(askedRange.start, askedRange.end),
+          line: selection.start,
+        }
+      : null;
 
   function investigate(span: { start: number; end: number }, name: string | null) {
     if (!file) return;
@@ -296,6 +308,7 @@ export function Composer({
             enclosing={enclosing}
             onSelect={viewer.selectLine}
             focusLine={prefill?.path === file.path ? prefill.line : undefined}
+            asked={askedRange}
           />
           <CodeContext
             repoPath={repoPath}
@@ -316,6 +329,7 @@ export function Composer({
                 onRun={run}
                 wider={canExpand ? enclosing : null}
                 onRunWider={runWider}
+                asked={asked}
               />
             )}
           </CodeContext>

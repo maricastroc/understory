@@ -2,6 +2,7 @@ import type { SymbolSpan } from "@understory/core/collect/symbol";
 import { useEffect, useMemo, useRef } from "react";
 import { useMessages } from "@/i18n/LocaleProvider";
 import { CodeText } from "../line-investigation/specimen/CodeText";
+import type { LineRange } from "../line-investigation/specimen/types";
 import { highlightLines } from "../line-investigation/specimen/highlight-code";
 import { GoToLine } from "./GoToLine";
 import { symbolNoun } from "./symbol-noun";
@@ -17,6 +18,7 @@ export function CodeViewer({
   enclosing,
   onSelect,
   focusLine,
+  asked = null,
 }: {
   file: OpenFile;
   selectedStart: number | null;
@@ -24,6 +26,7 @@ export function CodeViewer({
   enclosing: SymbolSpan | null;
   onSelect: (n: number, extend: boolean) => void;
   focusLine?: number;
+  asked?: LineRange | null;
 }) {
   const { scrollRef, startIndex, endIndex, totalHeight, onScroll, scrollToIndex } = useVirtualRows(
     file.lines.length,
@@ -136,7 +139,11 @@ export function CodeViewer({
                   </span>
                   <span className="flex-1 pr-4">
                     {ln ? (
-                      <CodeText segments={segments[n - 1] ?? []} token={null} datum={inRange} />
+                      <CodeText
+                        segments={segments[n - 1] ?? []}
+                        token={asked && n === selectedStart ? asked : null}
+                        datum={inRange}
+                      />
                     ) : (
                       " "
                     )}

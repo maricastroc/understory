@@ -141,16 +141,6 @@
   animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes li-arrive {
-  from {
-    opacity: 0;
-  }
-}
-
-@utility animate-li-arrive {
-  animation: li-arrive 0.24s ease-out backwards;
-}
-
 @keyframes li-sweep {
   from {
     background-size: 0% 100%;
@@ -186,7 +176,6 @@
   .animate-li-sweep,
   .animate-li-pop,
   .animate-li-trace,
-  .animate-li-arrive,
   .animate-spin,
   .animate-pulse {
     animation: none;
