@@ -33,7 +33,7 @@ describe("AppHeader", () => {
     const selector = screen.getByRole("button", { name: /acme\/payments-service/ });
     expect(selector.textContent).toContain("main · a1b2c3d");
     await user.click(selector);
-    expect(screen.getByRole("link", { name: "Open repository ↗" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "Open repository" }).getAttribute("href")).toBe(
       repo.url,
     );
     await user.click(screen.getByRole("button", { name: "New investigation here" }));

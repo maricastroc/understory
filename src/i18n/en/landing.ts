@@ -7,7 +7,6 @@ export const landing = {
   tagline: "code archaeology",
   nav: "Main",
   explain: "Explain a line",
-  explainGo: "Explain a line →",
   hero: {
     who: "who",
     when: "when",
@@ -18,7 +17,7 @@ export const landing = {
   },
   standard: {
     kicker: "evidence > assertions",
-    quoteFound: (ref: string) => `✓ Quote confirmed in ${ref}`,
+    quoteFound: (ref: string) => `Quote confirmed in ${ref}`,
     rejected: "discarded: not in the evidence",
   },
   method: {

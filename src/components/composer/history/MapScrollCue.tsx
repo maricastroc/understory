@@ -1,5 +1,6 @@
 import { useMessages } from "@/i18n/LocaleProvider";
 import { liButton } from "../../line-investigation/parts/button-class";
+import { ArrowLeft, ArrowRight } from "@/components/icons";
 
 export function MapScrollCue({
   side,
@@ -34,7 +35,17 @@ export function MapScrollCue({
         )}
         style={{ top: top - 12 }}
       >
-        {after ? m.moreAfter(count) : m.moreBefore(count)}
+        {after ? (
+          <>
+            {m.moreAfter(count)}
+            <ArrowRight className="size-3" />
+          </>
+        ) : (
+          <>
+            <ArrowLeft className="size-3" />
+            {m.moreBefore(count)}
+          </>
+        )}
       </button>
     </>
   );

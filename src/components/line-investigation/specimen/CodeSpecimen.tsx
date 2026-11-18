@@ -141,6 +141,7 @@ export function CodeSpecimen({
         {win.beforeRow && win.hiddenBefore && (
           <RangeToggle
             label={hiddenLabel(win.hiddenBefore, "end")}
+            folded
             expanded={false}
             controls={listId}
             placement="top"
@@ -168,6 +169,7 @@ export function CodeSpecimen({
       {showFooter && footerLabel && (
         <RangeToggle
           label={footerLabel}
+          folded={layout.mode !== "strip" && !expanded}
           expanded={expanded}
           controls={listId}
           placement="bottom"

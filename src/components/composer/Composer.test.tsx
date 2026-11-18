@@ -238,7 +238,7 @@ describe("Composer — choosing lines and asking", () => {
     expect(
       screen.getByRole("button", { name: "What do you want to find out about line 4?" }),
     ).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Investigate line 4 →" }));
+    fireEvent.click(screen.getByRole("button", { name: "Investigate line 4" }));
     expect(onInvestigate).toHaveBeenCalledWith({
       repoPath: "acme/payments-service",
       location: "src/billing/charge.ts:4",
@@ -267,7 +267,7 @@ describe("Composer — choosing lines and asking", () => {
     const box = screen.getByRole("textbox", { name: "What do you want to know about line 4?" });
     fireEvent.click(screen.getByRole("button", { name: "Why this value?" }));
     expect((box as HTMLTextAreaElement).value).toBe("Why this value?");
-    fireEvent.click(screen.getByRole("button", { name: "Investigate line 4 →" }));
+    fireEvent.click(screen.getByRole("button", { name: "Investigate line 4" }));
     expect(onInvestigate).toHaveBeenLastCalledWith(
       expect.objectContaining({ question: "Why this value?" }),
     );
@@ -275,7 +275,7 @@ describe("Composer — choosing lines and asking", () => {
       screen.getByRole("button", { name: "Investigate without a specific question" }),
     );
     expect(screen.queryByRole("textbox", { name: /What do you want to know about/ })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Investigate line 4 →" }));
+    fireEvent.click(screen.getByRole("button", { name: "Investigate line 4" }));
     expect(onInvestigate).toHaveBeenLastCalledWith(
       expect.objectContaining({ question: "Why is this line the way it is?" }),
     );
@@ -296,7 +296,7 @@ describe("Composer — choosing lines and asking", () => {
     });
     expect(selected()).toEqual([3, 4, 5, 6]);
     expect(screen.queryByRole("button", { name: /Investigate the whole/ })).toBeNull();
-    expect(screen.getByRole("button", { name: "Investigate chargeCustomer →" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Investigate chargeCustomer" })).toBeTruthy();
   });
 
   it("selects a range by dragging across lines", async () => {
@@ -309,7 +309,7 @@ describe("Composer — choosing lines and asking", () => {
     expect(selected()).toEqual([2, 3, 4, 5]);
     fireEvent.pointerEnter(line(6), { pointerType: "mouse", buttons: 0 });
     expect(selected()).toEqual([2, 3, 4, 5]);
-    fireEvent.click(screen.getByRole("button", { name: "Investigate lines 2–5 →" }));
+    fireEvent.click(screen.getByRole("button", { name: "Investigate lines 2–5" }));
     expect(onInvestigate).toHaveBeenCalledWith(
       expect.objectContaining({
         location: "src/billing/charge.ts:2-5",

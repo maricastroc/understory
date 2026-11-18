@@ -1,5 +1,6 @@
 import { useMessages } from "@/i18n/LocaleProvider";
 import type { Verdict } from "../model/types";
+import { Check, ChevronDown } from "@/components/icons";
 
 const CHIP: Record<Verdict, string> = {
   resolved:
@@ -37,23 +38,9 @@ export function VerdictButton({
       onClick={onToggle}
       className={`inline-flex cursor-pointer items-center gap-1.5 rounded-[3px] border py-1 pr-2.5 pl-2 text-[13px] font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus ${answered ? ANSWERED : CHIP[verdict]}`}
     >
-      {verdict === "resolved" && !answered && (
-        <svg
-          aria-hidden
-          width="13"
-          height="13"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M20 6 9 17l-5-5" />
-        </svg>
-      )}
+      {verdict === "resolved" && !answered && <Check className="size-[13px]" />}
       {answered ? v.answered : v.label[verdict]}
-      <span aria-hidden className="font-normal opacity-80">
-        ▾
-      </span>
+      <ChevronDown className="size-3.5 opacity-80" />
     </button>
   );
 }

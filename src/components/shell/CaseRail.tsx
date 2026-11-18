@@ -3,6 +3,7 @@ import { useMessages } from "@/i18n/LocaleProvider";
 import { CaseRailRow } from "./CaseRailRow";
 import { RailFooter } from "./RailFooter";
 import type { RailFooterInfo, RailItem } from "./types";
+import { ChevronsLeft, Close, Plus } from "@/components/icons";
 
 export function CaseRail({
   items,
@@ -39,7 +40,7 @@ export function CaseRail({
             aria-label={m.shell.newInvestigation}
             className="-mr-1.5 ml-auto grid size-7 cursor-pointer place-items-center text-[18px] leading-none font-light text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus active:bg-li-neutral-300 motion-reduce:transition-none"
           >
-            +
+            <Plus className="size-4" />
           </button>
         )}
         {onCollapse && (
@@ -49,7 +50,7 @@ export function CaseRail({
             aria-label={m.shell.collapseInvestigations}
             className={`-mr-1.5 grid size-7 cursor-pointer place-items-center text-[15px] leading-none text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus motion-reduce:transition-none ${onNew ? "ml-1" : "ml-auto"}`}
           >
-            «
+            <ChevronsLeft className="size-4" />
           </button>
         )}
         {onClose && (
@@ -59,7 +60,7 @@ export function CaseRail({
             aria-label={m.shell.closeInvestigations}
             className={`-mr-1.5 grid size-7 cursor-pointer place-items-center text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus motion-reduce:transition-none ${onNew ? "ml-1" : "ml-auto"}`}
           >
-            ✕
+            <Close className="size-4" />
           </button>
         )}
       </div>

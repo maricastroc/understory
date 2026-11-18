@@ -183,9 +183,9 @@ describe("FileStage — quiet by default, detailed on intent", () => {
     expect(inspector.getByText("Oldest line")).toBeTruthy();
     expect(inspector.getByText("Commits")).toBeTruthy();
     expect(inspector.getByText("Pull requests")).toBeTruthy();
-    fireEvent.click(inspector.getByRole("button", { name: "Open flags.ts →" }));
+    fireEvent.click(inspector.getByRole("button", { name: "Open flags.ts" }));
     expect(onOpen).toHaveBeenCalledWith("config/flags.ts");
-    fireEvent.keyDown(inspector.getByRole("button", { name: "Open flags.ts →" }), {
+    fireEvent.keyDown(inspector.getByRole("button", { name: "Open flags.ts" }), {
       key: "Escape",
     });
     expect(inspector.getByText("Hover or focus a file to inspect its history.")).toBeTruthy();
@@ -268,7 +268,7 @@ describe("FileStage — a map wider than its box", () => {
       name: "History map, scroll sideways for more files",
     });
     const right = screen.getByRole("button", { name: /^Scroll right, \d+ more files$/ });
-    const count = Number(right.textContent!.match(/^(\d+) more →$/)![1]);
+    const count = Number(right.textContent!.match(/^(\d+) more$/)![1]);
     expect(count).toBeGreaterThan(0);
     expect(count).toBeLessThan(14);
     expect(screen.queryByRole("button", { name: /^Scroll left/ })).toBeNull();
@@ -279,7 +279,7 @@ describe("FileStage — a map wider than its box", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Scroll right/ }));
     expect(screen.queryByRole("button", { name: /^Scroll right/ })).toBeNull();
     const back = screen.getByRole("button", { name: /^Scroll left, \d+ more files$/ });
-    expect(back.textContent).toMatch(/^← \d+ more$/);
+    expect(back.textContent).toMatch(/^\d+ more$/);
     fireEvent.click(back);
     expect(scrollBy).toHaveBeenLastCalledWith({ left: -400, behavior: "smooth" });
   });

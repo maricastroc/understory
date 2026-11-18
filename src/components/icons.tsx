@@ -1,10 +1,26 @@
+import { Fragment } from "react";
 import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ArrowUpRight,
   BookMarked,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  ChevronUp,
+  CircleAlert,
+  CircleDashed,
   CircleDot,
   Copy,
+  CornerDownLeft,
+  CornerDownRight,
+  Dot,
+  Ellipsis,
   ExternalLink,
   GitBranch,
   GitCommitHorizontal,
@@ -13,6 +29,7 @@ import {
   Lock,
   Menu,
   MessageSquare,
+  Plus,
   Search,
   ShieldCheck,
   TriangleAlert,
@@ -44,6 +61,24 @@ export function KindIcon({ kind, className }: { kind: ArtifactKind; className?: 
   return <Icon className={className} />;
 }
 
+export function ArrowText({ text, className = "size-3" }: { text: string; className?: string }) {
+  return (
+    <>
+      {text.split("→").map((part, i) => (
+        <Fragment key={i}>
+          {i > 0 && (
+            <>
+              <span className="sr-only">→</span>
+              <ArrowRight className={`inline-block align-[-0.15em] ${className}`} />
+            </>
+          )}
+          {part}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
 export {
   Search,
   BookMarked as Repo,
@@ -60,4 +95,20 @@ export {
   ChevronLeft,
   Menu,
   Languages,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ArrowUpRight,
+  ChevronDown,
+  ChevronUp,
+  ChevronsLeft,
+  ChevronsRight,
+  CircleAlert,
+  CircleDashed,
+  CornerDownLeft,
+  CornerDownRight,
+  Dot,
+  Ellipsis,
+  Plus,
 };

@@ -1,11 +1,12 @@
 "use client";
 
-import { useId } from "react";
+import { type ReactNode, useId } from "react";
 import { useMessages } from "@/i18n/LocaleProvider";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { Highlight } from "./Highlight";
 import { FIELD_FRAME } from "./composer-classes";
 import { PendingMark } from "../line-investigation/parts/PendingMark";
+import {} from "@/components/icons";
 
 export function MapSearch({
   query,
@@ -21,7 +22,7 @@ export function MapSearch({
   onQuery: (v: string) => void;
   results: string[];
   searching: boolean;
-  note: string;
+  note: ReactNode;
   onOpen: (path: string) => void;
   onSubmit: () => void;
   empty?: boolean;

@@ -14,6 +14,16 @@ import type { InvestigationView, ViewArtifact, ViewClause } from "../model/types
 import { EvidenceLetter } from "../parts/EvidenceLetter";
 import { liButton } from "../parts/button-class";
 import { standingOf } from "./why-model";
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowText,
+  ArrowUpRight,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Close,
+} from "@/components/icons";
 
 const TONE = {
   evidence: "text-li-evidence-ink",
@@ -97,7 +107,9 @@ function ArtifactBody({
               variant={a.role === "cited" ? "cited" : "supporting"}
             />
             <span className="tracking-[0.05em]">{kindName(a.kind, locale).toUpperCase()}</span>
-            <span>{dateLine(a, locale)}</span>
+            <span>
+              <ArrowText text={dateLine(a, locale)} />
+            </span>
             <span>
               {maxDays > 0
                 ? m.caseScreen.depthOf(
@@ -116,7 +128,7 @@ function ArtifactBody({
           <p className="font-li-mono text-[11.5px] leading-[1.5] text-li-text-subtle">
             {path.map((step, i) => (
               <span key={step.id}>
-                {i > 0 && <span aria-hidden> → </span>}
+                {i > 0 && <ArrowRight className="mx-1 inline-block size-3 align-[-0.15em]" />}
                 {step.relation && <span>{step.relation} </span>}
                 <span className="text-li-ink">{step.id}</span>
               </span>
@@ -130,7 +142,12 @@ function ArtifactBody({
           tone={source.quote ? "verified" : "unverified"}
           sight={source.quote ? `quote:${clause.id}:${a.id}` : null}
         />
-        <p className={`text-[12.5px] font-semibold ${TONE[status.tone]}`}>{status.text}</p>
+        <p className={`text-[12.5px] font-semibold ${TONE[status.tone]}`}>
+          {status.tone === "evidence" && (
+            <Check className="mr-1 inline-block size-3.5 align-[-0.15em]" />
+          )}
+          {status.text}
+        </p>
         {source.quote && standingOf(view.reading, clause.index) === "inferred" && (
           <p
             data-likely-note
@@ -146,6 +163,7 @@ function ArtifactBody({
             className={liButton("secondary", "", "sm")}
           >
             {m.caseScreen.showInHistory}
+            <ArrowDown className="size-3.5" />
           </button>
           {a.source.url && (
             <a
@@ -154,7 +172,8 @@ function ArtifactBody({
               rel="noopener noreferrer"
               className={liButton("ghost", "", "sm")}
             >
-              {sourceLinkLabel(a.source.url, locale)} ↗
+              {sourceLinkLabel(a.source.url, locale)}
+              <ArrowUpRight className="size-3.5" />
             </a>
           )}
           {onDrill && (
@@ -165,6 +184,7 @@ function ArtifactBody({
               className={liButton("ghost", "", "sm")}
             >
               {m.caseScreen.investigate}
+              <ArrowRight className="size-3.5" />
             </button>
           )}
         </div>
@@ -248,7 +268,7 @@ export function ClauseEvidence({
                 onClick={() => onStep(-1)}
                 className={liButton("icon", "aria-disabled:opacity-40")}
               >
-                ‹
+                <ChevronLeft className="size-4" />
               </button>
               <button
                 type="button"
@@ -257,7 +277,7 @@ export function ClauseEvidence({
                 onClick={() => onStep(1)}
                 className={liButton("icon", "aria-disabled:opacity-40")}
               >
-                ›
+                <ChevronRight className="size-4" />
               </button>
             </>
           )}
@@ -267,7 +287,7 @@ export function ClauseEvidence({
             onClick={onClose}
             className={liButton("icon")}
           >
-            ✕
+            <Close className="size-4" />
           </button>
         </div>
       </div>
@@ -312,6 +332,7 @@ export function ClauseEvidence({
               className={liButton("secondary", "", "sm")}
             >
               {c.showInHistory}
+              <ArrowDown className="size-3.5" />
             </button>
           </div>
         </div>

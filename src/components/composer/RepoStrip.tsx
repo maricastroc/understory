@@ -7,6 +7,7 @@ import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { repoDisplayName } from "../shell/repo-display-name";
 import type { HistoryMapControl } from "./history/use-history-map";
 import { RepoDetails } from "./RepoDetails";
+import { ChevronDown, ChevronUp } from "@/components/icons";
 
 export function RepoStrip({
   repoPath,
@@ -51,9 +52,7 @@ export function RepoStrip({
           className="-mr-2 ml-auto flex h-7 cursor-pointer items-center gap-1.5 px-2 text-[12.5px] text-li-neutral-800 transition-colors hover:bg-li-neutral-200 hover:text-li-ink focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus aria-expanded:text-li-ink"
         >
           {open ? m.composer.repo.hideDetails : m.composer.repo.details}
-          <span aria-hidden className="text-[10px]">
-            {open ? "▴" : "▾"}
-          </span>
+          {open ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
         </button>
       </div>
       <div id={detailsId} hidden={!open}>

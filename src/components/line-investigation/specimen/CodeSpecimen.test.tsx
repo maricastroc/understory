@@ -53,7 +53,7 @@ describe("CodeSpecimen — default panel", () => {
     expect(rows(container).map((r) => r.getAttribute("data-line"))).toEqual(
       Array.from({ length: 19 }, (_, i) => String(i + 1)),
     );
-    expect(screen.getByRole("button", { name: "⋯ lines 20–24 · isTransient()" })).toHaveProperty(
+    expect(screen.getByRole("button", { name: "lines 20–24 · isTransient()" })).toHaveProperty(
       "ariaExpanded",
       "false",
     );

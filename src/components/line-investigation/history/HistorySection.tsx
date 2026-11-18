@@ -26,6 +26,7 @@ import { HistoryRow } from "./HistoryRow";
 import { extentOf, type ReadingLayer } from "./reading-layer";
 import type { HistoryItem, HistoryModel, HistoryStratum } from "./types";
 import { useHistoryPosition } from "./use-history-position";
+import { ArrowUp } from "@/components/icons";
 
 const KINDS = ["commit", "pull_request", "review", "issue"] as const;
 
@@ -291,7 +292,8 @@ export function HistorySection({
             onClick={() => onBack(state.pinnedClause)}
             className={liButton("ghost", inside ? "" : "invisible", "sm")}
           >
-            ↑ {pinned ? h.backToClause(pinned.index + 1) : h.backToAnswer}
+            <ArrowUp className="size-3.5" />
+            {pinned ? h.backToClause(pinned.index + 1) : h.backToAnswer}
           </button>
         </span>
       </div>

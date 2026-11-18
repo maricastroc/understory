@@ -87,7 +87,7 @@ test("the demo maps its files by itself after a second of idle; no remote means 
   await expect(inspector).toContainText("Hover or focus a file to inspect its history.");
   await expect(inspector.getByRole("button")).toHaveCount(0);
   await files.getByRole("button", { name: /^src\/billing\/charge\.ts/ }).focus();
-  await expect(inspector.getByRole("button", { name: "Open charge.ts →" })).toBeVisible();
+  await expect(inspector.getByRole("button", { name: "Open charge.ts" })).toBeVisible();
   await expect(inspector).toContainText("Oldest line");
   expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
   await page.keyboard.press("Escape");
@@ -153,7 +153,7 @@ test("a follow-up starts a new question in the same file and links back as a fol
     .fill("Why only transient errors?");
   await page.getByRole("button", { name: /^Investigate line 12/ }).click();
 
-  const link = page.getByText(/^↳ continues/);
+  const link = page.getByText(/^continues/);
   await expect(link).toContainText("follow-up to “Why exactly 3 retries?”");
   await expect(link).not.toContainText("derived from");
 });

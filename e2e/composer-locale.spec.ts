@@ -38,7 +38,7 @@ test("the demo in Portuguese: the map, a file, a line and the question about it"
   await expect(context).toContainText("Última alteração:");
   await expect(context).toContainText("antes do HEAD");
   await expect(page.getByRole("group", { name: "Responder em" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Investigar a linha 8 →" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Investigar a linha 8" })).toBeVisible();
   expect(await axeViolations(page, { settleMs: 400 })).toEqual([]);
 });
 

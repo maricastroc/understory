@@ -10,6 +10,7 @@ import { META, ON_BORE, RAIL, WIDE_GRID } from "./dig-classes";
 import { DigSection } from "./DigSection";
 import { Found } from "./DigSurface";
 import type { BlameLine, DigModel } from "./types";
+import { ArrowDown, ArrowRight } from "@/components/icons";
 
 function Question({ model }: { model: DigModel }) {
   const locale = useLocale();
@@ -97,10 +98,11 @@ export function DigHero({ model, blame }: { model: DigModel; blame: BlameLine })
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
               <Link href="/app" className={liButton("primary", "", "lg")}>
                 <BlueprintCorners />
-                {l.explainGo}
+                {l.explain}
+                <ArrowRight className="size-4" />
               </Link>
               <a href="#dig-02" className="li-link py-2.5 text-[15px] font-medium">
-                {l.dig.digGo} ↓
+                {l.dig.digGo} <ArrowDown className="inline-block size-4 align-[-0.15em]" />
               </a>
             </div>
           </div>
@@ -124,7 +126,10 @@ export function DigHero({ model, blame }: { model: DigModel; blame: BlameLine })
         <p
           className={`${META} flex flex-col gap-x-8 gap-y-1 xl:col-start-2 xl:flex-row xl:justify-between xl:pr-10`}
         >
-          <span>↓ {l.dig.cue}</span>
+          <span>
+            <ArrowDown className="mr-1 inline-block size-3 align-[-0.15em]" />
+            {l.dig.cue}
+          </span>
           <span>{l.dig.unchanged(shortAge(t.time, model.unchangedDays), model.line)}</span>
         </p>
       </div>

@@ -1,11 +1,15 @@
+import { Ellipsis } from "@/components/icons";
+
 export function RangeToggle({
   label,
+  folded,
   expanded,
   controls,
   placement,
   onToggle,
 }: {
   label: string;
+  folded: boolean;
   expanded: boolean;
   controls: string;
   placement: "top" | "bottom";
@@ -18,8 +22,9 @@ export function RangeToggle({
       aria-expanded={expanded}
       aria-controls={controls}
       onClick={onToggle}
-      className={`flex w-full shrink-0 cursor-pointer items-center pl-23 text-left text-[11px] text-li-steel-700 transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none ${shape}`}
+      className={`flex w-full shrink-0 cursor-pointer items-center gap-1.5 pl-23 text-left text-[11px] text-li-steel-700 transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none ${shape}`}
     >
+      {folded && <Ellipsis className="size-3.5 shrink-0" />}
       {label}
     </button>
   );

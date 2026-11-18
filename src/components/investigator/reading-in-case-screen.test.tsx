@@ -55,7 +55,7 @@ describe("the case screen with the reading", () => {
     expect(row.textContent).toContain(BORROWED.narrative!.claims[0].text);
     expect(zone.textContent).not.toContain("Documented for this line");
     const chip = screen.getByRole("button", { name: /^Answered/ });
-    expect(chip.querySelector("svg")).toBeNull();
+    expect(chip.querySelector(".lucide-check")).toBeNull();
     fireEvent.click(row);
     expect(document.querySelector("[data-likely-note]")?.textContent).toContain(
       "Its link to this line is Understory's interpretation.",

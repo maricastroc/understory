@@ -67,7 +67,7 @@ describe("the why zone without the reading", () => {
     expect(screen.getByRole("region", { name: "Reasons found" })).toBeTruthy();
     expect(screen.queryByRole("region", { name: "What the history supports" })).toBeNull();
     expect(chip().textContent).toContain("Resolved");
-    expect(chip().querySelector("svg")).not.toBeNull();
+    expect(chip().querySelector(".lucide-check")).not.toBeNull();
     expect(document.querySelector("#history")!.textContent).toContain(
       "Understory does not infer a reason here.",
     );
@@ -156,7 +156,7 @@ describe("the why zone with the reading", () => {
   it("calls the verdict an answer, without the check, and says what its confidence rates", () => {
     setup("control-tslint-189", true);
     expect(chip().textContent).toContain("Answered");
-    expect(chip().querySelector("svg")).toBeNull();
+    expect(chip().querySelector(".lucide-check")).toBeNull();
     fireEvent.click(chip());
     const dialog = screen.getByRole("dialog", { name: "What was checked" });
     expect(dialog.textContent).toContain(
@@ -213,7 +213,7 @@ describe("validating the reading before it reaches the case screen", () => {
       expect(row.textContent).toContain(presented(id));
       expect(zone().textContent).not.toContain("Documented for this line");
       expect(chip().textContent).toContain("Answered");
-      expect(chip().querySelector("svg")).toBeNull();
+      expect(chip().querySelector(".lucide-check")).toBeNull();
       fireEvent.click(row);
       expect(note()?.textContent).toBe(
         "The passage documents the change it belongs to. Its link to this line is Understory's interpretation.",

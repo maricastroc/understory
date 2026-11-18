@@ -67,14 +67,14 @@ test("show in history lands on the source, and the bar leads back to the clause"
 }) => {
   await open(page);
   await clause(page, 1).click();
-  await evidence(page).getByRole("button", { name: "Show in history ↓" }).click();
+  await evidence(page).getByRole("button", { name: "Show in history" }).click();
   const located = page.locator('[data-artifact="issue:1187"]');
   await expect(located).toHaveAttribute("data-located", "true");
   await expect(located).toBeInViewport();
   const bar = page.locator("section#history > div.sticky");
   await expect(bar).toContainText("tracing conclusion 2");
   await expect(bar).toContainText("at 15 Mar 2023");
-  await bar.getByRole("button", { name: "↑ Back to conclusion 2" }).click();
+  await bar.getByRole("button", { name: "Back to conclusion 2" }).click();
   await expect(clause(page, 1)).toBeInViewport();
   await expect(clause(page, 1)).toBeFocused();
 });
@@ -128,7 +128,7 @@ for (const setup of ["default", "evidence", "located", "long"] as const) {
     await open(page, 1440, setup === "long" ? "many-owners" : "resolved");
     if (setup !== "default" && setup !== "long") await clause(page, 1).click();
     if (setup === "located")
-      await evidence(page).getByRole("button", { name: "Show in history ↓" }).click();
+      await evidence(page).getByRole("button", { name: "Show in history" }).click();
     await page.mouse.move(0, 0);
     expect(await axeViolations(page, { within: "main", settleMs: 400 })).toEqual([]);
   });

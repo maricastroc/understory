@@ -34,7 +34,7 @@ export const shell: Messages["shell"] = {
   notSaved: "Este servidor não salva os casos",
   repository: "Repositório",
   newHere: "Nova investigação aqui",
-  openRepository: "Abrir repositório ↗",
+  openRepository: "Abrir repositório",
   searchAll: "Buscar arquivos, símbolos ou casos",
   searchCases: "Buscar casos",
   searchResults: "Resultados da busca",

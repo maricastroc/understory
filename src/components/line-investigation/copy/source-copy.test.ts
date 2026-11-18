@@ -25,7 +25,7 @@ describe("clause sources", () => {
     expect(issue.type === "artifact" && issue.quote?.text).toBe("212 customers were charged twice");
     expect(pr.type === "artifact" && pr.quote).toBeNull();
     expect(sourceStatus(issue, clause, "en")).toEqual({
-      text: "✓ Quote found verbatim in the source",
+      text: "Quote found verbatim in the source",
       tone: "evidence",
     });
     expect(sourceStatus(pr, clause, "en").text).toBe(

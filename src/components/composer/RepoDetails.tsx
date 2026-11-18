@@ -4,6 +4,7 @@ import { formatDay, formatNumber } from "@/i18n/format";
 import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import type { HistoryMapControl } from "./history/use-history-map";
+import { ArrowUpRight } from "@/components/icons";
 
 const CELL: Record<string, string> = {
   mapped: "border-li-ink bg-li-ink",
@@ -64,7 +65,7 @@ export function RepoDetails({
               className="li-link truncate font-li-body text-[14px]"
             >
               {r.source[meta.kind]}
-              <span aria-hidden> ↗</span>
+              <ArrowUpRight className="ml-1 inline-block size-3.5 align-[-0.15em]" />
             </a>
           ) : (
             <span className="font-li-body text-[14px]">{r.source[meta?.kind ?? "local"]}</span>

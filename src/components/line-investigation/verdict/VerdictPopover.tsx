@@ -1,8 +1,17 @@
+import type { LucideIcon } from "lucide-react";
 import { type RefObject, useEffect, useRef } from "react";
 import { formatDecimal } from "@/i18n/format";
 import { useLocale, useMessages } from "@/i18n/LocaleProvider";
-import { checklistGlyph, checklistText } from "../copy/verdict-copy";
+import { checklistText } from "../copy/verdict-copy";
 import type { ChecklistTone, InvestigationView } from "../model/types";
+import { Check, CircleAlert, CircleDashed, Dot } from "@/components/icons";
+
+const MARK: Record<ChecklistTone, LucideIcon> = {
+  ok: Check,
+  silent: CircleDashed,
+  caveat: CircleAlert,
+  scope: Dot,
+};
 
 const GLYPH: Record<ChecklistTone, string> = {
   ok: "text-li-evidence-ink",
@@ -10,6 +19,11 @@ const GLYPH: Record<ChecklistTone, string> = {
   caveat: "text-li-ink font-semibold",
   scope: "text-li-text-subtle",
 };
+
+function ChecklistMark({ tone }: { tone: ChecklistTone }) {
+  const Icon = MARK[tone];
+  return <Icon className={`mt-0.5 size-3.5 ${GLYPH[tone]}`} />;
+}
 
 export function VerdictPopover({
   id,
@@ -52,9 +66,7 @@ export function VerdictPopover({
       <ul className="grid grid-cols-[16px_minmax(0,1fr)] gap-x-1.5 gap-y-1.25 text-li-neutral-800">
         {view.checklist.map((item, i) => (
           <li key={`${item.kind}-${i}`} className="contents">
-            <span aria-hidden className={GLYPH[item.tone]}>
-              {checklistGlyph(item)}
-            </span>
+            <ChecklistMark tone={item.tone} />
             <span>{checklistText(item, locale)}</span>
           </li>
         ))}

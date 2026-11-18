@@ -33,6 +33,7 @@ import { Toolbar } from "./Toolbar";
 import { whyModel } from "../why/why-model";
 import { useCaseKeyboard } from "./use-case-keyboard";
 import type { AnalysisLanguage, CasePhase } from "./types";
+import { CornerDownRight } from "@/components/icons";
 
 export function LineInvestigation({
   result,
@@ -158,6 +159,7 @@ export function LineInvestigation({
       <div className="flex flex-col gap-5.5 font-li-body text-li-ink">
         {parent && (
           <p className="-mb-3 font-li-mono text-[11.5px] text-li-text-subtle">
+            <CornerDownRight className="mr-1 inline-block size-3 align-[-0.15em]" />
             {c.continues}{" "}
             {parent.onOpen ? (
               <button

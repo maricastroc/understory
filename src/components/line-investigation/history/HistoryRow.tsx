@@ -20,6 +20,7 @@ import type { CaseAction } from "../state/types";
 import { BoreCell, Glyph, Margin, ROW_GRID } from "./HistoryParts";
 import { type ReadingLayer, scopeKey } from "./reading-layer";
 import type { HistoryMember, HistoryStratum } from "./types";
+import { ArrowRight, ArrowText, ArrowUp, ArrowUpRight } from "@/components/icons";
 
 function shortDate(a: ViewArtifact, anchor: ViewArtifact, locale: Locale): string {
   return a.date.slice(0, 4) === anchor.date.slice(0, 4)
@@ -140,7 +141,7 @@ export function HistoryRow({
           </span>
           {a.kind === "pull_request" && (
             <span className="font-li-mono text-[11px] text-li-text-subtle">
-              {dateLine(a, locale)}
+              <ArrowText text={dateLine(a, locale)} />
             </span>
           )}
           {chips.map((g) => (
@@ -202,7 +203,7 @@ export function HistoryRow({
         {opened && shown && (
           <div id={detailsId} className="mt-1 flex max-w-170 flex-col gap-2.5">
             <span className="text-xs text-li-text-subtle">
-              {[dateLine(a, locale), meta].filter(Boolean).join(" · ")}
+              <ArrowText text={[dateLine(a, locale), meta].filter(Boolean).join(" · ")} />
             </span>
             <QuoteBlock
               body={shown.body}
@@ -229,7 +230,8 @@ export function HistoryRow({
                   rel="noopener noreferrer"
                   className={liButton("ghost", "", "sm")}
                 >
-                  {sourceLinkLabel(a.source.url, locale)} ↗
+                  {sourceLinkLabel(a.source.url, locale)}
+                  <ArrowUpRight className="size-3.5" />
                 </a>
               )}
               {onDrill && (
@@ -239,6 +241,7 @@ export function HistoryRow({
                   className={liButton("ghost", "", "sm")}
                 >
                   {m.caseScreen.investigate}
+                  <ArrowRight className="size-3.5" />
                 </button>
               )}
             </div>
@@ -258,7 +261,8 @@ export function HistoryRow({
                 : "border-li-divider text-li-text-subtle hover:border-li-ink hover:text-li-ink"
             }`}
           >
-            ↑ {h.clauseChip(c.index + 1)}
+            <ArrowUp className="mr-0.5 inline-block size-3 align-[-0.15em]" />
+            {h.clauseChip(c.index + 1)}
           </button>
         ))}
       </div>

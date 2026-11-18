@@ -9,6 +9,7 @@ import type { MapSummary } from "./map-summary";
 import { whyShown } from "./scope-copy";
 import { historyShares } from "./share-copy";
 import type { CoreHistory, CoreStatus, MapCore } from "./types";
+import { ArrowRight } from "@/components/icons";
 
 function ShareBar({ view }: { view: CoreHistory }) {
   const total = view.shares.found + view.shares.none + view.shares.unknown || 1;
@@ -124,6 +125,7 @@ export function MapReading({
       >
         <BlueprintCorners />
         {r.open(focused.name)}
+        <ArrowRight className="size-4" />
       </button>
     </div>
   );
