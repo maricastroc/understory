@@ -129,12 +129,12 @@ describe("the composer in Portuguese", () => {
       screen.getByRole("textbox", { name: "O que você quer saber sobre a linha 4?" }),
     ).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Por que esse valor?" }));
-    fireEvent.click(screen.getByRole("button", { name: "Investigar a linha 4 →" }));
+    fireEvent.click(screen.getByRole("button", { name: "Investigar a linha 4" }));
     expect(onInvestigate).toHaveBeenLastCalledWith(
       expect.objectContaining({ question: "Por que esse valor?" }),
     );
     fireEvent.click(screen.getByRole("button", { name: "Investigar sem pergunta específica" }));
-    fireEvent.click(screen.getByRole("button", { name: "Investigar a linha 4 →" }));
+    fireEvent.click(screen.getByRole("button", { name: "Investigar a linha 4" }));
     expect(onInvestigate).toHaveBeenLastCalledWith(
       expect.objectContaining({ question: "Why is this line the way it is?" }),
     );
@@ -145,13 +145,13 @@ describe("the composer in Portuguese", () => {
     fireEvent.click(line(2));
     fireEvent.click(line(5), { shiftKey: true });
     expect(screen.getByRole("heading", { name: "Investigue as linhas 2–5" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Investigar as linhas 2–5 →" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Investigar as linhas 2–5" })).toBeTruthy();
     fireEvent.click(line(4));
     fireEvent.click(
       screen.getByRole("button", { name: "Investigar toda a função chargeCustomer 4 linhas" }),
     );
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Investigar chargeCustomer →" })).toBeTruthy(),
+      expect(screen.getByRole("button", { name: "Investigar chargeCustomer" })).toBeTruthy(),
     );
     expect(screen.getByText("função")).toBeTruthy();
   });

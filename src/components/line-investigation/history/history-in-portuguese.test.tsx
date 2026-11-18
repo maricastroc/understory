@@ -85,7 +85,7 @@ describe("the history in Portuguese", () => {
     const chip = within(row("pr:812")).getByRole("button", {
       name: "Voltar à conclusão 1 com PR #812 como fonte",
     });
-    expect(chip.textContent).toBe("↑ conclusão 1");
+    expect(chip.textContent).toBe("conclusão 1");
     expect(section().textContent).toMatch(/fonte da conclusão \d/);
     expect(section().textContent).toMatch(/origem−\d+(,\d)?a/);
     expect(section().textContent).toMatch(/ · há \d+ anos?( e \d+ m(ês|eses))?/);
@@ -96,8 +96,8 @@ describe("the history in Portuguese", () => {
     const user = userEvent.setup();
     setup(syntheticRetryCap);
     await user.click(row("pr:812").querySelector<HTMLButtonElement>("button[aria-expanded]")!);
-    expect(within(row("pr:812")).getByRole("button", { name: "Investigar →" })).toBeTruthy();
-    expect(within(row("pr:812")).getByRole("link", { name: /^Abrir .+ ↗$/ })).toBeTruthy();
+    expect(within(row("pr:812")).getByRole("button", { name: "Investigar" })).toBeTruthy();
+    expect(within(row("pr:812")).getByRole("link", { name: /^Abrir .+$/ })).toBeTruthy();
   });
 
   it("says which clause it is tracing and leads back to it", async () => {
@@ -105,7 +105,7 @@ describe("the history in Portuguese", () => {
     setup(syntheticRetryCap);
     await user.click(document.querySelector<HTMLButtonElement>('li[data-clause="c1"] > button')!);
     expect(section().textContent).toMatch(/seguindo a conclusão 2 · [A-Z](?: [A-Z])*/);
-    expect(within(section()).getByRole("button", { name: "↑ Voltar à conclusão 2" })).toBeTruthy();
+    expect(within(section()).getByRole("button", { name: "Voltar à conclusão 2" })).toBeTruthy();
   });
 
   it("folds a long run of uncited changes and opens it on request", async () => {

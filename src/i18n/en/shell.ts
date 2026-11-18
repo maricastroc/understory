@@ -33,7 +33,7 @@ export const shell = {
   notSaved: "Line cases aren't saved on this server",
   repository: "Repository",
   newHere: "New investigation here",
-  openRepository: "Open repository ↗",
+  openRepository: "Open repository",
   searchAll: "Search files, symbols or cases",
   searchCases: "Search cases",
   searchResults: "Search results",

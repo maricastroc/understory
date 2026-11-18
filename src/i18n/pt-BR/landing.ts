@@ -9,7 +9,6 @@ export const landing: Messages["landing"] = {
   tagline: "arqueologia de código",
   nav: "Principal",
   explain: "Explicar uma linha",
-  explainGo: "Explicar uma linha →",
   hero: {
     who: "quem",
     when: "quando",
@@ -20,7 +19,7 @@ export const landing: Messages["landing"] = {
   },
   standard: {
     kicker: "evidências > afirmações",
-    quoteFound: (ref) => `✓ Trecho confirmado na ${ref}`,
+    quoteFound: (ref) => `Trecho confirmado na ${ref}`,
     rejected: "descartado por não estar entre as evidências",
   },
   method: {

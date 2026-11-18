@@ -6,6 +6,7 @@ import { BlueprintCorners } from "../../line-investigation/parts/BlueprintCorner
 import { liButton } from "../../line-investigation/parts/button-class";
 import { CONTAINER } from "../parts/landing-classes";
 import { AT_TOKEN, CODE_START, META, TOKEN, WIDE_GRID } from "./dig-classes";
+import { ArrowRight } from "@/components/icons";
 
 export function DigClosing() {
   const t = useMessages().landing;
@@ -61,7 +62,8 @@ export function DigClosing() {
             <p className="text-lg text-pretty text-li-neutral-800">{t.closing.body}</p>
             <Link href="/app" className={liButton("primary", "", "xl")}>
               <BlueprintCorners />
-              {t.explainGo}
+              {t.explain}
+              <ArrowRight className="size-4" />
             </Link>
           </div>
         </div>

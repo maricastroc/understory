@@ -12,6 +12,7 @@ import { useLanguage } from "../use-language";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { askedText } from "../line-investigation/copy/asked-copy";
 import { symbolNoun } from "./symbol-noun";
+import { ArrowRight } from "@/components/icons";
 
 export function QuestionForm({
   target,
@@ -108,7 +109,8 @@ export function QuestionForm({
       <LanguageSwitch label={m.languages.answerIn} language={language} onChange={setLanguage} />
       <button type="submit" className={liButton("primary", "w-full", "lg")}>
         <BlueprintCorners />
-        {runLabel} →
+        {runLabel}
+        <ArrowRight className="size-4" />
       </button>
       {wider && (
         <button

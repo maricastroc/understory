@@ -6,7 +6,7 @@ import { Evidence } from "../Evidence";
 import { Findings } from "../findings/Findings";
 import { FindingsPending } from "../findings/FindingsPending";
 import { basename, toArtifactRef } from "../format";
-import { Alert, Branch, ChevronLeft, KindIcon } from "../icons";
+import { Alert, Branch, ChevronLeft, CornerDownRight, KindIcon } from "../icons";
 import { writerError } from "../line-investigation/copy/verdict-copy";
 import { Timeline } from "../Timeline";
 import { Pill } from "../ui";
@@ -79,6 +79,7 @@ export function CaseView({
             className="flex w-fit max-w-full cursor-pointer flex-col gap-0.5 rounded-lg border border-accent/20 bg-accent-tint px-3 py-2 text-left transition-colors hover:border-accent/45"
           >
             <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold tracking-wide text-accent-press uppercase">
+              <CornerDownRight className="size-3" />
               {m.caseScreen.continues} {parentCaseId}
             </span>
             {parentQuestion && (

@@ -34,6 +34,7 @@ import { DigSurface } from "./DigSurface";
 import { DigVersion } from "./DigVersion";
 import type { DigRecord } from "./types";
 import { useDigScroll } from "./use-dig-scroll";
+import { Check } from "@/components/icons";
 
 const FRAME =
   "overflow-x-clip [--bore-x:20px] [--code:clamp(10px,3vw,16px)] [--gutter:1rem] min-[641px]:[--gutter:1.5rem] xl:[--bore-x:calc(var(--code)_*_0.6_*_(var(--prefix)_+_var(--col)))] xl:[--code:19px]";
@@ -190,7 +191,7 @@ export function DigLanding() {
                             className={`border border-li-evidence px-2 text-li-evidence-ink ${FADE}`}
                             style={{ transitionDelay: `${200 + i * 150}ms` }}
                           >
-                            {word} ✓
+                            {word} <Check className="inline-block size-3 align-[-0.15em]" />
                           </span>
                         ))}
                         <span
@@ -287,6 +288,7 @@ export function DigLanding() {
                         <p
                           className={`text-[15px] font-semibold text-li-evidence-ink delay-500 ${FADE}`}
                         >
+                          <Check className="mr-1 inline-block size-4 align-[-0.15em]" />
                           {t.landing.standard.quoteFound(refText(proof.id))}
                         </p>
                         <p className={`${META} delay-700 ${FADE}`}>

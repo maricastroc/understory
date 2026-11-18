@@ -14,7 +14,7 @@ for (const locale of ["en", "pt-BR"])
       await page.locator("#history").waitFor();
       await page.evaluate(() => document.fonts.ready);
       const bar = page.locator("#history > div").first();
-      const back = bar.getByRole("button", { name: /^↑/ });
+      const back = bar.getByRole("button", { name: /^(Back to|Voltar)/ });
       await expect(back).toBeHidden();
       const resting = await bar.evaluate((e) => e.getBoundingClientRect().height);
 

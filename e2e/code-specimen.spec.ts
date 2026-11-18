@@ -91,7 +91,7 @@ test("keyboard: focus ring, expand and collapse", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await open(page, "?layout=wide");
   await page.keyboard.press("Tab");
-  const toggle = page.getByRole("button", { name: "⋯ lines 20–24 · isTransient()" });
+  const toggle = page.getByRole("button", { name: "lines 20–24 · isTransient()" });
   await expect(toggle).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("li[data-line]")).toHaveCount(24);

@@ -9,6 +9,7 @@ import { VerdictButton } from "../verdict/VerdictButton";
 import { VerdictPopover } from "../verdict/VerdictPopover";
 import { askedText } from "../copy/asked-copy";
 import { askedAt } from "../specimen/datum-token";
+import { ArrowLeft, ChevronDown } from "@/components/icons";
 
 function AskedQuestion({ question, asked }: { question: string; asked: string | null }) {
   const at = asked ? askedAt(question, asked) : -1;
@@ -117,8 +118,12 @@ export function TitleRow({
             <span className="col-start-1 row-start-1">
               {phase === "collecting" ? c.collecting : c.failed}
             </span>
-            <span aria-hidden className="invisible col-start-1 row-start-1">
-              {m.verdict.label.pending} ▾
+            <span
+              aria-hidden
+              className="invisible col-start-1 row-start-1 inline-flex items-center gap-1.5"
+            >
+              {m.verdict.label.pending}
+              <ChevronDown className="size-3.5" />
             </span>
           </span>
           <span aria-hidden className={liButton("secondary", "invisible")}>
@@ -141,6 +146,7 @@ export function TitleRow({
           </div>
           {onBackToQuestion && (
             <button type="button" onClick={onBackToQuestion} className={liButton("ghost")}>
+              <ArrowLeft className="size-4" />
               {c.backToQuestion}
             </button>
           )}

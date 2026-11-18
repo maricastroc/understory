@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { useMessages } from "@/i18n/LocaleProvider";
 import { RailDrawer } from "./RailDrawer";
+import { ChevronsRight } from "@/components/icons";
 
 export function AppShell({
   header,
@@ -38,7 +39,7 @@ export function AppShell({
               aria-expanded={false}
               className="grid size-7 cursor-pointer place-items-center text-[15px] leading-none text-li-ink transition-colors hover:bg-li-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-li-focus motion-reduce:transition-none"
             >
-              »
+              <ChevronsRight className="size-4" />
             </button>
           </div>
         ) : (

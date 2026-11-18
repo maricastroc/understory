@@ -32,7 +32,7 @@ for (const width of [1440, 375]) {
       page.getByRole("heading", { level: 1, name: "Why is this line here?" }),
     );
     const lead = await top(page.getByText(/^Understory investigates why a line/));
-    const call = await top(page.getByRole("link", { name: "Explain a line →" }).first());
+    const call = await top(page.locator("#dig-01").getByRole("link", { name: "Explain a line" }));
     const question = await top(page.getByText("Why exactly 3 retries?").first());
     expect(blame).toBeLessThan(title);
     expect(lead).toBeLessThan(call);
@@ -57,7 +57,7 @@ test("the cover: at 16:10 the first screen holds the line, the title, the call a
       page.getByRole("banner"),
       page.locator("p:visible", { hasText: "$ git blame -L 9,9 src/billing/charge.ts" }),
       page.getByRole("heading", { level: 1 }),
-      page.getByRole("link", { name: "Explain a line →" }).first(),
+      page.locator("#dig-01").getByRole("link", { name: "Explain a line" }),
       page.getByText("Why exactly 3 retries?").first(),
       page.getByText("reasons found · 0 of 3"),
     ]) {
@@ -114,7 +114,7 @@ test("the chapter bar appears under the hero and its tabs take you to each chapt
 }) => {
   await open(page);
   await expect(chapters(page)).not.toBeInViewport();
-  await page.getByRole("link", { name: "Dig through an example ↓" }).click();
+  await page.getByRole("link", { name: "Dig through an example" }).click();
   await expect(page).toHaveURL(/#dig-02$/);
   await expect(chapters(page)).toBeInViewport();
   await expect(chapters(page).locator('[aria-current="step"]')).toHaveAccessibleName(

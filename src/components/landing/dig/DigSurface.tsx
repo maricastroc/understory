@@ -5,6 +5,7 @@ import { useMessages } from "@/i18n/LocaleProvider";
 import { CONTAINER } from "../parts/landing-classes";
 import { META, TOKEN } from "./dig-classes";
 import type { BlameLine, DigModel } from "./types";
+import { Check } from "@/components/icons";
 
 export function Found({
   label,
@@ -21,7 +22,7 @@ export function Found({
       <span
         className={`absolute inset-x-0 border-t border-li-evidence pt-1 font-li-mono text-xs leading-none text-li-evidence-ink ${drop}`}
       >
-        {label} ✓
+        {label} <Check className="inline-block size-3 align-[-0.15em]" />
       </span>
     </span>
   );

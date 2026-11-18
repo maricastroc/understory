@@ -10,7 +10,7 @@ async function open(page: Page, width: number, query = "") {
 const clause = (page: Page, n: number) => page.locator(`li[data-clause="c${n}"] > button`);
 
 const glyphCentre = (page: Page, id: string) =>
-  page.locator(`[data-artifact="${id}"] svg`).evaluate((el) => {
+  page.locator(`[data-artifact="${id}"] svg:not(.lucide)`).evaluate((el) => {
     const r = el.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + 13 };
   });

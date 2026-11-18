@@ -5,6 +5,7 @@ import { useMessages } from "@/i18n/LocaleProvider";
 import { liButton } from "../line-investigation/parts/button-class";
 import type { RepoSummary } from "./types";
 import { useDismiss } from "./use-dismiss";
+import { ArrowUpRight, ChevronDown } from "@/components/icons";
 
 export function RepoSelector({
   repo,
@@ -43,9 +44,7 @@ export function RepoSelector({
         {repo.detail && (
           <span className="shrink-0 text-li-text-muted max-[1100px]:hidden">{repo.detail}</span>
         )}
-        <span aria-hidden className="text-li-text-muted">
-          ▾
-        </span>
+        <ChevronDown className="size-3.5 shrink-0 text-li-text-muted" />
       </button>
       {open && (
         <div
@@ -82,6 +81,7 @@ export function RepoSelector({
                 className={liButton("ghost", "", "sm")}
               >
                 {m.shell.openRepository}
+                <ArrowUpRight className="size-3.5" />
               </a>
             )}
           </div>

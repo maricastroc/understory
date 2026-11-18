@@ -88,7 +88,7 @@ describe("the dig in Portuguese", () => {
       "origem · linha 9 escrita pela primeira vez há 5,3 anos",
       "Três motivos no registro. Uma pergunta em aberto.",
       "Sem evidências, a resposta permanece em aberto.",
-      "✓ Trecho confirmado na issue #1187",
+      "Trecho confirmado na issue #1187",
       "PR #9999 · descartado por não estar entre as evidências",
       "3 trechos confirmados",
     ])

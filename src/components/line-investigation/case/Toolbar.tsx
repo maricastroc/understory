@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMessages } from "@/i18n/LocaleProvider";
 import { Legend } from "../legend/Legend";
 import { liButton } from "../parts/button-class";
+import { ArrowDown } from "@/components/icons";
 
 export function Toolbar({
   history,
@@ -34,7 +35,8 @@ export function Toolbar({
       {history && (
         <>
           <button type="button" onClick={onHistory} className={liButton("secondary", "", "sm")}>
-            {history} ↓
+            {history}
+            <ArrowDown className="size-3.5" />
           </button>
           <button
             type="button"

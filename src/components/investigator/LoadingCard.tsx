@@ -4,6 +4,7 @@ import { useMessages } from "@/i18n/LocaleProvider";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
 import { Elapsed } from "../line-investigation/parts/Elapsed";
 import { PendingMark } from "../line-investigation/parts/PendingMark";
+import { ArrowRight } from "@/components/icons";
 
 export function LoadingCard() {
   const m = useMessages();
@@ -21,7 +22,7 @@ export function LoadingCard() {
       <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-li-text-subtle">
         {m.loading.stages.map((s, i) => (
           <span key={s} className="flex items-center gap-2">
-            {i > 0 && <span aria-hidden>→</span>}
+            {i > 0 && <ArrowRight className="size-3" />}
             {s}
           </span>
         ))}

@@ -66,7 +66,7 @@ describe("the case screen in Portuguese", () => {
   it("names the why, the verdict and its checks, and writes the confidence the Brazilian way", () => {
     setup(CASES["ng-http-114"]);
     expect(screen.getByRole("region", { name: "Motivos encontrados" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "← Voltar à pergunta" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Voltar à pergunta" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Continuar neste arquivo" })).toBeTruthy();
     const chip = screen.getByRole("button", { name: /^Resolvido/ });
     fireEvent.click(chip);
@@ -133,8 +133,8 @@ describe("the case screen in Portuguese", () => {
     expect(evidence.querySelector("[data-likely-note]")!.textContent).toBe(
       "O texto citado documenta a mudança a que pertence. A ligação dele com esta linha é uma interpretação do Understory.",
     );
-    expect(within(evidence).getByRole("button", { name: "Ver no histórico ↓" })).toBeTruthy();
-    expect(within(evidence).getByRole("link", { name: "Abrir no GitHub ↗" })).toBeTruthy();
+    expect(within(evidence).getByRole("button", { name: "Ver no histórico" })).toBeTruthy();
+    expect(within(evidence).getByRole("link", { name: "Abrir no GitHub" })).toBeTruthy();
     expect(within(evidence).getByRole("button", { name: "Fechar evidência" })).toBeTruthy();
   });
 

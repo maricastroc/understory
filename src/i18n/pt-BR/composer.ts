@@ -114,7 +114,7 @@ export const composer: Messages["composer"] = {
   files: {
     choose: "Escolher um arquivo",
     shown: (n, total) => `${n} de ${total} visíveis`,
-    open: "↵ abrir",
+    open: "abrir",
     find: "Encontrar um arquivo ou símbolo",
     findPlaceholder: "Encontre um arquivo ou símbolo, ex.: chargeCustomer",
     nothingFor: "Nada encontrado para",
@@ -146,10 +146,10 @@ export const composer: Messages["composer"] = {
     tryItOn: "Experimente com",
     investigations: (n) => (n === 1 ? "1 investigação" : `${n} investigações`),
     demoRepository: "repositório de demonstração",
-    openAction: "Abrir →",
+    openAction: "Abrir",
     demoLead:
       "Repositório de demonstração: um pequeno serviço de pagamentos com um histórico de exemplo",
-    openDemo: "Abrir a demonstração →",
+    openDemo: "Abrir a demonstração",
     details: "Detalhes",
     hideDetails: "Ocultar detalhes",
     source: { github: "GitHub", remote: "Clonado de uma URL", local: "Clone local" },

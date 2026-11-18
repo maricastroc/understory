@@ -6,6 +6,7 @@ import { useLocale, useMessages } from "@/i18n/LocaleProvider";
 import { dayDate, kindName, namedRef, refLabel, tickText } from "../copy/artifact-copy";
 import { withoutTitle } from "../drawer/drawer-body";
 import { sourceLinkLabel } from "../drawer/source-link";
+import { ArrowUpRight } from "@/components/icons";
 
 const DAY = 86_400_000;
 
@@ -60,7 +61,8 @@ export function AnchorSpecimen({
             rel="noopener noreferrer"
             className="ml-auto font-li-body text-[12.5px] whitespace-nowrap text-li-ink underline decoration-li-neutral-400 underline-offset-2 hover:decoration-li-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-li-focus"
           >
-            {sourceLinkLabel(artifact.url, locale)} ↗
+            {sourceLinkLabel(artifact.url, locale)}
+            <ArrowUpRight className="ml-0.5 inline-block size-3.5 align-[-0.15em]" />
           </a>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { useMessages } from "@/i18n/LocaleProvider";
 import { StatusGlyph } from "./StatusGlyph";
 import type { RailItem } from "./types";
+import { Close } from "@/components/icons";
 
 export function CaseRailRow({
   item,
@@ -53,7 +54,7 @@ export function CaseRailRow({
           onClick={() => onRemove(item)}
           className="absolute top-1.5 right-1 grid size-6 cursor-pointer place-items-center text-[11px] text-li-text-subtle opacity-0 transition-opacity group-hover:opacity-100 hover:bg-li-neutral-300/60 hover:text-li-ink focus-visible:opacity-100 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus motion-reduce:transition-none [@media(hover:none)]:opacity-100"
         >
-          ✕
+          <Close className="size-3" />
         </button>
       )}
     </li>

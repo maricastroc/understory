@@ -2,6 +2,7 @@ import { useMessages } from "@/i18n/LocaleProvider";
 import { DomainIcon } from "../line-investigation/parts/DomainIcon";
 import { SECTION_LABEL } from "./composer-classes";
 import type { RecentRepo } from "./types/recent-repo";
+import { ArrowRight } from "@/components/icons";
 
 const ROW =
   "group grid w-full cursor-pointer grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-3 border-b border-li-divider py-3 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-li-focus";
@@ -37,7 +38,9 @@ export function RepoShortcuts({
                   {r.path === demoRepo ? ` · ${t.demoRepository}` : ""}
                 </span>
               </span>
-              <span className={ACTION}>{t.openAction}</span>
+              <span className={ACTION}>
+                {t.openAction} <ArrowRight className="inline-block size-3.5 align-[-0.15em]" />
+              </span>
             </button>
           </li>
         ))}
@@ -51,7 +54,9 @@ export function RepoShortcuts({
                 </span>
                 <span className="text-[12.5px] text-li-neutral-800">{t.demoLead}</span>
               </span>
-              <span className={ACTION}>{t.openDemo}</span>
+              <span className={ACTION}>
+                {t.openDemo} <ArrowRight className="inline-block size-3.5 align-[-0.15em]" />
+              </span>
             </button>
           </li>
         )}

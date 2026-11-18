@@ -160,7 +160,7 @@ describe("the shell in Portuguese", () => {
     fireEvent.click(screen.getByRole("button", { name: /^acme\/payments-service/ }));
     const menu = screen.getByRole("dialog", { name: "Repositório" });
     expect(within(menu).getByRole("button", { name: "Nova investigação aqui" })).toBeTruthy();
-    expect(within(menu).getByRole("link", { name: "Abrir repositório ↗" })).toBeTruthy();
+    expect(within(menu).getByRole("link", { name: "Abrir repositório" })).toBeTruthy();
     expect((await axe(container)).violations).toEqual([]);
 
     rerender(
@@ -185,7 +185,7 @@ describe("the shell in Portuguese", () => {
       </>,
     );
     expect(screen.getByRole("status").textContent).toBe(
-      "Investigando…Coletando do git→Montando a linha do tempo→Reconstruindo os motivos→Verificando as citações",
+      "Investigando…Coletando do gitMontando a linha do tempoReconstruindo os motivosVerificando as citações",
     );
     expect(screen.getByText("Não foi possível concluir a investigação.")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Voltar ao código" })).toBeTruthy();

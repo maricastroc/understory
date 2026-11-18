@@ -37,7 +37,7 @@ for (const width of [1440, 390]) {
     await expect(evidence.locator("[data-likely-note]")).toContainText(
       "A ligação dele com esta linha é uma interpretação do Understory.",
     );
-    await evidence.getByRole("button", { name: "Ver no histórico ↓" }).click();
+    await evidence.getByRole("button", { name: "Ver no histórico" }).click();
     await expect(page.locator("#history [aria-expanded='true']").first()).toBeVisible();
     await page.mouse.move(0, 0);
     expect(await axeViolations(page, { within: "main", settleMs: 400 })).toEqual([]);
@@ -81,10 +81,10 @@ for (const width of [1440, 390]) {
     const row = history.locator('[data-artifact="pr:812"]');
     await expect(
       row.getByRole("button", { name: "Voltar à conclusão 1 com PR #812 como fonte" }),
-    ).toHaveText("↑ conclusão 1");
+    ).toHaveText("conclusão 1");
     await expect(history).toContainText(/fonte da conclusão \d/);
     await row.locator("button[aria-expanded]").click();
-    await expect(row.getByRole("button", { name: "Investigar →" })).toBeVisible();
+    await expect(row.getByRole("button", { name: "Investigar" })).toBeVisible();
     await expect.poll(() => overflow(page)).toBeLessThanOrEqual(0);
     await page.mouse.move(0, 0);
     expect(await axeViolations(page, { within: "main", settleMs: 400 })).toEqual([]);

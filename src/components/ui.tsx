@@ -1,4 +1,5 @@
 import { initials } from "./shell/initials";
+import { ArrowText } from "@/components/icons";
 
 type Tone = "good" | "warn" | "neutral";
 
@@ -18,7 +19,11 @@ export function SectionLabel({ title, meta }: { title: string; meta?: string }) 
   return (
     <div className="mb-3.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
       <h2 className="text-[13px] font-semibold tracking-[0.07em] text-ink uppercase">{title}</h2>
-      {meta && <span className="text-[12px] text-ink-3">{meta}</span>}
+      {meta && (
+        <span className="text-[12px] text-ink-3">
+          <ArrowText text={meta} />
+        </span>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useMessages } from "@/i18n/LocaleProvider";
 import type { AuthUser } from "../investigator/use-auth";
-import { Menu } from "../icons";
+import { Menu, Plus } from "../icons";
 import { BlueprintCorners } from "../line-investigation/parts/BlueprintCorners";
 import { liButton } from "../line-investigation/parts/button-class";
 import { AccountButton } from "./AccountButton";
@@ -39,9 +39,7 @@ export function AppHeader({
   const newLabel = (
     <>
       <BlueprintCorners />
-      <span aria-hidden className="min-[640px]:hidden">
-        +
-      </span>
+      <Plus className="size-4 min-[640px]:hidden" />
       <span className="max-[640px]:sr-only">{m.shell.newInvestigation}</span>
     </>
   );

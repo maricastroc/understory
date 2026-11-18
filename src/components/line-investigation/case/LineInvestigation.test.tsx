@@ -164,9 +164,9 @@ describe("LineInvestigation — evidence in place", () => {
     expect(clause(1).closest("li")!.contains(panel)).toBe(true);
     expect(within(panel).getByRole("heading").textContent).toBe("EVIDENCE · CONCLUSION 2 · 1 OF 2");
     expect(within(panel).getByText("212 customers were charged twice").tagName).toBe("MARK");
-    expect(within(panel).getByText("✓ Quote found verbatim in the source")).toBeTruthy();
-    expect(panel.textContent).toContain(
-      "issue #1187 → closed by PR #812 → merged as 92f6a3f · wrote line 9 as it reads today",
+    expect(within(panel).getByText("Quote found verbatim in the source")).toBeTruthy();
+    expect(panel.textContent).toMatch(
+      /issue #1187\s*closed by PR #812\s*merged as 92f6a3f · wrote line 9 as it reads today/,
     );
     expect(screen.getByText("checking conclusion 2 · Esc returns here")).toBeTruthy();
   });
@@ -209,7 +209,7 @@ describe("LineInvestigation — evidence in place", () => {
     const user = userEvent.setup();
     setup();
     await user.click(clause(1));
-    await user.click(within(evidence()).getByRole("button", { name: "Show in history ↓" }));
+    await user.click(within(evidence()).getByRole("button", { name: "Show in history" }));
     expect(row("issue:1187").dataset.located).toBe("true");
     expect(rowButton("issue:1187").getAttribute("aria-expanded")).toBe("true");
     expect(document.activeElement).toBe(rowButton("issue:1187"));
@@ -245,7 +245,7 @@ describe("LineInvestigation — evidence in place", () => {
     const onDrill = vi.fn();
     setup(syntheticRetryCap, { onDrill });
     await user.click(clause(0));
-    await user.click(within(evidence()).getByRole("button", { name: "Investigate →" }));
+    await user.click(within(evidence()).getByRole("button", { name: "Investigate" }));
     expect(onDrill).toHaveBeenCalledTimes(1);
     expect(onDrill.mock.calls[0][0].id).toBe("commit:92f6a3f");
   });
@@ -258,9 +258,7 @@ describe("LineInvestigation — evidence in place", () => {
     expect(
       within(row("commit:7be210e")).getByText("No pull request references this commit"),
     ).toBeTruthy();
-    expect(
-      within(row("commit:7be210e")).getByRole("button", { name: "Investigate →" }),
-    ).toBeTruthy();
+    expect(within(row("commit:7be210e")).getByRole("button", { name: "Investigate" })).toBeTruthy();
   });
 
   it("stays accessible with the evidence and a row open", async () => {
@@ -299,7 +297,7 @@ describe("LineInvestigation — going back", () => {
     const user = userEvent.setup();
     const onBackToQuestion = vi.fn();
     const { rerender } = setup();
-    expect(screen.queryByRole("button", { name: "← Back to question" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Back to question" })).toBeNull();
     rerender(
       <LineInvestigation
         result={syntheticRetryCap}
@@ -311,7 +309,7 @@ describe("LineInvestigation — going back", () => {
         onBackToQuestion={onBackToQuestion}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "← Back to question" }));
+    await user.click(screen.getByRole("button", { name: "Back to question" }));
     expect(onBackToQuestion).toHaveBeenCalledOnce();
   });
 });
@@ -384,7 +382,7 @@ describe("LineInvestigation — a follow-up", () => {
         parent={{ id: "GI-2049", question: "Why is insertRules the way it is?" }}
       />,
     );
-    const link = screen.getByText(/^↳ continues/);
+    const link = screen.getByText(/^continues/);
     expect(link.textContent).toContain("follow-up to “Why is insertRules the way it is?”");
     expect(link.textContent).not.toContain("derived from");
     expect(screen.getByRole("button", { name: "Follow up in this file" })).toBeTruthy();

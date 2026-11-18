@@ -43,10 +43,3 @@ export function checklistText(item: ChecklistItem, locale: Locale): string {
       return item.error ? writerError(item.error, locale) : v.noReconstruction;
   }
 }
-
-export function checklistGlyph(item: ChecklistItem): string {
-  if (item.tone === "ok") return "✓";
-  if (item.tone === "silent") return "◌";
-  if (item.tone === "caveat") return "!";
-  return "·";
-}

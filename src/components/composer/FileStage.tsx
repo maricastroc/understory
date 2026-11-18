@@ -9,6 +9,7 @@ import { HistoryMap } from "./history/HistoryMap";
 import type { HistoryMapControl } from "./history/use-history-map";
 import { SECTION_RULE } from "./composer-classes";
 import { MapSearch } from "./MapSearch";
+import { CornerDownLeft } from "@/components/icons";
 
 export function FileStage({
   overview,
@@ -41,7 +42,14 @@ export function FileStage({
       q ? new Set(shown.filter((f) => f.path.toLowerCase().includes(q)).map((f) => f.path)) : null,
     [q, shown],
   );
-  const note = matches ? f.shown(matches.size, shown.length) : f.open;
+  const note = matches ? (
+    f.shown(matches.size, shown.length)
+  ) : (
+    <span className="inline-flex items-center gap-1">
+      <CornerDownLeft className="size-3" />
+      {f.open}
+    </span>
+  );
 
   const submit = () => {
     const first = shown.find((f) => matches?.has(f.path))?.path ?? results[0];
