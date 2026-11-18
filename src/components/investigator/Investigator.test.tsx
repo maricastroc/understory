@@ -189,6 +189,30 @@ describe("Investigator — the interface language and the answer language", () =
     );
   });
 
+  it("asks once, and says so, when the rewrite comes back in another language", async () => {
+    const api = stubApi();
+    render(inLocale("en"));
+    await screen.findByText("Collecting the line's history…");
+    await act(async () => {
+      api.evidence();
+      api.final("en");
+    });
+    const region = why();
+    await waitFor(() => expect(clauses(region).length).toBeGreaterThan(0));
+
+    const analysis = within(region).getByRole("group", { name: "Analysis" });
+    fireEvent.click(within(analysis).getByRole("button", { name: "PT" }));
+    await within(region).findByText("rewriting in Portuguese…");
+    await act(async () => api.narrate("en"));
+    const failed = await screen.findByText(/Could not rewrite this analysis in Portuguese\./);
+    await act(async () => new Promise((r) => setTimeout(r, 50)));
+    expect(requests(api, "/api/narrate").map((c) => c.body?.language)).toEqual(["pt"]);
+    expect(region.querySelector("li[data-clause] [lang]")!.getAttribute("lang")).toBe("en");
+
+    fireEvent.click(within(failed).getByRole("button", { name: "Try again" }));
+    await waitFor(() => expect(requests(api, "/api/narrate")).toHaveLength(2));
+  });
+
   it("brings an answer into the language chosen before, as it always did", async () => {
     window.localStorage.setItem("gi:lang", "pt");
     const api = stubApi();
