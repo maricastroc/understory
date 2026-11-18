@@ -203,6 +203,10 @@ export function useInvestigation(user: AuthUser | null) {
           failed(failureFrom(res, data));
           return;
         }
+        if (narrativeLanguage(data.narrative) !== language) {
+          failed({ code: "failed", detail: null });
+          return;
+        }
         settle(data.narrative);
       } catch (err) {
         failed(thrownFailure(err));
