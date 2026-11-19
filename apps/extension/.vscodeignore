@@ -8,3 +8,4 @@ esbuild.mjs
 tsconfig.json
 .gitignore
 *.vsix
+DEVELOPMENT.md

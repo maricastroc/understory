@@ -2,9 +2,14 @@
   "name": "understory-vscode",
   "displayName": "Understory",
   "description": "Investigate why a line of code is the way it is, from your editor.",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "private": true,
   "license": "MIT",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#1D1F20",
+    "theme": "dark"
+  },
   "publisher": "maricastroc",
   "repository": {
     "type": "git",
