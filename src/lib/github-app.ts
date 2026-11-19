@@ -47,7 +47,7 @@ async function installationId(owner: string, repo: string): Promise<number | nul
 }
 
 type Cached = { token: string; exp: number };
-const cache = new Map<number, Cached>();
+const cache = new Map<string, Cached>();
 
 async function installationTokenForRepo(owner: string, repo: string): Promise<string | null> {
   if (!githubAppConfigured()) return null;
@@ -55,8 +55,9 @@ async function installationTokenForRepo(owner: string, repo: string): Promise<st
   const id = await installationId(owner, repo);
   if (id === null) return null;
 
+  const key = `${id}:${owner}/${repo}`.toLowerCase();
   const now = Math.floor(Date.now() / 1000);
-  const hit = cache.get(id);
+  const hit = cache.get(key);
   if (hit && hit.exp - 60 > now) return hit.token;
 
   const res = await fetch(`https://api.github.com/app/installations/${id}/access_tokens`, {
@@ -67,7 +68,7 @@ async function installationTokenForRepo(owner: string, repo: string): Promise<st
   if (!res.ok) throw new Error(`GitHub App: token minting failed (${res.status})`);
 
   const data = (await res.json()) as { token: string; expires_at: string };
-  cache.set(id, { token: data.token, exp: Math.floor(new Date(data.expires_at).getTime() / 1000) });
+  cache.set(key, { token: data.token, exp: Math.floor(new Date(data.expires_at).getTime() / 1000) });
   return data.token;
 }
 
